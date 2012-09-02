@@ -1,7 +1,6 @@
 program Delphi2Xml;
 
 {$APPTYPE CONSOLE}
-
 {$R *.res}
 
 uses
@@ -27,4 +26,5 @@ begin
     on E: Exception do
       Writeln(E.ClassName, ': ', E.Message);
   end;
+
 end.
