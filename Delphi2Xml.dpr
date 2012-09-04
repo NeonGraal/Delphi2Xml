@@ -4,6 +4,7 @@ program Delphi2Xml;
 {$R *.res}
 
 uses
+  System.StrUtils,
   System.SysUtils,
   System.Win.ComObj,
   Xml.adomxmldom,
@@ -11,14 +12,18 @@ uses
 
 var
   prc: TD2XProcessor;
+  i: Integer;
 
 begin
   CoInitializeEx(nil, 0);
   try
     prc := TD2XProcessor.Create;
     try
-      prc.SetXmlProxy;
-      prc.ProcessFile('..\..\D2XProcessor.pas');
+      for i := 1 to ParamCount do
+        if (Length(ParamStr(i)) > 1) and CharInSet(ParamStr(i)[1], ['-', '/']) then
+          prc.Options.ParseOption(ParamStr(i))
+        else
+          prc.ProcessFile(ParamStr(i));
     finally
       prc.Free;
     end;

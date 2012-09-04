@@ -3,7 +3,9 @@ unit D2XProcessor;
 interface
 
 uses
+  System.Generics.Collections,
   System.Rtti,
+  System.SysUtils,
   Xml.XMLIntf,
   CastaliaPasLexTypes,
   CastaliaPasLex,
@@ -13,9 +15,26 @@ type
   TD2XOptions = class
   private
     fVerbose: Boolean;
+    fXml: Boolean;
+    fXmlExtension: String;
+    fCountChildren: Boolean;
+    fCountExtension: String;
+
   public
-    property Verbose: Boolean read fVerbose write fVerbose default False;
+    property Verbose: Boolean read fVerbose;
+
+    property Xml: Boolean read fXml;
+    property XmlExtension: String read fXmlExtension;
+
+    property CountChildren: Boolean read fCountChildren;
+    property CountExtension: String read fCountExtension;
+
+    constructor Create;
+
+    procedure ParseOption(pOpt: String);
   end;
+
+  ED2XOptionsException = class(Exception);
 
   TD2XParser = class(TmwSimplePasPar)
   private
@@ -301,6 +320,11 @@ type
 
   end;
 
+  TMethodCount = record
+    Method: String;
+    Children: Integer;
+  end;
+
   TD2XProcessor = class
   private
     fOpts: TD2XOptions;
@@ -311,23 +335,27 @@ type
     fXmlDoc: IXMLDocument;
     fXmlNode: IXMLNode;
 
-    procedure SetProxy;
+    fStack: TStack<TMethodCount>;
+    fCurrent: TMethodCount;
+    fMaxChildren: TDictionary<string, Integer>;
 
     procedure LogBefore(pMethod: String);
     procedure LogAfter(pMethod: String);
 
+    procedure CountBefore(pMethod: String);
+    procedure CountAfter(pMethod: String);
+
     procedure XmlNodeStart(pMethod: String);
     procedure XmlNodeEnd(_pMethod: String);
+
+    procedure RemoveProxy;
+    procedure SetProxy;
 
   public
     constructor Create;
     destructor Destroy; override;
 
     procedure ProcessFile(pFilename: String);
-
-    procedure RemoveProxy;
-    procedure SetSimpleProxy;
-    procedure SetXmlProxy;
 
     property Options: TD2XOptions read fOpts;
 
@@ -337,8 +365,7 @@ implementation
 
 uses
   Xml.XMLDoc,
-  System.Classes,
-  System.SysUtils;
+  System.Classes;
 
 { TD2XParser }
 
@@ -1945,9 +1972,47 @@ end;
 
 { TD2XProcessor }
 
+procedure TD2XProcessor.CountAfter(pMethod: String);
+var
+  lVal: Integer;
+begin
+  if fCurrent.Method = pMethod then
+  begin
+    if fMaxChildren.TryGetValue(fCurrent.Method, lVal) then
+    begin
+      if fCurrent.Children > lVal then
+        fMaxChildren.AddOrSetValue(fCurrent.Method, fCurrent.Children);
+    end
+    else
+      fMaxChildren.AddOrSetValue(fCurrent.Method, fCurrent.Children);
+  end;
+
+  if fStack.Count > 0 then
+    fCurrent := fStack.Pop
+  else
+  begin
+    fCurrent.Method := '';
+    fCurrent.Children := 0;
+  end;
+end;
+
+procedure TD2XProcessor.CountBefore(pMethod: String);
+begin
+  Inc(fCurrent.Children);
+  fStack.Push(fCurrent);
+  fCurrent.Method := pMethod;
+  fCurrent.Children := 0;
+end;
+
 constructor TD2XProcessor.Create;
 begin
   inherited Create;
+
+  fStack := nil;
+  fMaxChildren := nil;
+
+  fXmlDoc := nil;
+  fXmlNode := nil;
 
   fOpts := TD2XOptions.Create;
   fParser := TD2XParser.Create;
@@ -1977,7 +2042,10 @@ procedure TD2XProcessor.ProcessFile(pFilename: String);
 var
   lSS: TStringStream;
   lMS: TMemoryStream;
+  lP: TPair<string, Integer>;
 begin
+  SetProxy;
+
   lMS := nil;
   lSS := TStringStream.Create;
   try
@@ -1986,10 +2054,21 @@ begin
     lMS.Write(PChar(lSS.DataString)^, lSS.Size * Sizeof(PChar));
     fParser.Run(pFilename, lMS);
 
-    if Assigned(fXmlDoc) then
-    begin
-      fXmlDoc.Xml.SaveToFile(ChangeFileExt(pFilename, '.xml'));
-    end;
+    if fOpts.Xml then
+      fXmlDoc.Xml.SaveToFile(ChangeFileExt(pFilename, fOpts.XmlExtension));
+
+    if fOpts.CountChildren then
+      with TStringList.Create do
+        try
+          for lP in fMaxChildren do
+            if lP.Value > 0 then
+              Values[lP.Key] := IntToStr(lP.Value);
+          Sort;
+          SaveToFile(ChangeFileExt(pFilename, fOpts.CountExtension));
+        finally
+          Free;
+        end;
+
   finally
     FreeAndNil(lMS);
     FreeAndNil(lSS);
@@ -2000,6 +2079,9 @@ procedure TD2XProcessor.RemoveProxy;
 begin
   if Assigned(fVMI) then
   begin
+    FreeAndNil(fStack);
+    FreeAndNil(fMaxChildren);
+
     fXmlDoc := nil;
     fXmlNode := nil;
 
@@ -2011,46 +2093,45 @@ end;
 procedure TD2XProcessor.SetProxy;
 begin
   RemoveProxy;
+
+  if fOpts.Xml then
+  begin
+    fXmlDoc := NewXmlDocument;
+    fXmlDoc.Options := fXmlDoc.Options + [doNodeAutoIndent];
+  end;
+
+  if fOpts.CountChildren then
+  begin
+    fCurrent.Method := '';
+    fCurrent.Children := 0;
+    fStack := TStack<TMethodCount>.Create;
+    fMaxChildren := TDictionary<string, Integer>.Create;
+  end;
+
   fVMI := TVirtualMethodInterceptor.Create(TObject(fParser).ClassType);
   fVMI.Proxify(fParser);
-end;
-
-procedure TD2XProcessor.SetSimpleProxy;
-begin
-  SetProxy;
   fVMI.OnBefore :=
       procedure(pInst: TObject; pMethod: TRttiMethod;
       const pArgs: TArray<TValue>; out pDoInvoke: Boolean; out pResult: TValue)
     begin
       pDoInvoke := True;
-      LogBefore(pMethod.Name);
+      if fOpts.Verbose then
+        LogBefore(pMethod.Name);
+      if fOpts.CountChildren then
+        CountBefore(pMethod.Name);
+      if fOpts.Xml then
+        XmlNodeStart(pMethod.Name);
     end;
   fVMI.OnAfter :=
       procedure(pInst: TObject; pMethod: TRttiMethod;
       const pArgs: TArray<TValue>; var pResult: TValue)
     begin
-      LogAfter(pMethod.Name);
-    end;
-
-end;
-
-procedure TD2XProcessor.SetXmlProxy;
-begin
-  SetProxy;
-  fXmlDoc := NewXmlDocument;
-  fXmlDoc.Options := fXmlDoc.Options + [doNodeAutoIndent];
-  fVMI.OnBefore :=
-      procedure(pInst: TObject; pMethod: TRttiMethod;
-      const pArgs: TArray<TValue>; out pDoInvoke: Boolean; out pResult: TValue)
-    begin
-      pDoInvoke := True;
-      XmlNodeStart(pMethod.Name);
-    end;
-  fVMI.OnAfter :=
-      procedure(pInst: TObject; pMethod: TRttiMethod;
-      const pArgs: TArray<TValue>; var pResult: TValue)
-    begin
-      XmlNodeEnd(pMethod.Name);
+      if fOpts.Xml then
+        XmlNodeEnd(pMethod.Name);
+      if fOpts.CountChildren then
+        CountAfter(pMethod.Name);
+      if fOpts.Verbose then
+        LogAfter(pMethod.Name);
     end;
 end;
 
@@ -2082,6 +2163,67 @@ begin
       fXmlNode := fXmlDoc.AddChild(pMethod);
     fParser.LastTokens := '';
   end;
+end;
+
+{ TD2XOptions }
+
+constructor TD2XOptions.Create;
+begin
+  inherited;
+
+  fVerbose := False;
+  fXml := True;
+  fXmlExtension := '.xml';
+  fCountChildren := True;
+  fCountExtension := '.cnt';
+end;
+
+procedure TD2XOptions.ParseOption(pOpt: String);
+  function ErrorUnlessSet(out pFlag: Boolean): Boolean;
+  begin
+    Result := False;
+    if (Length(pOpt) = 2) or (pOpt[3] = '+') then
+      pFlag := True
+    else if pOpt[3] = '-' then
+      pFlag := False
+    else
+      Result := True;
+  end;
+  function ErrorUnlessSetExtension(out pFlag: Boolean;
+    out pExtn: String): Boolean;
+  begin
+    Result := False;
+    if ErrorUnlessSet(pFlag) then
+      if (pOpt[3] = ':') and (Length(pOpt) > 3) then
+      begin
+        pFlag := True;
+        if pOpt[4] = '.' then
+          pExtn := Copy(pOpt, 4, 99)
+        else
+          pExtn := '.' + Copy(pOpt, 4, 99);
+      end
+      else
+        Result := True;
+  end;
+
+begin
+  if (Length(pOpt) < 2) or not CharInSet(pOpt[1], ['-', '/']) then
+    raise ED2XOptionsException.Create('Invalid option: ' + pOpt)
+  else
+    case pOpt[2] of
+      'V', 'v':
+        if ErrorUnlessSet(fVerbose) then
+          raise ED2XOptionsException.Create('Invalid Verbose option: ' + pOpt);
+      'X', 'x':
+        if ErrorUnlessSetExtension(fXml, fXmlExtension) then
+          raise ED2XOptionsException.Create('Invalid Xml option: ' + pOpt);
+      'C', 'c':
+        if ErrorUnlessSetExtension(fCountChildren, fCountExtension) then
+          raise ED2XOptionsException.Create
+            ('Invalid Count Children option: ' + pOpt);
+    else
+      raise ED2XOptionsException.Create('Unknown option: ' + pOpt);
+    end;
 end;
 
 end.
