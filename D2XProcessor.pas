@@ -16,15 +16,15 @@ type
   private
     fVerbose: Boolean;
     fXml: Boolean;
-    fXmlExtension: String;
     fCountChildren: Boolean;
     fCountExtension: String;
+    fXmlDirectory: String;
 
   public
     property Verbose: Boolean read fVerbose;
 
     property Xml: Boolean read fXml;
-    property XmlExtension: String read fXmlExtension;
+    property XmlDirectory: String read fXmlDirectory;
 
     property CountChildren: Boolean read fCountChildren;
     property CountExtension: String read fCountExtension;
@@ -60,7 +60,7 @@ type
     procedure HandlePtIfEndDirect(Sender: TmwBasePasLex); override;
     procedure HandlePtElseIfDirect(Sender: TmwBasePasLex); override;
 
-    // procedure AccessSpecifier; override;
+    procedure AccessSpecifier; override;
     procedure AdditiveOperator; override;
     procedure AncestorIdList; override; // !! Added ancestorIdList back in...
     procedure AncestorId; override; // !! Added ancestorId back in...
@@ -81,7 +81,7 @@ type
     procedure ClassMemberList; override;
     procedure ClassMethodDirective; override;
     procedure ClassMethodHeading; override;
-    // procedure ClassMethodOrProperty; override;
+    procedure ClassMethodOrProperty; override;
     procedure ClassMethodResolution; override;
     procedure ClassProcedureHeading; override;
     procedure ClassClass; override;
@@ -169,7 +169,7 @@ type
     procedure InitializationSection; override;
     procedure InlineStatement; override;
     procedure InParameter; override;
-    // procedure InterfaceDeclaration; override;
+    procedure InterfaceDeclaration; override;
     procedure InterfaceForward; override;
     procedure InterfaceGUID; override;
     procedure InterfaceHeritage; override;
@@ -204,14 +204,14 @@ type
     procedure ObjectTypeEnd; override; // DR 2001-08-07
     procedure ObjectVisibility; override;
     procedure OldFormalParameterType; override;
-    // procedure OrdinalIdentifier; override;
+    procedure OrdinalIdentifier; override;
     procedure OrdinalType; override;
     procedure OutParameter; override;
     procedure PackageFile; override;
     procedure ParameterFormal; override;
     procedure ParameterName; override;
     procedure ParameterNameList; override;
-    // procedure ParseFile; override;
+    procedure ParseFile; override;
     procedure PointerType; override;
     procedure ProceduralDirective; override;
     procedure ProceduralType; override;
@@ -227,7 +227,7 @@ type
     procedure PropertyParameterConst; override;
     procedure PropertyParameterList; override;
     procedure PropertySpecifiers; override;
-    // procedure QualifiedIdentifier; override;
+    procedure QualifiedIdentifier; override;
     procedure QualifiedIdentifierList; override;
     procedure RaiseStatement; override;
     procedure ReadAccessIdentifier; override;
@@ -266,7 +266,7 @@ type
     procedure StorageStored; override;
     procedure StringIdentifier; override;
     procedure StringStatement; override;
-    // procedure StringType; override;
+    procedure StringType; override;
     procedure StructuredType; override;
     procedure SubrangeType; override;
     procedure TagField; override;
@@ -294,26 +294,26 @@ type
     procedure UnitName; override;
     procedure UsedUnitName; override;
     procedure UsedUnitsList; override;
-    // procedure UsesClause; override;
+    procedure UsesClause; override;
     procedure VarAbsolute; override;
     procedure VarEqual; override;
     procedure VarDeclaration; override;
     procedure Variable; override;
     procedure VariableList; override;
     procedure VariableReference; override;
-    // procedure VariableTwo; override;
+    procedure VariableTwo; override;
     procedure VariantIdentifier; override;
     procedure VariantSection; override;
     procedure VarParameter; override;
     procedure VarName; override; // !! Added VarName and VarNameList back in...
     procedure VarNameList; override;
     procedure VarSection; override;
-    // procedure VisibilityAutomated; override;
-    // procedure VisibilityPrivate; override;
-    // procedure VisibilityProtected; override;
-    // procedure VisibilityPublic; override;
-    // procedure VisibilityPublished; override;
-    // procedure VisibilityUnknown; override;
+    procedure VisibilityAutomated; override;
+    procedure VisibilityPrivate; override;
+    procedure VisibilityProtected; override;
+    procedure VisibilityPublic; override;
+    procedure VisibilityPublished; override;
+    procedure VisibilityUnknown; override;
     procedure WhileStatement; override;
     procedure WithStatement; override;
     procedure WriteAccessIdentifier; override;
@@ -324,6 +324,8 @@ type
     Method: String;
     Children: Integer;
   end;
+
+  TStrIntDict = TDictionary<string, Integer>;
 
   TD2XProcessor = class
   private
@@ -337,7 +339,7 @@ type
 
     fStack: TStack<TMethodCount>;
     fCurrent: TMethodCount;
-    fMaxChildren: TDictionary<string, Integer>;
+    fMaxChildren: TStrIntDict;
 
     procedure LogBefore(pMethod: String);
     procedure LogAfter(pMethod: String);
@@ -351,9 +353,15 @@ type
     procedure RemoveProxy;
     procedure SetProxy;
 
+    procedure ParserMessage(pSender: TObject; const pTyp: TMessageEventType;
+      const pMsg: string; pX, pY: Integer);
+
   public
     constructor Create;
     destructor Destroy; override;
+
+    procedure BeginProcessing;
+    procedure EndProcessing;
 
     procedure ProcessFile(pFilename: String);
 
@@ -369,13 +377,12 @@ uses
 
 { TD2XParser }
 
-(*
-  procedure TD2XParser.AccessSpecifier;
-  begin
+procedure TD2XParser.AccessSpecifier;
+begin
   inherited;
 
-  end;
-*)
+end;
+
 procedure TD2XParser.AdditiveOperator;
 begin
   inherited;
@@ -502,13 +509,12 @@ begin
 
 end;
 
-(*
-  procedure TD2XParser.ClassMethodOrProperty;
-  begin
+procedure TD2XParser.ClassMethodOrProperty;
+begin
   inherited;
 
-  end;
-*)
+end;
+
 procedure TD2XParser.ClassMethodResolution;
 begin
   inherited;
@@ -1091,13 +1097,12 @@ begin
 
 end;
 
-(*
-  procedure TD2XParser.InterfaceDeclaration;
-  begin
+procedure TD2XParser.InterfaceDeclaration;
+begin
   inherited;
 
-  end;
-*)
+end;
+
 procedure TD2XParser.InterfaceForward;
 begin
   inherited;
@@ -1309,13 +1314,12 @@ begin
 
 end;
 
-(*
-  procedure TD2XParser.OrdinalIdentifier;
-  begin
+procedure TD2XParser.OrdinalIdentifier;
+begin
   inherited;
 
-  end;
-*)
+end;
+
 procedure TD2XParser.OrdinalType;
 begin
   inherited;
@@ -1352,13 +1356,12 @@ begin
 
 end;
 
-(*
-  procedure TD2XParser.ParseFile;
-  begin
+procedure TD2XParser.ParseFile;
+begin
   inherited;
 
-  end;
-*)
+end;
+
 procedure TD2XParser.PointerType;
 begin
   inherited;
@@ -1449,13 +1452,12 @@ begin
 
 end;
 
-(*
-  procedure TD2XParser.QualifiedIdentifier;
-  begin
+procedure TD2XParser.QualifiedIdentifier;
+begin
   inherited;
 
-  end;
-*)
+end;
+
 procedure TD2XParser.QualifiedIdentifierList;
 begin
   inherited;
@@ -1684,13 +1686,12 @@ begin
 
 end;
 
-(*
-  procedure TD2XParser.StringType;
-  begin
+procedure TD2XParser.StringType;
+begin
   inherited;
 
-  end;
-*)
+end;
+
 procedure TD2XParser.StructuredType;
 begin
   inherited;
@@ -1829,13 +1830,12 @@ begin
 
 end;
 
-(*
-  procedure TD2XParser.UsesClause;
-  begin
+procedure TD2XParser.UsesClause;
+begin
   inherited;
 
-  end;
-*)
+end;
+
 procedure TD2XParser.VarAbsolute;
 begin
   inherited;
@@ -1872,13 +1872,12 @@ begin
 
 end;
 
-(*
-  procedure TD2XParser.VariableTwo;
-  begin
+procedure TD2XParser.VariableTwo;
+begin
   inherited;
 
-  end;
-*)
+end;
+
 procedure TD2XParser.VariantIdentifier;
 begin
   inherited;
@@ -1915,43 +1914,42 @@ begin
 
 end;
 
-(*
-  procedure TD2XParser.VisibilityAutomated;
-  begin
+procedure TD2XParser.VisibilityAutomated;
+begin
   inherited;
 
-  end;
+end;
 
-  procedure TD2XParser.VisibilityPrivate;
-  begin
+procedure TD2XParser.VisibilityPrivate;
+begin
   inherited;
 
-  end;
+end;
 
-  procedure TD2XParser.VisibilityProtected;
-  begin
+procedure TD2XParser.VisibilityProtected;
+begin
   inherited;
 
-  end;
+end;
 
-  procedure TD2XParser.VisibilityPublic;
-  begin
+procedure TD2XParser.VisibilityPublic;
+begin
   inherited;
 
-  end;
+end;
 
-  procedure TD2XParser.VisibilityPublished;
-  begin
+procedure TD2XParser.VisibilityPublished;
+begin
   inherited;
 
-  end;
+end;
 
-  procedure TD2XParser.VisibilityUnknown;
-  begin
+procedure TD2XParser.VisibilityUnknown;
+begin
   inherited;
 
-  end;
-*)
+end;
+
 procedure TD2XParser.WhileStatement;
 begin
   inherited;
@@ -1971,6 +1969,12 @@ begin
 end;
 
 { TD2XProcessor }
+
+procedure TD2XProcessor.BeginProcessing;
+begin
+  if fOpts.CountChildren then
+    fMaxChildren := TStrIntDict.Create;
+end;
 
 procedure TD2XProcessor.CountAfter(pMethod: String);
 var
@@ -2016,16 +2020,35 @@ begin
 
   fOpts := TD2XOptions.Create;
   fParser := TD2XParser.Create;
+  fParser.OnMessage := ParserMessage;
 end;
 
 destructor TD2XProcessor.Destroy;
 begin
   RemoveProxy;
 
+  FreeAndNil(fMaxChildren);
   FreeAndNil(fParser);
   FreeAndNil(fOpts);
 
   inherited;
+end;
+
+procedure TD2XProcessor.EndProcessing;
+var
+  lP: TPair<string, Integer>;
+begin
+  if fOpts.CountChildren then
+    with TStringList.Create do
+      try
+        for lP in fMaxChildren do
+          if lP.Value > 0 then
+            Values[lP.Key] := IntToStr(lP.Value);
+        Sort;
+        SaveToFile(ChangeFileExt(ParamStr(0), fOpts.CountExtension));
+      finally
+        Free;
+      end;
 end;
 
 procedure TD2XProcessor.LogAfter(pMethod: String);
@@ -2038,12 +2061,38 @@ begin
   Writeln('BEFORE ', pMethod, ' @ ', fParser.Lexer.Token);
 end;
 
+procedure TD2XProcessor.ParserMessage(pSender: TObject;
+  const pTyp: TMessageEventType; const pMsg: string; pX, pY: Integer);
+var
+  lAttr: IXMLNode;
+begin
+  if fOpts.Verbose then
+    if pTyp = meError then
+      Writeln('ERROR @ ', pX, ',', pY, ': ', pMsg)
+    else
+      Writeln('NOT SUPPORTED @ ', pX, ',', pY, ': ', pMsg);
+
+  if fOpts.Xml and Assigned(fXmlNode) then
+  begin
+    if pTyp = meError then
+      lAttr := fXmlDoc.CreateNode('errorMsg', ntAttribute)
+    else
+      lAttr := fXmlDoc.CreateNode('notSuppMsg', ntAttribute);
+    lAttr.Text := pMsg;
+    fXmlNode.AttributeNodes.Add(lAttr);
+    lAttr := fXmlDoc.CreateNode('msgAt', ntAttribute);
+    lAttr.Text := IntToStr(pX) + ',' + IntToStr(pY);
+    fXmlNode.AttributeNodes.Add(lAttr);
+  end;
+end;
+
 procedure TD2XProcessor.ProcessFile(pFilename: String);
 var
   lSS: TStringStream;
   lMS: TMemoryStream;
-  lP: TPair<string, Integer>;
+  lFile: string;
 begin
+  Writeln('Processing ', pFilename, ' ...');
   SetProxy;
 
   lMS := nil;
@@ -2055,19 +2104,18 @@ begin
     fParser.Run(pFilename, lMS);
 
     if fOpts.Xml then
-      fXmlDoc.Xml.SaveToFile(ChangeFileExt(pFilename, fOpts.XmlExtension));
-
-    if fOpts.CountChildren then
-      with TStringList.Create do
-        try
-          for lP in fMaxChildren do
-            if lP.Value > 0 then
-              Values[lP.Key] := IntToStr(lP.Value);
-          Sort;
-          SaveToFile(ChangeFileExt(pFilename, fOpts.CountExtension));
-        finally
-          Free;
-        end;
+    begin
+      if fOpts.XmlDirectory > '' then
+      begin
+        lFile := ExtractFilePath(ParamStr(0)) + fOpts.XmlDirectory;
+        ForceDirectories(lFile);
+        lFile := ChangeFilePath(pFilename, fOpts.XmlDirectory);
+      end
+      else
+        lFile := pFilename;
+      lFile := lFile + '.xml';
+      fXmlDoc.Xml.SaveToFile(lFile);
+    end;
 
   finally
     FreeAndNil(lMS);
@@ -2080,7 +2128,6 @@ begin
   if Assigned(fVMI) then
   begin
     FreeAndNil(fStack);
-    FreeAndNil(fMaxChildren);
 
     fXmlDoc := nil;
     fXmlNode := nil;
@@ -2105,7 +2152,6 @@ begin
     fCurrent.Method := '';
     fCurrent.Children := 0;
     fStack := TStack<TMethodCount>.Create;
-    fMaxChildren := TDictionary<string, Integer>.Create;
   end;
 
   fVMI := TVirtualMethodInterceptor.Create(TObject(fParser).ClassType);
@@ -2173,7 +2219,7 @@ begin
 
   fVerbose := False;
   fXml := True;
-  fXmlExtension := '.xml';
+  fXmlDirectory := '';
   fCountChildren := True;
   fCountExtension := '.cnt';
 end;
@@ -2189,21 +2235,28 @@ procedure TD2XOptions.ParseOption(pOpt: String);
     else
       Result := True;
   end;
-  function ErrorUnlessSetExtension(out pFlag: Boolean;
-    out pExtn: String): Boolean;
+  function ErrorUnlessSetValue(out pFlag: Boolean; out pVal: String): Boolean;
   begin
     Result := False;
     if ErrorUnlessSet(pFlag) then
-      if (pOpt[3] = ':') and (Length(pOpt) > 3) then
+      if pOpt[3] = ':' then
       begin
         pFlag := True;
-        if pOpt[4] = '.' then
-          pExtn := Copy(pOpt, 4, 99)
-        else
-          pExtn := '.' + Copy(pOpt, 4, 99);
+        pVal := Copy(pOpt, 4, 99)
       end
       else
         Result := True;
+  end;
+  function ErrorUnlessSetExtension(out pFlag: Boolean; out pExtn: String;
+    pDflt: String): Boolean;
+  begin
+    Result := False;
+    if ErrorUnlessSetValue(pFlag, pExtn) then
+      Result := True
+    else if pExtn = '' then
+      pExtn := pDflt
+    else if pExtn[1] <> '.' then
+      pExtn := '.' + pExtn;
   end;
 
 begin
@@ -2215,10 +2268,10 @@ begin
         if ErrorUnlessSet(fVerbose) then
           raise ED2XOptionsException.Create('Invalid Verbose option: ' + pOpt);
       'X', 'x':
-        if ErrorUnlessSetExtension(fXml, fXmlExtension) then
+        if ErrorUnlessSetValue(fXml, fXmlDirectory) then
           raise ED2XOptionsException.Create('Invalid Xml option: ' + pOpt);
       'C', 'c':
-        if ErrorUnlessSetExtension(fCountChildren, fCountExtension) then
+        if ErrorUnlessSetExtension(fCountChildren, fCountExtension, '.cnt') then
           raise ED2XOptionsException.Create
             ('Invalid Count Children option: ' + pOpt);
     else
