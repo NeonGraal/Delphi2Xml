@@ -13,6 +13,7 @@ uses
 var
   prc: TD2XProcessor;
   i: Integer;
+  fParamsOk : Boolean;
   ffRec: TSearchRec;
   filePath: string;
 
@@ -21,11 +22,12 @@ begin
   prc := TD2XProcessor.Create;
   try
     prc.BeginProcessing;
+    fParamsOk := True;
     for i := 1 to ParamCount do
       try
         if (Length(ParamStr(i)) > 1) and CharInSet(ParamStr(i)[1], ['-', '/'])
         then
-          prc.Options.ParseOption(ParamStr(i))
+          fParamsOk := prc.Options.ParseOption(ParamStr(i)) and fParamsOk
         else if FileExists(ParamStr(i)) then
           prc.ProcessFile(ParamStr(i))
         else if FindFirst(ParamStr(i), faAnyFile, ffRec) = 0 then
@@ -45,6 +47,8 @@ begin
             '" : ', E.Message);
       end;
     prc.EndProcessing;
+    if not fParamsOk then
+      prc.Options.ShowOptions;
   finally
     prc.Free;
   end;

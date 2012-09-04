@@ -19,9 +19,18 @@ type
     fCountChildren: Boolean;
     fCountExtension: String;
     fXmlDirectory: String;
+    fSkipExtension: String;
+    fSkipMethods: Boolean;
+    fUseBase: Boolean;
+    fBaseDirectory: String;
+    fRecurse: Boolean;
 
   public
     property Verbose: Boolean read fVerbose;
+    property Recurse: Boolean read fRecurse;
+
+    property UseBase: Boolean read fUseBase;
+    property BaseDirectory: String read fBaseDirectory;
 
     property Xml: Boolean read fXml;
     property XmlDirectory: String read fXmlDirectory;
@@ -29,9 +38,15 @@ type
     property CountChildren: Boolean read fCountChildren;
     property CountExtension: String read fCountExtension;
 
+    property SkipMethods: Boolean read fSkipMethods;
+    property SkipExtension: String read fSkipExtension;
+
     constructor Create;
 
-    procedure ParseOption(pOpt: String);
+    function ParseOption(pOpt: String): Boolean;
+
+    function ReportOptions: Boolean;
+    procedure ShowOptions;
   end;
 
   ED2XOptionsException = class(Exception);
@@ -2218,13 +2233,17 @@ begin
   inherited;
 
   fVerbose := False;
+  fUseBase := False;
+  fBaseDirectory := '';
   fXml := True;
   fXmlDirectory := '';
   fCountChildren := True;
   fCountExtension := '.cnt';
+  fSkipMethods := True;
+  fSkipExtension := '.skip';
 end;
 
-procedure TD2XOptions.ParseOption(pOpt: String);
+function TD2XOptions.ParseOption(pOpt: String): Boolean;
   function ErrorUnlessSet(out pFlag: Boolean): Boolean;
   begin
     Result := False;
@@ -2260,23 +2279,87 @@ procedure TD2XOptions.ParseOption(pOpt: String);
   end;
 
 begin
+  Result := False;
   if (Length(pOpt) < 2) or not CharInSet(pOpt[1], ['-', '/']) then
-    raise ED2XOptionsException.Create('Invalid option: ' + pOpt)
+    Writeln('Invalid option: ' + pOpt)
   else
     case pOpt[2] of
+      '!':
+          Result := ReportOptions;
       'V', 'v':
         if ErrorUnlessSet(fVerbose) then
-          raise ED2XOptionsException.Create('Invalid Verbose option: ' + pOpt);
+          Writeln('Invalid Verbose option: ' + pOpt)
+        else
+          Result := True;
+      'R', 'r':
+        if ErrorUnlessSet(fRecurse) then
+          Writeln('Invalid Recurse Directories option: ' + pOpt)
+        else
+          Result := True;
+      'D', 'd':
+        if ErrorUnlessSetValue(fUseBase, fBaseDirectory) then
+          Writeln('Invalid Use Base Directory option: ' + pOpt)
+        else
+          Result := True;
       'X', 'x':
         if ErrorUnlessSetValue(fXml, fXmlDirectory) then
-          raise ED2XOptionsException.Create('Invalid Xml option: ' + pOpt);
+          Writeln('Invalid Xml option: ' + pOpt)
+        else
+          Result := True;
       'C', 'c':
         if ErrorUnlessSetExtension(fCountChildren, fCountExtension, '.cnt') then
-          raise ED2XOptionsException.Create
-            ('Invalid Count Children option: ' + pOpt);
+          Writeln('Invalid Count Children option: ' + pOpt)
+        else
+          Result := True;
+      'S', 's':
+        if ErrorUnlessSetExtension(fSkipMethods, fSkipExtension, '.skip') then
+          Writeln('Invalid Skip Methods option: ' + pOpt)
+        else
+          Result := True;
     else
-      raise ED2XOptionsException.Create('Unknown option: ' + pOpt);
+      Writeln('Unknown option: ' + pOpt);
     end;
+end;
+
+function TD2XOptions.ReportOptions: Boolean;
+  function ShowEnabled(pOpt: Boolean; pLabel, pVal: String): string;
+  begin
+    if pOpt then begin
+      if pVal > '' then
+        Result := 'Enabled  ' + pLabel + pVal
+      else
+        Result := 'Enabled  ';
+    end
+    else
+      Result := 'Disabled ';
+  end;
+
+begin
+  Result := True;
+  Writeln('Current option settings:');
+  Writeln('  Verbose             ', ShowEnabled(fVerbose, '', ''));
+  Writeln('  Recurse             ', ShowEnabled(fRecurse, '', ''));
+  Writeln('  Directory base      ', ShowEnabled(fUseBase, 'Dir  ', fBaseDirectory));
+  Writeln('  Xml output          ', ShowEnabled(fXml, 'Dir  ', fXmlDirectory));
+  Writeln('  Count max children  ', ShowEnabled(fCountChildren, 'Extn ', fCountExtension));
+  Writeln('  Skip methods        ', ShowEnabled(fSkipMethods, 'Extn ', fSkipExtension));
+end;
+
+procedure TD2XOptions.ShowOptions;
+var
+  lBase: String;
+begin
+  lBase := ChangeFileExt(ExtractFileName(ParamStr(0)), '');
+  Writeln('Usage: ', lBase, ' [ Option | Filename | Wildcard ] ... ');
+  Writeln('  Options:        Default   Description');
+  Writeln('    V[+-]         -         Log all Parser methods called');
+  Writeln('    R[+-]         +         Recurse into subdirectories');
+  Writeln('    D[+-]|:<dir>  -         Use <dir> a base for all file lookups');
+  Writeln('    X[+-]|:<dir>  +         Generate XML files into current or given <dir>');
+  Writeln('    C[+-]|:<ext>  +:cnt     Count max Children into ', lBase,
+    '.<ext>');
+  Writeln('    S[+-]|:<ext>  +:skip    Skip Parse methods listed in ', lBase,
+    '.<ext>');
 end;
 
 end.
