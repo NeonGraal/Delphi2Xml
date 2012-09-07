@@ -14,8 +14,6 @@ var
   prc: TD2XProcessor;
   i: Integer;
   fParamsOk : Boolean;
-  ffRec: TSearchRec;
-  filePath: string;
 
 begin
   CoInitializeEx(nil, 0);
@@ -24,28 +22,7 @@ begin
     prc.BeginProcessing;
     fParamsOk := True;
     for i := 1 to ParamCount do
-      try
-        if (Length(ParamStr(i)) > 1) and CharInSet(ParamStr(i)[1], ['-', '/'])
-        then
-          fParamsOk := prc.Options.ParseOption(ParamStr(i)) and fParamsOk
-        else if FileExists(ParamStr(i)) then
-          prc.ProcessFile(ParamStr(i))
-        else if FindFirst(ParamStr(i), faAnyFile, ffRec) = 0 then
-          try
-            filePath := ExtractFilePath(ParamStr(i));
-            repeat
-              prc.ProcessFile(filePath + ffRec.Name);
-            until FindNext(ffRec) <> 0;
-          finally
-            FindClose(ffRec);
-          end
-        else
-          Writeln('Unknown file ', ParamStr(i));
-      except
-        on E: Exception do
-          Writeln('EXCEPTION (', E.ClassName, ') processing "', ParamStr(i),
-            '" : ', E.Message);
-      end;
+      fParamsOk := prc.ProcessParam(ParamStr(i)) and fParamsOk;
     prc.EndProcessing;
     if not fParamsOk then
       prc.Options.ShowOptions;

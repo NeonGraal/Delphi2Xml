@@ -362,6 +362,8 @@ type
     procedure CountBefore(pMethod: String);
     procedure CountAfter(pMethod: String);
 
+    procedure XmlAddAttribute(pName, pValue: String);
+
     procedure XmlNodeStart(pMethod: String);
     procedure XmlNodeEnd(_pMethod: String);
 
@@ -371,6 +373,12 @@ type
     procedure ParserMessage(pSender: TObject; const pTyp: TMessageEventType;
       const pMsg: string; pX, pY: Integer);
 
+    procedure LexerOnInclude(pLex: TmwBasePasLex);
+
+    function ProcessFile(pFilename: String): Boolean;
+    function ProcessDirectory(pDir, pWildCards: String): Boolean;
+    function RecurseDirectory(pDir, pWildCards: String): Boolean;
+
   public
     constructor Create;
     destructor Destroy; override;
@@ -378,7 +386,7 @@ type
     procedure BeginProcessing;
     procedure EndProcessing;
 
-    procedure ProcessFile(pFilename: String);
+    function ProcessParam(pStr: String): Boolean;
 
     property Options: TD2XOptions read fOpts;
 
@@ -388,7 +396,8 @@ implementation
 
 uses
   Xml.XMLDoc,
-  System.Classes;
+  System.Classes,
+  System.StrUtils;
 
 { TD2XParser }
 
@@ -2036,6 +2045,7 @@ begin
   fOpts := TD2XOptions.Create;
   fParser := TD2XParser.Create;
   fParser.OnMessage := ParserMessage;
+  fParser.Lexer.OnIncludeDirect := LexerOnInclude;
 end;
 
 destructor TD2XProcessor.Destroy;
@@ -2101,41 +2111,182 @@ begin
   end;
 end;
 
-procedure TD2XProcessor.ProcessFile(pFilename: String);
+function TD2XProcessor.ProcessDirectory(pDir, pWildCards: String): Boolean;
+var
+  lFF: TSearchRec;
+  lPath: string;
+  lFile: string;
+begin
+  Result := False;
+
+  if fOpts.UseBase then
+    lPath := fOpts.BaseDirectory + pDir
+  else
+    lPath := pDir;
+
+  for lFile in SplitString(pWildCards, ',') do
+    if FindFirst(lPath + lFile, faAnyFile - faDirectory, lFF) = 0 then
+      try
+        repeat
+          Result := ProcessFile(pDir + lFF.Name) or Result;
+        until FindNext(lFF) <> 0;
+      finally
+        FindClose(lFF);
+      end
+end;
+
+function TD2XProcessor.ProcessFile(pFilename: String): Boolean;
 var
   lSS: TStringStream;
   lMS: TMemoryStream;
   lFile: string;
+  lPhase: String;
 begin
-  Writeln('Processing ', pFilename, ' ...');
-  SetProxy;
+  Result := False;
+  lFile := pFilename;
+  if fOpts.UseBase then
+    lFile := fOpts.BaseDirectory + lFile;
+  if FileExists(lFile) then
+    try
+      lPhase := 'Initial';
+      Writeln('Processing ', pFilename, ' ...');
+      SetProxy;
 
-  lMS := nil;
-  lSS := TStringStream.Create;
-  try
-    lSS.LoadFromFile(pFilename);
-    lMS := TMemoryStream.Create;
-    lMS.Write(PChar(lSS.DataString)^, lSS.Size * Sizeof(PChar));
-    fParser.Run(pFilename, lMS);
+      lMS := nil;
+      lSS := TStringStream.Create;
+      try
+        lPhase := 'Loading';
+        lSS.LoadFromFile(lFile);
 
-    if fOpts.Xml then
-    begin
-      if fOpts.XmlDirectory > '' then
+        lFile := lSS.DataString;
+        lPhase := 'Converting ' + IntToStr(Length(lFile)) + ' x ' +
+          IntToStr(Sizeof(Char));
+        lMS := TMemoryStream.Create;
+        lMS.Write(PChar(lFile)^, Length(lFile) * Sizeof(Char));
+
+        lPhase := 'Parsing';
+        fParser.Run(pFilename, lMS);
+
+        if fOpts.Xml then
+        begin
+          lPhase := 'Preparing Xml';
+          if fOpts.XmlDirectory > '' then
+          begin
+            lFile := ExtractFilePath(ParamStr(0)) + fOpts.XmlDirectory +
+              ExtractFilePath(pFilename);
+            ForceDirectories(lFile);
+            lFile := fOpts.XmlDirectory + pFilename;
+          end
+          else
+            lFile := pFilename;
+
+          lPhase := 'Writing Xml';
+          lFile := lFile + '.xml';
+          fXmlDoc.Xml.SaveToFile(lFile);
+        end;
+        Result := True;
+      finally
+        FreeAndNil(lMS);
+        FreeAndNil(lSS);
+      end;
+    except
+      on E: Exception do
       begin
-        lFile := ExtractFilePath(ParamStr(0)) + fOpts.XmlDirectory;
-        ForceDirectories(lFile);
-        lFile := ChangeFilePath(pFilename, fOpts.XmlDirectory);
-      end
-      else
-        lFile := pFilename;
-      lFile := lFile + '.xml';
-      fXmlDoc.Xml.SaveToFile(lFile);
+        Writeln('EXCEPTION (', E.ClassName, ') processing "', pFilename,
+          '" at ', lPhase, ' : ', E.Message);
+        Result := False;
+      end;
     end;
+end;
 
-  finally
-    FreeAndNil(lMS);
-    FreeAndNil(lSS);
+procedure TD2XProcessor.LexerOnInclude(pLex: TmwBasePasLex);
+var
+  lFile: String;
+begin
+  lFile := pLex.Token;
+  if StartsText('{$include ', lFile) then
+    Delete(lFile, 1, 10);
+  if StartsText('{$i ', lFile) then
+    Delete(lFile, 1, 4);
+  if EndsText('}', lFile) then
+    SetLength(lFile, Length(lFile) - 1);
+
+  if fOpts.Verbose then
+    Writeln('INCLUDE @ ', pLex.PosXY.X, ',', pLex.PosXY.Y, ': ', lFile);
+
+  if fOpts.Xml and Assigned(fXmlNode) then
+  begin
+    XmlNodeStart('IncludeFile');
+    XmlAddAttribute('filename', lFile);
+    XmlNodeEnd('IncludeFile');
   end;
+
+  pLex.Next;
+end;
+
+function TD2XProcessor.ProcessParam(pStr: String): Boolean;
+var
+  lPath, lFile: string;
+begin
+  Result := False;
+  try
+    if (Length(pStr) > 1) and CharInSet(pStr[1], ['-', '/']) then
+      Result := Options.ParseOption(pStr)
+    else
+    begin
+      Result := ProcessFile(pStr);
+      if not Result then
+      begin
+        lPath := ExtractFilePath(pStr);
+        lFile := ExtractFileName(pStr);
+        Result := ProcessDirectory(lPath, lFile);
+        if fOpts.Recurse then
+          Result := RecurseDirectory(lPath, lFile) or Result;
+      end;
+    end;
+  except
+    on E: Exception do
+      Writeln('EXCEPTION (', E.ClassName, ') processing "', pStr, '" : ',
+        E.Message);
+  end;
+end;
+
+procedure TD2XProcessor.XmlAddAttribute(pName, pValue: String);
+var
+  lAttr: IXMLNode;
+begin
+  lAttr := fXmlDoc.CreateNode(pName, ntAttribute);
+  lAttr.Text := pValue;
+  fXmlNode.AttributeNodes.Add(lAttr);
+  fParser.LastTokens := '';
+end;
+
+function TD2XProcessor.RecurseDirectory(pDir, pWildCards: String): Boolean;
+var
+  lFF: TSearchRec;
+  lPath: string;
+  lFile: String;
+begin
+  Result := False;
+
+  if fOpts.UseBase then
+    lPath := fOpts.BaseDirectory + pDir
+  else
+    lPath := pDir;
+
+  if FindFirst(lPath + '*', faAnyFile - faNormal - faTemporary, lFF) = 0 then
+    try
+      repeat
+        if (lFF.Name <> '.') and (lFF.Name <> '..') then
+        begin
+          lFile := IncludeTrailingPathDelimiter(pDir + lFF.Name);
+          Result := ProcessDirectory(lFile, pWildCards) or Result;
+          Result := RecurseDirectory(lFile, pWildCards) or Result;
+        end;
+      until FindNext(lFF) <> 0;
+    finally
+      FindClose(lFF);
+    end;
 end;
 
 procedure TD2XProcessor.RemoveProxy;
@@ -2197,18 +2348,11 @@ begin
 end;
 
 procedure TD2XProcessor.XmlNodeEnd(_pMethod: String);
-var
-  lAttr: IXMLNode;
 begin
   if Assigned(fXmlNode) then
   begin
     if Length(fParser.LastTokens) > 1 then
-    begin
-      lAttr := fXmlDoc.CreateNode('lastToken', ntAttribute);
-      lAttr.Text := fParser.LastTokens;
-      fXmlNode.AttributeNodes.Add(lAttr);
-      fParser.LastTokens := '';
-    end;
+      XmlAddAttribute('lastToken', fParser.LastTokens);
 
     fXmlNode := fXmlNode.ParentNode;
   end;
@@ -2277,6 +2421,14 @@ function TD2XOptions.ParseOption(pOpt: String): Boolean;
     else if pExtn[1] <> '.' then
       pExtn := '.' + pExtn;
   end;
+  function ErrorUnlessSetDir(out pFlag: Boolean; out pDir: String): Boolean;
+  begin
+    Result := False;
+    if ErrorUnlessSetValue(pFlag, pDir) then
+      Result := True
+    else if pDir > '' then
+      pDir := IncludeTrailingPathDelimiter(pDir);
+  end;
 
 begin
   Result := False;
@@ -2285,7 +2437,7 @@ begin
   else
     case pOpt[2] of
       '!':
-          Result := ReportOptions;
+        Result := ReportOptions;
       'V', 'v':
         if ErrorUnlessSet(fVerbose) then
           Writeln('Invalid Verbose option: ' + pOpt)
@@ -2296,13 +2448,13 @@ begin
           Writeln('Invalid Recurse Directories option: ' + pOpt)
         else
           Result := True;
-      'D', 'd':
-        if ErrorUnlessSetValue(fUseBase, fBaseDirectory) then
+      'B', 'b':
+        if ErrorUnlessSetDir(fUseBase, fBaseDirectory) then
           Writeln('Invalid Use Base Directory option: ' + pOpt)
         else
           Result := True;
       'X', 'x':
-        if ErrorUnlessSetValue(fXml, fXmlDirectory) then
+        if ErrorUnlessSetDir(fXml, fXmlDirectory) then
           Writeln('Invalid Xml option: ' + pOpt)
         else
           Result := True;
@@ -2324,7 +2476,8 @@ end;
 function TD2XOptions.ReportOptions: Boolean;
   function ShowEnabled(pOpt: Boolean; pLabel, pVal: String): string;
   begin
-    if pOpt then begin
+    if pOpt then
+    begin
       if pVal > '' then
         Result := 'Enabled  ' + pLabel + pVal
       else
@@ -2339,10 +2492,13 @@ begin
   Writeln('Current option settings:');
   Writeln('  Verbose             ', ShowEnabled(fVerbose, '', ''));
   Writeln('  Recurse             ', ShowEnabled(fRecurse, '', ''));
-  Writeln('  Directory base      ', ShowEnabled(fUseBase, 'Dir  ', fBaseDirectory));
+  Writeln('  Directory base      ', ShowEnabled(fUseBase, 'Dir  ',
+    fBaseDirectory));
   Writeln('  Xml output          ', ShowEnabled(fXml, 'Dir  ', fXmlDirectory));
-  Writeln('  Count max children  ', ShowEnabled(fCountChildren, 'Extn ', fCountExtension));
-  Writeln('  Skip methods        ', ShowEnabled(fSkipMethods, 'Extn ', fSkipExtension));
+  Writeln('  Count max children  ', ShowEnabled(fCountChildren, 'Extn ',
+    fCountExtension));
+  Writeln('  Skip methods        ', ShowEnabled(fSkipMethods, 'Extn ',
+    fSkipExtension));
 end;
 
 procedure TD2XOptions.ShowOptions;
@@ -2354,7 +2510,7 @@ begin
   Writeln('  Options:        Default   Description');
   Writeln('    V[+-]         -         Log all Parser methods called');
   Writeln('    R[+-]         +         Recurse into subdirectories');
-  Writeln('    D[+-]|:<dir>  -         Use <dir> a base for all file lookups');
+  Writeln('    B[+-]|:<dir>  -         Use <dir> a base for all file lookups');
   Writeln('    X[+-]|:<dir>  +         Generate XML files into current or given <dir>');
   Writeln('    C[+-]|:<ext>  +:cnt     Count max Children into ', lBase,
     '.<ext>');
