@@ -8,7 +8,8 @@ uses
   System.SysUtils,
   System.Win.ComObj,
   Xml.adomxmldom,
-  D2XProcessor in 'D2XProcessor.pas';
+  D2XProcessor in 'D2XProcessor.pas',
+  D2XParser in 'D2XParser.pas';
 
 var
   prc: TD2XProcessor;
