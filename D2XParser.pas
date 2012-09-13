@@ -3,6 +3,7 @@ unit D2XParser;
 interface
 
 uses
+  System.Classes,
   CastaliaPasLex,
   CastaliaSimplePasPar;
 
@@ -12,23 +13,13 @@ type
   TD2XParser = class(TmwSimplePasPar)
   private
     fLastTokens: string;
+
   protected
     procedure NextToken; override;
+
   public
     property LastTokens: string read fLastTokens write fLastTokens;
-    procedure HandlePtCompDirect(Sender: TmwBasePasLex); override;
-    procedure HandlePtDefineDirect(Sender: TmwBasePasLex); override;
-    procedure HandlePtElseDirect(Sender: TmwBasePasLex); override;
-    procedure HandlePtEndIfDirect(Sender: TmwBasePasLex); override;
-    procedure HandlePtIfDefDirect(Sender: TmwBasePasLex); override;
-    procedure HandlePtIfNDefDirect(Sender: TmwBasePasLex); override;
-    procedure HandlePtIfOptDirect(Sender: TmwBasePasLex); override;
-    procedure HandlePtIncludeDirect(Sender: TmwBasePasLex); override;
-    procedure HandlePtResourceDirect(Sender: TmwBasePasLex); override;
-    procedure HandlePtUndefDirect(Sender: TmwBasePasLex); override;
-    procedure HandlePtIfDirect(Sender: TmwBasePasLex); override;
-    procedure HandlePtIfEndDirect(Sender: TmwBasePasLex); override;
-    procedure HandlePtElseIfDirect(Sender: TmwBasePasLex); override;
+
     procedure AccessSpecifier; override;
     procedure AdditiveOperator; override;
     procedure AncestorIdList; override; // !! Added ancestorIdList back in...
@@ -773,71 +764,6 @@ begin
 end;
 
 procedure TD2XParser.FunctionProcedureName;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.HandlePtCompDirect(Sender: TmwBasePasLex);
-begin
-  inherited;
-end;
-
-procedure TD2XParser.HandlePtDefineDirect(Sender: TmwBasePasLex);
-begin
-  inherited;
-end;
-
-procedure TD2XParser.HandlePtElseDirect(Sender: TmwBasePasLex);
-begin
-  inherited;
-end;
-
-procedure TD2XParser.HandlePtElseIfDirect(Sender: TmwBasePasLex);
-begin
-  inherited;
-end;
-
-procedure TD2XParser.HandlePtEndIfDirect(Sender: TmwBasePasLex);
-begin
-  inherited;
-end;
-
-procedure TD2XParser.HandlePtIfDefDirect(Sender: TmwBasePasLex);
-begin
-  inherited;
-end;
-
-procedure TD2XParser.HandlePtIfDirect(Sender: TmwBasePasLex);
-begin
-  inherited;
-end;
-
-procedure TD2XParser.HandlePtIfEndDirect(Sender: TmwBasePasLex);
-begin
-  inherited;
-end;
-
-procedure TD2XParser.HandlePtIfNDefDirect(Sender: TmwBasePasLex);
-begin
-  inherited;
-end;
-
-procedure TD2XParser.HandlePtIfOptDirect(Sender: TmwBasePasLex);
-begin
-  inherited;
-end;
-
-procedure TD2XParser.HandlePtIncludeDirect(Sender: TmwBasePasLex);
-begin
-  inherited;
-end;
-
-procedure TD2XParser.HandlePtResourceDirect(Sender: TmwBasePasLex);
-begin
-  inherited;
-end;
-
-procedure TD2XParser.HandlePtUndefDirect(Sender: TmwBasePasLex);
 begin
   inherited;
 end;

@@ -20,7 +20,6 @@ begin
   CoInitializeEx(nil, 0);
   prc := TD2XProcessor.Create;
   try
-    prc.BeginProcessing;
     fParamsOk := True;
     for i := 1 to ParamCount do
       fParamsOk := prc.ProcessParam(ParamStr(i)) and fParamsOk;

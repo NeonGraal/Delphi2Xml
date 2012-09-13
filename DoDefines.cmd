@@ -1,0 +1,1 @@
+Delphi2Xml -x- -w:Defines -t "*.dp?,*.inc,*.pas" -r -b:..\V6\3.6\Main "*.dp?,*.inc,*.pas"
