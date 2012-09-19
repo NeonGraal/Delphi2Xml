@@ -1,6 +1,4 @@
-AncestorId=1,1
 ClassHeritage=1,1
-ClassMethodHeading=1,1
 ClassMethodResolution=1,1
 ClassReferenceType=1,1
 CompoundStatement=1,1
@@ -34,7 +32,6 @@ RecordType=1,1
 ReturnType=1,1
 SetType=1,1
 SimpleType=1,1
-Statement=1,1
 StorageDefault=1,1
 StorageExpression=1,1
 StorageSpecifier=1,1

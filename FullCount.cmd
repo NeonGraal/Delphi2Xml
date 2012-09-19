@@ -1,1 +1,1 @@
-Delphi2Xml -x:XmlFull -t -s- "*.dp?,*.inc,*.pas" -r -b:..\V6\3.6\Main "*.dp?,*.inc,*.pas"
+Delphi2Xml -x:XmlFull -d:CPU32 -t -s- "*.dp?,*.inc,*.pas" -r -b:..\V6\3.6\Main "*.dp?,*.inc,*.pas"
