@@ -1,1 +1,1 @@
-Delphi2Xml -x- -w:Defines -d:CPU32 -t "*.dp?,*.inc,*.pas" -r -b:..\V6\3.6\Main "*.dp?,*.inc,*.pas"
+Delphi2Xml -x- -w:Defines @All.prm

@@ -4,83 +4,16 @@ interface
 
 uses
   System.Classes,
+  System.Diagnostics,
   System.Generics.Collections,
   System.Rtti,
   System.SysUtils,
   Xml.XMLIntf,
   CastaliaPasLexTypes,
+  D2XOptions,
   D2XParser;
 
 type
-  TD2XOptions = class
-  private
-    fVerbose: Boolean;
-    fXml: Boolean;
-    fCountChildren: Boolean;
-    fCountExtension: string;
-    fXmlDirectory: string;
-    fSkipExtension: string;
-    fSkipMethods: Boolean;
-    fUseBase: Boolean;
-    fBaseDirectory: string;
-    fRecurse: Boolean;
-    fLogErrors: Boolean;
-    fLogNotSupported: Boolean;
-    fTimestampFiles: Boolean;
-    fDefinesUsed: Boolean;
-    fUsedExtension: string;
-    fLoadExtension: string;
-    fLoadDefines: Boolean;
-    fDefines: TStringList;
-    fWriteDefines: Boolean;
-    fDefinesDirectory: string;
-
-    procedure AddDefine(pDef: string);
-    procedure DeleteDefine(pDef: string);
-    procedure LoadDefinesFile(pFile: string);
-
-  public
-    property LogErrors: Boolean read fLogErrors;
-    property LogNotSupported: Boolean read fLogNotSupported;
-    property TimestampFiles: Boolean read fTimestampFiles;
-
-    property Verbose: Boolean read fVerbose;
-    property Recurse: Boolean read fRecurse;
-
-    property UseBase: Boolean read fUseBase;
-    property BaseDirectory: string read fBaseDirectory;
-
-    property WriteDefines: Boolean read fWriteDefines;
-    property DefinesDirectory: string read fDefinesDirectory;
-
-    property Xml: Boolean read fXml;
-    property XmlDirectory: string read fXmlDirectory;
-
-    property DefinesUsed: Boolean read fDefinesUsed;
-    property UsedExtension: string read fUsedExtension;
-
-    property LoadDefines: Boolean read fLoadDefines;
-    property LoadExtension: string read fLoadExtension;
-
-    property Defines: TStringList read fDefines;
-
-    property CountChildren: Boolean read fCountChildren;
-    property CountExtension: string read fCountExtension;
-
-    property SkipMethods: Boolean read fSkipMethods;
-    property SkipExtension: string read fSkipExtension;
-
-    constructor Create;
-    destructor Destroy; override;
-
-    function ParseOption(pOpt: string): Boolean;
-
-    function ReportOptions: Boolean;
-    procedure ShowOptions;
-  end;
-
-  ED2XOptionsException = class(Exception);
-
   TPairLogMethod = function(pPair: TPair<string, Integer>): string of object;
 
   TMethodCount = record
@@ -94,8 +27,11 @@ type
   private
     fOpts: TD2XOptions;
     fOutputTimestamp: string;
+    fProgramDir: string;
 
-    fParser: TD2XParser;
+    fDuration: TStopwatch;
+
+    fParser: TD2XDefinesParser;
     fVMI: TVirtualMethodInterceptor;
 
     fXmlDoc: IXMLDocument;
@@ -127,10 +63,12 @@ type
 
     procedure RemoveProxy;
     procedure SetProxy;
+    function UseProxy: Boolean;
 
     function IsInternalMethod(pMethod: string): Boolean;
 
-    procedure LogMessage(pType, pMsg: string; pX, pY: Integer);
+    procedure LogMessage(pType, pMsg: string); overload;
+    procedure LogMessage(pType, pMsg: string; pX, pY: Integer); overload;
 
     procedure ParserMessage(pSender: TObject; const pTyp: TMessageEventType;
       const pMsg: string; pX, pY: Integer);
@@ -151,7 +89,11 @@ type
     procedure LexerOnEndIf(pLex: TD2XLexer);
     procedure LexerOnIfEnd(pLex: TD2XLexer);
 
-    procedure BeforeParseFile;
+    procedure WriteChangedDefines;
+
+    function GlobalFilename(pOutput: Boolean; pBaseExtn: string): string;
+
+    function ProcessParamsFile(pFilename: string): Boolean;
 
     function ProcessFile: Boolean; overload;
     function ProcessFile(pFilename: string): Boolean; overload;
@@ -181,18 +123,6 @@ uses
   System.StrUtils;
 
 { TD2XProcessor }
-
-procedure TD2XProcessor.BeforeParseFile;
-var
-  lS: string;
-begin
-  if fOpts.LoadDefines then
-  begin
-    fParser.Lexer.ClearDefines;
-    for lS in fOpts.Defines do
-      fParser.Lexer.AddDefine(lS);
-  end;
-end;
 
 procedure TD2XProcessor.CountAfter(pMethod: string);
 var
@@ -238,7 +168,9 @@ constructor TD2XProcessor.Create;
 begin
   inherited Create;
 
+  fProgramDir := ExtractFilePath(ParamStr(0));
   fOutputTimestamp := FormatDateTime('-HH-mm', Now);
+  fDuration := TStopwatch.StartNew;
 
   fStack := nil;
 
@@ -252,7 +184,7 @@ begin
   fXmlDoc := nil;
   fXmlNode := nil;
 
-  fParser := TD2XParser.Create;
+  fParser := TD2XFullParser.Create;
   fParser.OnMessage := ParserMessage;
 
   fParser.Lexer.OnIncludeDirect := LexerOnInclude;
@@ -284,6 +216,9 @@ end;
 
 destructor TD2XProcessor.Destroy;
 begin
+  fDuration.Stop;
+  Writeln(Format('Total processing time %0.3f', [fDuration.Elapsed.TotalSeconds]));
+
   RemoveProxy;
 
   FreeAndNil(fParser);
@@ -309,10 +244,7 @@ procedure TD2XProcessor.EndProcessing;
           if lP.Value > 0 then
             Values[lP.Key] := pFunc(lP);
         Sort;
-        if fOpts.TimestampFiles then
-          SaveToFile(ChangeFileExt(ParamStr(0), fOutputTimestamp + pExtn))
-        else
-          SaveToFile(ChangeFileExt(ParamStr(0), pExtn));
+        SaveToFile(GlobalFilename(True, pExtn));
       finally
         Free;
       end;
@@ -344,15 +276,17 @@ begin
   Writeln('BEFORE ', pMethod, ' @ ', fParser.Lexer.Token);
 end;
 
+procedure TD2XProcessor.LogMessage(pType, pMsg: string);
+begin
+  LogMessage(pType, pMsg, fParser.Lexer.PosXY.X, fParser.Lexer.PosXY.Y);
+end;
+
 procedure TD2XProcessor.LogMessage(pType, pMsg: string; pX, pY: Integer);
 var
   lErrFile: string;
   lExists: Boolean;
 begin
-  if fOpts.TimestampFiles then
-    lErrFile := ChangeFileExt(ParamStr(0), fOutputTimestamp + '.err')
-  else
-    lErrFile := ChangeFileExt(ParamStr(0), '.err');
+  lErrFile := GlobalFilename(True, '.err');
   lExists := TFile.Exists(lErrFile);
   with TFile.AppendText(lErrFile) do
     try
@@ -384,6 +318,27 @@ begin
     Result := IntToStr(lMin) + ',' + IntToStr(pPair.Value)
   else
     Result := '0,' + IntToStr(pPair.Value);
+end;
+
+function TD2XProcessor.GlobalFilename(pOutput: Boolean; pBaseExtn: string): string;
+  function MakeGlobalFilename(pDir, pExtn: string): string;
+  var
+    lPath: string;
+  begin
+    lPath := fProgramDir + pDir;
+    ForceDirectories(lPath);
+    Result := IncludeTrailingPathDelimiter(lPath) +
+      ChangeFileExt(ExtractFileName(ParamStr(0)), pExtn)
+  end;
+
+begin
+  if pOutput then
+    if fOpts.TimestampFiles then
+      Result := MakeGlobalFilename(fOpts.OutputDirectory, fOutputTimestamp + pBaseExtn)
+    else
+      Result := MakeGlobalFilename(fOpts.OutputDirectory, pBaseExtn)
+  else
+    Result := MakeGlobalFilename(fOpts.InputDirectory, pBaseExtn)
 end;
 
 procedure TD2XProcessor.ParserMessage(pSender: TObject; const pTyp: TMessageEventType;
@@ -464,11 +419,10 @@ end;
 function TD2XProcessor.ProcessFile: Boolean;
 var
   lSS: TStringStream;
-  lMS: TMemoryStream;
   lFile: string;
   lPhase: string;
   i: Integer;
-  lSL: TStringList;
+  lTimer: TStopwatch;
 begin
   Result := False;
   lFile := fFilename;
@@ -476,88 +430,72 @@ begin
     lFile := fOpts.BaseDirectory + lFile;
   if FileExists(lFile) then
     try
-      if fOpts.SkipMethods then
-        with TStringList.Create do
-          try
-            LoadFromFile(ChangeFileExt(ParamStr(0), fOpts.SkipExtension));
-            fSkippedMethods.Clear;
-            for i := 0 to Count - 1 do
-              if Names[i] = '' then
-                fSkippedMethods.Add(Strings[i], 0)
-              else
-                fSkippedMethods.Add(Names[i], 0);
-          finally
-            Free;
-          end;
-
       lPhase := 'Initial';
-      Writeln('Processing ', fFilename, ' ...');
-      SetProxy;
-
-      lMS := nil;
-      lSS := TStringStream.Create;
+      Write('Processing ', fFilename, ' ... ');
+      lTimer := TStopwatch.StartNew;
       try
-        lPhase := 'Loading';
-        lSS.LoadFromFile(lFile);
-
-        lFile := lSS.DataString;
-
-        if ContainsText(LeftStr(lFile, 16), '<') then
-          Exit;
-
-        lPhase := 'Converting ' + IntToStr(Length(lFile)) + ' x ' + IntToStr(Sizeof(Char));
-        lMS := TMemoryStream.Create;
-        lMS.Write(PChar(lFile)^, Length(lFile) * Sizeof(Char));
-
-        lPhase := 'Parsing';
-        fParser.Run(fFilename, lMS);
-
-        if fOpts.Xml then
-        begin
-          lPhase := 'Preparing Xml';
-          lFile := ExtractFilePath(ParamStr(0)) + fOpts.XmlDirectory +
-            ExtractFilePath(fFilename);
-          ForceDirectories(lFile);
-          lFile := fOpts.XmlDirectory + fFilename;
-
-          lPhase := 'Writing Xml';
-          lFile := lFile + '.xml';
-          fXmlDoc.Xml.SaveToFile(lFile);
-        end;
-
-        lSL := nil;
-        if fOpts.WriteDefines then
-          try
-            lSL := TStringList.Create;
-            lSL.Sorted := True;
-            lPhase := 'Preparing Defines';
-            fParser.Lexer.GetDefines(lSL);
-
-            if lSL.Text <> fOpts.Defines.Text then
-            begin
-              lFile := ExtractFilePath(ParamStr(0)) + fOpts.DefinesDirectory +
-                ExtractFilePath(fFilename);
-              ForceDirectories(lFile);
-              lFile := fOpts.DefinesDirectory + fFilename;
-
-              lPhase := 'Writing Defines';
-              lFile := lFile + '.def';
-              lSL.SaveToFile(lFile);
+        if fOpts.SkipMethods then
+          with TStringList.Create do
+            try
+              LoadFromFile(GlobalFilename(False, fOpts.SkipExtension));
+              fSkippedMethods.Clear;
+              for i := 0 to Count - 1 do
+                if Names[i] = '' then
+                  fSkippedMethods.Add(Strings[i], 0)
+                else
+                  fSkippedMethods.Add(Names[i], 0);
+            finally
+              Free;
             end;
-          finally
-            FreeAndNil(lSL);
+
+        RemoveProxy;
+        if UseProxy then
+          SetProxy;
+
+        lSS := TStringStream.Create;
+        try
+          lPhase := 'Loading';
+          lSS.LoadFromFile(lFile);
+
+          lFile := lSS.DataString;
+
+          if ContainsText(LeftStr(lFile, 16), '<') then
+            Exit;
+
+          if fOpts.LoadDefines then
+            fParser.StartDefines.Assign(fOpts.Defines);
+
+          lPhase := 'Parsing';
+          fParser.ProcessString(fFilename, lFile);
+
+          if fOpts.Xml then
+          begin
+            lPhase := 'Preparing Xml';
+            lFile := fProgramDir + fOpts.XmlDirectory + ExtractFilePath(fFilename);
+            ForceDirectories(lFile);
+            lFile := fOpts.XmlDirectory + fFilename;
+
+            lPhase := 'Writing Xml';
+            lFile := lFile + '.xml';
+            fXmlDoc.Xml.SaveToFile(lFile);
           end;
 
-        Result := True;
+          lPhase := 'Writing Defines';
+          if fOpts.WriteDefines then
+            WriteChangedDefines;
+
+          Result := True;
+        finally
+          FreeAndNil(lSS);
+        end;
       finally
-        FreeAndNil(lMS);
-        FreeAndNil(lSS);
+        lTimer.Stop;
+        Writeln(Format('%0.3f', [lTimer.Elapsed.TotalSeconds]));
       end;
     except
       on E: Exception do
       begin
-        Writeln('EXCEPTION (', E.ClassName, ') processing "', fFilename, '" at ', lPhase,
-          ' : ', E.Message);
+        LogMessage('EXCEPTION', '(' + E.ClassName + ')' + E.Message + ' at ' + lPhase);
         Result := False;
       end;
     end;
@@ -643,20 +581,74 @@ begin
     if (Length(pStr) > 1) and CharInSet(pStr[1], ['-', '/']) then
       Result := Options.ParseOption(pStr)
     else
-    begin
-      Result := ProcessFile(pStr);
-      if not Result then
+      if (Length(pStr) > 1) and (pStr[1] = '@') then
+        Result := ProcessParamsFile(Copy(pStr, 2))
+      else
       begin
-        lPath := ExtractFilePath(pStr);
-        lFile := ExtractFileName(pStr);
-        Result := ProcessDirectory(lPath, lFile);
-        if fOpts.Recurse then
-          Result := RecurseDirectory(lPath, lFile) or Result;
+        Result := ProcessFile(pStr);
+        if not Result then
+        begin
+          lPath := ExtractFilePath(pStr);
+          lFile := ExtractFileName(pStr);
+          Result := ProcessDirectory(lPath, lFile);
+          if fOpts.Recurse then
+            Result := RecurseDirectory(lPath, lFile) or Result;
+        end;
       end;
-    end;
   except
     on E: Exception do
       Writeln('EXCEPTION (', E.ClassName, ') processing "', pStr, '" : ', E.Message);
+  end;
+end;
+
+function TD2XProcessor.ProcessParamsFile(pFilename: string): Boolean;
+var
+  lSL: TStringList;
+  lS: string;
+begin
+  Result := True;
+  lSL := TStringList.Create;
+  try
+    lSL.LoadFromFile(pFilename);
+    for lS in lSL do
+      Result := ProcessParam(lS) and Result;
+  finally
+    FreeAndNil(lSL);
+  end;
+end;
+
+procedure TD2XProcessor.WriteChangedDefines;
+var
+  lFile: string;
+  lSL: TStringList;
+  lFS: TFileStream;
+  i: Integer;
+const
+  DEF_BREAK: array [0 .. 9] of Byte = (13, 10, 42, 42, 42, 42, 13, 10, 13, 10);
+begin
+  lSL := TStringList.Create;
+  try
+    fParser.GetLexerDefines(lSL);
+    fParser.StartDefines.Sort;
+    lSL.Sort;
+    for i := lSL.Count - 1 downto 1 do
+      if lSL[i] = lSL[i - 1] then
+        lSL.Delete(i);
+    if lSL.Text <> fParser.StartDefines.Text then
+    begin
+      lFile := fProgramDir + fOpts.DefinesDirectory + ExtractFilePath(fFilename);
+      ForceDirectories(lFile);
+      lFS := TFileStream.Create(fOpts.DefinesDirectory + fFilename + '.def', fmCreate);
+      try
+        fParser.StartDefines.SaveToStream(lFS);
+        lFS.Write(DEF_BREAK, 10);
+        lSL.SaveToStream(lFS);
+      finally
+        FreeAndNil(lFS);
+      end;
+    end;
+  finally
+    FreeAndNil(lSL);
   end;
 end;
 
@@ -714,8 +706,6 @@ end;
 
 procedure TD2XProcessor.SetProxy;
 begin
-  RemoveProxy;
-
   if fOpts.Xml then
   begin
     fXmlDoc := NewXmlDocument;
@@ -736,8 +726,6 @@ begin
       out pDoInvoke: Boolean; out pResult: TValue)
     begin
       pDoInvoke := True;
-      if pMethod.Name = 'ParseFile' then
-        BeforeParseFile;
       if IsInternalMethod(pMethod.Name) then
         Exit;
       if fOpts.SkipMethods and SkipBefore(pMethod.Name) then
@@ -785,6 +773,11 @@ begin
     fSkippedMethods[pMethod] := lVal + 1;
 end;
 
+function TD2XProcessor.UseProxy: Boolean;
+begin
+  Result := fOpts.Xml or fOpts.CountChildren;
+end;
+
 procedure TD2XProcessor.XmlNodeEnd(_pMethod: string);
 begin
   if Assigned(fXmlNode) then
@@ -809,311 +802,5 @@ begin
 end;
 
 { TD2XOptions }
-
-procedure TD2XOptions.AddDefine(pDef: string);
-begin
-  fLoadDefines := True;
-  if fDefines.IndexOf(pDef) < 0 then
-    fDefines.Add(pDef);
-end;
-
-constructor TD2XOptions.Create;
-begin
-  inherited;
-
-  fLogErrors := True;
-  fLogNotSupported := False;
-  fTimestampFiles := False;
-  fVerbose := False;
-  fUseBase := False;
-  fBaseDirectory := '';
-  fXml := True;
-  fXmlDirectory := '';
-  fWriteDefines := False;
-  fDefinesDirectory := '';
-  fDefinesUsed := True;
-  fUsedExtension := '.used';
-  fCountChildren := True;
-  fCountExtension := '.cnt';
-  fLoadDefines := True;
-  fLoadExtension := '.def';
-  fSkipMethods := True;
-  fSkipExtension := '.skip';
-  fDefines := TStringList.Create;
-  fDefines.Sorted := True;
-end;
-
-procedure TD2XOptions.DeleteDefine(pDef: string);
-var
-  lIdx: Integer;
-begin
-  lIdx := fDefines.IndexOf(pDef);
-  if lIdx >= 0 then
-  begin
-    fDefines.Delete(lIdx);
-    fLoadDefines := True;
-  end;
-end;
-
-destructor TD2XOptions.Destroy;
-begin
-  FreeAndNil(fDefines);
-
-  inherited;
-end;
-
-procedure TD2XOptions.LoadDefinesFile(pFile: string);
-begin
-  if pFile = '' then
-    fDefines.Clear
-  else
-    if StartsText('.', pFile) then
-      fDefines.LoadFromFile(ChangeFileExt(ParamStr(0), pFile))
-    else
-      fDefines.LoadFromFile(pFile);
-end;
-
-function TD2XOptions.ParseOption(pOpt: string): Boolean;
-  function ErrorUnlessSet(out pFlag: Boolean): Boolean;
-  begin
-    Result := False;
-    if (Length(pOpt) = 2) or (pOpt[3] = '+') then
-      pFlag := True
-    else
-      if pOpt[3] = '-' then
-        pFlag := False
-      else
-        Result := True;
-  end;
-  function ErrorUnlessValue(out pVal: string): Boolean;
-  begin
-    Result := False;
-    if (Length(pOpt) > 2) and (pOpt[3] = ':') then
-      pVal := Copy(pOpt, 4, 99)
-    else
-      Result := True;
-  end;
-  function ErrorUnlessSetValue(out pFlag: Boolean; out pVal: string): Boolean;
-  begin
-    Result := False;
-    if ErrorUnlessSet(pFlag) then
-      if pOpt[3] = ':' then
-      begin
-        pFlag := True;
-        pVal := Copy(pOpt, 4, 99)
-      end
-      else
-        Result := True;
-  end;
-  function ErrorUnlessSetExtension(out pFlag: Boolean; out pExtn: string;
-    pDflt: string): Boolean;
-  begin
-    Result := False;
-    if ErrorUnlessSetValue(pFlag, pExtn) then
-      Result := True
-    else
-      if pExtn = '' then
-        pExtn := pDflt
-      else
-        if pExtn[1] <> '.' then
-          pExtn := '.' + pExtn;
-  end;
-  function ErrorUnlessSetDir(out pFlag: Boolean; out pDir: string): Boolean;
-  begin
-    Result := False;
-    if ErrorUnlessSetValue(pFlag, pDir) then
-      Result := True
-    else
-      if pDir > '' then
-        pDir := IncludeTrailingPathDelimiter(pDir);
-  end;
-
-var
-  lDefine: string;
-
-begin
-  Result := False;
-  if (Length(pOpt) < 2) or not CharInSet(pOpt[1], ['-', '/']) then
-    Writeln('Invalid option: ' + pOpt)
-  else
-    case pOpt[2] of
-      '?':
-        Result := False;
-      '!':
-        Result := ReportOptions;
-      'E', 'e':
-        if ErrorUnlessSet(fLogErrors) then
-          Writeln('Invalid Log Error messages option: ' + pOpt)
-        else
-          Result := True;
-      'N', 'n':
-        if ErrorUnlessSet(fLogNotSupported) then
-          Writeln('Invalid Log Not Supported messages option: ' + pOpt)
-        else
-          Result := True;
-      'T', 't':
-        if ErrorUnlessSet(fTimestampFiles) then
-          Writeln('Invalid Timestamp Files option: ' + pOpt)
-        else
-          Result := True;
-      'V', 'v':
-        if ErrorUnlessSet(fVerbose) then
-          Writeln('Invalid Verbose option: ' + pOpt)
-        else
-          Result := True;
-      'R', 'r':
-        if ErrorUnlessSet(fRecurse) then
-          Writeln('Invalid Recurse Directories option: ' + pOpt)
-        else
-          Result := True;
-      'D', 'd':
-        if ErrorUnlessValue(lDefine) then
-          Writeln('Invalid Define option: ' + pOpt)
-        else
-        begin
-          AddDefine(lDefine);
-          Result := True;
-        end;
-      'Z', 'z':
-        if ErrorUnlessValue(lDefine) then
-          Writeln('Invalid Undefine option: ' + pOpt)
-        else
-        begin
-          DeleteDefine(lDefine);
-          Result := True;
-        end;
-      'L', 'l':
-        if ErrorUnlessSetValue(fLoadDefines, fLoadExtension) then
-          Writeln('Invalid Load Defines option: ' + pOpt)
-        else
-        begin
-          LoadDefinesFile(fLoadExtension);
-          Result := True;
-        end;
-      'W', 'w':
-        if ErrorUnlessSetDir(fWriteDefines, fDefinesDirectory) then
-          Writeln('Invalid Write Defines option: ' + pOpt)
-        else
-          Result := True;
-      'B', 'b':
-        if ErrorUnlessSetDir(fUseBase, fBaseDirectory) then
-          Writeln('Invalid Use Base Directory option: ' + pOpt)
-        else
-          Result := True;
-      'X', 'x':
-        if ErrorUnlessSetDir(fXml, fXmlDirectory) then
-          Writeln('Invalid Xml option: ' + pOpt)
-        else
-          Result := True;
-      'U', 'u':
-        if ErrorUnlessSetExtension(fDefinesUsed, fUsedExtension, '.used') then
-          Writeln('Invalid Count Defines Used option: ' + pOpt)
-        else
-          Result := True;
-      'C', 'c':
-        if ErrorUnlessSetExtension(fCountChildren, fCountExtension, '.cnt') then
-          Writeln('Invalid Count Children option: ' + pOpt)
-        else
-          Result := True;
-      'S', 's':
-        if ErrorUnlessSetExtension(fSkipMethods, fSkipExtension, '.skip') then
-          Writeln('Invalid Load Skipped Methods option: ' + pOpt)
-        else
-          Result := True;
-    else
-      Writeln('Unknown option: ' + pOpt);
-    end;
-end;
-
-function TD2XOptions.ReportOptions: Boolean;
-  function ShowEnabled(pOpt: Boolean; pLabel, pVal: string): string;
-  begin
-    if pOpt then
-    begin
-      if pVal > '' then
-        Result := 'Enabled  ' + pLabel + pVal
-      else
-        Result := 'Enabled  ';
-    end
-    else
-      Result := 'Disabled ';
-  end;
-
-var
-  lS: string;
-  w: Integer;
-
-  procedure WriteWidth(pStr: string);
-  begin
-    write(pStr);
-    Inc(w, Length(pStr));
-  end;
-
-begin
-  Result := True;
-  Writeln('Current option settings:');
-  Writeln('  Errors                  ', ShowEnabled(fLogErrors, '', ''));
-  Writeln('  Not Supported           ', ShowEnabled(fLogNotSupported, '', ''));
-  Writeln('  Timestamp Files         ', ShowEnabled(fTimestampFiles, '', ''));
-  Writeln('  Verbose                 ', ShowEnabled(fVerbose, '', ''));
-  Writeln('  Recurse                 ', ShowEnabled(fRecurse, '', ''));
-  Writeln('  Write defines           ', ShowEnabled(fWriteDefines, 'Dir  ',
-      fDefinesDirectory));
-  Writeln('  Directory base          ', ShowEnabled(fUseBase, 'Dir  ', fBaseDirectory));
-  Writeln('  Xml output              ', ShowEnabled(fXml, 'Dir  ', fXmlDirectory));
-  Writeln('  Count defines used      ', ShowEnabled(fDefinesUsed, 'Extn ', fUsedExtension));
-  Writeln('  Count min/max children  ', ShowEnabled(fCountChildren, 'Extn ', fCountExtension));
-  Writeln('  Skip methods in         ', ShowEnabled(fSkipMethods, 'Extn ', fSkipExtension));
-
-  if fLoadDefines then
-    if fDefines.Count < 1 then
-      Writeln('Use NO Defines')
-    else
-    begin
-      Writeln('Use these Defines:');
-      w := 0;
-      for lS in fDefines do
-      begin
-        if w = 0 then
-          WriteWidth('    ')
-        else
-          if (w + Length(lS)) > 78 then
-          begin
-            Writeln;
-            w := 0;
-            WriteWidth('    ');
-          end
-          else
-            WriteWidth(', ');
-
-        WriteWidth(lS);
-      end;
-    end
-  else
-    Writeln('Use default Defines');
-end;
-
-procedure TD2XOptions.ShowOptions;
-var
-  lBase: string;
-begin
-  lBase := ChangeFileExt(ExtractFileName(ParamStr(0)), '');
-  Writeln('Usage: ', lBase, ' [ Option | Filename | Wildcard ] ... ');
-  Writeln('  Options:        Default   Description');
-  Writeln('    E[+-]         -         Log Error messages');
-  Writeln('    N[+-]         -         Log Not Supported messages');
-  Writeln('    T[+-]         -         Timestamp global output files');
-  Writeln('    V[+-]         -         Log all Parser methods called');
-  Writeln('    R[+-]         +         Recurse into subdirectories');
-  Writeln('    D:<define>              Define <define> (also enables "Load Defines")');
-  Writeln('    Z:<define>              Undefine <define> (also enables "Load Defines")');
-  Writeln('    L[+-]|:<file> -         Load Defines from <file> (no <file> clears all defines)');
-  Writeln('    W[+-]|:<dir>  -         Generate Final Defines files into current or given <dir>');
-  Writeln('    B[+-]|:<dir>  -         Use <dir> a base for all file lookups');
-  Writeln('    X[+-]|:<dir>  +         Generate XML files into current or given <dir>');
-  Writeln('    C[+-]|:<ext>  +:cnt     Report Min/Max Children into ', lBase, '.<ext>');
-  Writeln('    U[+-]|:<ext>  +:used    Report Defines Used into ', lBase, '.<ext>');
-  Writeln('    S[+-]|:<ext>  +:skip    Load Skipped Methods from ', lBase, '.<ext>');
-end;
 
 end.

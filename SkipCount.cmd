@@ -1,1 +1,1 @@
-Delphi2Xml -x:XmlSkip -d:CPU32 -t "*.dp?,*.inc,*.pas" -r -b:..\V6\3.6\Main "*.dp?,*.inc,*.pas"
+Delphi2Xml -x:XmlSkip @All.prm

@@ -9,17 +9,35 @@ uses
 
 type
   TD2XLexer = TmwBasePasLex;
+  TD2XParser = TmwSimplePasPar;
 
-  TD2XParser = class(TmwSimplePasPar)
+  TD2XDefinesParser = class(TD2XParser)
   private
+    fLength : Cardinal;
+    fProcessed: Byte;
     fLastTokens: string;
+    fStartDefines: TStringList;
+
+    function GetStartDefines: TStringList;
 
   protected
     procedure NextToken; override;
 
   public
-    property LastTokens: string read fLastTokens write fLastTokens;
+    constructor Create;
+    destructor Destroy; override;
 
+    procedure ProcessString(pFilename, pContents: string);
+
+    procedure ParseFile; override;
+    procedure GetLexerDefines(pDefs: TStringList);
+
+    property LastTokens: string read fLastTokens write fLastTokens;
+    property StartDefines: TStringList read GetStartDefines;
+  end;
+
+  TD2XFullParser = class(TD2XDefinesParser)
+  public
     procedure AccessSpecifier; override;
     procedure AdditiveOperator; override;
     procedure AncestorIdList; override; // !! Added ancestorIdList back in...
@@ -281,1267 +299,1344 @@ type
 
 implementation
 
+uses
+  System.Math,
+  System.SysUtils;
+
 { TD2XParser }
 
-procedure TD2XParser.AccessSpecifier;
+procedure TD2XFullParser.AccessSpecifier;
 begin
   inherited;
 end;
 
-procedure TD2XParser.AdditiveOperator;
+procedure TD2XFullParser.AdditiveOperator;
 begin
   inherited;
 end;
 
-procedure TD2XParser.AncestorId;
+procedure TD2XFullParser.AncestorId;
 begin
   inherited;
 end;
 
-procedure TD2XParser.AncestorIdList;
+procedure TD2XFullParser.AncestorIdList;
 begin
   inherited;
 end;
 
-procedure TD2XParser.AnonymousMethod;
+procedure TD2XFullParser.AnonymousMethod;
 begin
   inherited;
 end;
 
-procedure TD2XParser.AnonymousMethodType;
+procedure TD2XFullParser.AnonymousMethodType;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ArrayConstant;
+procedure TD2XFullParser.ArrayConstant;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ArrayType;
+procedure TD2XFullParser.ArrayType;
 begin
   inherited;
 end;
 
-procedure TD2XParser.AsmStatement;
+procedure TD2XFullParser.AsmStatement;
 begin
   inherited;
 end;
 
-procedure TD2XParser.Block;
+procedure TD2XFullParser.Block;
 begin
   inherited;
 end;
 
-procedure TD2XParser.CaseLabel;
+procedure TD2XFullParser.CaseLabel;
 begin
   inherited;
 end;
 
-procedure TD2XParser.CaseSelector;
+procedure TD2XFullParser.CaseSelector;
 begin
   inherited;
 end;
 
-procedure TD2XParser.CaseStatement;
+procedure TD2XFullParser.CaseStatement;
 begin
   inherited;
 end;
 
-procedure TD2XParser.CharString;
+procedure TD2XFullParser.CharString;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ClassClass;
+procedure TD2XFullParser.ClassClass;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ClassField;
+procedure TD2XFullParser.ClassField;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ClassForward;
+procedure TD2XFullParser.ClassForward;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ClassFunctionHeading;
+procedure TD2XFullParser.ClassFunctionHeading;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ClassHeritage;
+procedure TD2XFullParser.ClassHeritage;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ClassMemberList;
+procedure TD2XFullParser.ClassMemberList;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ClassMethodDirective;
+procedure TD2XFullParser.ClassMethodDirective;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ClassMethodHeading;
+procedure TD2XFullParser.ClassMethodHeading;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ClassMethodOrProperty;
+procedure TD2XFullParser.ClassMethodOrProperty;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ClassMethodResolution;
+procedure TD2XFullParser.ClassMethodResolution;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ClassProcedureHeading;
+procedure TD2XFullParser.ClassProcedureHeading;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ClassProperty;
+procedure TD2XFullParser.ClassProperty;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ClassReferenceType;
+procedure TD2XFullParser.ClassReferenceType;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ClassType;
+procedure TD2XFullParser.ClassType;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ClassTypeEnd;
+procedure TD2XFullParser.ClassTypeEnd;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ClassVisibility;
+procedure TD2XFullParser.ClassVisibility;
 begin
   inherited;
 end;
 
-procedure TD2XParser.CompoundStatement;
+procedure TD2XFullParser.CompoundStatement;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ConstantColon;
+procedure TD2XFullParser.ConstantColon;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ConstantDeclaration;
+procedure TD2XFullParser.ConstantDeclaration;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ConstantEqual;
+procedure TD2XFullParser.ConstantEqual;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ConstantExpression;
+procedure TD2XFullParser.ConstantExpression;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ConstantName;
+procedure TD2XFullParser.ConstantName;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ConstantType;
+procedure TD2XFullParser.ConstantType;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ConstantValue;
+procedure TD2XFullParser.ConstantValue;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ConstantValueTyped;
+procedure TD2XFullParser.ConstantValueTyped;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ConstParameter;
+procedure TD2XFullParser.ConstParameter;
 begin
   inherited;
 end;
 
-procedure TD2XParser.Constraint;
+procedure TD2XFullParser.Constraint;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ConstraintList;
+procedure TD2XFullParser.ConstraintList;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ConstructorHeading;
+procedure TD2XFullParser.ConstructorHeading;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ConstructorName;
+procedure TD2XFullParser.ConstructorName;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ConstSection;
+procedure TD2XFullParser.ConstSection;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ContainsClause;
+procedure TD2XFullParser.ContainsClause;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ContainsExpression;
+procedure TD2XFullParser.ContainsExpression;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ContainsIdentifier;
+procedure TD2XFullParser.ContainsIdentifier;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ContainsStatement;
+procedure TD2XFullParser.ContainsStatement;
 begin
   inherited;
 end;
 
-procedure TD2XParser.DeclarationSection;
+procedure TD2XFullParser.DeclarationSection;
 begin
   inherited;
 end;
 
-procedure TD2XParser.Designator;
+procedure TD2XFullParser.Designator;
 begin
   inherited;
 end;
 
-procedure TD2XParser.DestructorHeading;
+procedure TD2XFullParser.DestructorHeading;
 begin
   inherited;
 end;
 
-procedure TD2XParser.DestructorName;
+procedure TD2XFullParser.DestructorName;
 begin
   inherited;
 end;
 
-procedure TD2XParser.Directive16Bit;
+procedure TD2XFullParser.Directive16Bit;
 begin
   inherited;
 end;
 
-procedure TD2XParser.DirectiveBinding;
+procedure TD2XFullParser.DirectiveBinding;
 begin
   inherited;
 end;
 
-procedure TD2XParser.DirectiveCalling;
+procedure TD2XFullParser.DirectiveCalling;
 begin
   inherited;
 end;
 
-procedure TD2XParser.DirectiveDeprecated;
+procedure TD2XFullParser.DirectiveDeprecated;
 begin
   inherited;
 end;
 
-procedure TD2XParser.DirectiveLibrary;
+procedure TD2XFullParser.DirectiveLibrary;
 begin
   inherited;
 end;
 
-procedure TD2XParser.DirectiveLocal;
+procedure TD2XFullParser.DirectiveLocal;
 begin
   inherited;
 end;
 
-procedure TD2XParser.DirectivePlatform;
+procedure TD2XFullParser.DirectivePlatform;
 begin
   inherited;
 end;
 
-procedure TD2XParser.DirectiveVarargs;
+procedure TD2XFullParser.DirectiveVarargs;
 begin
   inherited;
 end;
 
-procedure TD2XParser.DispIDSpecifier;
+procedure TD2XFullParser.DispIDSpecifier;
 begin
   inherited;
 end;
 
-procedure TD2XParser.DispInterfaceForward;
+procedure TD2XFullParser.DispInterfaceForward;
 begin
   inherited;
 end;
 
-procedure TD2XParser.EmptyStatement;
+procedure TD2XFullParser.EmptyStatement;
 begin
   inherited;
 end;
 
-procedure TD2XParser.EnumeratedType;
+procedure TD2XFullParser.EnumeratedType;
 begin
   inherited;
 end;
 
-procedure TD2XParser.EnumeratedTypeItem;
+procedure TD2XFullParser.EnumeratedTypeItem;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ExceptBlock;
+procedure TD2XFullParser.ExceptBlock;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ExceptionBlockElseBranch;
+procedure TD2XFullParser.ExceptionBlockElseBranch;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ExceptionClassTypeIdentifier;
+procedure TD2XFullParser.ExceptionClassTypeIdentifier;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ExceptionHandler;
+procedure TD2XFullParser.ExceptionHandler;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ExceptionHandlerList;
+procedure TD2XFullParser.ExceptionHandlerList;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ExceptionIdentifier;
+procedure TD2XFullParser.ExceptionIdentifier;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ExceptionVariable;
+procedure TD2XFullParser.ExceptionVariable;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ExplicitType;
+procedure TD2XFullParser.ExplicitType;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ExportedHeading;
+procedure TD2XFullParser.ExportedHeading;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ExportsClause;
+procedure TD2XFullParser.ExportsClause;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ExportsElement;
+procedure TD2XFullParser.ExportsElement;
 begin
   inherited;
 end;
 
-procedure TD2XParser.Expression;
+procedure TD2XFullParser.Expression;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ExpressionList;
+procedure TD2XFullParser.ExpressionList;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ExternalDirective;
+procedure TD2XFullParser.ExternalDirective;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ExternalDirectiveThree;
+procedure TD2XFullParser.ExternalDirectiveThree;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ExternalDirectiveTwo;
+procedure TD2XFullParser.ExternalDirectiveTwo;
 begin
   inherited;
 end;
 
-procedure TD2XParser.Factor;
+procedure TD2XFullParser.Factor;
 begin
   inherited;
 end;
 
-procedure TD2XParser.FieldDeclaration;
+procedure TD2XFullParser.FieldDeclaration;
 begin
   inherited;
 end;
 
-procedure TD2XParser.FieldList;
+procedure TD2XFullParser.FieldList;
 begin
   inherited;
 end;
 
-procedure TD2XParser.FieldName;
+procedure TD2XFullParser.FieldName;
 begin
   inherited;
 end;
 
-procedure TD2XParser.FieldNameList;
+procedure TD2XFullParser.FieldNameList;
 begin
   inherited;
 end;
 
-procedure TD2XParser.FileType;
+procedure TD2XFullParser.FileType;
 begin
   inherited;
 end;
 
-procedure TD2XParser.FormalParameterList;
+procedure TD2XFullParser.FormalParameterList;
 begin
   inherited;
 end;
 
-procedure TD2XParser.FormalParameterSection;
+procedure TD2XFullParser.FormalParameterSection;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ForStatement;
+procedure TD2XFullParser.ForStatement;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ForwardDeclaration;
+procedure TD2XFullParser.ForwardDeclaration;
 begin
   inherited;
 end;
 
-procedure TD2XParser.FunctionHeading;
+procedure TD2XFullParser.FunctionHeading;
 begin
   inherited;
 end;
 
-procedure TD2XParser.FunctionMethodDeclaration;
+procedure TD2XFullParser.FunctionMethodDeclaration;
 begin
   inherited;
 end;
 
-procedure TD2XParser.FunctionMethodName;
+procedure TD2XFullParser.FunctionMethodName;
 begin
   inherited;
 end;
 
-procedure TD2XParser.FunctionProcedureBlock;
+procedure TD2XFullParser.FunctionProcedureBlock;
 begin
   inherited;
 end;
 
-procedure TD2XParser.FunctionProcedureName;
+procedure TD2XFullParser.FunctionProcedureName;
 begin
   inherited;
 end;
 
-procedure TD2XParser.Identifier;
+procedure TD2XFullParser.Identifier;
 begin
   inherited;
 end;
 
-procedure TD2XParser.IdentifierList;
+procedure TD2XFullParser.IdentifierList;
 begin
   inherited;
 end;
 
-procedure TD2XParser.IfStatement;
+procedure TD2XFullParser.IfStatement;
 begin
   inherited;
 end;
 
-procedure TD2XParser.ImplementationSection;
+procedure TD2XFullParser.ImplementationSection;
 begin
   inherited;
 end;
 
-procedure TD2XParser.IncludeFile;
+procedure TD2XFullParser.IncludeFile;
 begin
   inherited;
 end;
 
-procedure TD2XParser.IndexSpecifier;
+procedure TD2XFullParser.IndexSpecifier;
 begin
   inherited;
 end;
 
-procedure TD2XParser.InheritedStatement;
+procedure TD2XFullParser.InheritedStatement;
 begin
   inherited;
 end;
 
-procedure TD2XParser.InitializationSection;
+procedure TD2XFullParser.InitializationSection;
 begin
   inherited;
 end;
 
-procedure TD2XParser.InlineStatement;
+procedure TD2XFullParser.InlineStatement;
 begin
   inherited;
 end;
 
-procedure TD2XParser.InParameter;
+procedure TD2XFullParser.InParameter;
 begin
   inherited;
 end;
 
-procedure TD2XParser.InterfaceDeclaration;
+procedure TD2XFullParser.InterfaceDeclaration;
 begin
   inherited;
 end;
 
-procedure TD2XParser.InterfaceForward;
+procedure TD2XFullParser.InterfaceForward;
 begin
   inherited;
 end;
 
-procedure TD2XParser.InterfaceGUID;
+procedure TD2XFullParser.InterfaceGUID;
 begin
   inherited;
 end;
 
-procedure TD2XParser.InterfaceHeritage;
+procedure TD2XFullParser.InterfaceHeritage;
 begin
   inherited;
 end;
 
-procedure TD2XParser.InterfaceMemberList;
+procedure TD2XFullParser.InterfaceMemberList;
 begin
   inherited;
 end;
 
-procedure TD2XParser.InterfaceSection;
+procedure TD2XFullParser.InterfaceSection;
 begin
   inherited;
 end;
 
-procedure TD2XParser.InterfaceType;
+procedure TD2XFullParser.InterfaceType;
 begin
   inherited;
 end;
 
-procedure TD2XParser.LabelDeclarationSection;
+procedure TD2XFullParser.LabelDeclarationSection;
 begin
   inherited;
 end;
 
-procedure TD2XParser.LabeledStatement;
+procedure TD2XFullParser.LabeledStatement;
 begin
   inherited;
 end;
 
-procedure TD2XParser.LabelId;
+procedure TD2XFullParser.LabelId;
 begin
   inherited;
 end;
 
-procedure TD2XParser.LibraryFile;
+procedure TD2XFullParser.LibraryFile;
 begin
   inherited;
 end;
 
-procedure TD2XParser.MainUsedUnitExpression;
+procedure TD2XFullParser.MainUsedUnitExpression;
 begin
   inherited;
 end;
 
-procedure TD2XParser.MainUsedUnitName;
+procedure TD2XFullParser.MainUsedUnitName;
 begin
   inherited;
 end;
 
-procedure TD2XParser.MainUsedUnitStatement;
+procedure TD2XFullParser.MainUsedUnitStatement;
 begin
   inherited;
 end;
 
-procedure TD2XParser.MainUsesClause;
+procedure TD2XFullParser.MainUsesClause;
 begin
   inherited;
 end;
 
-procedure TD2XParser.MultiplicativeOperator;
+procedure TD2XFullParser.MultiplicativeOperator;
 begin
   inherited;
 end;
 
-procedure TD2XParser.NewFormalParameterType;
+procedure TD2XFullParser.NewFormalParameterType;
 begin
   inherited;
 end;
 
-procedure TD2XParser.NextToken;
+procedure TD2XFullParser.Number;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.ObjectConstructorHeading;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.ObjectDestructorHeading;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.ObjectField;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.ObjectForward;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.ObjectFunctionHeading;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.ObjectHeritage;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.ObjectMemberList;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.ObjectMethodDirective;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.ObjectMethodHeading;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.ObjectNameOfMethod;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.ObjectProcedureHeading;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.ObjectProperty;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.ObjectPropertySpecifiers;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.ObjectType;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.ObjectTypeEnd;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.ObjectVisibility;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.OldFormalParameterType;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.OrdinalIdentifier;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.OrdinalType;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.OutParameter;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.PackageFile;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.ParameterFormal;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.ParameterName;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.ParameterNameList;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.ParseFile;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.PointerType;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.ProceduralDirective;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.ProceduralType;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.ProcedureDeclarationSection;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.ProcedureHeading;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.ProcedureMethodDeclaration;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.ProcedureMethodName;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.ProgramBlock;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.ProgramFile;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.PropertyDefault;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.PropertyInterface;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.PropertyName;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.PropertyParameterConst;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.PropertyParameterList;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.PropertySpecifiers;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.QualifiedIdentifier;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.QualifiedIdentifierList;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.RaiseStatement;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.ReadAccessIdentifier;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.RealIdentifier;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.RealType;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.RecordConstant;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.RecordFieldConstant;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.RecordType;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.RecordVariant;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.RelativeOperator;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.RepeatStatement;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.RequiresClause;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.RequiresIdentifier;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.ResolutionInterfaceName;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.ResourceDeclaration;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.ReturnType;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.SetConstructor;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.SetElement;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.SetType;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.SimpleExpression;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.SimpleStatement;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.SimpleType;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.SkipAnsiComment;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.SkipBorComment;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.SkipCRLF;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.SkipCRLFco;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.SkipSlashesComment;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.SkipSpace;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.Statement;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.StatementList;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.StorageDefault;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.StorageExpression;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.StorageIdentifier;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.StorageNoDefault;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.StorageSpecifier;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.StorageStored;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.StringIdentifier;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.StringStatement;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.StringType;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.StructuredType;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.SubrangeType;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.TagField;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.TagFieldName;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.TagFieldTypeName;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.Term;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.TryStatement;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.TypeArgs;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.TypedConstant;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.TypeDeclaration;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.TypeId;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.TypeKind;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.TypeName;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.TypeParamDecl;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.TypeParamDeclList;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.TypeParamList;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.TypeParams;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.TypeSection;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.UnitFile;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.UnitId;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.UnitName;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.UsedUnitName;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.UsedUnitsList;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.UsesClause;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.VarAbsolute;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.VarDeclaration;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.VarEqual;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.Variable;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.VariableList;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.VariableReference;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.VariableTwo;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.VariantIdentifier;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.VariantSection;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.VarName;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.VarNameList;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.VarParameter;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.VarSection;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.VisibilityAutomated;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.VisibilityPrivate;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.VisibilityProtected;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.VisibilityPublic;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.VisibilityPublished;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.VisibilityUnknown;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.WhileStatement;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.WithStatement;
+begin
+  inherited;
+end;
+
+procedure TD2XFullParser.WriteAccessIdentifier;
+begin
+  inherited;
+end;
+
+{ TD2XDefinesParser }
+
+constructor TD2XDefinesParser.Create;
+begin
+  inherited;
+
+  fStartDefines := nil;
+  fLength := 0;
+  fProcessed := 0;
+end;
+
+destructor TD2XDefinesParser.Destroy;
+begin
+  FreeAndNil(fStartDefines);
+
+  inherited;
+end;
+
+procedure TD2XDefinesParser.GetLexerDefines(pDefs: TStringList);
+begin
+  Lexer.GetDefines(pDefs);
+end;
+
+function TD2XDefinesParser.GetStartDefines: TStringList;
+begin
+  if not Assigned(fStartDefines) then
+    fStartDefines := TStringList.Create;
+
+  Result := fStartDefines;
+end;
+
+procedure TD2XDefinesParser.NextToken;
+var
+  lProcessed: Byte;
 begin
   fLastTokens := fLastTokens + Lexer.Token;
-  inherited;
-end;
-
-procedure TD2XParser.Number;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.ObjectConstructorHeading;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.ObjectDestructorHeading;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.ObjectField;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.ObjectForward;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.ObjectFunctionHeading;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.ObjectHeritage;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.ObjectMemberList;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.ObjectMethodDirective;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.ObjectMethodHeading;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.ObjectNameOfMethod;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.ObjectProcedureHeading;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.ObjectProperty;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.ObjectPropertySpecifiers;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.ObjectType;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.ObjectTypeEnd;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.ObjectVisibility;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.OldFormalParameterType;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.OrdinalIdentifier;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.OrdinalType;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.OutParameter;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.PackageFile;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.ParameterFormal;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.ParameterName;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.ParameterNameList;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.ParseFile;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.PointerType;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.ProceduralDirective;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.ProceduralType;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.ProcedureDeclarationSection;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.ProcedureHeading;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.ProcedureMethodDeclaration;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.ProcedureMethodName;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.ProgramBlock;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.ProgramFile;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.PropertyDefault;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.PropertyInterface;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.PropertyName;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.PropertyParameterConst;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.PropertyParameterList;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.PropertySpecifiers;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.QualifiedIdentifier;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.QualifiedIdentifierList;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.RaiseStatement;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.ReadAccessIdentifier;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.RealIdentifier;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.RealType;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.RecordConstant;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.RecordFieldConstant;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.RecordType;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.RecordVariant;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.RelativeOperator;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.RepeatStatement;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.RequiresClause;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.RequiresIdentifier;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.ResolutionInterfaceName;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.ResourceDeclaration;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.ReturnType;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.SetConstructor;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.SetElement;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.SetType;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.SimpleExpression;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.SimpleStatement;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.SimpleType;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.SkipAnsiComment;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.SkipBorComment;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.SkipCRLF;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.SkipCRLFco;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.SkipSlashesComment;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.SkipSpace;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.Statement;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.StatementList;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.StorageDefault;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.StorageExpression;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.StorageIdentifier;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.StorageNoDefault;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.StorageSpecifier;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.StorageStored;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.StringIdentifier;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.StringStatement;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.StringType;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.StructuredType;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.SubrangeType;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.TagField;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.TagFieldName;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.TagFieldTypeName;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.Term;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.TryStatement;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.TypeArgs;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.TypedConstant;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.TypeDeclaration;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.TypeId;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.TypeKind;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.TypeName;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.TypeParamDecl;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.TypeParamDeclList;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.TypeParamList;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.TypeParams;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.TypeSection;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.UnitFile;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.UnitId;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.UnitName;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.UsedUnitName;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.UsedUnitsList;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.UsesClause;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.VarAbsolute;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.VarDeclaration;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.VarEqual;
-begin
-  inherited;
-end;
 
-procedure TD2XParser.Variable;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.VariableList;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.VariableReference;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.VariableTwo;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.VariantIdentifier;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.VariantSection;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.VarName;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.VarNameList;
-begin
-  inherited;
-end;
+  if fLength > 0 then begin
+    lProcessed := Lexer.RunPos * 100 div fLength;
+    if lProcessed > fProcessed then
+    begin
+      fProcessed := lProcessed;
+      Write(Format('%3d%%'#8#8#8#8, [fProcessed]));
+    end;
+  end;
 
-procedure TD2XParser.VarParameter;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.VarSection;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.VisibilityAutomated;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.VisibilityPrivate;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.VisibilityProtected;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.VisibilityPublic;
-begin
-  inherited;
-end;
-
-procedure TD2XParser.VisibilityPublished;
-begin
   inherited;
 end;
 
-procedure TD2XParser.VisibilityUnknown;
+procedure TD2XDefinesParser.ParseFile;
+var
+  lS: string;
 begin
-  inherited;
-end;
+  if Assigned(fStartDefines) then
+  begin
+    Lexer.ClearDefines;
+    for lS in fStartDefines do
+      Lexer.AddDefine(lS);
+  end;
 
-procedure TD2XParser.WhileStatement;
-begin
   inherited;
 end;
 
-procedure TD2XParser.WithStatement;
+procedure TD2XDefinesParser.ProcessString(pFilename, pContents: string);
+var
+  lMS: TMemoryStream;
 begin
-  inherited;
-end;
+  lMS := TMemoryStream.Create;
+  try
+    fLength := Length(pContents);
+    fProcessed := 0;
+    lMS.Write(PChar(pContents)^, fLength * Sizeof(Char));
 
-procedure TD2XParser.WriteAccessIdentifier;
-begin
-  inherited;
+    Run(pFilename, lMS);
+  finally
+    lMS.Free;
+  end;
 end;
 
 end.
