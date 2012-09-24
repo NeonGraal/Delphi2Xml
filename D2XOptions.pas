@@ -36,9 +36,12 @@ type
     fOutputDirectory: string;
     fUseInput: boolean;
     fInputDirectory: string;
+    fParseMode: string;
+
     procedure AddDefine(pDef: string);
     procedure DeleteDefine(pDef: string);
     procedure LoadDefinesFile(pFile: string);
+
   public
     property LogErrors: boolean read fLogErrors;
     property LogNotSupported: boolean read fLogNotSupported;
@@ -64,8 +67,11 @@ type
     property CountExtension: string read fCountExtension;
     property SkipMethods: boolean read fSkipMethods;
     property SkipExtension: string read fSkipExtension;
+    property ParseMode: string read fParseMode;
+
     constructor Create;
     destructor Destroy; override;
+
     function ParseOption(pOpt: string): boolean;
     function ReportOptions: boolean;
     procedure ShowOptions;
@@ -107,6 +113,7 @@ begin
   fSkipExtension := '.skip';
   fDefines := TStringList.Create;
   fDefines.Sorted := True;
+  fParseMode := 'Full';
 end;
 
 procedure TD2XOptions.DeleteDefine(pDef: string);
@@ -230,6 +237,11 @@ begin
           Writeln('Invalid Recurse Directories option: ' + pOpt)
         else
           Result := True;
+      'M', 'm':
+        if ErrorUnlessValue(fParseMode) then
+          Writeln('Invalid Parse mode option: ' + pOpt)
+        else
+          Result := True;
       'D', 'd':
         if ErrorUnlessValue(lDefine) then
           Writeln('Invalid Define option: ' + pOpt)
@@ -325,6 +337,7 @@ var
 begin
   Result := True;
   Writeln('Current option settings:');
+  Writeln('  Parse Mode              ', fParseMode);
   Writeln('  Errors                  ', ShowEnabled(fLogErrors, '', ''));
   Writeln('  Not Supported           ', ShowEnabled(fLogNotSupported, '', ''));
   Writeln('  Timestamp Files         ', ShowEnabled(fTimestampFiles, '', ''));
@@ -380,6 +393,7 @@ begin
   Writeln('    R[+-]         +         Recurse into subdirectories');
   Writeln('    D:<define>              Define <define> (also enables "Load Defines")');
   Writeln('    Z:<define>              Undefine <define> (also enables "Load Defines")');
+  Writeln('    M:<mode>                Set Parsing mode (F[ull], U[ses])');
   Writeln('    L[+-]|:<file> -         Load Defines from <file> (no <file> clears all defines)');
   Writeln('    W[+-]|:<dir>  -         Generate Final Defines files into current or given <dir>');
   Writeln('    B[+-]|:<dir>  -         Use <dir> as a base for all file lookups');

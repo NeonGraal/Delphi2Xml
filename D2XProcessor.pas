@@ -75,8 +75,8 @@ type
 
     procedure LexerOnInclude(pLex: TD2XLexer);
 
-    procedure LexerOnDefine(pLex: TD2XLexer);
-    procedure LexerOnUnDef(pLex: TD2XLexer);
+    // procedure LexerOnDefine(pLex: TD2XLexer);
+    // procedure LexerOnUnDef(pLex: TD2XLexer);
 
     procedure DefineUsed(pDef: string);
 
@@ -85,15 +85,17 @@ type
     procedure LexerOnIfOpt(pLex: TD2XLexer);
     procedure LexerOnIf(pLex: TD2XLexer);
     procedure LexerOnElseIf(pLex: TD2XLexer);
-    procedure LexerOnElse(pLex: TD2XLexer);
-    procedure LexerOnEndIf(pLex: TD2XLexer);
-    procedure LexerOnIfEnd(pLex: TD2XLexer);
+    // procedure LexerOnElse(pLex: TD2XLexer);
+    // procedure LexerOnEndIf(pLex: TD2XLexer);
+    // procedure LexerOnIfEnd(pLex: TD2XLexer);
 
     procedure WriteChangedDefines;
 
     function GlobalFilename(pOutput: Boolean; pBaseExtn: string): string;
 
     function ProcessParamsFile(pFilename: string): Boolean;
+
+    procedure InitParser;
 
     function ProcessFile: Boolean; overload;
     function ProcessFile(pFilename: string): Boolean; overload;
@@ -184,21 +186,7 @@ begin
   fXmlDoc := nil;
   fXmlNode := nil;
 
-  fParser := TD2XFullParser.Create;
-  fParser.OnMessage := ParserMessage;
-
-  fParser.Lexer.OnIncludeDirect := LexerOnInclude;
-  fParser.Lexer.OnDefineDirect := LexerOnDefine;
-  fParser.Lexer.OnUnDefDirect := LexerOnUnDef;
-
-  fParser.Lexer.OnIfDirect := LexerOnIf;
-  fParser.Lexer.OnIfDefDirect := LexerOnIfDef;
-  fParser.Lexer.OnIfNDefDirect := LexerOnIfNDef;
-  fParser.Lexer.OnIfOptDirect := LexerOnIfOpt;
-  fParser.Lexer.OnElseDirect := LexerOnElse;
-  fParser.Lexer.OnElseIfDirect := LexerOnElseIf;
-  fParser.Lexer.OnEndIfDirect := LexerOnEndIf;
-  fParser.Lexer.OnIfEndDirect := LexerOnIfEnd;
+  InitParser;
 
   fParser.Lexer.InitDefines;
   fParser.Lexer.GetDefines(fOpts.Defines);
@@ -431,7 +419,7 @@ begin
   if FileExists(lFile) then
     try
       lPhase := 'Initial';
-      Write('Processing ', fFilename, ' ... ');
+      write('Processing ', fFilename, ' ... ');
       lTimer := TStopwatch.StartNew;
       try
         if fOpts.SkipMethods then
@@ -448,6 +436,7 @@ begin
               Free;
             end;
 
+        InitParser;
         RemoveProxy;
         if UseProxy then
           SetProxy;
@@ -501,26 +490,28 @@ begin
     end;
 end;
 
-procedure TD2XProcessor.LexerOnDefine(pLex: TD2XLexer);
-begin
+(*
+  procedure TD2XProcessor.LexerOnDefine(pLex: TD2XLexer);
+  begin
   pLex.Next;
-end;
+  end;
 
-procedure TD2XProcessor.LexerOnElse(pLex: TD2XLexer);
-begin
+  procedure TD2XProcessor.LexerOnElse(pLex: TD2XLexer);
+  begin
   pLex.Next;
-end;
-
+  end;
+*)
 procedure TD2XProcessor.LexerOnElseIf(pLex: TD2XLexer);
 begin
   pLex.Next;
 end;
 
-procedure TD2XProcessor.LexerOnEndIf(pLex: TD2XLexer);
-begin
+(*
+  procedure TD2XProcessor.LexerOnEndIf(pLex: TD2XLexer);
+  begin
   pLex.Next;
-end;
-
+  end;
+*)
 procedure TD2XProcessor.LexerOnIf(pLex: TD2XLexer);
 begin
   pLex.Next;
@@ -532,11 +523,12 @@ begin
   pLex.Next;
 end;
 
-procedure TD2XProcessor.LexerOnIfEnd(pLex: TD2XLexer);
-begin
+(*
+  procedure TD2XProcessor.LexerOnIfEnd(pLex: TD2XLexer);
+  begin
   pLex.Next;
-end;
-
+  end;
+*)
 procedure TD2XProcessor.LexerOnIfNDef(pLex: TD2XLexer);
 begin
   DefineUsed(pLex.DirectiveParam);
@@ -567,11 +559,12 @@ begin
   pLex.Next;
 end;
 
-procedure TD2XProcessor.LexerOnUnDef(pLex: TD2XLexer);
-begin
+(*
+  procedure TD2XProcessor.LexerOnUnDef(pLex: TD2XLexer);
+  begin
   pLex.Next;
-end;
-
+  end;
+*)
 function TD2XProcessor.ProcessParam(pStr: string): Boolean;
 var
   lPath, lFile: string;
@@ -598,6 +591,47 @@ begin
   except
     on E: Exception do
       Writeln('EXCEPTION (', E.ClassName, ') processing "', pStr, '" : ', E.Message);
+  end;
+end;
+
+procedure TD2XProcessor.InitParser;
+begin
+  if Assigned(fParser) then
+  begin
+    RemoveProxy;
+    if StartsText('U', fOpts.ParseMode) then
+    begin
+      if not(fParser is TD2XUsesParser) then
+        FreeAndNil(fParser);
+    end
+    else
+    begin
+      if not(fParser is TD2XFullParser) then
+        FreeAndNil(fParser);
+    end
+  end;
+
+  if not Assigned(fParser) then
+  begin
+    if StartsText('U', fOpts.ParseMode) then
+      fParser := TD2XUsesParser.Create
+    else
+      fParser := TD2XFullParser.Create;
+
+    fParser.OnMessage := ParserMessage;
+    fParser.AddAttribute := XmlAddAttribute;
+
+    fParser.Lexer.OnIncludeDirect := LexerOnInclude;
+    // fParser.Lexer.OnDefineDirect := LexerOnDefine;
+    // fParser.Lexer.OnUnDefDirect := LexerOnUnDef;
+    fParser.Lexer.OnIfDirect := LexerOnIf;
+    fParser.Lexer.OnIfDefDirect := LexerOnIfDef;
+    fParser.Lexer.OnIfNDefDirect := LexerOnIfNDef;
+    fParser.Lexer.OnIfOptDirect := LexerOnIfOpt;
+    // fParser.Lexer.OnElseDirect := LexerOnElse;
+    fParser.Lexer.OnElseIfDirect := LexerOnElseIf;
+    // fParser.Lexer.OnEndIfDirect := LexerOnEndIf;
+    // fParser.Lexer.OnIfEndDirect := LexerOnIfEnd;
   end;
 end;
 
@@ -795,8 +829,10 @@ begin
   begin
     if Assigned(fXmlNode) then
       fXmlNode := fXmlNode.AddChild(pMethod)
-    else
+    else begin
       fXmlNode := fXmlDoc.AddChild(pMethod);
+      XmlAddAttribute('parseMode', fOpts.ParseMode);
+    end;
     fParser.LastTokens := '';
   end;
 end;

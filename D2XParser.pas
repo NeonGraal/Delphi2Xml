@@ -5,23 +5,30 @@ interface
 uses
   System.Classes,
   CastaliaPasLex,
+  CastaliaPasLexTypes,
   CastaliaSimplePasPar;
 
 type
   TD2XLexer = TmwBasePasLex;
   TD2XParser = TmwSimplePasPar;
 
+  TD2XAddAttributeEvent = procedure(pName, pValue: string) of object;
+
   TD2XDefinesParser = class(TD2XParser)
   private
-    fLength : Cardinal;
+    fLength: Cardinal;
     fProcessed: Byte;
     fLastTokens: string;
     fStartDefines: TStringList;
+    FAddAttribute: TD2XAddAttributeEvent;
 
     function GetStartDefines: TStringList;
 
   protected
     procedure NextToken; override;
+
+    procedure DoAddAttribute(pName, pValue: string); overload;
+    procedure DoAddAttribute(pName: string); overload;
 
   public
     constructor Create;
@@ -34,6 +41,26 @@ type
 
     property LastTokens: string read fLastTokens write fLastTokens;
     property StartDefines: TStringList read GetStartDefines;
+
+    property AddAttribute: TD2XAddAttributeEvent read FAddAttribute write FAddAttribute;
+  end;
+
+  TD2XUsesParser = class(TD2XDefinesParser)
+  private
+    fCurrentSection: string;
+
+    procedure ReadToFileEnd;
+    procedure ReadTo(pSym: TptTokenKind);
+  public
+    procedure InterfaceSection; override;
+    procedure ImplementationSection; override;
+    procedure ProgramBlock; override;
+    procedure UsedUnitName; override;
+
+    procedure MainUsedUnitStatement; override;
+    procedure MainUsedUnitExpression; override;
+
+    property CurrentSection: string read fCurrentSection;
   end;
 
   TD2XFullParser = class(TD2XDefinesParser)
@@ -1578,6 +1605,18 @@ begin
   inherited;
 end;
 
+procedure TD2XDefinesParser.DoAddAttribute(pName: string);
+begin
+  DoAddAttribute(pName, fLastTokens);
+  fLastTokens := '';
+end;
+
+procedure TD2XDefinesParser.DoAddAttribute(pName, pValue: string);
+begin
+  if Assigned(FAddAttribute) then
+    FAddAttribute(pName, pValue);
+end;
+
 procedure TD2XDefinesParser.GetLexerDefines(pDefs: TStringList);
 begin
   Lexer.GetDefines(pDefs);
@@ -1597,12 +1636,13 @@ var
 begin
   fLastTokens := fLastTokens + Lexer.Token;
 
-  if fLength > 0 then begin
+  if fLength > 0 then
+  begin
     lProcessed := Lexer.RunPos * 100 div fLength;
     if lProcessed > fProcessed then
     begin
       fProcessed := lProcessed;
-      Write(Format('%3d%%'#8#8#8#8, [fProcessed]));
+      write(Format('%3d%%'#8#8#8#8, [fProcessed]));
     end;
   end;
 
@@ -1637,6 +1677,74 @@ begin
   finally
     lMS.Free;
   end;
+end;
+
+{ TD2XUsedParser }
+
+procedure TD2XUsesParser.ImplementationSection;
+begin
+  Expected(ptImplementation);
+  fCurrentSection := 'Implementation';
+  if TokenID = ptUses then
+    UsesClause;
+
+  ReadToFileEnd;
+end;
+
+procedure TD2XUsesParser.InterfaceSection;
+begin
+  Expected(ptInterface);
+  fCurrentSection := 'Interface';
+  if TokenID = ptUses then
+    UsesClause;
+
+  ReadTo(ptImplementation);
+end;
+
+procedure TD2XUsesParser.MainUsedUnitExpression;
+begin
+  inherited;
+  DoAddAttribute('fileName');
+end;
+
+procedure TD2XUsesParser.MainUsedUnitStatement;
+begin
+  inherited;
+end;
+
+procedure TD2XUsesParser.ProgramBlock;
+begin
+  if TokenID = ptUses then
+  begin
+    MainUsesClause;
+  end;
+
+  ReadToFileEnd;
+  NextToken;
+end;
+
+procedure TD2XUsesParser.ReadTo(pSym: TptTokenKind);
+begin
+  while (TokenID <> pSym) and (TokenID <> ptNull) do
+  begin
+    fLastTokens := '';
+    NextToken;
+  end;
+end;
+
+procedure TD2XUsesParser.ReadToFileEnd;
+begin
+  while not((TokenID = ptEnd) and (Lexer.CharAhead = '.')) and (TokenID <> ptNull) do
+  begin
+    fLastTokens := '';
+    NextToken;
+  end;
+end;
+
+procedure TD2XUsesParser.UsedUnitName;
+begin
+  inherited;
+  DoAddAttribute('unitName');
 end;
 
 end.

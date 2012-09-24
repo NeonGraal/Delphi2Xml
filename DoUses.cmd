@@ -1,0 +1,1 @@
+Delphi2Xml -m:Uses -x:XmlUses @All.prm
