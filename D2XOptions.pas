@@ -10,6 +10,15 @@ uses
 type
   ED2XOptionsException = class(Exception);
 
+  TD2XParseMode = (pmFull, pmUses);
+
+  TD2XResultPer = (rpFile, rpWildcard, rpSubDir, rpDir, rpParam, rpRun);
+
+
+  TD2X = class
+    class function EnumLabel<T: record>(pVal: T): String;
+  end;
+
   TD2XOptions = class
   private
     fVerbose: boolean;
@@ -36,11 +45,16 @@ type
     fOutputDirectory: string;
     fUseInput: boolean;
     fInputDirectory: string;
-    fParseMode: string;
+    fParseMode: TD2XParseMode;
+    fResultPer: TD2XResultPer;
+    fFinalToken: Boolean;
 
     procedure AddDefine(pDef: string);
     procedure DeleteDefine(pDef: string);
     procedure LoadDefinesFile(pFile: string);
+
+    function SetParseMode(pVal: string): Boolean;
+    function SetResultPer(pVal: string): Boolean;
 
   public
     property LogErrors: boolean read fLogErrors;
@@ -67,7 +81,9 @@ type
     property CountExtension: string read fCountExtension;
     property SkipMethods: boolean read fSkipMethods;
     property SkipExtension: string read fSkipExtension;
-    property ParseMode: string read fParseMode;
+    property ParseMode: TD2XParseMode read fParseMode;
+    property ResultPer: TD2XResultPer read fResultPer;
+    property FinalToken: Boolean read fFinalToken;
 
     constructor Create;
     destructor Destroy; override;
@@ -78,6 +94,15 @@ type
   end;
 
 implementation
+
+uses
+  System.Rtti,
+  System.TypInfo;
+
+type
+  TD2XSetterFunc = function(pVal: string): Boolean of object;
+
+{ TD2XOptions }
 
 procedure TD2XOptions.AddDefine(pDef: string);
 begin
@@ -113,7 +138,9 @@ begin
   fSkipExtension := '.skip';
   fDefines := TStringList.Create;
   fDefines.Sorted := True;
-  fParseMode := 'Full';
+  fParseMode := pmFull;
+  fResultPer := rpFile;
+  fFinalToken := False;
 end;
 
 procedure TD2XOptions.DeleteDefine(pDef: string);
@@ -162,6 +189,14 @@ function TD2XOptions.ParseOption(pOpt: string): boolean;
     Result := False;
     if (Length(pOpt) > 2) and (pOpt[3] = ':') then
       pVal := Copy(pOpt, 4, 99)
+    else
+      Result := True;
+  end;
+  function ErrorUnlessSetter(pFunc: TD2XSetterFunc): Boolean;
+  begin
+    Result := False;
+    if (Length(pOpt) > 2) and (pOpt[3] = ':') then
+      Result := not pFunc(Copy(pOpt, 4, 99))
     else
       Result := True;
   end;
@@ -232,14 +267,24 @@ begin
           Writeln('Invalid Verbose option: ' + pOpt)
         else
           Result := True;
+      'F', 'f':
+        if ErrorUnlessSet(fFinalToken) then
+          Writeln('Invalid Final token option: ' + pOpt)
+        else
+          Result := True;
       'R', 'r':
         if ErrorUnlessSet(fRecurse) then
           Writeln('Invalid Recurse Directories option: ' + pOpt)
         else
           Result := True;
       'M', 'm':
-        if ErrorUnlessValue(fParseMode) then
+        if ErrorUnlessSetter(SetParseMode) then
           Writeln('Invalid Parse mode option: ' + pOpt)
+        else
+          Result := True;
+      'P', 'p':
+        if ErrorUnlessSetter(SetResultPer) then
+          Writeln('Invalid Result per option: ' + pOpt)
         else
           Result := True;
       'D', 'd':
@@ -337,12 +382,14 @@ var
 begin
   Result := True;
   Writeln('Current option settings:');
-  Writeln('  Parse Mode              ', fParseMode);
+  Writeln('  Parse Mode              ', TD2X.EnumLabel(fParseMode));
+  Writeln('  Result per              ', TD2X.EnumLabel(fResultPer));
   Writeln('  Errors                  ', ShowEnabled(fLogErrors, '', ''));
   Writeln('  Not Supported           ', ShowEnabled(fLogNotSupported, '', ''));
   Writeln('  Timestamp Files         ', ShowEnabled(fTimestampFiles, '', ''));
   Writeln('  Verbose                 ', ShowEnabled(fVerbose, '', ''));
   Writeln('  Recurse                 ', ShowEnabled(fRecurse, '', ''));
+  Writeln('  Show Final token        ', ShowEnabled(fFinalToken, '', ''));
   Writeln('  Write defines           ', ShowEnabled(fWriteDefines, 'Dir  ',
       fDefinesDirectory));
   Writeln('  Directory base          ', ShowEnabled(fUseBase, 'Dir  ', fBaseDirectory));
@@ -354,7 +401,7 @@ begin
   Writeln('  Skip methods in         ', ShowEnabled(fSkipMethods, 'Extn ', fSkipExtension));
   if fLoadDefines then
     if fDefines.Count < 1 then
-      Writeln('Use NO Defines')
+      Write('Use NO Defines')
     else
     begin
       Writeln('Use these Defines:');
@@ -376,7 +423,36 @@ begin
       end;
     end
   else
-    Writeln('Use default Defines');
+    Write('Use default Defines');
+  Writeln;
+end;
+
+function TD2XOptions.SetParseMode(pVal: string): Boolean;
+begin
+  case pVal[1] of
+    'U', 'u':
+      fParseMode := pmUses;
+    else
+      fParseMode := pmFull;
+  end;
+end;
+
+function TD2XOptions.SetResultPer(pVal: string): Boolean;
+begin
+  case pVal[1] of
+    'R', 'r':
+      fResultPer := rpRun;
+    'P', 'p':
+      fResultPer := rpParam;
+    'W', 'w':
+      fResultPer := rpWildcard;
+    'S', 's':
+      fResultPer := rpSubDir;
+    'D', 'd':
+      fResultPer := rpDir;
+    else
+      fResultPer := rpFile;
+  end;
 end;
 
 procedure TD2XOptions.ShowOptions;
@@ -387,6 +463,7 @@ begin
   Writeln('Usage: ', lBase, ' [ Option | @Params | mFilename | Wildcard ] ... ');
   Writeln('  Options:        Default   Description');
   Writeln('    E[+-]         -         Log Error messages');
+  Writeln('    F[+-]         -         Record Final Token');
   Writeln('    N[+-]         -         Log Not Supported messages');
   Writeln('    T[+-]         -         Timestamp global output files');
   Writeln('    V[+-]         -         Log all Parser methods called');
@@ -394,6 +471,7 @@ begin
   Writeln('    D:<define>              Define <define> (also enables "Load Defines")');
   Writeln('    Z:<define>              Undefine <define> (also enables "Load Defines")');
   Writeln('    M:<mode>                Set Parsing mode (F[ull], U[ses])');
+  Writeln('    P:<Per>                 Set Result per (F[ile], [S]ubdir, D[ir], W[ildcard], P[aram], R[un])');
   Writeln('    L[+-]|:<file> -         Load Defines from <file> (no <file> clears all defines)');
   Writeln('    W[+-]|:<dir>  -         Generate Final Defines files into current or given <dir>');
   Writeln('    B[+-]|:<dir>  -         Use <dir> as a base for all file lookups');
@@ -403,7 +481,17 @@ begin
   Writeln('    C[+-]|:<ext>  +:cnt     Report Min/Max Children into ', lBase, '.<ext>');
   Writeln('    U[+-]|:<ext>  +:used    Report Defines Used into ', lBase, '.<ext>');
   Writeln('    S[+-]|:<ext>  +:skip    Load Skipped Methods from ', lBase, '.<ext>');
-  // Available option letters: AFGHJKMPQY
+  // Available option letters: AGHJKQY
+end;
+
+{ TD2X }
+
+class function TD2X.EnumLabel<T>(pVal: T): String;
+var
+  lV: TValue;
+begin
+  lV := TValue.From<T>(pVal);
+  Result := Copy(lV.ToString, 3, 99);
 end;
 
 end.

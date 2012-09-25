@@ -46,6 +46,7 @@ type
     fSkippedMethods: TStrIntDict;
 
     fFilename: string;
+    fHasFiles: Boolean;
 
     procedure LogBefore(pMethod: string);
     procedure LogAfter(pMethod: string);
@@ -56,10 +57,13 @@ type
     function SkipBefore(pMethod: string): Boolean;
     function SkipAfter(pMethod: string): Boolean;
 
-    procedure XmlAddAttribute(pName, pValue: string);
+    procedure XmlAddAttribute(pName: string); overload;
+    procedure XmlAddAttribute(pName, pValue: string); overload;
+    procedure XmlAddText; overload;
+    procedure XmlAddText(pText: string); overload;
 
     procedure XmlNodeStart(pMethod: string);
-    procedure XmlNodeEnd(_pMethod: string);
+    procedure XmlNodeEnd;
 
     procedure RemoveProxy;
     procedure SetProxy;
@@ -89,18 +93,24 @@ type
     // procedure LexerOnEndIf(pLex: TD2XLexer);
     // procedure LexerOnIfEnd(pLex: TD2XLexer);
 
-    procedure WriteChangedDefines;
-
     function GlobalFilename(pOutput: Boolean; pBaseExtn: string): string;
+    function TimestampFilename(pBaseExtn: string): string;
 
     function ProcessParamsFile(pFilename: string): Boolean;
 
     procedure InitParser;
 
+    function TidyFilename(pFilename: string): string;
+    procedure BeginResults(pNodename: string; pPer: TD2XResultPer);
+    procedure EndResults(pFilename: string; pPer: TD2XResultPer);
+
+    procedure DoBeginResults;
+    procedure DoEndResults(pFilename: string);
+
     function ProcessFile: Boolean; overload;
     function ProcessFile(pFilename: string): Boolean; overload;
     function ProcessDirectory(pDir, pWildCards: string): Boolean;
-    function RecurseDirectory(pDir, pWildCards: string): Boolean;
+    function RecurseDirectory(pDir, pWildCards: string; pMainDir: Boolean): Boolean;
 
     function SimplePairLog(pPair: TPair<string, Integer>): string;
     function MinMaxPairLog(pPair: TPair<string, Integer>): string;
@@ -111,7 +121,7 @@ type
 
     procedure EndProcessing;
 
-    function ProcessParam(pStr: string): Boolean;
+    function ProcessParam(pStr, pFrom: string; pIdx: Integer): Boolean;
 
     property Options: TD2XOptions read fOpts;
 
@@ -125,6 +135,18 @@ uses
   System.StrUtils;
 
 { TD2XProcessor }
+
+procedure TD2XProcessor.BeginResults(pNodename: string; pPer: TD2XResultPer);
+begin
+  if fOpts.ResultPer = pPer then
+    DoBeginResults;
+
+  if fOpts.ResultPer >= pPer then
+  begin
+    if fOpts.Xml then
+      XmlNodeStart(pNodename);
+  end;
+end;
 
 procedure TD2XProcessor.CountAfter(pMethod: string);
 var
@@ -221,6 +243,70 @@ begin
   inherited;
 end;
 
+procedure TD2XProcessor.DoBeginResults;
+begin
+  if fOpts.Xml then
+  begin
+    fXmlDoc := NewXmlDocument;
+    fXmlDoc.Options := fXmlDoc.Options + [doNodeAutoIndent];
+    fHasFiles := False;
+  end;
+end;
+
+procedure TD2XProcessor.DoEndResults(pFilename: string);
+var
+  lFile: string;
+  lSL: TStringList;
+  lFS: TFileStream;
+  i: Integer;
+const
+  DEF_BREAK: array [0 .. 9] of Byte = (13, 10, 42, 42, 42, 42, 13, 10, 13, 10);
+begin
+  if fOpts.Xml then
+  begin
+    if fHasFiles then
+    begin
+      lFile := fProgramDir + fOpts.XmlDirectory + ExtractFilePath(pFilename);
+      ForceDirectories(lFile);
+      lFile := fOpts.XmlDirectory + pFilename;
+
+      lFile := lFile + '.xml';
+      fXmlDoc.Xml.SaveToFile(lFile);
+    end;
+
+    fXmlDoc := nil;
+    fXmlNode := nil;
+  end;
+
+  if fOpts.WriteDefines then
+  begin
+    lSL := TStringList.Create;
+    try
+      fParser.GetLexerDefines(lSL);
+      fParser.StartDefines.Sort;
+      lSL.Sort;
+      for i := lSL.Count - 1 downto 1 do
+        if lSL[i] = lSL[i - 1] then
+          lSL.Delete(i);
+      if lSL.Text <> fParser.StartDefines.Text then
+      begin
+        lFile := fProgramDir + fOpts.DefinesDirectory + ExtractFilePath(pFilename);
+        ForceDirectories(lFile);
+        lFS := TFileStream.Create(fOpts.DefinesDirectory + pFilename + '.def', fmCreate);
+        try
+          fParser.StartDefines.SaveToStream(lFS);
+          lFS.Write(DEF_BREAK, 10);
+          lSL.SaveToStream(lFS);
+        finally
+          FreeAndNil(lFS);
+        end;
+      end;
+    finally
+      FreeAndNil(lSL);
+    end;
+  end;
+end;
+
 procedure TD2XProcessor.EndProcessing;
   procedure OutputStrIntDict(pDict: TStrIntDict; pExtn: string; pFunc: TPairLogMethod);
   var
@@ -239,6 +325,8 @@ procedure TD2XProcessor.EndProcessing;
   end;
 
 begin
+  EndResults(TimestampFilename(''), rpRun);
+
   if fOpts.DefinesUsed then
     OutputStrIntDict(fDefinesUsed, fOpts.UsedExtension, SimplePairLog);
 
@@ -247,6 +335,21 @@ begin
 
   if fOpts.SkipMethods then
     OutputStrIntDict(fSkippedMethods, fOpts.SkipExtension + '.log', SimplePairLog);
+end;
+
+procedure TD2XProcessor.EndResults(pFilename: string; pPer: TD2XResultPer);
+begin
+  if fOpts.ResultPer >= pPer then
+  begin
+    if fOpts.Xml then
+    begin
+      XmlAddAttribute('fileName', pFilename);
+      XmlNodeEnd;
+    end;
+  end;
+
+  if fOpts.ResultPer = pPer then
+    DoEndResults(pFilename);
 end;
 
 function TD2XProcessor.IsInternalMethod(pMethod: string): Boolean;
@@ -332,7 +435,7 @@ end;
 procedure TD2XProcessor.ParserMessage(pSender: TObject; const pTyp: TMessageEventType;
   const pMsg: string; pX, pY: Integer);
 var
-  lAttr: IXMLNode;
+  lNode, lAttr: IXMLNode;
 begin
   case pTyp of
     meError:
@@ -359,17 +462,16 @@ begin
   begin
     case pTyp of
       meError:
-        lAttr := fXmlDoc.CreateNode('errorMsg', ntAttribute);
+        lNode := fXmlNode.AddChild('D2X_errorMsg');
       meNotSupported:
-        lAttr := fXmlDoc.CreateNode('notSuppMsg', ntAttribute);
+        lNode := fXmlNode.AddChild('D2X_notSuppMsg');
     else
-      lAttr := fXmlDoc.CreateNode('unknownMsg', ntAttribute);
+      lNode := fXmlNode.AddChild('D2X_unknownMsg');
     end;
-    lAttr.Text := pMsg;
-    fXmlNode.AttributeNodes.Add(lAttr);
+    lNode.Text := pMsg;
     lAttr := fXmlDoc.CreateNode('msgAt', ntAttribute);
     lAttr.Text := IntToStr(pX) + ',' + IntToStr(pY);
-    fXmlNode.AttributeNodes.Add(lAttr);
+    lNode.AttributeNodes.Add(lAttr);
   end;
 end;
 
@@ -389,12 +491,14 @@ begin
   for lFile in SplitString(pWildCards, ',') do
     if FindFirst(lPath + lFile, faAnyFile - faDirectory, lFF) = 0 then
       try
+        BeginResults('D2X_Pattern', rpWildcard);
         repeat
           Result := ProcessFile(pDir + lFF.Name) or Result;
         until FindNext(lFF) <> 0;
+        EndResults(pDir + 'Pattern-' + TidyFilename(lFile), rpWildcard);
       finally
         FindClose(lFF);
-      end
+      end;
 end;
 
 function TD2XProcessor.ProcessFile(pFilename: string): Boolean;
@@ -408,17 +512,18 @@ function TD2XProcessor.ProcessFile: Boolean;
 var
   lSS: TStringStream;
   lFile: string;
-  lPhase: string;
   i: Integer;
   lTimer: TStopwatch;
+  lNoException: Boolean;
+  lCurrNode: IXMLNode;
 begin
   Result := False;
+  lNoException := True;
   lFile := fFilename;
   if fOpts.UseBase then
     lFile := fOpts.BaseDirectory + lFile;
   if FileExists(lFile) then
     try
-      lPhase := 'Initial';
       write('Processing ', fFilename, ' ... ');
       lTimer := TStopwatch.StartNew;
       try
@@ -437,13 +542,11 @@ begin
             end;
 
         InitParser;
-        RemoveProxy;
         if UseProxy then
           SetProxy;
 
         lSS := TStringStream.Create;
         try
-          lPhase := 'Loading';
           lSS.LoadFromFile(lFile);
 
           lFile := lSS.DataString;
@@ -451,29 +554,32 @@ begin
           if ContainsText(LeftStr(lFile, 16), '<') then
             Exit;
 
+          fHasFiles := True;
+          BeginResults('D2X_File', rpFile);
+
           if fOpts.LoadDefines then
             fParser.StartDefines.Assign(fOpts.Defines);
 
-          lPhase := 'Parsing';
-          fParser.ProcessString(fFilename, lFile);
+          try
+            fParser.ProcessString(fFilename, lFile);
+            Result := True;
+          except
+            on E: Exception do
+            begin
+              LogMessage('EXCEPTION', '(' + E.ClassName + ')' + E.Message);
+              lNoException := False;
 
-          if fOpts.Xml then
-          begin
-            lPhase := 'Preparing Xml';
-            lFile := fProgramDir + fOpts.XmlDirectory + ExtractFilePath(fFilename);
-            ForceDirectories(lFile);
-            lFile := fOpts.XmlDirectory + fFilename;
+              lCurrNode := fXmlNode;
+              while Assigned(lCurrNode) and (lCurrNode.LocalName <> 'D2X_File') do
+                lCurrNode := lCurrNode.ParentNode;
 
-            lPhase := 'Writing Xml';
-            lFile := lFile + '.xml';
-            fXmlDoc.Xml.SaveToFile(lFile);
+              if Assigned(lCurrNode) then
+                fXmlNode := lCurrNode;
+            end;
           end;
 
-          lPhase := 'Writing Defines';
-          if fOpts.WriteDefines then
-            WriteChangedDefines;
+          EndResults(fFilename, rpFile);
 
-          Result := True;
         finally
           FreeAndNil(lSS);
         end;
@@ -484,10 +590,11 @@ begin
     except
       on E: Exception do
       begin
-        LogMessage('EXCEPTION', '(' + E.ClassName + ')' + E.Message + ' at ' + lPhase);
+        LogMessage('EXCEPTION', '(' + E.ClassName + ')' + E.Message);
         Result := False;
       end;
     end;
+  Result := Result and lNoException;
 end;
 
 (*
@@ -553,7 +660,7 @@ begin
   begin
     XmlNodeStart('IncludeFile');
     XmlAddAttribute('filename', lFile);
-    XmlNodeEnd('IncludeFile');
+    XmlNodeEnd;
   end;
 
   pLex.Next;
@@ -565,28 +672,42 @@ end;
   pLex.Next;
   end;
 *)
-function TD2XProcessor.ProcessParam(pStr: string): Boolean;
+function TD2XProcessor.ProcessParam(pStr, pFrom: string; pIdx: Integer): Boolean;
 var
   lPath, lFile: string;
+  lPrevPer: TD2XResultPer;
 begin
   Result := False;
   try
     if (Length(pStr) > 1) and CharInSet(pStr[1], ['-', '/']) then
-      Result := Options.ParseOption(pStr)
+    begin
+      lPrevPer := fOpts.ResultPer;
+      Result := Options.ParseOption(pStr);
+      if lPrevPer <> fOpts.ResultPer then
+      begin
+        if lPrevPer = rpRun then
+          EndResults(TimestampFilename(''), fOpts.ResultPer);
+        BeginResults('D2X_Run', rpRun);
+      end;
+    end
     else
       if (Length(pStr) > 1) and (pStr[1] = '@') then
         Result := ProcessParamsFile(Copy(pStr, 2))
       else
       begin
+        BeginResults('D2X_Param', rpParam);
         Result := ProcessFile(pStr);
         if not Result then
         begin
           lPath := ExtractFilePath(pStr);
           lFile := ExtractFileName(pStr);
+          BeginResults('D2X_Dir', rpDir);
           Result := ProcessDirectory(lPath, lFile);
+          EndResults(ExcludeTrailingPathDelimiter(lPath), rpDir);
           if fOpts.Recurse then
-            Result := RecurseDirectory(lPath, lFile) or Result;
+            Result := RecurseDirectory(lPath, lFile, True) or Result;
         end;
+        EndResults(pFrom + '-' + IntToStr(pIdx), rpParam);
       end;
   except
     on E: Exception do
@@ -599,27 +720,32 @@ begin
   if Assigned(fParser) then
   begin
     RemoveProxy;
-    if StartsText('U', fOpts.ParseMode) then
-    begin
-      if not(fParser is TD2XUsesParser) then
-        FreeAndNil(fParser);
-    end
+    case fOpts.ParseMode of
+      pmUses:
+        begin
+          if not(fParser is TD2XUsesParser) then
+            FreeAndNil(fParser);
+        end
     else
-    begin
-      if not(fParser is TD2XFullParser) then
-        FreeAndNil(fParser);
-    end
+      begin
+        if not(fParser is TD2XFullParser) then
+          FreeAndNil(fParser);
+      end
+    end;
   end;
 
   if not Assigned(fParser) then
   begin
-    if StartsText('U', fOpts.ParseMode) then
-      fParser := TD2XUsesParser.Create
+    case fOpts.ParseMode of
+      pmUses:
+        fParser := TD2XUsesParser.Create
     else
       fParser := TD2XFullParser.Create;
+    end;
 
     fParser.OnMessage := ParserMessage;
     fParser.AddAttribute := XmlAddAttribute;
+    fParser.AddText := XmlAddText;
 
     fParser.Lexer.OnIncludeDirect := LexerOnInclude;
     // fParser.Lexer.OnDefineDirect := LexerOnDefine;
@@ -638,49 +764,14 @@ end;
 function TD2XProcessor.ProcessParamsFile(pFilename: string): Boolean;
 var
   lSL: TStringList;
-  lS: string;
+  i: Integer;
 begin
   Result := True;
   lSL := TStringList.Create;
   try
     lSL.LoadFromFile(pFilename);
-    for lS in lSL do
-      Result := ProcessParam(lS) and Result;
-  finally
-    FreeAndNil(lSL);
-  end;
-end;
-
-procedure TD2XProcessor.WriteChangedDefines;
-var
-  lFile: string;
-  lSL: TStringList;
-  lFS: TFileStream;
-  i: Integer;
-const
-  DEF_BREAK: array [0 .. 9] of Byte = (13, 10, 42, 42, 42, 42, 13, 10, 13, 10);
-begin
-  lSL := TStringList.Create;
-  try
-    fParser.GetLexerDefines(lSL);
-    fParser.StartDefines.Sort;
-    lSL.Sort;
-    for i := lSL.Count - 1 downto 1 do
-      if lSL[i] = lSL[i - 1] then
-        lSL.Delete(i);
-    if lSL.Text <> fParser.StartDefines.Text then
-    begin
-      lFile := fProgramDir + fOpts.DefinesDirectory + ExtractFilePath(fFilename);
-      ForceDirectories(lFile);
-      lFS := TFileStream.Create(fOpts.DefinesDirectory + fFilename + '.def', fmCreate);
-      try
-        fParser.StartDefines.SaveToStream(lFS);
-        lFS.Write(DEF_BREAK, 10);
-        lSL.SaveToStream(lFS);
-      finally
-        FreeAndNil(lFS);
-      end;
-    end;
+    for i := 0 to lSL.Count - 1 do
+      Result := ProcessParam(lSL[i], ChangeFileExt(pFilename, ''), i + 1) and Result;
   finally
     FreeAndNil(lSL);
   end;
@@ -690,13 +781,33 @@ procedure TD2XProcessor.XmlAddAttribute(pName, pValue: string);
 var
   lAttr: IXMLNode;
 begin
-  lAttr := fXmlDoc.CreateNode(pName, ntAttribute);
-  lAttr.Text := pValue;
-  fXmlNode.AttributeNodes.Add(lAttr);
+  if Assigned(fXmlNode) then
+  begin
+    lAttr := fXmlDoc.CreateNode(pName, ntAttribute);
+    lAttr.Text := pValue;
+    fXmlNode.AttributeNodes.Add(lAttr);
+  end;
+end;
+
+procedure TD2XProcessor.XmlAddText;
+begin
+  XmlAddText(fParser.LastTokens);
   fParser.LastTokens := '';
 end;
 
-function TD2XProcessor.RecurseDirectory(pDir, pWildCards: string): Boolean;
+procedure TD2XProcessor.XmlAddAttribute(pName: string);
+begin
+  XmlAddAttribute(pName, fParser.LastTokens);
+  fParser.LastTokens := '';
+end;
+
+procedure TD2XProcessor.XmlAddText(pText: string);
+begin
+  if Assigned(fXmlNode) then
+    fXmlNode.Text := fXmlNode.Text + pText;
+end;
+
+function TD2XProcessor.RecurseDirectory(pDir, pWildCards: string; pMainDir: Boolean): Boolean;
 var
   lFF: TSearchRec;
   lPath: string;
@@ -712,11 +823,19 @@ begin
   if FindFirst(lPath + '*', faAnyFile - faNormal - faTemporary, lFF) = 0 then
     try
       repeat
-        if (lFF.Name <> '.') and (lFF.Name <> '..') then
+        if (lFF.Name <> '.') and (lFF.Name <> '..') and ((lFF.Attr and faDirectory) <> 0) then
         begin
           lFile := IncludeTrailingPathDelimiter(pDir + lFF.Name);
+          if pMainDir then
+            BeginResults('D2X_Dir', rpDir)
+          else
+            BeginResults('D2X_SubDir', rpSubDir);
           Result := ProcessDirectory(lFile, pWildCards) or Result;
-          Result := RecurseDirectory(lFile, pWildCards) or Result;
+          if not pMainDir then
+            EndResults(ExcludeTrailingPathDelimiter(lFile), rpSubDir);
+          Result := RecurseDirectory(lFile, pWildCards, False) or Result;
+          if pMainDir then
+            EndResults(ExcludeTrailingPathDelimiter(lFile), rpDir);
         end;
       until FindNext(lFF) <> 0;
     finally
@@ -730,9 +849,6 @@ begin
   begin
     FreeAndNil(fStack);
 
-    fXmlDoc := nil;
-    fXmlNode := nil;
-
     fVMI.Unproxify(fParser);
     FreeAndNil(fVMI);
   end;
@@ -740,12 +856,6 @@ end;
 
 procedure TD2XProcessor.SetProxy;
 begin
-  if fOpts.Xml then
-  begin
-    fXmlDoc := NewXmlDocument;
-    fXmlDoc.Options := fXmlDoc.Options + [doNodeAutoIndent];
-  end;
-
   if fOpts.CountChildren then
   begin
     fCurrent.Method := '';
@@ -780,7 +890,7 @@ begin
       if fOpts.SkipMethods and SkipAfter(pMethod.Name) then
         Exit;
       if fOpts.Xml then
-        XmlNodeEnd(pMethod.Name);
+        XmlNodeEnd;
       if fOpts.CountChildren then
         CountAfter(pMethod.Name);
       if fOpts.Verbose then
@@ -807,17 +917,30 @@ begin
     fSkippedMethods[pMethod] := lVal + 1;
 end;
 
+function TD2XProcessor.TidyFilename(pFilename: string): string;
+begin
+  Result := ReplaceStr(ReplaceStr(ReplaceStr(pFilename, '*', ''), '.', ''), '?', '');
+end;
+
+function TD2XProcessor.TimestampFilename(pBaseExtn: string): string;
+begin
+  if fOpts.TimestampFiles then
+    Result := ChangeFileExt(ExtractFileName(ParamStr(0)), fOutputTimestamp + pBaseExtn)
+  else
+    Result := ChangeFileExt(ExtractFileName(ParamStr(0)), pBaseExtn)
+end;
+
 function TD2XProcessor.UseProxy: Boolean;
 begin
   Result := fOpts.Xml or fOpts.CountChildren;
 end;
 
-procedure TD2XProcessor.XmlNodeEnd(_pMethod: string);
+procedure TD2XProcessor.XmlNodeEnd;
 begin
   if Assigned(fXmlNode) then
   begin
-    if Length(fParser.LastTokens) > 1 then
-      XmlAddAttribute('lastToken', fParser.LastTokens);
+    if fOpts.FinalToken and (Length(fParser.LastTokens) > 1) then
+      XmlAddAttribute('lastToken');
 
     fXmlNode := fXmlNode.ParentNode;
   end;
@@ -829,9 +952,10 @@ begin
   begin
     if Assigned(fXmlNode) then
       fXmlNode := fXmlNode.AddChild(pMethod)
-    else begin
+    else
+    begin
       fXmlNode := fXmlDoc.AddChild(pMethod);
-      XmlAddAttribute('parseMode', fOpts.ParseMode);
+      XmlAddAttribute('parseMode', TD2X.EnumLabel(fOpts.ParseMode));
     end;
     fParser.LastTokens := '';
   end;

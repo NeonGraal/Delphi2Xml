@@ -13,6 +13,7 @@ type
   TD2XParser = TmwSimplePasPar;
 
   TD2XAddAttributeEvent = procedure(pName, pValue: string) of object;
+  TD2XAddTextEvent = procedure(pText: string) of object;
 
   TD2XDefinesParser = class(TD2XParser)
   private
@@ -21,6 +22,7 @@ type
     fLastTokens: string;
     fStartDefines: TStringList;
     FAddAttribute: TD2XAddAttributeEvent;
+    FAddText: TD2XAddTextEvent;
 
     function GetStartDefines: TStringList;
 
@@ -29,6 +31,9 @@ type
 
     procedure DoAddAttribute(pName, pValue: string); overload;
     procedure DoAddAttribute(pName: string); overload;
+
+    procedure DoAddText(pText: string); overload;
+    procedure DoAddText; overload;
 
   public
     constructor Create;
@@ -43,6 +48,7 @@ type
     property StartDefines: TStringList read GetStartDefines;
 
     property AddAttribute: TD2XAddAttributeEvent read FAddAttribute write FAddAttribute;
+    property AddText: TD2XAddTextEvent read FAddText write FAddText;
   end;
 
   TD2XUsesParser = class(TD2XDefinesParser)
@@ -57,6 +63,7 @@ type
     procedure ProgramBlock; override;
     procedure UsedUnitName; override;
 
+    procedure MainUnitName; override;
     procedure MainUsedUnitStatement; override;
     procedure MainUsedUnitExpression; override;
 
@@ -185,6 +192,7 @@ type
     procedure LabeledStatement; override;
     procedure LabelId; override;
     procedure LibraryFile; override;
+    procedure MainUnitName; override;
     procedure MainUsedUnitExpression; override;
     procedure MainUsedUnitName; override;
     procedure MainUsedUnitStatement; override;
@@ -922,6 +930,11 @@ begin
   inherited;
 end;
 
+procedure TD2XFullParser.MainUnitName;
+begin
+  inherited;
+end;
+
 procedure TD2XFullParser.MainUsedUnitExpression;
 begin
   inherited;
@@ -1611,6 +1624,18 @@ begin
   fLastTokens := '';
 end;
 
+procedure TD2XDefinesParser.DoAddText(pText: string);
+begin
+  if Assigned(FAddText) then
+    FAddText(pText);
+end;
+
+procedure TD2XDefinesParser.DoAddText;
+begin
+  DoAddText(fLastTokens);
+  fLastTokens := '';
+end;
+
 procedure TD2XDefinesParser.DoAddAttribute(pName, pValue: string);
 begin
   if Assigned(FAddAttribute) then
@@ -1638,7 +1663,7 @@ begin
 
   if fLength > 0 then
   begin
-    lProcessed := Lexer.RunPos * 100 div fLength;
+    lProcessed := Cardinal(Lexer.RunPos) * 100 div fLength;
     if lProcessed > fProcessed then
     begin
       fProcessed := lProcessed;
@@ -1701,10 +1726,18 @@ begin
   ReadTo(ptImplementation);
 end;
 
+procedure TD2XUsesParser.MainUnitName;
+begin
+  fLastTokens := '';
+  inherited;
+  DoAddText;
+end;
+
 procedure TD2XUsesParser.MainUsedUnitExpression;
 begin
+  fLastTokens := '';
   inherited;
-  DoAddAttribute('fileName');
+  DoAddText;
 end;
 
 procedure TD2XUsesParser.MainUsedUnitStatement;
@@ -1744,7 +1777,7 @@ end;
 procedure TD2XUsesParser.UsedUnitName;
 begin
   inherited;
-  DoAddAttribute('unitName');
+  DoAddText;
 end;
 
 end.

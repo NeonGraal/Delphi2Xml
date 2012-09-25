@@ -23,7 +23,7 @@ begin
   try
     fParamsOk := True;
     for i := 1 to ParamCount do
-      fParamsOk := prc.ProcessParam(ParamStr(i)) and fParamsOk;
+      fParamsOk := prc.ProcessParam(ParamStr(i), 'Param', i) and fParamsOk;
     prc.EndProcessing;
     if not fParamsOk then
       prc.Options.ShowOptions;
