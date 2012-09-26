@@ -56,6 +56,7 @@ type
 
     function SetParseMode(pVal: string): boolean;
     function SetResultPer(pVal: string): boolean;
+    function SetGlobalName(pVal: string): boolean;
 
   public
     property LogErrors: boolean read fLogErrors;
@@ -334,14 +335,17 @@ begin
         if ErrorUnlessSetter(SetParseMode) then
           Writeln('Invalid Parse mode option: ' + pOpt)
         else
+        begin
+
           Result := True;
+        end;
       'P', 'p':
         if ErrorUnlessSetter(SetResultPer) then
           Writeln('Invalid Result per option: ' + pOpt)
         else
           Result := True;
       'G', 'g':
-        if ErrorUnlessValue(fGlobalName) then
+        if ErrorUnlessSetter(SetGlobalName) then
           Writeln('Invalid Global name option: ' + pOpt)
         else
           Result := True;
@@ -494,12 +498,23 @@ begin
   Writeln;
 end;
 
+function TD2XOptions.SetGlobalName(pVal: string): boolean;
+begin
+  fGlobalName := pVal;
+  fXmlDirectory := IncludeTrailingPathDelimiter(pVal);
+  fDefinesDirectory := IncludeTrailingPathDelimiter(pVal);
+  Result := True;
+end;
+
 function TD2XOptions.SetParseMode(pVal: string): boolean;
 begin
   Result := True;
   case pVal[1] of
     'U', 'u':
-      fParseMode := pmUses;
+      begin
+        fParseMode := pmUses;
+        SetGlobalName('Uses');
+      end
   else
     fParseMode := pmFull;
   end;

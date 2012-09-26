@@ -273,8 +273,8 @@ begin
       fXmlDoc.Xml.SaveToFile(lFile);
     end;
 
-    fXmlDoc := nil;
     fXmlNode := nil;
+    fXmlDoc := nil;
   end;
 
   if fOpts.WriteDefines then
@@ -508,7 +508,10 @@ begin
         LogMessage('EXCEPTION', '(' + E.ClassName + ')' + E.Message);
         Result := False;
       end;
-    end;
+    end
+  else
+    if fOpts.Verbose then
+      Writeln('Cannot find "', lFile, '"');
 end;
 
 function TD2XProcessor.ProcessInput: Boolean;
