@@ -8,10 +8,10 @@ uses
   System.Generics.Collections,
   System.Rtti,
   System.SysUtils,
-  Xml.XMLIntf,
   CastaliaPasLexTypes,
   D2XOptions,
-  D2XParser;
+  D2XParser,
+  D2Xml;
 
 type
   TStrIntPair = TPair<string, Integer>;
@@ -27,7 +27,6 @@ type
   TD2XProcessor = class
   private
     fOpts: TD2XOptions;
-    fOutputTimestamp: string;
     fProgramDir: string;
 
     fDuration: TStopwatch;
@@ -35,8 +34,8 @@ type
     fParser: TD2XDefinesParser;
     fVMI: TVirtualMethodInterceptor;
 
-    fXmlDoc: IXMLDocument;
-    fXmlNode: IXMLNode;
+    fXmlDoc: TD2XmlDoc;
+    fXmlNode: TD2XmlNode;
 
     fStack: TStack<TMethodCount>;
     fCurrent: TMethodCount;
@@ -129,9 +128,9 @@ type
 implementation
 
 uses
-  Xml.XMLDoc,
   System.IOUtils,
   System.StrUtils,
+  Xml.XMLIntf,
   Winapi.Windows;
 
 { TD2XProcessor }
@@ -258,6 +257,7 @@ var
   lSL: TStringList;
   lFS: TFileStream;
   i: Integer;
+  lXml: TStringStream;
 const
   DEF_BREAK: array [0 .. 9] of Byte = (13, 10, 42, 42, 42, 42, 13, 10, 13, 10);
 begin
@@ -268,13 +268,17 @@ begin
       lFile := fProgramDir + fOpts.XmlDirectory + ExtractFilePath(pFilename);
       ForceDirectories(lFile);
       lFile := fOpts.XmlDirectory + pFilename;
-
       lFile := lFile + '.xml';
-      fXmlDoc.Xml.SaveToFile(lFile);
+      lXml := fXmlDoc.Xml;
+      try
+        lXml.SaveToFile(lFile);
+      finally
+        FreeAndNil(lXml);
+      end;
     end;
 
     fXmlNode := nil;
-    fXmlDoc := nil;
+    FreeAndNil(fXmlDoc);
   end;
 
   if fOpts.WriteDefines then
@@ -416,7 +420,7 @@ end;
 procedure TD2XProcessor.ParserMessage(pSender: TObject; const pTyp: TMessageEventType;
   const pMsg: string; pX, pY: Integer);
 var
-  lNode, lAttr: IXMLNode;
+  lNode, lAttr: TD2XmlNode;
 begin
   case pTyp of
     meError:
@@ -450,9 +454,10 @@ begin
       lNode := fXmlNode.AddChild('D2X_unknownMsg');
     end;
     lNode.Text := pMsg;
-    lAttr := fXmlDoc.CreateNode('msgAt', ntAttribute);
+    // lAttr := fXmlDoc.CreateNode('msgAt', ntAttribute);
+    // lNode.AttributeNodes.Add(lAttr);
+    lAttr := lNode.AddAttribute('msgAt');
     lAttr.Text := IntToStr(pX) + ',' + IntToStr(pY);
-    lNode.AttributeNodes.Add(lAttr);
   end;
 end;
 
@@ -738,7 +743,7 @@ var
   lTimer: TStopwatch;
   i: Integer;
   lFile: string;
-  lCurrNode: IXMLNode;
+  lCurrNode: TD2XmlNode;
 begin
   write('Processing ', fFilename, ' ... ');
   lTimer := TStopwatch.StartNew;
@@ -799,13 +804,14 @@ end;
 
 procedure TD2XProcessor.XmlAddAttribute(pName, pValue: string);
 var
-  lAttr: IXMLNode;
+  lAttr: TD2XmlNode;
 begin
   if Assigned(fXmlNode) then
   begin
-    lAttr := fXmlDoc.CreateNode(pName, ntAttribute);
+    // lAttr := fXmlDoc.CreateNode(pName, ntAttribute);
+    // fXmlNode.AttributeNodes.Add(lAttr);
+    lAttr := fXmlNode.AddAttribute(pName);
     lAttr.Text := pValue;
-    fXmlNode.AttributeNodes.Add(lAttr);
   end;
 end;
 
@@ -823,14 +829,15 @@ end;
 
 procedure TD2XProcessor.XmlAddText(pText: string);
 var
-  lText: IXMLNode;
+  lText: TD2XmlNode;
 begin
   if Assigned(fXmlNode) then
     if fXmlNode.HasChildNodes then
     begin
-      lText := fXmlDoc.CreateNode('', ntText);
+      // lText := fXmlDoc.CreateNode('', ntText);
+      // fXmlNode.ChildNodes.Add(lText);
+      lText := fXmlNode.AddChild('');
       lText.Text := pText;
-      fXmlNode.ChildNodes.Add(lText);
     end
     else
       fXmlNode.Text := fXmlNode.Text + pText;

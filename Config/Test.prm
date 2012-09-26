@@ -1,9 +1,7 @@
-#m:Uses
+-m:Uses
 #f-
 -x:XmlTest
 #p:Dir
 -d:DUMMY
 -d:CPU32
-#.dp?,*.inc,*.pas
--b:..\V6\3.6\Main
-3rd Party\DevExpress\ExpressBars\Sources\dxBar.pas
+*.dp?,*.inc,*.pas

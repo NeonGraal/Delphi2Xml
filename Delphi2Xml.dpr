@@ -6,8 +6,8 @@ program Delphi2Xml;
 uses
   System.StrUtils,
   System.SysUtils,
-  System.Win.ComObj,
-  Xml.adomxmldom,
+//  System.Win.ComObj,
+//  Xml.adomxmldom,
   D2XProcessor in 'Source\D2XProcessor.pas',
   D2XParser in 'Source\D2XParser.pas',
   D2XOptions in 'Source\D2XOptions.pas',
@@ -19,7 +19,7 @@ var
   fParamsOk : Boolean;
 
 begin
-  CoInitializeEx(nil, 0);
+//  CoInitializeEx(nil, 0);
   prc := TD2XProcessor.Create;
   try
     fParamsOk := True;
