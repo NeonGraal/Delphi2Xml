@@ -1,0 +1,7 @@
+#m:Uses
+#f-
+-x:XmlTest
+-p:Dir
+-d:DUMMY
+-d:CPU32
+*.dp?,*.inc,*.pas

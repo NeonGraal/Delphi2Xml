@@ -39,10 +39,14 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    procedure ProcessString(pFilename, pContents: string);
+    procedure UsedUnitName; override;
+    procedure MainUnitName; override;
+    procedure MainUsedUnitExpression; override;
 
     procedure ParseFile; override;
     procedure GetLexerDefines(pDefs: TStringList);
+
+    procedure ProcessString(pFilename, pContents: string);
 
     property LastTokens: string read fLastTokens write fLastTokens;
     property StartDefines: TStringList read GetStartDefines;
@@ -61,10 +65,10 @@ type
     procedure InterfaceSection; override;
     procedure ImplementationSection; override;
     procedure ProgramBlock; override;
-    procedure UsedUnitName; override;
-
-    procedure MainUnitName; override;
     procedure MainUsedUnitStatement; override;
+
+    procedure UsedUnitName; override;
+    procedure MainUnitName; override;
     procedure MainUsedUnitExpression; override;
 
     property CurrentSection: string read fCurrentSection;
@@ -1655,6 +1659,20 @@ begin
   Result := fStartDefines;
 end;
 
+procedure TD2XDefinesParser.MainUnitName;
+begin
+  fLastTokens := '';
+  inherited;
+  DoAddText;
+end;
+
+procedure TD2XDefinesParser.MainUsedUnitExpression;
+begin
+  fLastTokens := '';
+  inherited;
+  DoAddText;
+end;
+
 procedure TD2XDefinesParser.NextToken;
 var
   lProcessed: Byte;
@@ -1704,6 +1722,13 @@ begin
   end;
 end;
 
+procedure TD2XDefinesParser.UsedUnitName;
+begin
+  fLastTokens := '';
+  inherited;
+  DoAddText;
+end;
+
 { TD2XUsedParser }
 
 procedure TD2XUsesParser.ImplementationSection;
@@ -1728,16 +1753,12 @@ end;
 
 procedure TD2XUsesParser.MainUnitName;
 begin
-  fLastTokens := '';
   inherited;
-  DoAddText;
 end;
 
 procedure TD2XUsesParser.MainUsedUnitExpression;
 begin
-  fLastTokens := '';
   inherited;
-  DoAddText;
 end;
 
 procedure TD2XUsesParser.MainUsedUnitStatement;
@@ -1777,7 +1798,6 @@ end;
 procedure TD2XUsesParser.UsedUnitName;
 begin
   inherited;
-  DoAddText;
 end;
 
 end.

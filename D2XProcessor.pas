@@ -14,14 +14,15 @@ uses
   D2XParser;
 
 type
-  TPairLogMethod = function(pPair: TPair<string, Integer>): string of object;
+  TStrIntPair = TPair<string, Integer>;
+  TStrIntDict = TDictionary<string, Integer>;
+
+  TPairLogMethod = function(pPair: TStrIntPair): string of object;
 
   TMethodCount = record
     Method: string;
     Children: Integer;
   end;
-
-  TStrIntDict = TDictionary<string, Integer>;
 
   TD2XProcessor = class
   private
@@ -93,10 +94,7 @@ type
     // procedure LexerOnEndIf(pLex: TD2XLexer);
     // procedure LexerOnIfEnd(pLex: TD2XLexer);
 
-    function GlobalFilename(pOutput: Boolean; pBaseExtn: string): string;
-    function TimestampFilename(pBaseExtn: string): string;
-
-    function ProcessParamsFile(pFilename: string): Boolean;
+    function ProcessParamsFile(pFileOrExtn: string): Boolean;
 
     procedure InitParser;
 
@@ -107,13 +105,14 @@ type
     procedure DoBeginResults;
     procedure DoEndResults(pFilename: string);
 
-    function ProcessFile: Boolean; overload;
-    function ProcessFile(pFilename: string): Boolean; overload;
+    function ProcessStream(pStream: TStringStream): Boolean;
+    function ProcessInput: Boolean;
+    function ProcessFile(pFilename: string): Boolean;
     function ProcessDirectory(pDir, pWildCards: string): Boolean;
     function RecurseDirectory(pDir, pWildCards: string; pMainDir: Boolean): Boolean;
 
-    function SimplePairLog(pPair: TPair<string, Integer>): string;
-    function MinMaxPairLog(pPair: TPair<string, Integer>): string;
+    function SimplePairLog(pPair: TStrIntPair): string;
+    function MinMaxPairLog(pPair: TStrIntPair): string;
 
   public
     constructor Create;
@@ -132,7 +131,8 @@ implementation
 uses
   Xml.XMLDoc,
   System.IOUtils,
-  System.StrUtils;
+  System.StrUtils,
+  Winapi.Windows;
 
 { TD2XProcessor }
 
@@ -193,7 +193,6 @@ begin
   inherited Create;
 
   fProgramDir := ExtractFilePath(ParamStr(0));
-  fOutputTimestamp := FormatDateTime('-HH-mm', Now);
   fDuration := TStopwatch.StartNew;
 
   fStack := nil;
@@ -310,7 +309,7 @@ end;
 procedure TD2XProcessor.EndProcessing;
   procedure OutputStrIntDict(pDict: TStrIntDict; pExtn: string; pFunc: TPairLogMethod);
   var
-    lP: TPair<string, Integer>;
+    lP: TStrIntPair;
   begin
     with TStringList.Create do
       try
@@ -318,23 +317,23 @@ procedure TD2XProcessor.EndProcessing;
           if lP.Value > 0 then
             Values[lP.Key] := pFunc(lP);
         Sort;
-        SaveToFile(GlobalFilename(True, pExtn));
+        SaveToFile(fOpts.OutputFileOrExtn(pExtn));
       finally
         Free;
       end;
   end;
 
 begin
-  EndResults(TimestampFilename(''), rpRun);
+  EndResults('', rpRun);
 
   if fOpts.DefinesUsed then
-    OutputStrIntDict(fDefinesUsed, fOpts.UsedExtension, SimplePairLog);
+    OutputStrIntDict(fDefinesUsed, fOpts.UsedFileOrExtn, SimplePairLog);
 
   if fOpts.CountChildren then
-    OutputStrIntDict(fMaxChildren, fOpts.CountExtension, MinMaxPairLog);
+    OutputStrIntDict(fMaxChildren, fOpts.CountFileOrExtn, MinMaxPairLog);
 
   if fOpts.SkipMethods then
-    OutputStrIntDict(fSkippedMethods, fOpts.SkipExtension + '.log', SimplePairLog);
+    OutputStrIntDict(fSkippedMethods, fOpts.SkipFileOrExtn + '.log', SimplePairLog);
 end;
 
 procedure TD2XProcessor.EndResults(pFilename: string; pPer: TD2XResultPer);
@@ -349,7 +348,10 @@ begin
   end;
 
   if fOpts.ResultPer = pPer then
-    DoEndResults(pFilename);
+    if pFilename = '' then
+      DoEndResults('(' + TD2X.ToLabel(pPer) + ')')
+    else
+      DoEndResults(pFilename);
 end;
 
 function TD2XProcessor.IsInternalMethod(pMethod: string): Boolean;
@@ -377,7 +379,7 @@ var
   lErrFile: string;
   lExists: Boolean;
 begin
-  lErrFile := GlobalFilename(True, '.err');
+  lErrFile := fOpts.OutputFileOrExtn('.err');
   lExists := TFile.Exists(lErrFile);
   with TFile.AppendText(lErrFile) do
     try
@@ -401,7 +403,7 @@ begin
     end;
 end;
 
-function TD2XProcessor.MinMaxPairLog(pPair: TPair<string, Integer>): string;
+function TD2XProcessor.MinMaxPairLog(pPair: TStrIntPair): string;
 var
   lMin: Integer;
 begin
@@ -409,27 +411,6 @@ begin
     Result := IntToStr(lMin) + ',' + IntToStr(pPair.Value)
   else
     Result := '0,' + IntToStr(pPair.Value);
-end;
-
-function TD2XProcessor.GlobalFilename(pOutput: Boolean; pBaseExtn: string): string;
-  function MakeGlobalFilename(pDir, pExtn: string): string;
-  var
-    lPath: string;
-  begin
-    lPath := fProgramDir + pDir;
-    ForceDirectories(lPath);
-    Result := IncludeTrailingPathDelimiter(lPath) +
-      ChangeFileExt(ExtractFileName(ParamStr(0)), pExtn)
-  end;
-
-begin
-  if pOutput then
-    if fOpts.TimestampFiles then
-      Result := MakeGlobalFilename(fOpts.OutputDirectory, fOutputTimestamp + pBaseExtn)
-    else
-      Result := MakeGlobalFilename(fOpts.OutputDirectory, pBaseExtn)
-  else
-    Result := MakeGlobalFilename(fOpts.InputDirectory, pBaseExtn)
 end;
 
 procedure TD2XProcessor.ParserMessage(pSender: TObject; const pTyp: TMessageEventType;
@@ -489,103 +470,37 @@ begin
     lPath := pDir;
 
   for lFile in SplitString(pWildCards, ',') do
-    if FindFirst(lPath + lFile, faAnyFile - faDirectory, lFF) = 0 then
+    if System.SysUtils.FindFirst(lPath + lFile, faAnyFile - faDirectory, lFF) = 0 then
       try
         BeginResults('D2X_Pattern', rpWildcard);
         repeat
           Result := ProcessFile(pDir + lFF.Name) or Result;
-        until FindNext(lFF) <> 0;
+        until System.SysUtils.FindNext(lFF) <> 0;
         EndResults(pDir + 'Pattern-' + TidyFilename(lFile), rpWildcard);
       finally
-        FindClose(lFF);
+        System.SysUtils.FindClose(lFF);
       end;
 end;
 
 function TD2XProcessor.ProcessFile(pFilename: string): Boolean;
-begin
-  fFilename := pFilename;
-
-  Result := ProcessFile;
-end;
-
-function TD2XProcessor.ProcessFile: Boolean;
 var
   lSS: TStringStream;
   lFile: string;
-  i: Integer;
-  lTimer: TStopwatch;
-  lNoException: Boolean;
-  lCurrNode: IXMLNode;
 begin
   Result := False;
-  lNoException := True;
+  fFilename := pFilename;
   lFile := fFilename;
   if fOpts.UseBase then
     lFile := fOpts.BaseDirectory + lFile;
   if FileExists(lFile) then
     try
-      write('Processing ', fFilename, ' ... ');
-      lTimer := TStopwatch.StartNew;
+      lSS := TStringStream.Create;
       try
-        if fOpts.SkipMethods then
-          with TStringList.Create do
-            try
-              LoadFromFile(GlobalFilename(False, fOpts.SkipExtension));
-              fSkippedMethods.Clear;
-              for i := 0 to Count - 1 do
-                if Names[i] = '' then
-                  fSkippedMethods.Add(Strings[i], 0)
-                else
-                  fSkippedMethods.Add(Names[i], 0);
-            finally
-              Free;
-            end;
+        lSS.LoadFromFile(lFile);
 
-        InitParser;
-        if UseProxy then
-          SetProxy;
-
-        lSS := TStringStream.Create;
-        try
-          lSS.LoadFromFile(lFile);
-
-          lFile := lSS.DataString;
-
-          if ContainsText(LeftStr(lFile, 16), '<') then
-            Exit;
-
-          fHasFiles := True;
-          BeginResults('D2X_File', rpFile);
-
-          if fOpts.LoadDefines then
-            fParser.StartDefines.Assign(fOpts.Defines);
-
-          try
-            fParser.ProcessString(fFilename, lFile);
-            Result := True;
-          except
-            on E: Exception do
-            begin
-              LogMessage('EXCEPTION', '(' + E.ClassName + ')' + E.Message);
-              lNoException := False;
-
-              lCurrNode := fXmlNode;
-              while Assigned(lCurrNode) and (lCurrNode.LocalName <> 'D2X_File') do
-                lCurrNode := lCurrNode.ParentNode;
-
-              if Assigned(lCurrNode) then
-                fXmlNode := lCurrNode;
-            end;
-          end;
-
-          EndResults(fFilename, rpFile);
-
-        finally
-          FreeAndNil(lSS);
-        end;
+        Result := ProcessStream(lSS);
       finally
-        lTimer.Stop;
-        Writeln(Format('%0.3f', [lTimer.Elapsed.TotalSeconds]));
+        FreeAndNil(lSS);
       end;
     except
       on E: Exception do
@@ -594,7 +509,27 @@ begin
         Result := False;
       end;
     end;
-  Result := Result and lNoException;
+end;
+
+function TD2XProcessor.ProcessInput: Boolean;
+var
+  lSS: TStringStream;
+  lIS: THandleStream;
+begin
+  lSS := TStringStream.Create;
+  try
+    lIS := THandleStream.Create(GetStdHandle(STD_INPUT_HANDLE));
+    try
+      lSS.CopyFrom(lIS, 0);
+    finally
+      FreeAndNil(lIS);
+    end;
+
+    fFilename := '(Input)';
+    Result := ProcessStream(lSS);
+  finally
+    FreeAndNil(lSS);
+  end;
 end;
 
 (*
@@ -679,36 +614,52 @@ var
 begin
   Result := False;
   try
-    if (Length(pStr) > 1) and CharInSet(pStr[1], ['-', '/']) then
+    if (Length(pStr) > 1) then
     begin
-      lPrevPer := fOpts.ResultPer;
-      Result := Options.ParseOption(pStr);
-      if lPrevPer <> fOpts.ResultPer then
-      begin
-        if lPrevPer = rpRun then
-          EndResults(TimestampFilename(''), fOpts.ResultPer);
-        BeginResults('D2X_Run', rpRun);
+      case pStr[1] of
+        '-', '/':
+          begin
+            lPrevPer := fOpts.ResultPer;
+            Result := Options.ParseOption(pStr);
+            if lPrevPer <> fOpts.ResultPer then
+            begin
+              if lPrevPer = rpRun then
+                EndResults('', fOpts.ResultPer);
+              BeginResults('D2X_Run', rpRun);
+            end;
+            Exit;
+          end;
+        '@':
+          begin
+            Result := ProcessParamsFile(Copy(pStr, 2));
+            Exit;
+          end;
+        '#':
+          begin
+            Result := True;
+            Exit;
+          end;
       end;
-    end
+    end;
+
+    BeginResults('D2X_Param', rpParam);
+    if pStr = '-' then
+      Result := ProcessInput
     else
-      if (Length(pStr) > 1) and (pStr[1] = '@') then
-        Result := ProcessParamsFile(Copy(pStr, 2))
-      else
+    begin
+      Result := ProcessFile(pStr);
+      if not Result then
       begin
-        BeginResults('D2X_Param', rpParam);
-        Result := ProcessFile(pStr);
-        if not Result then
-        begin
-          lPath := ExtractFilePath(pStr);
-          lFile := ExtractFileName(pStr);
-          BeginResults('D2X_Dir', rpDir);
-          Result := ProcessDirectory(lPath, lFile);
-          EndResults(ExcludeTrailingPathDelimiter(lPath), rpDir);
-          if fOpts.Recurse then
-            Result := RecurseDirectory(lPath, lFile, True) or Result;
-        end;
-        EndResults(pFrom + '-' + IntToStr(pIdx), rpParam);
+        lPath := ExtractFilePath(pStr);
+        lFile := ExtractFileName(pStr);
+        BeginResults('D2X_Dir', rpDir);
+        Result := ProcessDirectory(lPath, lFile);
+        EndResults(ExcludeTrailingPathDelimiter(lPath), rpDir);
+        if fOpts.Recurse then
+          Result := RecurseDirectory(lPath, lFile, True) or Result;
       end;
+    end;
+    EndResults(pFrom + '-' + IntToStr(pIdx), rpParam);
   except
     on E: Exception do
       Writeln('EXCEPTION (', E.ClassName, ') processing "', pStr, '" : ', E.Message);
@@ -761,19 +712,85 @@ begin
   end;
 end;
 
-function TD2XProcessor.ProcessParamsFile(pFilename: string): Boolean;
+function TD2XProcessor.ProcessParamsFile(pFileOrExtn: string): Boolean;
 var
   lSL: TStringList;
   i: Integer;
+  lFile: string;
 begin
   Result := True;
   lSL := TStringList.Create;
+  lFile := fOpts.InputFileOrExtn(pFileOrExtn);
   try
-    lSL.LoadFromFile(pFilename);
+    lSL.LoadFromFile(lFile);
     for i := 0 to lSL.Count - 1 do
-      Result := ProcessParam(lSL[i], ChangeFileExt(pFilename, ''), i + 1) and Result;
+      Result := ProcessParam(lSL[i], lFile, i + 1) and Result;
   finally
     FreeAndNil(lSL);
+  end;
+end;
+
+function TD2XProcessor.ProcessStream(pStream: TStringStream): Boolean;
+var
+  lTimer: TStopwatch;
+  i: Integer;
+  lFile: string;
+  lCurrNode: IXMLNode;
+begin
+  write('Processing ', fFilename, ' ... ');
+  lTimer := TStopwatch.StartNew;
+  try
+    if fOpts.SkipMethods then
+      with TStringList.Create do
+        try
+          LoadFromFile(fOpts.InputFileOrExtn(fOpts.SkipFileOrExtn));
+          fSkippedMethods.Clear;
+          for i := 0 to Count - 1 do
+            if Names[i] = '' then
+              fSkippedMethods.Add(Strings[i], 0)
+            else
+              fSkippedMethods.Add(Names[i], 0);
+        finally
+          Free;
+        end;
+
+    InitParser;
+    if UseProxy then
+      SetProxy;
+
+    Result := False;
+    lFile := pStream.DataString;
+
+    if ContainsText(LeftStr(lFile, 16), '<') then
+      Exit;
+
+    BeginResults('D2X_File', rpFile);
+    fHasFiles := True;
+
+    if fOpts.LoadDefines then
+      fParser.StartDefines.Assign(fOpts.Defines);
+
+    try
+      fParser.ProcessString(fFilename, lFile);
+      Result := True;
+    except
+      on E: Exception do
+      begin
+        LogMessage('EXCEPTION', '(' + E.ClassName + ')' + E.Message);
+
+        lCurrNode := fXmlNode;
+        while Assigned(lCurrNode) and (lCurrNode.LocalName <> 'D2X_File') do
+          lCurrNode := lCurrNode.ParentNode;
+
+        if Assigned(lCurrNode) then
+          fXmlNode := lCurrNode;
+      end;
+    end;
+
+    EndResults(fFilename, rpFile);
+  finally
+    lTimer.Stop;
+    Writeln(Format('%0.3f', [lTimer.Elapsed.TotalSeconds]));
   end;
 end;
 
@@ -802,9 +819,18 @@ begin
 end;
 
 procedure TD2XProcessor.XmlAddText(pText: string);
+var
+  lText: IXMLNode;
 begin
   if Assigned(fXmlNode) then
-    fXmlNode.Text := fXmlNode.Text + pText;
+    if fXmlNode.HasChildNodes then
+    begin
+      lText := fXmlDoc.CreateNode('', ntText);
+      lText.Text := pText;
+      fXmlNode.ChildNodes.Add(lText);
+    end
+    else
+      fXmlNode.Text := fXmlNode.Text + pText;
 end;
 
 function TD2XProcessor.RecurseDirectory(pDir, pWildCards: string; pMainDir: Boolean): Boolean;
@@ -820,7 +846,7 @@ begin
   else
     lPath := pDir;
 
-  if FindFirst(lPath + '*', faAnyFile - faNormal - faTemporary, lFF) = 0 then
+  if System.SysUtils.FindFirst(lPath + '*', faAnyFile - faNormal - faTemporary, lFF) = 0 then
     try
       repeat
         if (lFF.Name <> '.') and (lFF.Name <> '..') and ((lFF.Attr and faDirectory) <> 0) then
@@ -837,9 +863,9 @@ begin
           if pMainDir then
             EndResults(ExcludeTrailingPathDelimiter(lFile), rpDir);
         end;
-      until FindNext(lFF) <> 0;
+      until System.SysUtils.FindNext(lFF) <> 0;
     finally
-      FindClose(lFF);
+      System.SysUtils.FindClose(lFF);
     end;
 end;
 
@@ -898,7 +924,7 @@ begin
     end;
 end;
 
-function TD2XProcessor.SimplePairLog(pPair: TPair<string, Integer>): string;
+function TD2XProcessor.SimplePairLog(pPair: TStrIntPair): string;
 begin
   Result := IntToStr(pPair.Value);
 end;
@@ -920,14 +946,6 @@ end;
 function TD2XProcessor.TidyFilename(pFilename: string): string;
 begin
   Result := ReplaceStr(ReplaceStr(ReplaceStr(pFilename, '*', ''), '.', ''), '?', '');
-end;
-
-function TD2XProcessor.TimestampFilename(pBaseExtn: string): string;
-begin
-  if fOpts.TimestampFiles then
-    Result := ChangeFileExt(ExtractFileName(ParamStr(0)), fOutputTimestamp + pBaseExtn)
-  else
-    Result := ChangeFileExt(ExtractFileName(ParamStr(0)), pBaseExtn)
 end;
 
 function TD2XProcessor.UseProxy: Boolean;
@@ -955,7 +973,7 @@ begin
     else
     begin
       fXmlNode := fXmlDoc.AddChild(pMethod);
-      XmlAddAttribute('parseMode', TD2X.EnumLabel(fOpts.ParseMode));
+      XmlAddAttribute('parseMode', TD2X.ToLabel(fOpts.ParseMode));
     end;
     fParser.LastTokens := '';
   end;
