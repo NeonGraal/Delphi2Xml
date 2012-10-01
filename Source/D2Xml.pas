@@ -9,20 +9,28 @@ uses
 // Xml.XMLDoc,
 
 type
+  TD2XmlDoc = class;
+
   TD2XmlNode = class
   strict private
     fText: string;
     fParent: TD2XmlNode;
+    fXml: TStringStream;
 
   strict protected
     fTag: string;
+    fDoc: TD2XmlDoc;
 
     constructor Create(pTag: string; pParent: TD2XmlNode); virtual;
 
   protected
+    procedure MakeXml(pW: TTextWriter); virtual;
+    function GetXml: TStringStream;
     procedure WriteXml(pXml: TTextWriter; pOptions: TXMLDocOptions; pIndent: Integer); virtual;
 
   public
+    destructor Destroy; override;
+
     function AddChild(pTag: string): TD2XmlNode; virtual;
     function AddAttribute(pTag: string): TD2XmlNode; virtual;
     function HasChildNodes: Boolean; virtual;
@@ -30,12 +38,16 @@ type
     property ParentNode: TD2XmlNode read fParent;
     property LocalName: string read fTag;
     property Text: string read fText write fText;
+    property Xml: TStringStream read GetXml;
 
   end;
 
   TD2XmlAttribute = class(TD2XmlNode)
   protected
-    procedure WriteXml(pXml: TTextWriter; pOptions: TXMLDocOptions; pIndent: Integer); override;
+    procedure MakeXml(pW: TTextWriter); override;
+
+    procedure WriteXml(pXml: TTextWriter; pOptions: TXMLDocOptions; pIndent: Integer);
+      override;
   end;
 
   TD2XmlElement = class(TD2XmlNode)
@@ -47,7 +59,9 @@ type
     constructor Create(pTag: string; pParent: TD2XmlNode); override;
 
   protected
-    procedure WriteXml(pXml: TTextWriter; pOptions: TXMLDocOptions; pIndent: Integer); override;
+    procedure MakeXml(pW: TTextWriter); override;
+    procedure WriteXml(pXml: TTextWriter; pOptions: TXMLDocOptions; pIndent: Integer);
+      override;
 
   public
     destructor Destroy; override;
@@ -61,14 +75,14 @@ type
   private
     FOptions: TXMLDocOptions;
 
-    function GetXml: TStringStream;
+  protected
+    procedure MakeXml(pW: TTextWriter); override;
 
   public
     constructor CreateDoc;
     function AddChild(pTag: string): TD2XmlNode; override;
 
     property Options: TXMLDocOptions read FOptions write FOptions;
-    property Xml: TStringStream read GetXml;
 
   end;
 
@@ -102,21 +116,13 @@ end;
 constructor TD2XmlDoc.CreateDoc;
 begin
   Create('', nil);
+  fDoc := Self;
 end;
 
-function TD2XmlDoc.GetXml: TStringStream;
-var
-  lWriter: TStreamWriter;
+procedure TD2XmlDoc.MakeXml(pW: TTextWriter);
 begin
-  Result := TStringStream.Create;
-
-  lWriter := TStreamWriter.Create(Result);
-  try
-    lWriter.Write('<?xml version="1.0"?>');
-    WriteXml(lWriter, FOptions, 0);
-  finally
-    FreeAndNil(lWriter);
-  end;
+  pW.WriteLine('<?xml version="1.0"?>');
+  inherited;
 end;
 
 { TD2XmlNode }
@@ -135,11 +141,42 @@ constructor TD2XmlNode.Create(pTag: string; pParent: TD2XmlNode);
 begin
   fTag := pTag;
   fParent := pParent;
+  if Assigned(fParent) then
+    fDoc := pParent.fDoc;
+  fXml := nil;
+end;
+
+destructor TD2XmlNode.Destroy;
+begin
+  FreeAndNil(fXml);
+
+  inherited;
+end;
+
+function TD2XmlNode.GetXml: TStringStream;
+var
+  lW: TStreamWriter;
+begin
+  if not Assigned(fXml) then
+    try
+      fXml := TStringStream.Create;
+      lW := TStreamWriter.Create(fXml);
+      MakeXml(lW)
+    finally
+      FreeAndNil(lW);
+    end;
+
+  Result := fXml;
 end;
 
 function TD2XmlNode.HasChildNodes: Boolean;
 begin
   Result := False;
+end;
+
+procedure TD2XmlNode.MakeXml(pW: TTextWriter);
+begin
+
 end;
 
 procedure TD2XmlNode.WriteXml(pXml: TTextWriter; pOptions: TXMLDocOptions; pIndent: Integer);
@@ -151,12 +188,16 @@ end;
 
 function TD2XmlElement.AddAttribute(pTag: string): TD2XmlNode;
 begin
+  Assert(Assigned(fAtttributes), 'AddAttribute called after Xml Generated');
+
   Result := TD2XmlAttribute.Create(pTag, Self);
   fAtttributes.Add(Result);
 end;
 
 function TD2XmlElement.AddChild(pTag: string): TD2XmlNode;
 begin
+  Assert(Assigned(fChildren), 'AddChild called after Xml Generated');
+
   Result := TD2XmlElement.Create(pTag, Self);
   fChildren.Add(Result);
 end;
@@ -179,7 +220,65 @@ end;
 
 function TD2XmlElement.HasChildNodes: Boolean;
 begin
+  Assert(Assigned(fChildren), 'HasChildNodes called after Xml Generated');
+
   Result := fChildren.Count > 0;
+end;
+
+procedure TD2XmlElement.MakeXml(pW: TTextWriter);
+var
+  lN: TD2XmlNode;
+  lR: TStreamReader;
+  lS: string;
+begin
+  if fTag > '' then
+  begin
+    pW.Write('<');
+    pW.Write(fTag);
+    if fAtttributes.Count > 0 then
+      for lN in fAtttributes do
+        lN.MakeXml(pW);
+    FreeAndNil(fAtttributes);
+
+    if (fChildren.Count > 0) or (Text > '') then
+    begin
+      pW.Write('>');
+      if Text > '' then
+        pW.Write(Text)
+      else
+      begin
+        if doNodeAutoIndent in fDoc.Options then
+        begin
+          pW.WriteLine;
+          for lN in fChildren do
+            try
+              lR := TStreamReader.Create(lN.GetXml);
+              lR.BaseStream.Seek(0, soBeginning);
+              while not lR.EndOfStream do
+              begin
+                lS := lR.ReadLine;
+                pW.WriteLine('  ' + lS);
+              end;
+            finally
+              FreeAndNil(lR);
+            end;
+        end
+        else
+          for lN in fChildren do
+            pW.Write(lN.GetXml);
+        FreeAndNil(fChildren);
+      end;
+      pW.Write('</');
+      pW.Write(fTag);
+      pW.Write('>');
+    end
+    else
+      pW.Write(' />');
+    if doNodeAutoIndent in fDoc.Options then
+      pW.WriteLine;
+  end
+  else
+    pW.Write(Text);
 end;
 
 procedure TD2XmlElement.WriteXml(pXml: TTextWriter; pOptions: TXMLDocOptions;
@@ -230,14 +329,19 @@ end;
 
 { TD2XmlAttribute }
 
+procedure TD2XmlAttribute.MakeXml(pW: TTextWriter);
+begin
+  pW.Write(' ');
+  pW.Write(LocalName);
+  pW.Write('="');
+  pW.Write(XmlEscape(Text));
+  pW.Write('"');
+end;
+
 procedure TD2XmlAttribute.WriteXml(pXml: TTextWriter; pOptions: TXMLDocOptions;
   pIndent: Integer);
 begin
-  pXml.Write(' ');
-  pXml.Write(LocalName);
-  pXml.Write('="');
-  pXml.Write(XmlEscape(Text));
-  pXml.Write('"');
+  MakeXml(pXml);
 end;
 
 end.

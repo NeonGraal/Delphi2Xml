@@ -257,7 +257,6 @@ var
   lSL: TStringList;
   lFS: TFileStream;
   i: Integer;
-  lXml: TStringStream;
 const
   DEF_BREAK: array [0 .. 9] of Byte = (13, 10, 42, 42, 42, 42, 13, 10, 13, 10);
 begin
@@ -268,13 +267,7 @@ begin
       lFile := fProgramDir + fOpts.XmlDirectory + ExtractFilePath(pFilename);
       ForceDirectories(lFile);
       lFile := fOpts.XmlDirectory + pFilename;
-      lFile := lFile + '.xml';
-      lXml := fXmlDoc.Xml;
-      try
-        lXml.SaveToFile(lFile);
-      finally
-        FreeAndNil(lXml);
-      end;
+      fXmlDoc.Xml.SaveToFile(lFile + '.xml');
     end;
 
     fXmlNode := nil;
@@ -970,6 +963,7 @@ begin
     if fOpts.FinalToken and (Length(fParser.LastTokens) > 1) then
       XmlAddAttribute('lastToken');
 
+    fXmlNode.Xml;
     fXmlNode := fXmlNode.ParentNode;
   end;
 end;

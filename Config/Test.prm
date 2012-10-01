@@ -1,7 +1,8 @@
--m:Uses
+#m:Uses
 #f-
 -x:XmlTest
 #p:Dir
 -d:DUMMY
 -d:CPU32
+-r
 *.dp?,*.inc,*.pas

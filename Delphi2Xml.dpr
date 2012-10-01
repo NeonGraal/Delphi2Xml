@@ -4,8 +4,10 @@ program Delphi2Xml;
 {$R *.res}
 
 uses
+  System.Classes,
   System.StrUtils,
   System.SysUtils,
+  Winapi.Windows,
 //  System.Win.ComObj,
 //  Xml.adomxmldom,
   D2XProcessor in 'Source\D2XProcessor.pas',
@@ -16,20 +18,27 @@ uses
 var
   prc: TD2XProcessor;
   i: Integer;
-  fParamsOk : Boolean;
+  bOk : Boolean;
+  sOut: THandleStream;
 
 begin
 //  CoInitializeEx(nil, 0);
-  prc := TD2XProcessor.Create;
+  sOut := nil;
+  prc := nil;
+
   try
-    fParamsOk := True;
+    sOut := THandleStream.Create(GetStdHandle(STD_OUTPUT_HANDLE));
+    prc := TD2XProcessor.Create;
+    prc.Options.SetLog(sOut);
+    bOk := True;
     for i := 1 to ParamCount do
-      fParamsOk := prc.ProcessParam(ParamStr(i), 'Param', i) and fParamsOk;
+      bOk := prc.ProcessParam(ParamStr(i), 'Param', i) and bOk;
     prc.EndProcessing;
-    if not fParamsOk then
+    if not bOk then
       prc.Options.ShowOptions;
   finally
-    prc.Free;
+    FreeAndNil(prc);
+    FreeAndNil(sOut);
   end;
 
 end.
