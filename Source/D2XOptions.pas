@@ -287,6 +287,16 @@ function TD2XOptions.ParseOption(pOpt: string): boolean;
       else
         Result := True;
   end;
+  function ErrorUnlessSetDefault(out pFlag: boolean; out pVal: string;
+    pDflt: string): boolean;
+  begin
+    Result := False;
+    if ErrorUnlessSetValue(pFlag, pVal) then
+      Result := True
+    else
+      if pVal = '' then
+        pVal := pDflt;
+  end;
   function ErrorUnlessSetExtension(out pFlag: boolean; out pExtn: string;
     pDflt: string): boolean;
   begin
@@ -297,7 +307,7 @@ function TD2XOptions.ParseOption(pOpt: string): boolean;
       if pExtn = '' then
         pExtn := pDflt
       else
-        if pExtn[1] <> '.' then
+        if not ContainsText(pExtn, '.') then
           pExtn := '.' + pExtn;
   end;
   function ErrorUnlessSetDir(out pFlag: boolean; var pDir: string): boolean;
