@@ -128,6 +128,7 @@ type
 implementation
 
 uses
+  D2X,
   System.IOUtils,
   System.StrUtils,
   Xml.XMLIntf,

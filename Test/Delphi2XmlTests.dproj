@@ -66,8 +66,8 @@
 			<DCC_RemoteDebug>true</DCC_RemoteDebug>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+			<DCC_ConsoleTarget>true</DCC_ConsoleTarget>
 			<VerInfo_Locale>1033</VerInfo_Locale>
-			<Manifest_File>None</Manifest_File>
 			<DCC_RemoteDebug>false</DCC_RemoteDebug>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_2)'!=''">
@@ -80,8 +80,12 @@
 			<DelphiCompile Include="$(MainSource)">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
-			<DCCReference Include="..\Source\D2XOptions.pas"/>
+			<DCCReference Include="..\Source\d2xoptions.pas"/>
 			<DCCReference Include="D2XOptionsTest.pas"/>
+			<DCCReference Include="D2XTest.pas"/>
+			<DCCReference Include="..\Source\D2X.pas"/>
+			<DCCReference Include="..\Source\D2XParam.pas"/>
+			<DCCReference Include="D2XParamTest.pas"/>
 			<None Include="Config\Load.def"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>

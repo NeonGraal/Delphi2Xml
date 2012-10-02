@@ -3,6 +3,7 @@ unit D2XOptions;
 interface
 
 uses
+  D2X,
   System.SysUtils,
   System.StrUtils,
   System.Classes;
@@ -13,10 +14,6 @@ type
   TD2XParseMode = (pmFull, pmUses);
 
   TD2XResultPer = (rpFile, rpWildcard, rpSubDir, rpDir, rpParam, rpRun);
-
-  TD2X = class
-    class function ToLabel<T>(pVal: T): string;
-  end;
 
   TD2XOptions = class
   private
@@ -269,7 +266,6 @@ function TD2XOptions.ParseOption(pOpt: string): boolean;
   end;
   function ErrorUnlessSetter(pFunc: TD2XSetterFunc): boolean;
   begin
-    Result := False;
     if (Length(pOpt) > 2) and (pOpt[3] = ':') then
       Result := not pFunc(Copy(pOpt, 4, 99))
     else
@@ -621,13 +617,5 @@ begin
 end;
 
 { TD2X }
-
-class function TD2X.ToLabel<T>(pVal: T): string;
-var
-  lV: TValue;
-begin
-  lV := TValue.From<T>(pVal);
-  Result := Copy(lV.ToString, 3, 99);
-end;
 
 end.

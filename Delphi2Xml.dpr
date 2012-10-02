@@ -8,12 +8,12 @@ uses
   System.StrUtils,
   System.SysUtils,
   Winapi.Windows,
-//  System.Win.ComObj,
-//  Xml.adomxmldom,
   D2XProcessor in 'Source\D2XProcessor.pas',
   D2XParser in 'Source\D2XParser.pas',
   D2XOptions in 'Source\D2XOptions.pas',
-  D2Xml in 'Source\D2Xml.pas';
+  D2Xml in 'Source\D2Xml.pas',
+  D2X in 'Source\D2X.pas',
+  D2XParam in 'Source\D2XParam.pas';
 
 var
   prc: TD2XProcessor;

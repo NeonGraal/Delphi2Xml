@@ -11,19 +11,14 @@ uses
 
 type
   // Test methods for class TD2X
-  TestTD2X = class(TTestCase)
-  strict private
-    FD2X: TD2X;
-  public
-    procedure SetUp; override;
-    procedure TearDown; override;
-  published
-    procedure TestToLabel;
-  end;
-
   TestTD2XOptionBase = class(TTestCase)
+  private
+    fLog: TStringStream;
+
   strict protected
     fOpts: TD2XOptions;
+
+    procedure CheckLog(pMsg: String);
   public
     procedure SetUp; override;
     procedure TearDown; override;
@@ -57,14 +52,9 @@ type
 
   // Test methods for class TD2XOptions
   TestTD2XOptions = class(TestTD2XOptionBase)
-  private
-    fLog: TStringStream;
-
   public
     procedure SetUp; override;
-    procedure TearDown; override;
 
-    procedure CheckLog(pMsg: String);
   published
     procedure TestParseOptionBlank;
     procedure TestParseOptionWrongPrefix;
@@ -141,7 +131,11 @@ type
     procedure TestParseOptionY;
     procedure TestParseOptionZ;
     procedure TestParseOptionZValue;
+  end;
 
+  // Test methods for class TD2XOptions
+  TestTD2XOptionGeneral = class(TestTD2XOptionBase)
+  published
     procedure TestDefaultOptions;
     procedure TestReportOptions;
     procedure TestShowOptions;
@@ -149,40 +143,23 @@ type
 
 implementation
 
-{ TestTD2X }
-
-procedure TestTD2X.SetUp;
-begin
-  FD2X := TD2X.Create;
-end;
-
-procedure TestTD2X.TearDown;
-begin
-  FD2X.Free;
-  FD2X := nil;
-end;
-
-procedure TestTD2X.TestToLabel;
-var
-  ReturnValue: string;
-  pVal: TD2XParseMode;
-begin
-  pVal := pmFull;
-
-  ReturnValue := FD2X.ToLabel(pVal);
-
-  CheckEqualsString('Full', ReturnValue, 'ReturnValue');
-end;
-
 { TestTD2XOptionBase }
+
+procedure TestTD2XOptionBase.CheckLog(pMsg: String);
+begin
+  CheckEqualsString(pMsg, Trim(fLog.DataString), 'Log');
+end;
 
 procedure TestTD2XOptionBase.SetUp;
 begin
   fOpts := TD2XOptions.Create;
+  fLog := TStringStream.Create;
+  fOpts.SetLog(fLog);
 end;
 
 procedure TestTD2XOptionBase.TearDown;
 begin
+  FreeAndNil(fLog);
   FreeAndNil(fOpts);
 end;
 
@@ -446,52 +423,11 @@ end;
 
 { TestTD2XOptions }
 
-procedure TestTD2XOptions.CheckLog(pMsg: String);
-begin
-  CheckEqualsString(pMsg, Trim(fLog.DataString), 'Log');
-end;
-
 procedure TestTD2XOptions.SetUp;
 begin
   inherited;
 
-  fLog := TStringStream.Create;
-  fOpts.SetLog(fLog);
   fOpts.Defines.CommaText := 'Alpha,Beta,Gamma';
-end;
-
-procedure TestTD2XOptions.TearDown;
-begin
-  FreeAndNil(fLog);
-
-  inherited;
-end;
-
-procedure TestTD2XOptions.TestDefaultOptions;
-begin
-  Check(fOpts.LogErrors, 'LogErrors');
-  CheckFalse(fOpts.LogNotSupported, 'LogNotSupported');
-  CheckFalse(fOpts.TimestampFiles, 'TimestampFiles');
-  CheckFalse(fOpts.Verbose, 'Verbose');
-  CheckFalse(fOpts.Recurse, 'Recurse');
-  CheckFalse(fOpts.UseBase, 'UseBase');
-  CheckEqualsString('', fOpts.BaseDirectory, 'BaseDirectory');
-  CheckFalse(fOpts.WriteDefines, 'WriteDefines');
-  CheckEqualsString('Defines\', fOpts.DefinesDirectory, 'DefinesDirectory');
-  Check(fOpts.Xml, 'Xml');
-  CheckEqualsString('Xml\', fOpts.XmlDirectory, 'XmlDirectory');
-  Check(fOpts.DefinesUsed, 'DefinesUsed');
-  CheckEqualsString('.used', fOpts.UsedFileOrExtn, 'UsedFileOrExtn');
-  Check(fOpts.LoadDefines, 'LoadDefines');
-  CheckEqualsString('.def', fOpts.LoadFileOrExtn, 'LoadFileOrExtn');
-  CheckEqualsString('Alpha,Beta,Gamma', fOpts.Defines.CommaText, 'Defines');
-  Check(fOpts.CountChildren, 'CountChildren');
-  CheckEqualsString('.cnt', fOpts.CountFileOrExtn, 'CountFileOrExtn');
-  Check(fOpts.SkipMethods, 'SkipMethods');
-  CheckEqualsString(fOpts.GlobalName + '.skip', fOpts.SkipFileOrExtn, 'SkipFileOrExtn');
-  Check(fOpts.ParseMode = pmFull, 'ParseMode');
-  Check(fOpts.ResultPer = rpFile, 'ResultPer');
-  Check(fOpts.FinalToken, 'FinalToken');
 end;
 
 procedure TestTD2XOptions.TestParseOptionBlank;
@@ -1423,7 +1359,36 @@ begin
   CheckLog('');
 end;
 
-procedure TestTD2XOptions.TestReportOptions;
+{ TestTD2XOptionGeneral }
+
+procedure TestTD2XOptionGeneral.TestDefaultOptions;
+begin
+  Check(fOpts.LogErrors, 'LogErrors');
+  CheckFalse(fOpts.LogNotSupported, 'LogNotSupported');
+  CheckFalse(fOpts.TimestampFiles, 'TimestampFiles');
+  CheckFalse(fOpts.Verbose, 'Verbose');
+  CheckFalse(fOpts.Recurse, 'Recurse');
+  CheckFalse(fOpts.UseBase, 'UseBase');
+  CheckEqualsString('', fOpts.BaseDirectory, 'BaseDirectory');
+  CheckFalse(fOpts.WriteDefines, 'WriteDefines');
+  CheckEqualsString('Defines\', fOpts.DefinesDirectory, 'DefinesDirectory');
+  Check(fOpts.Xml, 'Xml');
+  CheckEqualsString('Xml\', fOpts.XmlDirectory, 'XmlDirectory');
+  Check(fOpts.DefinesUsed, 'DefinesUsed');
+  CheckEqualsString('.used', fOpts.UsedFileOrExtn, 'UsedFileOrExtn');
+  Check(fOpts.LoadDefines, 'LoadDefines');
+  CheckEqualsString('.def', fOpts.LoadFileOrExtn, 'LoadFileOrExtn');
+  CheckEqualsString('', fOpts.Defines.CommaText, 'Defines');
+  Check(fOpts.CountChildren, 'CountChildren');
+  CheckEqualsString('.cnt', fOpts.CountFileOrExtn, 'CountFileOrExtn');
+  Check(fOpts.SkipMethods, 'SkipMethods');
+  CheckEqualsString(fOpts.GlobalName + '.skip', fOpts.SkipFileOrExtn, 'SkipFileOrExtn');
+  Check(fOpts.ParseMode = pmFull, 'ParseMode');
+  Check(fOpts.ResultPer = rpFile, 'ResultPer');
+  Check(fOpts.FinalToken, 'FinalToken');
+end;
+
+procedure TestTD2XOptionGeneral.TestReportOptions;
 var
   ReturnValue: Boolean;
 begin
@@ -1433,7 +1398,7 @@ begin
   CheckNotEqualsString('', fLog.DataString, 'Log');
 end;
 
-procedure TestTD2XOptions.TestShowOptions;
+procedure TestTD2XOptionGeneral.TestShowOptions;
 var
   ReturnValue: Boolean;
 begin
@@ -1445,6 +1410,6 @@ end;
 
 initialization
 
-RegisterTests([TestTD2X.Suite, TestTD2XOptionFilenames.Suite, TestTD2XOptions.Suite]);
+RegisterTests([TestTD2XOptionGeneral.Suite, TestTD2XOptionFilenames.Suite, TestTD2XOptions.Suite]);
 
 end.

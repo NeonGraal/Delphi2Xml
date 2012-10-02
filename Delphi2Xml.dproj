@@ -95,6 +95,8 @@
 			<DCCReference Include="Source\D2XParser.pas"/>
 			<DCCReference Include="Source\D2XOptions.pas"/>
 			<DCCReference Include="Source\D2Xml.pas"/>
+			<DCCReference Include="Source\D2X.pas"/>
+			<DCCReference Include="Source\D2XParam.pas"/>
 			<None Include="Config\Test.prm"/>
 			<None Include="Config\Delphi2Xml.skip"/>
 			<BuildConfiguration Include="Release">
