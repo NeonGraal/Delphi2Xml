@@ -16,6 +16,7 @@ type
     TParamFormatter = function(pVal: T): string of object;
 
   public
+    constructor Create;
     constructor CreateParam(pCode, pLabel, pSample, pDescr: string; pDefault: T;
       pGetter: TParamGetter; pSetter: TParamSetter; pConverter: TParamConverter;
       pFormatter: TParamFormatter);
@@ -74,6 +75,11 @@ begin
   Result := fSetter(fConverter(pStr));
 end;
 
+constructor TD2XSingleParam<T>.Create;
+begin
+  raise EInvalidParam.Create('Need to use Specific constructor');
+end;
+
 constructor TD2XSingleParam<T>.CreateParam(pCode, pLabel, pSample, pDescr: string; pDefault: T;
   pGetter: TParamGetter; pSetter: TParamSetter; pConverter: TParamConverter;
   pFormatter: TParamFormatter);
@@ -128,7 +134,8 @@ end;
 
 procedure TD2XSingleParam<T>.Reset;
 begin
-  fSetter(fDefault);
+  if not fSetter(fDefault) then
+    raise EInvalidParam.Create('Invalid default value');
 end;
 
 function TD2XSingleParam<T>.ToString: string;
