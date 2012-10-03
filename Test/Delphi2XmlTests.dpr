@@ -19,12 +19,12 @@ uses
   TextTestRunner,
   System.StrUtils,
   Winapi.Windows,
-  d2xoptions in '..\Source\d2xoptions.pas',
   D2XOptionsTest in 'D2XOptionsTest.pas',
   D2XTest in 'D2XTest.pas',
   D2X in '..\Source\D2X.pas',
   D2XParam in '..\Source\D2XParam.pas',
-  D2XParamTest in 'D2XParamTest.pas';
+  D2XParamTest in 'D2XParamTest.pas',
+  D2XOptions in '..\Source\D2XOptions.pas';
 
 {$R *.RES}
 

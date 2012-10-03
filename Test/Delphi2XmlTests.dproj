@@ -80,12 +80,12 @@
 			<DelphiCompile Include="$(MainSource)">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
-			<DCCReference Include="..\Source\d2xoptions.pas"/>
 			<DCCReference Include="D2XOptionsTest.pas"/>
 			<DCCReference Include="D2XTest.pas"/>
 			<DCCReference Include="..\Source\D2X.pas"/>
 			<DCCReference Include="..\Source\D2XParam.pas"/>
 			<DCCReference Include="D2XParamTest.pas"/>
+			<DCCReference Include="..\Source\D2XOptions.pas"/>
 			<None Include="Config\Load.def"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
