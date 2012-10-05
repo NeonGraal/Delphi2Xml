@@ -3,6 +3,7 @@ unit D2XParam;
 interface
 
 uses
+  System.Classes,
   System.Generics.Collections,
   System.SysUtils;
 
@@ -27,17 +28,22 @@ type
   end;
 
   TD2XParams = class(TObjectList<TD2XParam>)
+  private
+    fLog: TTextWriter;
+
   public
     constructor Create;
 
     function ForCode(pCode: string): TD2XParam;
-    function DescribeAll: string;
-    function ReportAll: string;
+    procedure DescribeAll;
+    procedure ReportAll;
+
+    property Log: TTextWriter read fLog write fLog;
   end;
 
   TD2XSingleParam<T> = class(TD2XParam)
   public type
-    TspConverter = function(pStr: string): T of object;
+    TspConverter = function(pStr: string; out pVal: T): Boolean of object;
     TspFormatter = function(pVal: T): string of object;
     TspValidator = function(pVal: T): Boolean of object;
 
@@ -50,7 +56,6 @@ type
     function Describe: string; override;
     function Report: string; override;
 
-    function Value: T;
     function ToString: string; override;
 
   private
@@ -63,30 +68,35 @@ type
 
     function CheckValue(pVal: T): Boolean;
     function ConvertAndSet(pStr: string): Boolean;
+    procedure SetValue(const pVal: T);
+
+  public
+    property Value: T read fValue write SetValue;
   end;
 
   TD2XBooleanParam = class(TD2XSingleParam<Boolean>)
   public
-    constructor CreateBool(pCode, pLabel, pDescr: string);
+    constructor CreateBool(pCode, pLabel, pDescr: string; pDefault: Boolean = False);
 
   private
-    function ConvertBoolean(pVal: string): Boolean;
+    function ConvertBoolean(pStr: string; out pVal: Boolean): Boolean;
     function FormatBoolean(pVal: Boolean): string;
   end;
 
   TD2XStringParam = class(TD2XSingleParam<string>)
   public
     constructor CreateStr(pCode, pLabel, pSample, pDescr, pDefault: string;
+      pConverter: TD2XSingleParam<string>.TspConverter;
       pValidator: TD2XSingleParam<string>.TspValidator);
 
   private
-    function SimpleString(pVal: string): string;
+    function ConvertString(pStr: string; out pVal: string): Boolean;
+    function FormatString(pVal: string): string;
   end;
 
 implementation
 
 uses
-  System.Classes,
   System.Generics.Defaults,
   System.StrUtils;
 
@@ -104,8 +114,7 @@ function TD2XSingleParam<T>.ConvertAndSet(pStr: string): Boolean;
 var
   lVal: T;
 begin
-  lVal := fConverter(pStr);
-  Result := CheckValue(lVal);
+  Result := fConverter(pStr, lVal) and CheckValue(lVal);
   if Result then
     fValue := lVal;
 end;
@@ -154,36 +163,40 @@ begin
     raise EInvalidParam.Create('Invalid default value');
 end;
 
+procedure TD2XSingleParam<T>.SetValue(const pVal: T);
+begin
+  if CheckValue(pVal) then
+    fValue := pVal
+  else
+    raise EInvalidParam.Create('Invalid value');
+end;
+
 function TD2XSingleParam<T>.ToString: string;
 begin
   Result := fFormatter(fValue);
 end;
 
-function TD2XSingleParam<T>.Value: T;
-begin
-  Result := fValue;
-end;
-
 { TD2XBooleanParam }
 
-function TD2XBooleanParam.ConvertBoolean(pVal: string): Boolean;
+function TD2XBooleanParam.ConvertBoolean(pStr: string; out pVal: Boolean): Boolean;
 begin
-  if Length(pVal) > 0 then
-    case pVal[1] of
+  Result := True;
+  if Length(pStr) > 0 then
+    case pStr[1] of
       '+', 'T', 't', 'Y', 'y', '1':
-        Result := True;
+        pVal := True;
       '-', 'F', 'f', 'N', 'n', '0':
-        Result := False;
+        pVal := False;
     else
-      raise EParserError.Create('Invalid Value for Boolean');
+      Result := False;
     end
   else
-    Result := True;
+    pVal := True;
 end;
 
-constructor TD2XBooleanParam.CreateBool(pCode, pLabel, pDescr: string);
+constructor TD2XBooleanParam.CreateBool(pCode, pLabel, pDescr: string; pDefault: Boolean);
 begin
-  CreateParam(pCode, pLabel, '[+|-]', pDescr, False, ConvertBoolean, FormatBoolean, nil);
+  CreateParam(pCode, pLabel, '[+|-]', pDescr, pDefault, ConvertBoolean, FormatBoolean, nil);
 end;
 
 function TD2XBooleanParam.FormatBoolean(pVal: Boolean): string;
@@ -193,14 +206,24 @@ end;
 
 { TD2XStringParam }
 
-constructor TD2XStringParam.CreateStr(pCode, pLabel, pSample, pDescr, pDefault: string;
-  pValidator: TD2XSingleParam<string>.TspValidator);
+function TD2XStringParam.ConvertString(pStr: string; out pVal: string): Boolean;
 begin
-  CreateParam(pCode, pLabel, pSample, pDescr, pDefault, SimpleString, SimpleString,
-    pValidator);
+  Result := True;
+  pVal := pStr;
 end;
 
-function TD2XStringParam.SimpleString(pVal: string): string;
+constructor TD2XStringParam.CreateStr(pCode, pLabel, pSample, pDescr, pDefault: string;
+  pConverter: TD2XSingleParam<string>.TspConverter;
+  pValidator: TD2XSingleParam<string>.TspValidator);
+begin
+  if Assigned(pConverter) then
+    CreateParam(pCode, pLabel, pSample, pDescr, pDefault, pConverter, FormatString, pValidator)
+  else
+    CreateParam(pCode, pLabel, pSample, pDescr, pDefault, ConvertString, FormatString,
+      pValidator);
+end;
+
+function TD2XStringParam.FormatString(pVal: string): string;
 begin
   Result := pVal;
 end;
@@ -247,20 +270,22 @@ type
     function Compare(const pL, pR: TD2XParam): Integer; override;
   end;
 
-{ TD2XParams }
+  { TD2XParams }
 
 constructor TD2XParams.Create;
 begin
   inherited Create(TD2XParamEqCmp.Create, True);
 end;
 
-function TD2XParams.DescribeAll: string;
+procedure TD2XParams.DescribeAll;
 var
   lP: TD2XParam;
 begin
-  Result := '';
+  if not Assigned(fLog) then
+    Exit;
+
   for lP in Self do
-    Result := Result + lP.Describe + #13#10;
+    fLog.WriteLine(lP.Describe);
 end;
 
 function TD2XParams.ForCode(pCode: string): TD2XParam;
@@ -269,18 +294,20 @@ var
 begin
   Result := nil;
   for lP in Self do
-    if lP.fCode = pCode then
+    if lP.IsCode(pCode) then
       Result := lP;
 end;
 
-function TD2XParams.ReportAll: string;
+procedure TD2XParams.ReportAll;
 var
   lP: TD2XParam;
 begin
-  Result := '';
+  if not Assigned(fLog) then
+    Exit;
+
   for lP in Self do
     if lP.Report > '' then
-      Result := Result + lP.Report + #13#10;
+      fLog.WriteLine(lP.Report);
 end;
 
 { TD2XParamEqCmp }

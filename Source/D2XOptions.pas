@@ -4,6 +4,7 @@ interface
 
 uses
   D2X,
+  D2XParam,
   System.SysUtils,
   System.StrUtils,
   System.Classes;
@@ -17,24 +18,26 @@ type
 
   TD2XOptions = class
   private
-    fVerbose: boolean;
+    fVerbose: TD2XBooleanParam;
+    fRecurse: TD2XBooleanParam;
+    fLogErrors: TD2XBooleanParam;
+    fLogNotSupported: TD2XBooleanParam;
+    fTimestampFiles: TD2XBooleanParam;
+    fFinalToken: TD2XBooleanParam;
+    fGlobalName: TD2XStringParam;
+
     fXml: boolean;
+    fXmlDirectory: string;
     fCountChildren: boolean;
     fCountFileOrExtn: string;
-    fXmlDirectory: string;
-    fSkipFileOrExtn: string;
     fSkipMethods: boolean;
+    fSkipFileOrExtn: string;
     fUseBase: boolean;
     fBaseDirectory: string;
-    fRecurse: boolean;
-    fLogErrors: boolean;
-    fLogNotSupported: boolean;
-    fTimestampFiles: boolean;
     fDefinesUsed: boolean;
     fUsedFileOrExtn: string;
-    fLoadFileOrExtn: string;
     fLoadDefines: boolean;
-    fDefines: TStringList;
+    fLoadFileOrExtn: string;
     fWriteDefines: boolean;
     fDefinesDirectory: string;
     fUseOutput: boolean;
@@ -44,9 +47,12 @@ type
     fInputDirectory: string;
     fParseMode: TD2XParseMode;
     fResultPer: TD2XResultPer;
-    fFinalToken: boolean;
-    fGlobalName: string;
+
+    fDefines: TStringList;
+
     fLog: TStreamWriter;
+
+    fParams: TD2XParams;
 
     procedure AddDefine(pDef: string);
     procedure DeleteDefine(pDef: string);
@@ -54,17 +60,29 @@ type
 
     function SetParseMode(pVal: string): boolean;
     function SetResultPer(pVal: string): boolean;
-    function SetGlobalName(pVal: string): boolean;
+
+    function ConvertGlobalName(pStr: string; out pVal: String): boolean;
+    function ValidateGlobalName(pVal: string): boolean;
 
     procedure Log(pFmt: string; pArgs: array of const);
     procedure LogOptionError(pLabel, pOpt: string);
+    function GetVerbose: boolean;
+    function GetLogErrors: boolean;
+    function GetLogNotSupported: boolean;
+    function GetRecurse: boolean;
+    function GetTimestampFiles: boolean;
+    function GetFinalToken: boolean;
+    function GetGlobalName: string;
 
   public
-    property LogErrors: boolean read fLogErrors;
-    property LogNotSupported: boolean read fLogNotSupported;
-    property TimestampFiles: boolean read fTimestampFiles;
-    property Verbose: boolean read fVerbose;
-    property Recurse: boolean read fRecurse;
+    property LogErrors: boolean read GetLogErrors;
+    property LogNotSupported: boolean read GetLogNotSupported;
+    property TimestampFiles: boolean read GetTimestampFiles;
+    property Verbose: boolean read GetVerbose;
+    property Recurse: boolean read GetRecurse;
+    property FinalToken: boolean read GetFinalToken;
+    property GlobalName: string read GetGlobalName;
+
     property UseBase: boolean read fUseBase;
     property BaseDirectory: string read fBaseDirectory;
     // property UseInput: boolean read fUseInput;
@@ -86,8 +104,6 @@ type
     property SkipFileOrExtn: string read fSkipFileOrExtn;
     property ParseMode: TD2XParseMode read fParseMode;
     property ResultPer: TD2XResultPer read fResultPer;
-    property FinalToken: boolean read fFinalToken;
-    property GlobalName: string read fGlobalName;
     property OutputTimestamp: string read fOutputTimestamp;
 
     constructor Create;
@@ -121,15 +137,38 @@ begin
     fDefines.Add(pDef);
 end;
 
+function TD2XOptions.ConvertGlobalName(pStr: string; out pVal: String): boolean;
+begin
+  Result := True;
+  if pStr = '' then
+    pVal := ChangeFileExt(ExtractFileName(ParamStr(0)), '')
+  else
+    pVal := pStr;
+end;
+
 constructor TD2XOptions.Create;
 begin
   inherited;
 
-  fGlobalName := ChangeFileExt(ExtractFileName(ParamStr(0)), '');
-  fLogErrors := True;
-  fLogNotSupported := False;
-  fTimestampFiles := False;
-  fVerbose := False;
+  fParams := TD2XParams.Create;
+  fVerbose := TD2XBooleanParam.CreateBool('V', 'Verbose', 'Log all Parser methods called');
+  fParams.Add(fVerbose);
+  fLogErrors := TD2XBooleanParam.CreateBool('E', 'Log Errors', 'Log Error messages', True);
+  fParams.Add(fLogErrors);
+  fLogNotSupported := TD2XBooleanParam.CreateBool('N', 'Log Not Supported',
+    'Log Not Supported messages');
+  fParams.Add(fLogNotSupported);
+  fTimestampFiles := TD2XBooleanParam.CreateBool('T', 'Timestamp',
+    'Timestamp global output files');
+  fParams.Add(fTimestampFiles);
+  fFinalToken := TD2XBooleanParam.CreateBool('F', 'Final Token', 'Record Final Token', True);
+  fParams.Add(fFinalToken);
+  fRecurse := TD2XBooleanParam.CreateBool('R', 'Recurse', 'Recurse into subdirectories');
+  fParams.Add(fRecurse);
+  fGlobalName := TD2XStringParam.CreateStr('G', 'Global name', '<str>', 'Sets global name',
+    ChangeFileExt(ExtractFileName(ParamStr(0)), ''), ConvertGlobalName, ValidateGlobalName);
+  fParams.Add(fGlobalName);
+
   fUseBase := False;
   fBaseDirectory := '';
   fUseInput := True;
@@ -148,12 +187,11 @@ begin
   fLoadDefines := True;
   fLoadFileOrExtn := '.def';
   fSkipMethods := True;
-  fSkipFileOrExtn := fGlobalName + '.skip';
+  fSkipFileOrExtn := GlobalName + '.skip';
   fDefines := TStringList.Create;
   fDefines.Sorted := True;
   fParseMode := pmFull;
   fResultPer := rpFile;
-  fFinalToken := True;
   fLog := nil;
 end;
 
@@ -173,14 +211,51 @@ destructor TD2XOptions.Destroy;
 begin
   FreeAndNil(fLog);
   FreeAndNil(fDefines);
+  FreeAndNil(fParams);
+
   inherited;
+end;
+
+function TD2XOptions.GetFinalToken: boolean;
+begin
+  Result := fFinalToken.Value;
+end;
+
+function TD2XOptions.GetGlobalName: string;
+begin
+  Result := fGlobalName.Value;
+end;
+
+function TD2XOptions.GetLogErrors: boolean;
+begin
+  Result := fLogErrors.Value;
+end;
+
+function TD2XOptions.GetLogNotSupported: boolean;
+begin
+  Result := fLogNotSupported.Value;
+end;
+
+function TD2XOptions.GetRecurse: boolean;
+begin
+  Result := fRecurse.Value;
+end;
+
+function TD2XOptions.GetTimestampFiles: boolean;
+begin
+  Result := fTimestampFiles.Value;
+end;
+
+function TD2XOptions.GetVerbose: boolean;
+begin
+  Result := fVerbose.Value;
 end;
 
 function TD2XOptions.InputFileOrExtn(pFileOrExtn: string): string;
   function GlobalFileOrExtn(pFileOrExtn: string): string;
   begin
     if StartsText('.', pFileOrExtn) then
-      Result := ChangeFileExt(fGlobalName, pFileOrExtn)
+      Result := ChangeFileExt(GlobalName, pFileOrExtn)
     else
       Result := pFileOrExtn;
   end;
@@ -217,12 +292,12 @@ function TD2XOptions.OutputFileOrExtn(pFileOrExtn: string): string;
     lExtn: string;
   begin
     if StartsText('.', pFileOrExtn) then
-      if fTimestampFiles then
-        Result := ChangeFileExt(fGlobalName, fOutputTimestamp + pFileOrExtn)
+      if TimestampFiles then
+        Result := ChangeFileExt(GlobalName, fOutputTimestamp + pFileOrExtn)
       else
-        Result := ChangeFileExt(fGlobalName, pFileOrExtn)
+        Result := ChangeFileExt(GlobalName, pFileOrExtn)
     else
-      if fTimestampFiles then
+      if TimestampFiles then
       begin
         lExtn := ExtractFileExt(pFileOrExtn);
         Result := ChangeFileExt(pFileOrExtn, fOutputTimestamp + lExtn);
@@ -245,6 +320,7 @@ begin
 end;
 
 function TD2XOptions.ParseOption(pOpt: string): boolean;
+
   function ErrorUnlessSet(out pFlag: boolean): boolean;
   begin
     Result := False;
@@ -283,8 +359,7 @@ function TD2XOptions.ParseOption(pOpt: string): boolean;
       else
         Result := True;
   end;
-  function ErrorUnlessSetDefault(out pFlag: boolean; out pVal: string;
-    pDflt: string): boolean;
+  function ErrorUnlessSetDefault(out pFlag: boolean; out pVal: string; pDflt: string): boolean;
   begin
     Result := False;
     if ErrorUnlessSetValue(pFlag, pVal) then
@@ -320,140 +395,112 @@ function TD2XOptions.ParseOption(pOpt: string): boolean;
 
 var
   lValue: string;
+  lPrm: TD2XParam;
 begin
   Result := False;
   if (Length(pOpt) < 2) or not CharInSet(pOpt[1], ['-', '/']) then
     raise ED2XOptionsException.Create('Invalid option: ' + pOpt)
   else
-    case pOpt[2] of
-      '?':
-        Result := False;
-      '!':
-        begin
-          ReportOptions;
-          Result := True;
-        end;
-      'E', 'e':
-        if ErrorUnlessSet(fLogErrors) then
-          LogOptionError('Invalid Log Error messages', pOpt)
-        else
-          Result := True;
-      'N', 'n':
-        if ErrorUnlessSet(fLogNotSupported) then
-          LogOptionError('Invalid Log Not Supported messages', pOpt)
-        else
-          Result := True;
-      'T', 't':
-        if ErrorUnlessSet(fTimestampFiles) then
-          LogOptionError('Invalid Timestamp Files', pOpt)
-        else
-          Result := True;
-      'V', 'v':
-        if ErrorUnlessSet(fVerbose) then
-          LogOptionError('Invalid Verbose', pOpt)
-        else
-          Result := True;
-      'F', 'f':
-        if ErrorUnlessSet(fFinalToken) then
-          LogOptionError('Invalid Final token', pOpt)
-        else
-          Result := True;
-      'R', 'r':
-        if ErrorUnlessSet(fRecurse) then
-          LogOptionError('Invalid Recurse Directories', pOpt)
-        else
-          Result := True;
-      'M', 'm':
-        if ErrorUnlessSetter(SetParseMode) then
-          LogOptionError('Invalid Parse mode', pOpt)
-        else
-        begin
-
-          Result := True;
-        end;
-      'P', 'p':
-        if ErrorUnlessSetter(SetResultPer) then
-          LogOptionError('Invalid Result per', pOpt)
-        else
-          Result := True;
-      'G', 'g':
-        if ErrorUnlessSetter(SetGlobalName) then
-          LogOptionError('Invalid Global name', pOpt)
-        else
-          Result := True;
-      'D', 'd':
-        if ErrorUnlessValue(lValue) then
-          LogOptionError('Invalid Define', pOpt)
-        else
-        begin
-          AddDefine(lValue);
-          Result := True;
-        end;
-      'Z', 'z':
-        if ErrorUnlessValue(lValue) then
-          LogOptionError('Invalid Undefine', pOpt)
-        else
-        begin
-          DeleteDefine(lValue);
-          Result := True;
-        end;
-      'L', 'l':
-        if ErrorUnlessSetValue(fLoadDefines, fLoadFileOrExtn) then
-          LogOptionError('Invalid Load Defines', pOpt)
-        else
-        begin
-          LoadDefinesFile(fLoadFileOrExtn);
-          Result := True;
-        end;
-      'W', 'w':
-        if ErrorUnlessSetDir(fWriteDefines, fDefinesDirectory) then
-          LogOptionError('Invalid Write Defines', pOpt)
-        else
-          Result := True;
-      'B', 'b':
-        if ErrorUnlessSetDir(fUseBase, fBaseDirectory) then
-          LogOptionError('Invalid Use Base Directory', pOpt)
-        else
-          Result := True;
-      'I', 'i':
-        if ErrorUnlessSetDir(fUseInput, fInputDirectory) then
-          LogOptionError('Invalid Use Input Directory', pOpt)
-        else
-          Result := True;
-      'O', 'o':
-        if ErrorUnlessSetDir(fUseOutput, fOutputDirectory) then
-          LogOptionError('Invalid Use Output Directory', pOpt)
-        else
-          Result := True;
-      'X', 'x':
-        if ErrorUnlessSetDir(fXml, fXmlDirectory) then
-          LogOptionError('Invalid Xml', pOpt)
-        else
-          Result := True;
-      'U', 'u':
-        if ErrorUnlessSetExtension(fDefinesUsed, fUsedFileOrExtn, '.used') then
-          LogOptionError('Invalid Count Defines Used', pOpt)
-        else
-          Result := True;
-      'C', 'c':
-        if ErrorUnlessSetExtension(fCountChildren, fCountFileOrExtn, '.cnt') then
-          LogOptionError('Invalid Count Children', pOpt)
-        else
-          Result := True;
-      'S', 's':
-        if ErrorUnlessSetValue(fSkipMethods, lValue) then
-          LogOptionError('Invalid Load Skipped Methods', pOpt)
-        else
-        begin
-          if ExtractFileExt(lValue) > '.' then
-            fSkipFileOrExtn := lValue
-          else
-            fSkipFileOrExtn := lValue + '.skip';
-          Result := True;
-        end;
+  begin
+    lPrm := fParams.ForCode(Copy(pOpt, 2, 1));
+    if Assigned(lPrm) then
+      Result := lPrm.Parse(Copy(pOpt, 2, Length(pOpt)))
     else
-      LogOptionError('Unknown', pOpt);
-    end;
+      case pOpt[2] of
+        '?':
+          Result := False;
+        '!':
+          begin
+            ReportOptions;
+            Result := True;
+          end;
+        'M', 'm':
+          if ErrorUnlessSetter(SetParseMode) then
+            LogOptionError('Invalid Parse mode', pOpt)
+          else
+          begin
+
+            Result := True;
+          end;
+        'P', 'p':
+          if ErrorUnlessSetter(SetResultPer) then
+            LogOptionError('Invalid Result per', pOpt)
+          else
+            Result := True;
+        'D', 'd':
+          if ErrorUnlessValue(lValue) then
+            LogOptionError('Invalid Define', pOpt)
+          else
+          begin
+            AddDefine(lValue);
+            Result := True;
+          end;
+        'Z', 'z':
+          if ErrorUnlessValue(lValue) then
+            LogOptionError('Invalid Undefine', pOpt)
+          else
+          begin
+            DeleteDefine(lValue);
+            Result := True;
+          end;
+        'L', 'l':
+          if ErrorUnlessSetValue(fLoadDefines, fLoadFileOrExtn) then
+            LogOptionError('Invalid Load Defines', pOpt)
+          else
+          begin
+            LoadDefinesFile(fLoadFileOrExtn);
+            Result := True;
+          end;
+        'W', 'w':
+          if ErrorUnlessSetDir(fWriteDefines, fDefinesDirectory) then
+            LogOptionError('Invalid Write Defines', pOpt)
+          else
+            Result := True;
+        'B', 'b':
+          if ErrorUnlessSetDir(fUseBase, fBaseDirectory) then
+            LogOptionError('Invalid Use Base Directory', pOpt)
+          else
+            Result := True;
+        'I', 'i':
+          if ErrorUnlessSetDir(fUseInput, fInputDirectory) then
+            LogOptionError('Invalid Use Input Directory', pOpt)
+          else
+            Result := True;
+        'O', 'o':
+          if ErrorUnlessSetDir(fUseOutput, fOutputDirectory) then
+            LogOptionError('Invalid Use Output Directory', pOpt)
+          else
+            Result := True;
+        'X', 'x':
+          if ErrorUnlessSetDir(fXml, fXmlDirectory) then
+            LogOptionError('Invalid Xml', pOpt)
+          else
+            Result := True;
+        'U', 'u':
+          if ErrorUnlessSetExtension(fDefinesUsed, fUsedFileOrExtn, '.used') then
+            LogOptionError('Invalid Count Defines Used', pOpt)
+          else
+            Result := True;
+        'C', 'c':
+          if ErrorUnlessSetExtension(fCountChildren, fCountFileOrExtn, '.cnt') then
+            LogOptionError('Invalid Count Children', pOpt)
+          else
+            Result := True;
+        'S', 's':
+          if ErrorUnlessSetValue(fSkipMethods, lValue) then
+            LogOptionError('Invalid Load Skipped Methods', pOpt)
+          else
+          begin
+            if ExtractFileExt(lValue) > '.' then
+              fSkipFileOrExtn := lValue
+            else
+              fSkipFileOrExtn := lValue + '.skip';
+            Result := True;
+          end;
+      else
+        LogOptionError('Unknown', pOpt);
+      end;
+  end;
 end;
 
 function TD2XOptions.ReportOptions: boolean;
@@ -483,15 +530,10 @@ begin
   Result := True;
 
   Log('Current option settings:', []);
+  fParams.Log := fLog;
+  fParams.ReportAll;
   Log('  Parse Mode              %s', [TD2X.ToLabel(fParseMode)]);
   Log('  Result per              %s', [TD2X.ToLabel(fResultPer)]);
-  Log('  Global name             %s', [fGlobalName]);
-  Log('  Errors                  %s', [ShowEnabled(fLogErrors, '', '')]);
-  Log('  Not Supported           %s', [ShowEnabled(fLogNotSupported, '', '')]);
-  Log('  Timestamp Files         %s', [ShowEnabled(fTimestampFiles, '', '')]);
-  Log('  Verbose                 %s', [ShowEnabled(fVerbose, '', '')]);
-  Log('  Recurse                 %s', [ShowEnabled(fRecurse, '', '')]);
-  Log('  Show Final token        %s', [ShowEnabled(fFinalToken, '', '')]);
   Log('  Input base              %s', [ShowEnabled(fUseInput, 'Dir  ', fInputDirectory)]);
   Log('  Output base             %s', [ShowEnabled(fUseOutput, 'Dir  ', fOutputDirectory)]);
   Log('  Directory base          %s', [ShowEnabled(fUseBase, 'Dir  ', fBaseDirectory)]);
@@ -533,9 +575,8 @@ begin
     Log('Use default Defines', []);
 end;
 
-function TD2XOptions.SetGlobalName(pVal: string): boolean;
+function TD2XOptions.ValidateGlobalName(pVal: string): boolean;
 begin
-  fGlobalName := pVal;
   fXmlDirectory := IncludeTrailingPathDelimiter(pVal);
   fDefinesDirectory := IncludeTrailingPathDelimiter(pVal);
   Result := True;
@@ -553,7 +594,7 @@ begin
     'U', 'u':
       begin
         fParseMode := pmUses;
-        SetGlobalName('Uses');
+        fGlobalName.Value := 'Uses';
       end
   else
     fParseMode := pmFull;
@@ -588,14 +629,9 @@ begin
 
   Log('Usage: %s [ Option | @Params | mFilename | Wildcard ] ... ', [lBase]);
   Log('  Options:        %-15s Description', ['Default']);
-  Log('    E[+-]         %-15s Log Error messages', ['-']);
-  Log('    F[+-]         %-15s Record Final Token', ['+']);
-  Log('    N[+-]         %-15s Log Not Supported messages', ['-']);
-  Log('    T[+-]         %-15s Timestamp global output files', ['-']);
-  Log('    V[+-]         %-15s Log all Parser methods called', ['-']);
-  Log('    R[+-]         %-15s Recurse into subdirectories', ['+']);
+  fParams.Log := fLog;
+  fParams.DescribeAll;
   Log('    D:<define>    %-15s Define <define> (also enables "Load Defines")', ['']);
-  Log('    G:<global>    %-15s Sets global name', [lBase]);
   Log('    Z:<define>    %-15s Undefine <define> (also enables "Load Defines")', ['']);
   Log('    M:<mode>      %-15s Set Parsing mode (F[ull], U[ses])', ['']);
   Log('    P:<Per>       %-15s Set Result per (F[ile], [S]ubdir, D[ir], W[ildcard], P[aram], R[un])',

@@ -684,8 +684,9 @@ var
 begin
   pOpt := '-G';
   ReturnValue := fOpts.ParseOption(pOpt);
-  CheckFalse(ReturnValue, 'ReturnValue');
-  CheckLog('Invalid Global name option: -G');
+  Check(ReturnValue, 'ReturnValue');
+  CheckEqualsString(ChangeFileExt(ExtractFileName(ParamStr(0)), ''), fOpts.GlobalName, 'GlobalName');
+  CheckLog('');
 end;
 
 procedure TestTD2XOptions.TestParseOptionGValue;
@@ -693,7 +694,7 @@ var
   ReturnValue: Boolean;
   pOpt: string;
 begin
-  pOpt := '-G:Global';
+  pOpt := '-GGlobal';
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
   CheckEqualsString('Global', fOpts.GlobalName, 'GlobalName');
@@ -1369,6 +1370,7 @@ begin
   CheckFalse(fOpts.Verbose, 'Verbose');
   CheckFalse(fOpts.Recurse, 'Recurse');
   CheckFalse(fOpts.UseBase, 'UseBase');
+  CheckEqualsString(ChangeFileExt(ExtractFileName(ParamStr(0)), ''), fOpts.GlobalName, 'SkipFileOrExtn');
   CheckEqualsString('', fOpts.BaseDirectory, 'BaseDirectory');
   CheckFalse(fOpts.WriteDefines, 'WriteDefines');
   CheckEqualsString('Defines\', fOpts.DefinesDirectory, 'DefinesDirectory');

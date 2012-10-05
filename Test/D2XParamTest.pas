@@ -4,7 +4,8 @@ interface
 
 uses
   TestFramework,
-  D2XParam;
+  D2XParam,
+  System.SysUtils;
 
 type
 
@@ -34,13 +35,14 @@ type
   private
     function TstParser(pStr: string): Boolean;
 
-    function CnvStrProp(pVal: string): string;
+    function CnvStrProp(pStr: string; out pVal: string): Boolean;
+    function FmtStrProp(pVal: string): string;
     function InvStrProp(pVal: string): Boolean;
 
-    function CnvBoolProp(pVal: string): Boolean;
+    function CnvBoolProp(pStr: string; out pVal: Boolean): Boolean;
     function FmtBoolProp(pVal: Boolean): string;
 
-    function CnvObjProp(pVal: string): TObject;
+    function CnvObjProp(pStr: string; out pVal: TObject): Boolean;
     function FmtObjProp(pVal: TObject): string;
 
   published
@@ -91,10 +93,56 @@ type
     procedure TestToString;
   end;
 
+  TestTD2XValidStringParam = class(TTestCase)
+  strict private
+    fStrP: TD2XStringParam;
+
+    function NotBlank(pStr: string): Boolean;
+
+  public
+    procedure SetUp; override;
+    procedure TearDown; override;
+
+  published
+    procedure TestParse;
+    procedure TestValue;
+  end;
+
+  TestTD2XFormatStringParam = class(TTestCase)
+  strict private
+    fStrP: TD2XStringParam;
+
+    function LeadingColon(pStr: string; out pVal: string): Boolean;
+
+  public
+    procedure SetUp; override;
+    procedure TearDown; override;
+
+  published
+    procedure TestParse;
+  end;
+
+  TestTD2XFormatValidStringParam = class(TTestCase)
+  strict private
+    fStrP: TD2XStringParam;
+
+    function LeadingColon(pStr: string; out pVal: string): Boolean;
+    function NotBlank(pStr: string): Boolean;
+
+  public
+    procedure SetUp; override;
+    procedure TearDown; override;
+
+  published
+    procedure TestParse;
+    procedure TestValue;
+  end;
+
   TestTD2XParams = class(TTestCase)
   strict private
     fPs: TD2XParams;
     fCalledParser: Boolean;
+    fSB: TStringBuilder;
 
     function TstParser(pStr: string): Boolean;
 
@@ -113,8 +161,7 @@ implementation
 uses
   System.Classes,
   System.RegularExpressions,
-  System.StrUtils,
-  System.SysUtils;
+  System.StrUtils;
 
 function ReduceString(pStr: string): string;
 begin
@@ -123,19 +170,22 @@ end;
 
 { TestTD2XSingleParam }
 
-function TestTD2XSingleParam.CnvBoolProp(pVal: string): Boolean;
+function TestTD2XSingleParam.CnvBoolProp(pStr: string; out pVal: Boolean): Boolean;
 begin
-  Result := False;
+  pVal := False;
+  Result := True;
 end;
 
-function TestTD2XSingleParam.CnvObjProp(pVal: string): TObject;
+function TestTD2XSingleParam.CnvObjProp(pStr: string; out pVal: TObject): Boolean;
 begin
-  Result := nil;
+  Result := True;
+  pVal := nil;
 end;
 
-function TestTD2XSingleParam.CnvStrProp(pVal: string): string;
+function TestTD2XSingleParam.CnvStrProp(pStr: string; out pVal: string): Boolean;
 begin
-  Result := '';
+  Result := True;
+  pVal := '';
 end;
 
 function TestTD2XSingleParam.FmtBoolProp(pVal: Boolean): string;
@@ -146,6 +196,11 @@ end;
 function TestTD2XSingleParam.FmtObjProp(pVal: TObject): string;
 begin
   Result := 'nil';
+end;
+
+function TestTD2XSingleParam.FmtStrProp(pVal: string): string;
+begin
+  Result := '';
 end;
 
 function TestTD2XSingleParam.InvStrProp(pVal: string): Boolean;
@@ -183,7 +238,7 @@ procedure TestTD2XSingleParam.TestInvalidAllBlank;
 begin
   StartExpectingException(EInvalidParam);
   try
-    TD2XSingleParam<string>.CreateParam('', '', '', '', '', CnvStrProp, CnvStrProp, nil);
+    TD2XSingleParam<string>.CreateParam('', '', '', '', '', CnvStrProp, FmtStrProp, nil);
   except
     on E: EInvalidParam do
     begin
@@ -197,7 +252,7 @@ procedure TestTD2XSingleParam.TestInvalidDefaultValue;
 begin
   StartExpectingException(EInvalidParam);
   try
-    TD2XSingleParam<string>.CreateParam('Code', 'Label', '', '', '', CnvStrProp, CnvStrProp,
+    TD2XSingleParam<string>.CreateParam('Code', 'Label', '', '', '', CnvStrProp, FmtStrProp,
       InvStrProp);
   except
     on E: EInvalidParam do
@@ -240,7 +295,7 @@ procedure TestTD2XSingleParam.TestInvalidNilConverter;
 begin
   StartExpectingException(EInvalidParam);
   try
-    TD2XSingleParam<string>.CreateParam('Code', 'Label', '', '', '', nil, CnvStrProp, nil);
+    TD2XSingleParam<string>.CreateParam('Code', 'Label', '', '', '', nil, FmtStrProp, nil);
   except
     on E: EInvalidParam do
     begin
@@ -293,7 +348,7 @@ var
   lStrP: TD2XSingleParam<string>;
 begin
   lStrP := TD2XSingleParam<string>.CreateParam('T', 'Test', '', '', '', CnvStrProp,
-    CnvStrProp, nil);
+    FmtStrProp, nil);
 
   try
     CheckEqualsString('-T Test', ReduceString(lStrP.Describe), 'Describe Param');
@@ -358,8 +413,8 @@ procedure TestTD2XBooleanParam.TestReset;
 begin
   CheckEquals(False, fBoolP.Value, 'Default Value Set');
 
-  Check(fBoolP.Parse('T'), 'Parse right code with No value');
-  CheckEquals(True, fBoolP.Value, 'Blank Value');
+  fBoolP.Value := True;
+  CheckEquals(True, fBoolP.Value, 'Set Value');
 
   fBoolP.Reset;
   CheckEquals(False, fBoolP.Value, 'Default Value Reset');
@@ -368,19 +423,25 @@ end;
 procedure TestTD2XBooleanParam.TestToString;
 begin
   CheckEqualsString('-', fBoolP.ToString, 'Report Default Value');
+
+  fBoolP.Value := True;
+  CheckEqualsString('+', fBoolP.ToString, 'Report Value');
 end;
 
 procedure TestTD2XBooleanParam.TestValue;
 begin
   CheckEquals(False, fBoolP.Value, 'Default Value Set');
+
+  fBoolP.Value := True;
+  CheckEquals(True, fBoolP.Value, 'Value Set');
 end;
 
 { TestTD2XStringParam }
 
 procedure TestTD2XStringParam.SetUp;
 begin
-  fStrP := TD2XStringParam.CreateStr('T', 'Test', '<Example>', 'Test String Param',
-    'Tst', nil);
+  fStrP := TD2XStringParam.CreateStr('T', 'Test', '<Example>', 'Test String Param', 'Tst',
+    nil, nil);
 end;
 
 procedure TestTD2XStringParam.TearDown;
@@ -408,14 +469,17 @@ end;
 procedure TestTD2XStringParam.TestReport;
 begin
   CheckEqualsString('Test Tst', ReduceString(fStrP.Report), 'Report Default Value');
+
+  fStrP.Value := 'Simple';
+  CheckEqualsString('Test Simple', ReduceString(fStrP.Report), 'Report Simple Value');
 end;
 
 procedure TestTD2XStringParam.TestReset;
 begin
   CheckEqualsString('Tst', fStrP.Value, 'Default Value Set');
 
-  Check(fStrP.Parse('TSimple'), 'Parse right code with value');
-  CheckEqualsString('Simple', fStrP.Value, 'Simple Value');
+  fStrP.Value := 'Simple';
+  CheckEqualsString('Simple', fStrP.Value, 'Simple Value Set');
 
   fStrP.Reset;
   CheckEqualsString('Tst', fStrP.Value, 'Default Value Set');
@@ -423,12 +487,18 @@ end;
 
 procedure TestTD2XStringParam.TestToString;
 begin
-  CheckEqualsString('Tst', fStrP.ToString, 'Check Value');
+  CheckEqualsString('Tst', fStrP.ToString, 'Check Default Value');
+
+  fStrP.Value := 'Simple';
+  CheckEqualsString('Simple', fStrP.ToString, 'Check Simple Value');
 end;
 
 procedure TestTD2XStringParam.TestValue;
 begin
-  CheckEqualsString('Tst', fStrP.Value, 'Check Value');
+  CheckEqualsString('Tst', fStrP.Value, 'Check Default Value');
+
+  fStrP.Value := 'Simple';
+  CheckEqualsString('Simple', fStrP.Value, 'Check Simple Value');
 end;
 
 { TestTD2XParam }
@@ -538,10 +608,14 @@ begin
   inherited;
 
   fPs := TD2XParams.Create;
+  fSB := TStringBuilder.Create;
+  fPs.Log := TStringWriter.Create(fSB);
 end;
 
 procedure TestTD2XParams.TearDown;
 begin
+  FreeAndNil(fSB);
+  fPs.Log.Free;
   FreeAndNil(fPs);
 
   inherited;
@@ -549,14 +623,19 @@ end;
 
 procedure TestTD2XParams.TestDescribeAll;
 begin
-  CheckEqualsString('', fPs.DescribeAll, 'Describe No Params');
+  fPs.DescribeAll;
+  CheckEqualsString('', fSB.ToString, 'Describe No Params');
 
   fPs.Add(TD2XParam.Create('T', 'Test', 'Test param', TstParser));
-  CheckEqualsString('-T Test Test param', ReduceString(fPs.DescribeAll), 'Describe One Param');
+  fSB.Clear;
+  fPs.DescribeAll;
+  CheckEqualsString('-T Test Test param', ReduceString(fSB.ToString), 'Describe One Param');
 
   fPs.Add(TD2XBooleanParam.CreateBool('B', 'Boolean', 'Boolean param'));
+  fSB.Clear;
+  fPs.DescribeAll;
   CheckEqualsString('-T Test Test param -B Boolean [+|-] - Boolean param',
-    ReduceString(fPs.DescribeAll), 'Describe Two Params');
+    ReduceString(fSB.ToString), 'Describe Two Params');
 end;
 
 procedure TestTD2XParams.TestForCode;
@@ -575,23 +654,187 @@ end;
 
 procedure TestTD2XParams.TestReportAll;
 begin
-  CheckEqualsString('', fPs.ReportAll, 'Report No Params');
+  fPs.ReportAll;
+  CheckEqualsString('', fSB.ToString, 'Report No Params');
 
   fPs.Add(TD2XParam.Create('T', 'Test', 'Testing', TstParser));
-  CheckEqualsString('', fPs.ReportAll, 'Report One Param');
+  fSB.Clear;
+  fPs.ReportAll;
+  CheckEqualsString('', fSB.ToString, 'Report One Param');
 
   fPs.Add(TD2XBooleanParam.CreateBool('B', 'Boolean', 'Boolean param'));
-  CheckEqualsString('Boolean -', ReduceString(fPs.ReportAll), 'Report Two Params');
+  fSB.Clear;
+  fPs.ReportAll;
+  CheckEqualsString('Boolean -', ReduceString(fSB.ToString), 'Report Two Params');
 end;
 
 function TestTD2XParams.TstParser(pStr: string): Boolean;
 begin
   fCalledParser := True;
+  Result := True;
+end;
+
+{ TestTD2XValidStringParam }
+
+function TestTD2XValidStringParam.NotBlank(pStr: string): Boolean;
+begin
+  Result := pStr > '';
+end;
+
+procedure TestTD2XValidStringParam.SetUp;
+begin
+  fStrP := TD2XStringParam.CreateStr('T', 'Test', '<Example>', 'Test String Param', 'Tst', nil,
+    NotBlank);
+end;
+
+procedure TestTD2XValidStringParam.TearDown;
+begin
+  FreeAndNil(fStrP);
+end;
+
+procedure TestTD2XValidStringParam.TestParse;
+begin
+  CheckEqualsString('Tst', fStrP.Value, 'Default Value Set');
+
+  CheckFalse(fStrP.Parse('T'), 'Parse right code with No value');
+  CheckEqualsString('Tst', fStrP.Value, 'Value unchanged');
+
+  Check(fStrP.Parse('TSimple'), 'Parse right code with value');
+  CheckEqualsString('Simple', fStrP.Value, 'Simple Value');
+end;
+
+procedure TestTD2XValidStringParam.TestValue;
+begin
+  CheckEqualsString('Tst', fStrP.Value, 'Check Default Value');
+
+  fStrP.Value := 'Simple';
+  CheckEqualsString('Simple', fStrP.Value, 'Check Simple Value');
+
+  StartExpectingException(EInvalidParam);
+  try
+    fStrP.Value := '';
+  except
+    on E: EInvalidParam do
+    begin
+      CheckEqualsString('Invalid value', E.Message, 'Exception message');
+      raise;
+    end;
+  end;
+end;
+
+{ TestTD2XFormatStringParam }
+
+function TestTD2XFormatStringParam.LeadingColon(pStr: string; out pVal: string): Boolean;
+begin
+  Result := True;
+  if pStr = '' then
+    pVal := ''
+  else
+    if pStr[1] = ':' then
+      pVal := Copy(pStr, 2, Length(pStr))
+    else
+      Result := False;
+end;
+
+procedure TestTD2XFormatStringParam.SetUp;
+begin
+  fStrP := TD2XStringParam.CreateStr('T', 'Test', '<Example>', 'Test String Param', 'Tst',
+    LeadingColon, nil);
+end;
+
+procedure TestTD2XFormatStringParam.TearDown;
+begin
+  FreeAndNil(fStrP);
+end;
+
+procedure TestTD2XFormatStringParam.TestParse;
+begin
+  CheckEqualsString('Tst', fStrP.Value, 'Default Value Set');
+
+  Check(fStrP.Parse('T'), 'Parse right code with No value');
+  CheckEqualsString('', fStrP.Value, 'Blank Value');
+
+  CheckFalse(fStrP.Parse('T-Simple'), 'Parse right code with Wrong value');
+  CheckEqualsString('', fStrP.Value, 'Blank Value');
+
+  Check(fStrP.Parse('T:Simple'), 'Parse right code with Right value');
+  CheckEqualsString('Simple', fStrP.Value, 'Simple Value');
+
+  Check(fStrP.Parse('T:'), 'Parse right code with Right Blank value');
+  CheckEqualsString('', fStrP.Value, 'Simple Value');
+end;
+
+{ TestTD2XFormatValidStringParam }
+
+function TestTD2XFormatValidStringParam.LeadingColon(pStr: string; out pVal: string): Boolean;
+begin
+  Result := True;
+  if pStr = '' then
+    pVal := ''
+  else
+    if pStr[1] = ':' then
+      pVal := Copy(pStr, 2, Length(pStr))
+    else
+      Result := False;
+end;
+
+function TestTD2XFormatValidStringParam.NotBlank(pStr: string): Boolean;
+begin
+  Result := pStr > '';
+end;
+
+procedure TestTD2XFormatValidStringParam.SetUp;
+begin
+  fStrP := TD2XStringParam.CreateStr('T', 'Test', '<Example>', 'Test String Param', 'Tst',
+    LeadingColon, NotBlank);
+end;
+
+procedure TestTD2XFormatValidStringParam.TearDown;
+begin
+  FreeAndNil(fStrP);
+end;
+
+procedure TestTD2XFormatValidStringParam.TestParse;
+begin
+  CheckEqualsString('Tst', fStrP.Value, 'Default Value Set');
+
+  CheckFalse(fStrP.Parse('T'), 'Parse right code with No value');
+  CheckEqualsString('Tst', fStrP.Value, 'Blank Value');
+
+  CheckFalse(fStrP.Parse('T-Simple'), 'Parse right code with Wrong value');
+  CheckEqualsString('Tst', fStrP.Value, 'Blank Value');
+
+  Check(fStrP.Parse('T:Simple'), 'Parse right code with Right value');
+  CheckEqualsString('Simple', fStrP.Value, 'Simple Value');
+
+  CheckFalse(fStrP.Parse('T:'), 'Parse right code with Right Blank value');
+  CheckEqualsString('Simple', fStrP.Value, 'Simple Value');
+end;
+
+procedure TestTD2XFormatValidStringParam.TestValue;
+begin
+  CheckEqualsString('Tst', fStrP.Value, 'Check Default Value');
+
+  fStrP.Value := 'Simple';
+  CheckEqualsString('Simple', fStrP.Value, 'Check Simple Value');
+
+  StartExpectingException(EInvalidParam);
+  try
+    fStrP.Value := '';
+  except
+    on E: EInvalidParam do
+    begin
+      CheckEqualsString('Invalid value', E.Message, 'Exception message');
+      raise;
+    end;
+  end;
 end;
 
 initialization
 
 RegisterTests([TestTD2XBooleanParam.Suite, TestTD2XStringParam.Suite,
-    TestTD2XSingleParam.Suite, TestTD2XParam.Suite, TestTD2XParams.Suite]);
+    TestTD2XValidStringParam.Suite, TestTD2XFormatStringParam.Suite,
+    TestTD2XFormatValidStringParam.Suite, TestTD2XSingleParam.Suite, TestTD2XParam.Suite,
+    TestTD2XParams.Suite]);
 
 end.
