@@ -47,6 +47,6 @@ end;
 
 initialization
 
-RegisterTests([TestTD2X.Suite]);
+RegisterTests('Global', [TestTD2X.Suite]);
 
 end.

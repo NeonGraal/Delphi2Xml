@@ -25,6 +25,10 @@ type
   protected
     fCode, fLabel, fDescr: string;
     fParser: TpParser;
+
+  public
+    property ParamLabel: string read fLabel;
+
   end;
 
   TD2XParams = class(TObjectList<TD2XParam>)
@@ -57,6 +61,10 @@ type
     function Report: string; override;
 
     function ToString: string; override;
+
+  protected
+    function GetSample: string; virtual;
+    function GetFormatted(pDefault: Boolean): string; virtual;
 
   private
     fSample: string;
@@ -92,6 +100,35 @@ type
   private
     function ConvertString(pStr: string; out pVal: string): Boolean;
     function FormatString(pVal: string): string;
+  end;
+
+  TD2XFlaggedStringParam = class(TD2XSingleParam<string>)
+  public type
+    TfspFormatter = function(pFlag: Boolean; pVal: string): string of object;
+
+  public
+    constructor CreateFlagStr(pCode, pLabel, pSample, pDescr, pStrDefault: string;
+      pFlagDefault: Boolean; pStrConverter: TD2XSingleParam<string>.TspConverter;
+      pStrValidator: TD2XSingleParam<string>.TspValidator; pFormatter: TfspFormatter);
+
+    procedure Reset; override;
+
+  protected
+    function GetSample: string; override;
+    function GetFormatted(pDefault: Boolean): string; override;
+
+  private
+    fFlagDefault: Boolean;
+    fFlag: Boolean;
+    fStrConverter: TD2XSingleParam<string>.TspConverter;
+    fFormatter: TfspFormatter;
+
+    function ConvertString(pStr: string; out pVal: string): Boolean;
+    function FormatFlagString(pFlag: Boolean; pVal: string): string;
+    function FormatString(pVal: string): string;
+
+  public
+    property Flag: Boolean read fFlag write fFlag;
   end;
 
 implementation
@@ -146,13 +183,26 @@ end;
 
 function TD2XSingleParam<T>.Describe: string;
 begin
-  Result := Format('  -%s %-15s %-15s %-15s %s', [fCode, fLabel, fSample,
-      fFormatter(fDefault), fDescr]);
+  Result := Format('  -%s %-15s %-15s %-15s %s', [fCode, fLabel, GetSample,
+      GetFormatted(True), fDescr]);
+end;
+
+function TD2XSingleParam<T>.GetFormatted(pDefault: Boolean): string;
+begin
+  if pDefault then
+    Result := fFormatter(fDefault)
+  else
+    Result := fFormatter(fValue);
+end;
+
+function TD2XSingleParam<T>.GetSample: string;
+begin
+  Result := fSample;
 end;
 
 function TD2XSingleParam<T>.Report: string;
 begin
-  Result := Format(' %-15s %s', [fLabel, fFormatter(fValue)]);
+  Result := Format(' %-15s %s', [fLabel, GetFormatted(False)]);
 end;
 
 procedure TD2XSingleParam<T>.Reset;
@@ -173,7 +223,7 @@ end;
 
 function TD2XSingleParam<T>.ToString: string;
 begin
-  Result := fFormatter(fValue);
+  Result := GetFormatted(False);
 end;
 
 { TD2XBooleanParam }
@@ -315,6 +365,88 @@ end;
 function TD2XParamEqCmp.Compare(const pL, pR: TD2XParam): Integer;
 begin
   Result := CompareStr(pL.fCode, pR.fCode);
+end;
+
+{ TD2XFlaggedStringParam }
+
+function TD2XFlaggedStringParam.ConvertString(pStr: string; out pVal: string): Boolean;
+begin
+  Result := False;
+  pVal := '';
+  if (pStr = '') or (pStr = '+') or (pStr = ':') or (pStr = '-') then
+  begin
+    fFlag := pStr <> '-';
+    if Assigned(fStrConverter) then
+      Result := fStrConverter('', pVal)
+    else
+      Result := True;
+  end;
+  if (Length(pStr) > 1) and (pStr[1] = ':') then
+  begin
+    fFlag := True;
+    if Assigned(fStrConverter) then
+      Result := fStrConverter(Copy(pStr, 2, Length(pStr)), pVal)
+    else
+    begin
+      pVal := Copy(pStr, 2, Length(pStr));
+      Result := True;
+    end;
+  end;
+end;
+
+constructor TD2XFlaggedStringParam.CreateFlagStr(pCode, pLabel, pSample, pDescr,
+  pStrDefault: string; pFlagDefault: Boolean;
+  pStrConverter: TD2XSingleParam<string>.TspConverter;
+  pStrValidator: TD2XSingleParam<string>.TspValidator; pFormatter: TfspFormatter);
+begin
+  fStrConverter := pStrConverter;
+  fFlagDefault := pFlagDefault;
+  if Assigned(pFormatter) then
+    fFormatter := pFormatter
+  else
+    fFormatter := FormatFlagString;
+
+  CreateParam(pCode, pLabel, pSample, pDescr, pStrDefault, ConvertString, FormatString,
+    pStrValidator);
+end;
+
+function TD2XFlaggedStringParam.FormatFlagString(pFlag: Boolean; pVal: string): string;
+begin
+  if pFlag then
+    if pVal > '' then
+      Result := ':' + pVal
+    else
+      Result := '+'
+  else
+    if pVal > '' then
+      Result := '-(' + pVal + ')'
+    else
+      Result := '-';
+end;
+
+function TD2XFlaggedStringParam.FormatString(pVal: string): string;
+begin
+  raise EInvalidParam.Create('Incorrect call to TD2XFlaggedStringParam.FormatString');
+end;
+
+function TD2XFlaggedStringParam.GetFormatted(pDefault: Boolean): string;
+begin
+  if pDefault then
+    Result := fFormatter(fFlagDefault, fDefault)
+  else
+    Result := fFormatter(fFlag, fValue);
+end;
+
+function TD2XFlaggedStringParam.GetSample: string;
+begin
+  Result := '[+-]:' + fSample;
+end;
+
+procedure TD2XFlaggedStringParam.Reset;
+begin
+  inherited;
+
+  fFlag := fFlagDefault;
 end;
 
 end.

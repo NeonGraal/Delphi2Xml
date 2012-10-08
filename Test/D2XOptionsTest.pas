@@ -18,7 +18,7 @@ type
   strict protected
     fOpts: TD2XOptions;
 
-    procedure CheckLog(pMsg: String);
+    procedure CheckLog(pMsg: string);
   public
     procedure SetUp; override;
     procedure TearDown; override;
@@ -91,6 +91,7 @@ type
     procedure TestParseOptionLOn;
     procedure TestParseOptionLValue;
     procedure TestParseOptionM;
+    procedure TestParseOptionMValue;
     procedure TestParseOptionN;
     procedure TestParseOptionNOff;
     procedure TestParseOptionNOn;
@@ -145,7 +146,7 @@ implementation
 
 { TestTD2XOptionBase }
 
-procedure TestTD2XOptionBase.CheckLog(pMsg: String);
+procedure TestTD2XOptionBase.CheckLog(pMsg: string);
 begin
   CheckEqualsString(pMsg, Trim(fLog.DataString), 'Log');
 end;
@@ -405,7 +406,8 @@ begin
 
   ReturnValue := fOpts.OutputFileOrExtn(pExtn);
 
-  CheckEqualsString('Log\' + fOpts.GlobalName + fOpts.OutputTimestamp + '.Extn', ReturnValue, 'ReturnValue');
+  CheckEqualsString('Log\' + fOpts.GlobalName + fOpts.OutputTimestamp + '.Extn', ReturnValue,
+    'ReturnValue');
 end;
 
 procedure TestTD2XOptionFilenames.TestOutputTimestampFile;
@@ -685,7 +687,8 @@ begin
   pOpt := '-G';
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
-  CheckEqualsString(ChangeFileExt(ExtractFileName(ParamStr(0)), ''), fOpts.GlobalName, 'GlobalName');
+  CheckEqualsString(ChangeFileExt(ExtractFileName(ParamStr(0)), ''), fOpts.GlobalName,
+    'GlobalName');
   CheckLog('');
 end;
 
@@ -698,6 +701,10 @@ begin
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
   CheckEqualsString('Global', fOpts.GlobalName, 'GlobalName');
+
+  CheckEqualsString('Global\', fOpts.XmlDirectory, 'XmlDirectory');
+  CheckEqualsString('Global\', fOpts.DefinesDirectory, 'DefinesDirectory');
+
   CheckLog('');
 end;
 
@@ -720,7 +727,8 @@ begin
   pOpt := '-I';
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
-  CheckEqualsString('Config\Input.File', fOpts.InputFileOrExtn('Input.File'), 'InputFileOrExtn');
+  CheckEqualsString('Config\Input.File', fOpts.InputFileOrExtn('Input.File'),
+    'InputFileOrExtn');
   CheckLog('');
 end;
 
@@ -744,7 +752,8 @@ begin
   pOpt := '-I+';
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
-  CheckEqualsString('Config\Input.File', fOpts.InputFileOrExtn('Input.File'), 'InputFileOrExtn');
+  CheckEqualsString('Config\Input.File', fOpts.InputFileOrExtn('Input.File'),
+    'InputFileOrExtn');
   CheckLog('');
 end;
 
@@ -756,7 +765,8 @@ begin
   pOpt := '-I:Input';
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
-  CheckEqualsString('Input\Input.File', fOpts.InputFileOrExtn('Input.File'), 'InputFileOrExtn');
+  CheckEqualsString('Input\Input.File', fOpts.InputFileOrExtn('Input.File'),
+    'InputFileOrExtn');
   CheckLog('');
 end;
 
@@ -851,6 +861,19 @@ begin
   CheckLog('Invalid Parse mode option: -M');
 end;
 
+procedure TestTD2XOptions.TestParseOptionMValue;
+var
+  ReturnValue: Boolean;
+  pOpt: string;
+begin
+  pOpt := '-MUses';
+  ReturnValue := fOpts.ParseOption(pOpt);
+  Check(ReturnValue, 'ReturnValue');
+  Check(fOpts.ParseMode = pmUses, 'ParseMode');
+  CheckEqualsString('Uses', fOpts.GlobalName, 'GlobalName');
+  CheckLog('');
+end;
+
 procedure TestTD2XOptions.TestParseOptionN;
 var
   ReturnValue: Boolean;
@@ -895,7 +918,8 @@ begin
   pOpt := '-O';
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
-  CheckEqualsString('Log\Output.File', fOpts.OutputFileOrExtn('Output.File'), 'OutputFileOrExtn');
+  CheckEqualsString('Log\Output.File', fOpts.OutputFileOrExtn('Output.File'),
+    'OutputFileOrExtn');
   CheckLog('');
 end;
 
@@ -919,7 +943,8 @@ begin
   pOpt := '-O+';
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
-  CheckEqualsString('Log\Output.File', fOpts.OutputFileOrExtn('Output.File'), 'OutputFileOrExtn');
+  CheckEqualsString('Log\Output.File', fOpts.OutputFileOrExtn('Output.File'),
+    'OutputFileOrExtn');
   CheckLog('');
 end;
 
@@ -931,7 +956,8 @@ begin
   pOpt := '-O:Output';
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
-  CheckEqualsString('Output\Output.File', fOpts.OutputFileOrExtn('Output.File'), 'OutputFileOrExtn');
+  CheckEqualsString('Output\Output.File', fOpts.OutputFileOrExtn('Output.File'),
+    'OutputFileOrExtn');
   CheckLog('');
 end;
 
@@ -943,7 +969,7 @@ begin
   pOpt := '-P';
   ReturnValue := fOpts.ParseOption(pOpt);
   CheckFalse(ReturnValue, 'ReturnValue');
-  CheckLog('Invalid Result per option: -P');
+  CheckLog('Invalid Results per option: -P');
 end;
 
 procedure TestTD2XOptions.TestParseOptionPValue;
@@ -951,9 +977,10 @@ var
   ReturnValue: Boolean;
   pOpt: string;
 begin
-  pOpt := '-P:Dir';
+  pOpt := '-PDir';
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
+
   Check(fOpts.ResultPer = rpDir, 'ResultPer');
   CheckLog('');
 end;
@@ -1370,7 +1397,8 @@ begin
   CheckFalse(fOpts.Verbose, 'Verbose');
   CheckFalse(fOpts.Recurse, 'Recurse');
   CheckFalse(fOpts.UseBase, 'UseBase');
-  CheckEqualsString(ChangeFileExt(ExtractFileName(ParamStr(0)), ''), fOpts.GlobalName, 'SkipFileOrExtn');
+  CheckEqualsString(ChangeFileExt(ExtractFileName(ParamStr(0)), ''), fOpts.GlobalName,
+    'SkipFileOrExtn');
   CheckEqualsString('', fOpts.BaseDirectory, 'BaseDirectory');
   CheckFalse(fOpts.WriteDefines, 'WriteDefines');
   CheckEqualsString('Defines\', fOpts.DefinesDirectory, 'DefinesDirectory');
@@ -1412,6 +1440,7 @@ end;
 
 initialization
 
-RegisterTests([TestTD2XOptionGeneral.Suite, TestTD2XOptionFilenames.Suite, TestTD2XOptions.Suite]);
+RegisterTests('Options', [TestTD2XOptionGeneral.Suite, TestTD2XOptionFilenames.Suite,
+    TestTD2XOptions.Suite]);
 
 end.

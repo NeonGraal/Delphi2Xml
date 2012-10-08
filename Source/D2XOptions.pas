@@ -25,6 +25,8 @@ type
     fTimestampFiles: TD2XBooleanParam;
     fFinalToken: TD2XBooleanParam;
     fGlobalName: TD2XStringParam;
+    fParseMode: TD2XSingleParam<TD2XParseMode>;
+    fResultPer: TD2XSingleParam<TD2XResultPer>;
 
     fXml: boolean;
     fXmlDirectory: string;
@@ -45,8 +47,6 @@ type
     fOutputTimestamp: string;
     fUseInput: boolean;
     fInputDirectory: string;
-    fParseMode: TD2XParseMode;
-    fResultPer: TD2XResultPer;
 
     fDefines: TStringList;
 
@@ -58,11 +58,14 @@ type
     procedure DeleteDefine(pDef: string);
     procedure LoadDefinesFile(pFile: string);
 
-    function SetParseMode(pVal: string): boolean;
-    function SetResultPer(pVal: string): boolean;
-
-    function ConvertGlobalName(pStr: string; out pVal: String): boolean;
+    function ConvertGlobalName(pStr: string; out pVal: string): boolean;
     function ValidateGlobalName(pVal: string): boolean;
+
+    function ConvertParsingMode(pStr: string; out pVal: TD2XParseMode): boolean;
+    function FormatParsingMode(pVal: TD2XParseMode): string;
+
+    function ConvertResultPer(pStr: string; out pVal: TD2XResultPer): boolean;
+    function FormatResultPer(pVal: TD2XResultPer): string;
 
     procedure Log(pFmt: string; pArgs: array of const);
     procedure LogOptionError(pLabel, pOpt: string);
@@ -73,6 +76,8 @@ type
     function GetTimestampFiles: boolean;
     function GetFinalToken: boolean;
     function GetGlobalName: string;
+    function GetParseMode: TD2XParseMode;
+    function GetResultPer: TD2XResultPer;
 
   public
     property LogErrors: boolean read GetLogErrors;
@@ -82,6 +87,8 @@ type
     property Recurse: boolean read GetRecurse;
     property FinalToken: boolean read GetFinalToken;
     property GlobalName: string read GetGlobalName;
+    property ParseMode: TD2XParseMode read GetParseMode;
+    property ResultPer: TD2XResultPer read GetResultPer;
 
     property UseBase: boolean read fUseBase;
     property BaseDirectory: string read fBaseDirectory;
@@ -102,8 +109,6 @@ type
     property CountFileOrExtn: string read fCountFileOrExtn;
     property SkipMethods: boolean read fSkipMethods;
     property SkipFileOrExtn: string read fSkipFileOrExtn;
-    property ParseMode: TD2XParseMode read fParseMode;
-    property ResultPer: TD2XResultPer read fResultPer;
     property OutputTimestamp: string read fOutputTimestamp;
 
     constructor Create;
@@ -137,13 +142,48 @@ begin
     fDefines.Add(pDef);
 end;
 
-function TD2XOptions.ConvertGlobalName(pStr: string; out pVal: String): boolean;
+function TD2XOptions.ConvertGlobalName(pStr: string; out pVal: string): boolean;
 begin
   Result := True;
   if pStr = '' then
     pVal := ChangeFileExt(ExtractFileName(ParamStr(0)), '')
   else
     pVal := pStr;
+end;
+
+function TD2XOptions.ConvertParsingMode(pStr: string; out pVal: TD2XParseMode): boolean;
+begin
+  Result := pStr > '';
+  if Result then
+    case pStr[1] of
+      'U', 'u':
+        begin
+          pVal := pmUses;
+          fGlobalName.Value := 'Uses';
+        end
+    else
+      pVal := pmFull;
+    end;
+end;
+
+function TD2XOptions.ConvertResultPer(pStr: string; out pVal: TD2XResultPer): boolean;
+begin
+  Result := pStr > '';
+  if Result then
+    case pStr[1] of
+      'R', 'r':
+        pVal := rpRun;
+      'P', 'p':
+        pVal := rpParam;
+      'W', 'w':
+        pVal := rpWildcard;
+      'S', 's':
+        pVal := rpSubDir;
+      'D', 'd':
+        pVal := rpDir;
+    else
+      pVal := rpFile;
+    end;
 end;
 
 constructor TD2XOptions.Create;
@@ -168,6 +208,13 @@ begin
   fGlobalName := TD2XStringParam.CreateStr('G', 'Global name', '<str>', 'Sets global name',
     ChangeFileExt(ExtractFileName(ParamStr(0)), ''), ConvertGlobalName, ValidateGlobalName);
   fParams.Add(fGlobalName);
+  fParseMode := TD2XSingleParam<TD2XParseMode>.CreateParam('M', 'Parse mode', '<mode>',
+    'Set Parsing mode (F[ull], U[ses])', pmFull, ConvertParsingMode, FormatParsingMode, nil);
+  fParams.Add(fParseMode);
+  fResultPer := TD2XSingleParam<TD2XResultPer>.CreateParam('P', 'Results per', '<per>',
+    'Set Result per (F[ile], [S]ubdir, D[ir], W[ildcard], P[aram], R[un])', rpFile,
+    ConvertResultPer, FormatResultPer, nil);
+  fParams.Add(fResultPer);
 
   fUseBase := False;
   fBaseDirectory := '';
@@ -190,8 +237,6 @@ begin
   fSkipFileOrExtn := GlobalName + '.skip';
   fDefines := TStringList.Create;
   fDefines.Sorted := True;
-  fParseMode := pmFull;
-  fResultPer := rpFile;
   fLog := nil;
 end;
 
@@ -216,6 +261,16 @@ begin
   inherited;
 end;
 
+function TD2XOptions.FormatParsingMode(pVal: TD2XParseMode): string;
+begin
+  Result := TD2X.ToLabel(pVal);
+end;
+
+function TD2XOptions.FormatResultPer(pVal: TD2XResultPer): string;
+begin
+  Result := TD2X.ToLabel(pVal);
+end;
+
 function TD2XOptions.GetFinalToken: boolean;
 begin
   Result := fFinalToken.Value;
@@ -236,9 +291,19 @@ begin
   Result := fLogNotSupported.Value;
 end;
 
+function TD2XOptions.GetParseMode: TD2XParseMode;
+begin
+  Result := fParseMode.Value;
+end;
+
 function TD2XOptions.GetRecurse: boolean;
 begin
   Result := fRecurse.Value;
+end;
+
+function TD2XOptions.GetResultPer: TD2XResultPer;
+begin
+  Result := fResultPer.Value;
 end;
 
 function TD2XOptions.GetTimestampFiles: boolean;
@@ -404,7 +469,10 @@ begin
   begin
     lPrm := fParams.ForCode(Copy(pOpt, 2, 1));
     if Assigned(lPrm) then
-      Result := lPrm.Parse(Copy(pOpt, 2, Length(pOpt)))
+      if lPrm.Parse(Copy(pOpt, 2, Length(pOpt))) then
+        Result := True
+      else
+        LogOptionError('Invalid ' + lPrm.ParamLabel, pOpt)
     else
       case pOpt[2] of
         '?':
@@ -414,19 +482,6 @@ begin
             ReportOptions;
             Result := True;
           end;
-        'M', 'm':
-          if ErrorUnlessSetter(SetParseMode) then
-            LogOptionError('Invalid Parse mode', pOpt)
-          else
-          begin
-
-            Result := True;
-          end;
-        'P', 'p':
-          if ErrorUnlessSetter(SetResultPer) then
-            LogOptionError('Invalid Result per', pOpt)
-          else
-            Result := True;
         'D', 'd':
           if ErrorUnlessValue(lValue) then
             LogOptionError('Invalid Define', pOpt)
@@ -587,39 +642,6 @@ begin
   fLog := TStreamWriter.Create(pDest);
 end;
 
-function TD2XOptions.SetParseMode(pVal: string): boolean;
-begin
-  Result := True;
-  case pVal[1] of
-    'U', 'u':
-      begin
-        fParseMode := pmUses;
-        fGlobalName.Value := 'Uses';
-      end
-  else
-    fParseMode := pmFull;
-  end;
-end;
-
-function TD2XOptions.SetResultPer(pVal: string): boolean;
-begin
-  Result := True;
-  case pVal[1] of
-    'R', 'r':
-      fResultPer := rpRun;
-    'P', 'p':
-      fResultPer := rpParam;
-    'W', 'w':
-      fResultPer := rpWildcard;
-    'S', 's':
-      fResultPer := rpSubDir;
-    'D', 'd':
-      fResultPer := rpDir;
-  else
-    fResultPer := rpFile;
-  end;
-end;
-
 function TD2XOptions.ShowOptions: boolean;
 var
   lBase: string;
@@ -633,9 +655,6 @@ begin
   fParams.DescribeAll;
   Log('    D:<define>    %-15s Define <define> (also enables "Load Defines")', ['']);
   Log('    Z:<define>    %-15s Undefine <define> (also enables "Load Defines")', ['']);
-  Log('    M:<mode>      %-15s Set Parsing mode (F[ull], U[ses])', ['']);
-  Log('    P:<Per>       %-15s Set Result per (F[ile], [S]ubdir, D[ir], W[ildcard], P[aram], R[un])',
-    ['']);
   Log('    L[+-]|:<f/e>  %-15s Load Defines from <f/e> (no <f/e> clears all defines)',
     [':.def']);
   Log('    W[+-]|:<dir>  %-15s Generate Final Defines files into current or given <dir>', ['-']
