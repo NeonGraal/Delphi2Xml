@@ -27,26 +27,26 @@ type
     fGlobalName: TD2XStringParam;
     fParseMode: TD2XSingleParam<TD2XParseMode>;
     fResultPer: TD2XSingleParam<TD2XResultPer>;
+    fWriteXml: TD2XFlaggedStringParam;
+    // fXmlDirectory: string;
+    fWriteDefines: TD2XFlaggedStringParam;
+    // fDefinesDirectory: string;
+    fUseBase: TD2XFlaggedStringParam;
+    // fBaseDirectory: string;
+    fUseOutput: TD2XFlaggedStringParam;
+    // fOutputDirectory: string;
+    fUseInput: TD2XFlaggedStringParam;
+    // fInputDirectory: string;
+    fCountChildren: TD2XFlaggedStringParam;
+//    fCountFileOrExtn: string;
+    fSkipMethods: TD2XFlaggedStringParam;
+//    fSkipFileOrExtn: string;
+    fDefinesUsed: TD2XFlaggedStringParam;
+//    fUsedFileOrExtn: string;
 
-    fXml: boolean;
-    fXmlDirectory: string;
-    fCountChildren: boolean;
-    fCountFileOrExtn: string;
-    fSkipMethods: boolean;
-    fSkipFileOrExtn: string;
-    fUseBase: boolean;
-    fBaseDirectory: string;
-    fDefinesUsed: boolean;
-    fUsedFileOrExtn: string;
     fLoadDefines: boolean;
     fLoadFileOrExtn: string;
-    fWriteDefines: boolean;
-    fDefinesDirectory: string;
-    fUseOutput: boolean;
-    fOutputDirectory: string;
     fOutputTimestamp: string;
-    fUseInput: boolean;
-    fInputDirectory: string;
 
     fDefines: TStringList;
 
@@ -58,13 +58,19 @@ type
     procedure DeleteDefine(pDef: string);
     procedure LoadDefinesFile(pFile: string);
 
-    function ConvertGlobalName(pStr: string; out pVal: string): boolean;
+    function ConvertGlobalName(pStr: string; pDflt: string; out pVal: string): boolean;
     function ValidateGlobalName(pVal: string): boolean;
 
-    function ConvertParsingMode(pStr: string; out pVal: TD2XParseMode): boolean;
+    function ConvertDir(pStr: string; pDflt: string; out pVal: string): boolean;
+    function ConvertFile(pStr: string; pDflt: string; out pVal: string): boolean;
+    function ConvertExtn(pStr: string; pDflt: string; out pVal: string): boolean;
+
+    function ConvertParsingMode(pStr: string; pDflt: TD2XParseMode;
+      out pVal: TD2XParseMode): boolean;
     function FormatParsingMode(pVal: TD2XParseMode): string;
 
-    function ConvertResultPer(pStr: string; out pVal: TD2XResultPer): boolean;
+    function ConvertResultPer(pStr: string; pDflt: TD2XResultPer;
+      out pVal: TD2XResultPer): boolean;
     function FormatResultPer(pVal: TD2XResultPer): string;
 
     procedure Log(pFmt: string; pArgs: array of const);
@@ -78,6 +84,18 @@ type
     function GetGlobalName: string;
     function GetParseMode: TD2XParseMode;
     function GetResultPer: TD2XResultPer;
+    function GetXmlDirectory: string;
+    function GetXmlFlag: boolean;
+    function GetBaseDirectory: string;
+    function GetDefinesDirectory: string;
+    function GetUseBase: boolean;
+    function GetWriteDefines: boolean;
+    function GetCountChildren: boolean;
+    function GetCountFileOrExtn: string;
+    function GetDefinesUsed: boolean;
+    function GetSkipFileOrExtn: string;
+    function GetSkipMethods: boolean;
+    function GetDefinesUsedFileOrExtn: string;
 
   public
     property LogErrors: boolean read GetLogErrors;
@@ -90,25 +108,26 @@ type
     property ParseMode: TD2XParseMode read GetParseMode;
     property ResultPer: TD2XResultPer read GetResultPer;
 
-    property UseBase: boolean read fUseBase;
-    property BaseDirectory: string read fBaseDirectory;
+    property UseBase: boolean read GetUseBase;
+    property BaseDirectory: string read GetBaseDirectory;
     // property UseInput: boolean read fUseInput;
     // property InputDirectory: string read fInputDirectory;
     // property UseOutput: boolean read fUseOutput;
     // property OutputDirectory: string read fOutputDirectory;
-    property WriteDefines: boolean read fWriteDefines;
-    property DefinesDirectory: string read fDefinesDirectory;
-    property Xml: boolean read fXml;
-    property XmlDirectory: string read fXmlDirectory;
-    property DefinesUsed: boolean read fDefinesUsed;
-    property UsedFileOrExtn: string read fUsedFileOrExtn;
+    property WriteDefines: boolean read GetWriteDefines;
+    property DefinesDirectory: string read GetDefinesDirectory;
+    property WriteXml: boolean read GetXmlFlag;
+    property XmlDirectory: string read GetXmlDirectory;
+    property CountChildren: boolean read GetCountChildren;
+    property CountChildrenFoE: string read GetCountFileOrExtn;
+    property SkipMethods: boolean read GetSkipMethods;
+    property SkipMethodsFoE: string read GetSkipFileOrExtn;
+    property DefinesUsed: boolean read GetDefinesUsed;
+    property DefinesUsedFoE: string read GetDefinesUsedFileOrExtn;
+
     property LoadDefines: boolean read fLoadDefines;
     property LoadFileOrExtn: string read fLoadFileOrExtn;
     property Defines: TStringList read fDefines;
-    property CountChildren: boolean read fCountChildren;
-    property CountFileOrExtn: string read fCountFileOrExtn;
-    property SkipMethods: boolean read fSkipMethods;
-    property SkipFileOrExtn: string read fSkipFileOrExtn;
     property OutputTimestamp: string read fOutputTimestamp;
 
     constructor Create;
@@ -142,7 +161,41 @@ begin
     fDefines.Add(pDef);
 end;
 
-function TD2XOptions.ConvertGlobalName(pStr: string; out pVal: string): boolean;
+function TD2XOptions.ConvertDir(pStr: string; pDflt: string; out pVal: string): boolean;
+begin
+  Result := True;
+  if pStr > '' then
+    pVal := IncludeTrailingPathDelimiter(pStr)
+  else
+    pVal := '';
+end;
+
+function TD2XOptions.ConvertExtn(pStr, pDflt: string;
+  out pVal: string): boolean;
+begin
+  Result := True;
+  if pStr = '' then
+    pVal := pDflt
+  else
+    if ExtractFileExt(pStr) > '' then
+      pVal := pStr
+    else
+      pVal := '.' + pStr;
+end;
+
+function TD2XOptions.ConvertFile(pStr, pDflt: string; out pVal: string): boolean;
+begin
+  Result := True;
+  if pStr = '' then
+    pVal := pDflt
+  else
+    if ExtractFileExt(pStr) > '' then
+      pVal := pStr
+    else
+      pVal := pStr + pDflt;
+end;
+
+function TD2XOptions.ConvertGlobalName(pStr: string; pDflt: string; out pVal: string): boolean;
 begin
   Result := True;
   if pStr = '' then
@@ -151,7 +204,8 @@ begin
     pVal := pStr;
 end;
 
-function TD2XOptions.ConvertParsingMode(pStr: string; out pVal: TD2XParseMode): boolean;
+function TD2XOptions.ConvertParsingMode(pStr: string; pDflt: TD2XParseMode;
+  out pVal: TD2XParseMode): boolean;
 begin
   Result := pStr > '';
   if Result then
@@ -160,13 +214,16 @@ begin
         begin
           pVal := pmUses;
           fGlobalName.Value := 'Uses';
-        end
+        end;
+      '!', 'D', 'd':
+        pVal := pDflt;
     else
       pVal := pmFull;
     end;
 end;
 
-function TD2XOptions.ConvertResultPer(pStr: string; out pVal: TD2XResultPer): boolean;
+function TD2XOptions.ConvertResultPer(pStr: string; pDflt: TD2XResultPer;
+  out pVal: TD2XResultPer): boolean;
 begin
   Result := pStr > '';
   if Result then
@@ -181,6 +238,8 @@ begin
         pVal := rpSubDir;
       'D', 'd':
         pVal := rpDir;
+      '!':
+        pVal := pDflt;
     else
       pVal := rpFile;
     end;
@@ -215,26 +274,39 @@ begin
     'Set Result per (F[ile], [S]ubdir, D[ir], W[ildcard], P[aram], R[un])', rpFile,
     ConvertResultPer, FormatResultPer, nil);
   fParams.Add(fResultPer);
+  fUseBase := TD2XFlaggedStringParam.CreateFlagStr('B', 'Base dir', '<dir>',
+    'Use <dir> as a base for all file lookups', '', False, ConvertDir, nil, nil);
+  fParams.Add(fUseBase);
+  fUseInput := TD2XFlaggedStringParam.CreateFlagStr('I', 'Input dir', '<dir>',
+    'Use <dir> as a base for all file input', 'Config\', True, ConvertDir, nil, nil);
+  fParams.Add(fUseInput);
+  fUseOutput := TD2XFlaggedStringParam.CreateFlagStr('O', 'Output dir', '<dir>',
+    'Use <dir> as a base for all file output', 'Log\', True, ConvertDir, nil, nil);
+  fParams.Add(fUseOutput);
+  fWriteXml := TD2XFlaggedStringParam.CreateFlagStr('X', 'Generate XML', '<dir>',
+    'Generate XML files into current or given <dir>', 'Xml\', True, ConvertDir, nil, nil);
+  fParams.Add(fWriteXml);
+  fWriteDefines := TD2XFlaggedStringParam.CreateFlagStr('W', 'Write Defines', '<dir>',
+    'Generate Final Defines files into current or given <dir>', 'Defines\', False, ConvertDir,
+    nil, nil);
+  fParams.Add(fWriteDefines);
+  fDefinesUsed := TD2XFlaggedStringParam.CreateFlagStr('U', 'Defines Used', '<f/e>',
+    'Report Defines Used into <f/e>', '.used', True, ConvertExtn,
+    nil, nil);
+  fParams.Add(fDefinesUsed);
+  fCountChildren := TD2XFlaggedStringParam.CreateFlagStr('C', 'Count Children', '<f/e>',
+    'Report Min/Max Children into <f/e>', '.cnt', True, ConvertExtn,
+    nil, nil);
+  fParams.Add(fCountChildren);
+  fSkipMethods := TD2XFlaggedStringParam.CreateFlagStr('S', 'Skipped Methods', '<f/e>',
+    'Load Skipped Methods from <f/e>', '.skip', True, ConvertFile,
+    nil, nil);
+  fParams.Add(fSkipMethods);
 
-  fUseBase := False;
-  fBaseDirectory := '';
-  fUseInput := True;
-  fInputDirectory := 'Config\';
-  fUseOutput := True;
-  fOutputDirectory := 'Log\';
   fOutputTimestamp := FormatDateTime('-HH-mm', Now);
-  fXml := True;
-  fXmlDirectory := 'Xml\';
-  fWriteDefines := False;
-  fDefinesDirectory := 'Defines\';
-  fDefinesUsed := True;
-  fUsedFileOrExtn := '.used';
-  fCountChildren := True;
-  fCountFileOrExtn := '.cnt';
+
   fLoadDefines := True;
   fLoadFileOrExtn := '.def';
-  fSkipMethods := True;
-  fSkipFileOrExtn := GlobalName + '.skip';
   fDefines := TStringList.Create;
   fDefines.Sorted := True;
   fLog := nil;
@@ -269,6 +341,31 @@ end;
 function TD2XOptions.FormatResultPer(pVal: TD2XResultPer): string;
 begin
   Result := TD2X.ToLabel(pVal);
+end;
+
+function TD2XOptions.GetBaseDirectory: string;
+begin
+  Result := fUseBase.Value
+end;
+
+function TD2XOptions.GetCountChildren: boolean;
+begin
+  Result := fCountChildren.Flag
+end;
+
+function TD2XOptions.GetCountFileOrExtn: string;
+begin
+  Result := fCountChildren.Value
+end;
+
+function TD2XOptions.GetDefinesDirectory: string;
+begin
+  Result := fWriteDefines.Value
+end;
+
+function TD2XOptions.GetDefinesUsed: boolean;
+begin
+  Result := fDefinesUsed.Flag
 end;
 
 function TD2XOptions.GetFinalToken: boolean;
@@ -306,14 +403,49 @@ begin
   Result := fResultPer.Value;
 end;
 
+function TD2XOptions.GetSkipFileOrExtn: string;
+begin
+  Result := fSkipMethods.Value
+end;
+
+function TD2XOptions.GetSkipMethods: boolean;
+begin
+  Result := fSkipMethods.Flag
+end;
+
 function TD2XOptions.GetTimestampFiles: boolean;
 begin
   Result := fTimestampFiles.Value;
 end;
 
+function TD2XOptions.GetUseBase: boolean;
+begin
+  Result := fUseBase.Flag
+end;
+
+function TD2XOptions.GetDefinesUsedFileOrExtn: string;
+begin
+  Result := fDefinesUsed.Value
+end;
+
 function TD2XOptions.GetVerbose: boolean;
 begin
   Result := fVerbose.Value;
+end;
+
+function TD2XOptions.GetWriteDefines: boolean;
+begin
+  Result := fWriteDefines.Flag;
+end;
+
+function TD2XOptions.GetXmlDirectory: string;
+begin
+  Result := fWriteXml.Value;
+end;
+
+function TD2XOptions.GetXmlFlag: boolean;
+begin
+  Result := fWriteXml.Flag;
 end;
 
 function TD2XOptions.InputFileOrExtn(pFileOrExtn: string): string;
@@ -326,8 +458,8 @@ function TD2XOptions.InputFileOrExtn(pFileOrExtn: string): string;
   end;
 
 begin
-  if fUseInput then
-    Result := fInputDirectory + GlobalFileOrExtn(pFileOrExtn)
+  if fUseInput.Flag then
+    Result := fUseInput.Value + GlobalFileOrExtn(pFileOrExtn)
   else
     Result := GlobalFileOrExtn(pFileOrExtn);
 end;
@@ -375,8 +507,8 @@ var
   lPath: string;
 
 begin
-  if fUseOutput then
-    Result := fOutputDirectory + GlobalFileOrExtn(pFileOrExtn)
+  if fUseOutput.Flag then
+    Result := fUseOutput.Value + GlobalFileOrExtn(pFileOrExtn)
   else
     Result := GlobalFileOrExtn(pFileOrExtn);
 
@@ -506,52 +638,6 @@ begin
             LoadDefinesFile(fLoadFileOrExtn);
             Result := True;
           end;
-        'W', 'w':
-          if ErrorUnlessSetDir(fWriteDefines, fDefinesDirectory) then
-            LogOptionError('Invalid Write Defines', pOpt)
-          else
-            Result := True;
-        'B', 'b':
-          if ErrorUnlessSetDir(fUseBase, fBaseDirectory) then
-            LogOptionError('Invalid Use Base Directory', pOpt)
-          else
-            Result := True;
-        'I', 'i':
-          if ErrorUnlessSetDir(fUseInput, fInputDirectory) then
-            LogOptionError('Invalid Use Input Directory', pOpt)
-          else
-            Result := True;
-        'O', 'o':
-          if ErrorUnlessSetDir(fUseOutput, fOutputDirectory) then
-            LogOptionError('Invalid Use Output Directory', pOpt)
-          else
-            Result := True;
-        'X', 'x':
-          if ErrorUnlessSetDir(fXml, fXmlDirectory) then
-            LogOptionError('Invalid Xml', pOpt)
-          else
-            Result := True;
-        'U', 'u':
-          if ErrorUnlessSetExtension(fDefinesUsed, fUsedFileOrExtn, '.used') then
-            LogOptionError('Invalid Count Defines Used', pOpt)
-          else
-            Result := True;
-        'C', 'c':
-          if ErrorUnlessSetExtension(fCountChildren, fCountFileOrExtn, '.cnt') then
-            LogOptionError('Invalid Count Children', pOpt)
-          else
-            Result := True;
-        'S', 's':
-          if ErrorUnlessSetValue(fSkipMethods, lValue) then
-            LogOptionError('Invalid Load Skipped Methods', pOpt)
-          else
-          begin
-            if ExtractFileExt(lValue) > '.' then
-              fSkipFileOrExtn := lValue
-            else
-              fSkipFileOrExtn := lValue + '.skip';
-            Result := True;
-          end;
       else
         LogOptionError('Unknown', pOpt);
       end;
@@ -589,18 +675,6 @@ begin
   fParams.ReportAll;
   Log('  Parse Mode              %s', [TD2X.ToLabel(fParseMode)]);
   Log('  Result per              %s', [TD2X.ToLabel(fResultPer)]);
-  Log('  Input base              %s', [ShowEnabled(fUseInput, 'Dir  ', fInputDirectory)]);
-  Log('  Output base             %s', [ShowEnabled(fUseOutput, 'Dir  ', fOutputDirectory)]);
-  Log('  Directory base          %s', [ShowEnabled(fUseBase, 'Dir  ', fBaseDirectory)]);
-  Log('  Xml output              %s', [ShowEnabled(fXml, 'Dir  ', fXmlDirectory)]);
-  Log('  Write defines           %s', [ShowEnabled(fWriteDefines, 'Dir  ',
-        fDefinesDirectory)]);
-  Log('  Count defines used      %s',
-    [ShowEnabled(fDefinesUsed, 'File ', OutputFileOrExtn(fUsedFileOrExtn))]);
-  Log('  Count min/max children  %s', [ShowEnabled(fCountChildren, 'File ',
-        OutputFileOrExtn(fCountFileOrExtn))]);
-  Log('  Skip methods in         %s',
-    [ShowEnabled(fSkipMethods, 'File ', InputFileOrExtn(fSkipFileOrExtn))]);
 
   if fLoadDefines then
     if fDefines.Count < 1 then
@@ -632,8 +706,10 @@ end;
 
 function TD2XOptions.ValidateGlobalName(pVal: string): boolean;
 begin
-  fXmlDirectory := IncludeTrailingPathDelimiter(pVal);
-  fDefinesDirectory := IncludeTrailingPathDelimiter(pVal);
+  if Assigned(fWriteXml) then
+    fWriteXml.Value := IncludeTrailingPathDelimiter(pVal);
+  if Assigned(fWriteDefines) then
+    fWriteDefines.Value := IncludeTrailingPathDelimiter(pVal);
   Result := True;
 end;
 

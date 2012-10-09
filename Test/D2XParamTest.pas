@@ -53,14 +53,16 @@ type
   private
     function TstParser(pStr: string): Boolean;
 
-    function CnvStrProp(pStr: string; out pVal: string): Boolean;
+    function CnvDefault<T>(pStr: string; pDflt: T; out pVal: T): Boolean;
+
+    function CnvStrProp(pStr: string; pDflt: string; out pVal: string): Boolean;
     function FmtStrProp(pVal: string): string;
     function InvStrProp(pVal: string): Boolean;
 
-    function CnvBoolProp(pStr: string; out pVal: Boolean): Boolean;
+    function CnvBoolProp(pStr: string; pDflt: Boolean; out pVal: Boolean): Boolean;
     function FmtBoolProp(pVal: Boolean): string;
 
-    function CnvObjProp(pStr: string; out pVal: TObject): Boolean;
+    function CnvObjProp(pStr: string; pDflt: TObject; out pVal: TObject): Boolean;
     function FmtObjProp(pVal: TObject): string;
 
   published
@@ -75,6 +77,9 @@ type
     procedure TestObjectParam;
     procedure TestStringParam;
     procedure TestBooleanParam;
+
+    procedure TestStringDfltParam;
+    procedure TestBooleanDfltParam;
   end;
 
   TestTD2XBooleanParam = class(TTestCase)
@@ -130,7 +135,7 @@ type
   strict private
     fStrP: TD2XStringParam;
 
-    function LeadingColon(pStr: string; out pVal: string): Boolean;
+    function LeadingColon(pStr: string; pDflt: string; out pVal: string): Boolean;
 
   public
     procedure SetUp; override;
@@ -144,7 +149,7 @@ type
   strict private
     fStrP: TD2XStringParam;
 
-    function LeadingColon(pStr: string; out pVal: string): Boolean;
+    function LeadingColon(pStr: string; pDflt: string; out pVal: string): Boolean;
     function NotBlank(pStr: string): Boolean;
 
   public
@@ -188,19 +193,26 @@ end;
 
 { TestTD2XSingleParam }
 
-function TestTD2XSingleParam.CnvBoolProp(pStr: string; out pVal: Boolean): Boolean;
+function TestTD2XSingleParam.CnvBoolProp(pStr: string; pDflt: Boolean; out pVal: Boolean): Boolean;
 begin
   pVal := False;
   Result := True;
 end;
 
-function TestTD2XSingleParam.CnvObjProp(pStr: string; out pVal: TObject): Boolean;
+function TestTD2XSingleParam.CnvDefault<T>(pStr: string; pDflt: T;
+  out pVal: T): Boolean;
+begin
+  Result := True;
+  pVal := pDflt;
+end;
+
+function TestTD2XSingleParam.CnvObjProp(pStr: string; pDflt: TObject; out pVal: TObject): Boolean;
 begin
   Result := True;
   pVal := nil;
 end;
 
-function TestTD2XSingleParam.CnvStrProp(pStr: string; out pVal: string): Boolean;
+function TestTD2XSingleParam.CnvStrProp(pStr: string; pDflt: string; out pVal: string): Boolean;
 begin
   Result := True;
   pVal := '';
@@ -208,7 +220,7 @@ end;
 
 function TestTD2XSingleParam.FmtBoolProp(pVal: Boolean): string;
 begin
-  Result := '-';
+  Result := IfThen(pVal, '+', '-');
 end;
 
 function TestTD2XSingleParam.FmtObjProp(pVal: TObject): string;
@@ -218,12 +230,38 @@ end;
 
 function TestTD2XSingleParam.FmtStrProp(pVal: string): string;
 begin
-  Result := '';
+  Result := pVal;
 end;
 
 function TestTD2XSingleParam.InvStrProp(pVal: string): Boolean;
 begin
   Result := False;
+end;
+
+procedure TestTD2XSingleParam.TestBooleanDfltParam;
+var
+  lBoolP: TD2XSingleParam<Boolean>;
+begin
+  lBoolP := TD2XSingleParam<Boolean>.CreateParam('T', 'Test', '', '', True, CnvDefault<Boolean>,
+    FmtBoolProp, nil);
+
+  try
+    CheckEqualsString('-T Test +', ReduceString(lBoolP.Describe), 'Describe Param');
+    CheckEqualsString('Test +', ReduceString(lBoolP.Report), 'Report Default Value');
+
+    CheckFalse(lBoolP.IsCode('A'), 'Check wrong code');
+    Check(lBoolP.IsCode('T'), 'Check correct code');
+
+    CheckFalse(lBoolP.Parse('A'), 'Parse wrong code');
+    Check(lBoolP.Parse('T'), 'Parse right code with No value');
+    Check(lBoolP.Parse('T0'), 'Parse right code with False value');
+    Check(lBoolP.Parse('T+'), 'Parse right code with True value');
+
+    CheckEquals(True, lBoolP.Value, 'Returned value');
+    CheckEqualsString('+', lBoolP.ToString, 'String representation');
+  finally
+    FreeAndNil(lBoolP);
+  end;
 end;
 
 procedure TestTD2XSingleParam.TestBooleanParam;
@@ -245,7 +283,7 @@ begin
     Check(lBoolP.Parse('T0'), 'Parse right code with False value');
     Check(lBoolP.Parse('T+'), 'Parse right code with True value');
 
-    CheckFalse(lBoolP.Value, 'Returned value');
+    CheckEquals(False, lBoolP.Value, 'Returned value');
     CheckEqualsString('-', lBoolP.ToString, 'String representation');
   finally
     FreeAndNil(lBoolP);
@@ -358,6 +396,30 @@ begin
     CheckEqualsString('nil', lObjP.ToString, 'String representation');
   finally
     FreeAndNil(lObjP);
+  end;
+end;
+
+procedure TestTD2XSingleParam.TestStringDfltParam;
+var
+  lStrP: TD2XSingleParam<string>;
+begin
+  lStrP := TD2XSingleParam<string>.CreateParam('T', 'Test', '', '', 'Tst', CnvDefault<string>,
+    FmtStrProp, nil);
+
+  try
+    CheckEqualsString('-T Test Tst', ReduceString(lStrP.Describe), 'Describe Param');
+    CheckEqualsString('Test Tst', ReduceString(lStrP.Report), 'Report Default Value');
+
+    CheckFalse(lStrP.IsCode('A'), 'Check Wrong code');
+    Check(lStrP.IsCode('T'), 'Check correct code');
+
+    Check(lStrP.Parse('T'), 'Parse right code with No value');
+    Check(lStrP.Parse('TSimple'), 'Parse right code with value');
+
+    CheckEqualsString('Tst', lStrP.Value, 'Returned value');
+    CheckEqualsString('Tst', lStrP.ToString, 'String representation');
+  finally
+    FreeAndNil(lStrP);
   end;
 end;
 
@@ -742,7 +804,7 @@ end;
 
 { TestTD2XFormatStringParam }
 
-function TestTD2XFormatStringParam.LeadingColon(pStr: string; out pVal: string): Boolean;
+function TestTD2XFormatStringParam.LeadingColon(pStr: string; pDflt: string; out pVal: string): Boolean;
 begin
   Result := True;
   if pStr = '' then
@@ -784,7 +846,7 @@ end;
 
 { TestTD2XFormatValidStringParam }
 
-function TestTD2XFormatValidStringParam.LeadingColon(pStr: string; out pVal: string): Boolean;
+function TestTD2XFormatValidStringParam.LeadingColon(pStr: string; pDflt: string; out pVal: string): Boolean;
 begin
   Result := True;
   if pStr = '' then
@@ -881,15 +943,15 @@ begin
   CheckEquals(False, fFlagP.Flag, 'Default Flag Set');
 
   Check(fFlagP.Parse('T'), 'Parse right code with No value');
-  CheckEqualsString('', fFlagP.Value, 'Blank Value');
+  CheckEqualsString('Tst', fFlagP.Value, 'Remains default Value');
   CheckEquals(True, fFlagP.Flag, 'Blank Flag Set');
 
   Check(fFlagP.Parse('T-'), 'Parse right code with Flag off');
-  CheckEqualsString('', fFlagP.Value, 'Blank Off Value');
+  CheckEqualsString('Tst', fFlagP.Value, 'Remains default Value');
   CheckEquals(False, fFlagP.Flag, 'Flag Off');
 
   Check(fFlagP.Parse('T+'), 'Parse right code with Flag on');
-  CheckEqualsString('', fFlagP.Value, 'Blank On Value');
+  CheckEqualsString('Tst', fFlagP.Value, 'Remains default Value');
   CheckEquals(True, fFlagP.Flag, 'Flag On');
 
   fFlagP.Flag := False;
@@ -897,6 +959,14 @@ begin
 
   Check(fFlagP.Parse('T:Simple'), 'Parse right code with value');
   CheckEqualsString('Simple', fFlagP.Value, 'Simple Value');
+  CheckEquals(True, fFlagP.Flag, 'Flag Set');
+
+  Check(fFlagP.Parse('T-'), 'Parse right code with Flag off');
+  CheckEqualsString('Simple', fFlagP.Value, 'Remains previous Value');
+  CheckEquals(False, fFlagP.Flag, 'Flag Off');
+
+  Check(fFlagP.Parse('T:'), 'Parse right code with no value');
+  CheckEqualsString('', fFlagP.Value, 'Blank Value');
   CheckEquals(True, fFlagP.Flag, 'Flag Set');
 end;
 

@@ -62,8 +62,10 @@ type
     procedure TestParseOptionB;
     procedure TestParseOptionBOff;
     procedure TestParseOptionBOn;
+    procedure TestParseOptionBBlank;
     procedure TestParseOptionBValue;
     procedure TestParseOptionC;
+    procedure TestParseOptionCBlank;
     procedure TestParseOptionCExtn;
     procedure TestParseOptionCOff;
     procedure TestParseOptionCOn;
@@ -83,12 +85,14 @@ type
     procedure TestParseOptionI;
     procedure TestParseOptionIOff;
     procedure TestParseOptionIOn;
+    procedure TestParseOptionIBlank;
     procedure TestParseOptionIValue;
     procedure TestParseOptionJ;
     procedure TestParseOptionK;
     procedure TestParseOptionL;
     procedure TestParseOptionLOff;
     procedure TestParseOptionLOn;
+    procedure TestParseOptionLBlank;
     procedure TestParseOptionLValue;
     procedure TestParseOptionM;
     procedure TestParseOptionMValue;
@@ -98,6 +102,7 @@ type
     procedure TestParseOptionO;
     procedure TestParseOptionOOff;
     procedure TestParseOptionOOn;
+    procedure TestParseOptionOBlank;
     procedure TestParseOptionOValue;
     procedure TestParseOptionP;
     procedure TestParseOptionPValue;
@@ -106,6 +111,8 @@ type
     procedure TestParseOptionROff;
     procedure TestParseOptionROn;
     procedure TestParseOptionS;
+    procedure TestParseOptionSBlank;
+    procedure TestParseOptionSExtn;
     procedure TestParseOptionSFile;
     procedure TestParseOptionSOff;
     procedure TestParseOptionSOn;
@@ -114,6 +121,7 @@ type
     procedure TestParseOptionTOff;
     procedure TestParseOptionTOn;
     procedure TestParseOptionU;
+    procedure TestParseOptionUBlank;
     procedure TestParseOptionUExtn;
     procedure TestParseOptionUFile;
     procedure TestParseOptionUOff;
@@ -124,10 +132,12 @@ type
     procedure TestParseOptionW;
     procedure TestParseOptionWOff;
     procedure TestParseOptionWOn;
+    procedure TestParseOptionWBlank;
     procedure TestParseOptionWValue;
     procedure TestParseOptionX;
     procedure TestParseOptionXOff;
     procedure TestParseOptionXOn;
+    procedure TestParseOptionXBlank;
     procedure TestParseOptionXValue;
     procedure TestParseOptionY;
     procedure TestParseOptionZ;
@@ -468,6 +478,19 @@ begin
   CheckLog('');
 end;
 
+procedure TestTD2XOptions.TestParseOptionBBlank;
+var
+  ReturnValue: Boolean;
+  pOpt: string;
+begin
+  pOpt := '-B:';
+  ReturnValue := fOpts.ParseOption(pOpt);
+  Check(ReturnValue, 'ReturnValue');
+  Check(fOpts.UseBase, 'UseBase');
+  CheckEqualsString('', fOpts.BaseDirectory, 'BaseDirectory');
+  CheckLog('');
+end;
+
 procedure TestTD2XOptions.TestParseOptionBOff;
 var
   ReturnValue: Boolean;
@@ -516,7 +539,20 @@ begin
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
   Check(fOpts.CountChildren, 'CountChildren');
-  CheckEqualsString('.cnt', fOpts.CountFileOrExtn, 'CountFileOrExtn');
+  CheckEqualsString('.cnt', fOpts.CountChildrenFoE, 'CountFileOrExtn');
+  CheckLog('');
+end;
+
+procedure TestTD2XOptions.TestParseOptionCBlank;
+var
+  ReturnValue: Boolean;
+  pOpt: string;
+begin
+  pOpt := '-C:';
+  ReturnValue := fOpts.ParseOption(pOpt);
+  Check(ReturnValue, 'ReturnValue');
+  Check(fOpts.CountChildren, 'CountChildren');
+  CheckEqualsString('.cnt', fOpts.CountChildrenFoE, 'CountFileOrExtn');
   CheckLog('');
 end;
 
@@ -529,7 +565,7 @@ begin
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
   Check(fOpts.CountChildren, 'CountChildren');
-  CheckEqualsString('.Extn', fOpts.CountFileOrExtn, 'CountFileOrExtn');
+  CheckEqualsString('.Extn', fOpts.CountChildrenFoE, 'CountFileOrExtn');
   CheckLog('');
 end;
 
@@ -542,7 +578,7 @@ begin
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
   CheckFalse(fOpts.CountChildren, 'CountChildren');
-  CheckEqualsString('.cnt', fOpts.CountFileOrExtn, 'CountFileOrExtn');
+  CheckEqualsString('.cnt', fOpts.CountChildrenFoE, 'CountFileOrExtn');
   CheckLog('');
 end;
 
@@ -555,7 +591,7 @@ begin
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
   Check(fOpts.CountChildren, 'CountChildren');
-  CheckEqualsString('.cnt', fOpts.CountFileOrExtn, 'CountFileOrExtn');
+  CheckEqualsString('.cnt', fOpts.CountChildrenFoE, 'CountFileOrExtn');
   CheckLog('');
 end;
 
@@ -568,7 +604,7 @@ begin
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
   Check(fOpts.CountChildren, 'CountChildren');
-  CheckEqualsString('File.Extn', fOpts.CountFileOrExtn, 'CountFileOrExtn');
+  CheckEqualsString('File.Extn', fOpts.CountChildrenFoE, 'CountFileOrExtn');
   CheckLog('');
 end;
 
@@ -732,6 +768,19 @@ begin
   CheckLog('');
 end;
 
+procedure TestTD2XOptions.TestParseOptionIBlank;
+var
+  ReturnValue: Boolean;
+  pOpt: string;
+begin
+  pOpt := '-I:';
+  ReturnValue := fOpts.ParseOption(pOpt);
+  Check(ReturnValue, 'ReturnValue');
+  CheckEqualsString('Input.File', fOpts.InputFileOrExtn('Input.File'),
+    'InputFileOrExtn');
+  CheckLog('');
+end;
+
 procedure TestTD2XOptions.TestParseOptionIOff;
 var
   ReturnValue: Boolean;
@@ -803,6 +852,21 @@ begin
   Check(fOpts.LoadDefines, 'LoadDefines');
   CheckEqualsString('', fOpts.LoadFileOrExtn, 'LoadFileOrExtn');
   CheckEqualsString('', fOpts.Defines.CommaText, 'Defines');
+  CheckLog('');
+end;
+
+procedure TestTD2XOptions.TestParseOptionLBlank;
+var
+  ReturnValue: Boolean;
+  pOpt: string;
+begin
+  fOpts.Defines.CommaText := 'Alpha,Beta,Value';
+  pOpt := '-L:Load.def';
+  ReturnValue := fOpts.ParseOption(pOpt);
+  Check(ReturnValue, 'ReturnValue');
+  Check(fOpts.LoadDefines, 'LoadDefines');
+  CheckEqualsString('Load.def', fOpts.LoadFileOrExtn, 'LoadFileOrExtn');
+  CheckEqualsString('Tango,Uniform', fOpts.Defines.CommaText, 'Defines');
   CheckLog('');
 end;
 
@@ -919,6 +983,19 @@ begin
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
   CheckEqualsString('Log\Output.File', fOpts.OutputFileOrExtn('Output.File'),
+    'OutputFileOrExtn');
+  CheckLog('');
+end;
+
+procedure TestTD2XOptions.TestParseOptionOBlank;
+var
+  ReturnValue: Boolean;
+  pOpt: string;
+begin
+  pOpt := '-O:';
+  ReturnValue := fOpts.ParseOption(pOpt);
+  Check(ReturnValue, 'ReturnValue');
+  CheckEqualsString('Output.File', fOpts.OutputFileOrExtn('Output.File'),
     'OutputFileOrExtn');
   CheckLog('');
 end;
@@ -1041,7 +1118,33 @@ begin
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
   Check(fOpts.SkipMethods, 'SkipMethods');
-  CheckEqualsString('.skip', fOpts.SkipFileOrExtn, 'SkipFileOrExtn');
+  CheckEqualsString('.skip', fOpts.SkipMethodsFoE, 'SkipFileOrExtn');
+  CheckLog('');
+end;
+
+procedure TestTD2XOptions.TestParseOptionSBlank;
+var
+  ReturnValue: Boolean;
+  pOpt: string;
+begin
+  pOpt := '-S:';
+  ReturnValue := fOpts.ParseOption(pOpt);
+  Check(ReturnValue, 'ReturnValue');
+  Check(fOpts.SkipMethods, 'SkipMethods');
+  CheckEqualsString('.skip', fOpts.SkipMethodsFoE, 'SkipFileOrExtn');
+  CheckLog('');
+end;
+
+procedure TestTD2XOptions.TestParseOptionSExtn;
+var
+  ReturnValue: Boolean;
+  pOpt: string;
+begin
+  pOpt := '-S:.Extn';
+  ReturnValue := fOpts.ParseOption(pOpt);
+  Check(ReturnValue, 'ReturnValue');
+  Check(fOpts.SkipMethods, 'SkipMethods');
+  CheckEqualsString('.Extn', fOpts.SkipMethodsFoE, 'SkipFileOrExtn');
   CheckLog('');
 end;
 
@@ -1054,7 +1157,7 @@ begin
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
   Check(fOpts.SkipMethods, 'SkipMethods');
-  CheckEqualsString('Extn.skip', fOpts.SkipFileOrExtn, 'SkipFileOrExtn');
+  CheckEqualsString('Extn.skip', fOpts.SkipMethodsFoE, 'SkipFileOrExtn');
   CheckLog('');
 end;
 
@@ -1067,7 +1170,7 @@ begin
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
   Check(fOpts.SkipMethods, 'SkipMethods');
-  CheckEqualsString('File.Extn', fOpts.SkipFileOrExtn, 'SkipFileOrExtn');
+  CheckEqualsString('File.Extn', fOpts.SkipMethodsFoE, 'SkipFileOrExtn');
   CheckLog('');
 end;
 
@@ -1080,7 +1183,7 @@ begin
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
   CheckFalse(fOpts.SkipMethods, 'SkipMethods');
-  CheckEqualsString('.skip', fOpts.SkipFileOrExtn, 'SkipFileOrExtn');
+  CheckEqualsString('.skip', fOpts.SkipMethodsFoE, 'SkipFileOrExtn');
   CheckLog('');
 end;
 
@@ -1093,7 +1196,7 @@ begin
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
   Check(fOpts.SkipMethods, 'SkipMethods');
-  CheckEqualsString('.skip', fOpts.SkipFileOrExtn, 'SkipFileOrExtn');
+  CheckEqualsString('.skip', fOpts.SkipMethodsFoE, 'SkipFileOrExtn');
   CheckLog('');
 end;
 
@@ -1145,7 +1248,20 @@ begin
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
   Check(fOpts.DefinesUsed, 'DefinesUsed');
-  CheckEqualsString('.used', fOpts.UsedFileOrExtn, 'UsedFileOrExtn');
+  CheckEqualsString('.used', fOpts.DefinesUsedFoE, 'UsedFileOrExtn');
+  CheckLog('');
+end;
+
+procedure TestTD2XOptions.TestParseOptionUBlank;
+var
+  ReturnValue: Boolean;
+  pOpt: string;
+begin
+  pOpt := '-U:';
+  ReturnValue := fOpts.ParseOption(pOpt);
+  Check(ReturnValue, 'ReturnValue');
+  Check(fOpts.DefinesUsed, 'DefinesUsed');
+  CheckEqualsString('.used', fOpts.DefinesUsedFoE, 'UsedFileOrExtn');
   CheckLog('');
 end;
 
@@ -1158,7 +1274,7 @@ begin
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
   Check(fOpts.DefinesUsed, 'DefinesUsed');
-  CheckEqualsString('.Extn', fOpts.UsedFileOrExtn, 'UsedFileOrExtn');
+  CheckEqualsString('.Extn', fOpts.DefinesUsedFoE, 'UsedFileOrExtn');
   CheckLog('');
 end;
 
@@ -1171,7 +1287,7 @@ begin
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
   Check(fOpts.DefinesUsed, 'DefinesUsed');
-  CheckEqualsString('File.Extn', fOpts.UsedFileOrExtn, 'UsedFileOrExtn');
+  CheckEqualsString('File.Extn', fOpts.DefinesUsedFoE, 'UsedFileOrExtn');
   CheckLog('');
 end;
 
@@ -1184,7 +1300,7 @@ begin
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
   CheckFalse(fOpts.DefinesUsed, 'DefinesUsed');
-  CheckEqualsString('.used', fOpts.UsedFileOrExtn, 'UsedFileOrExtn');
+  CheckEqualsString('.used', fOpts.DefinesUsedFoE, 'UsedFileOrExtn');
   CheckLog('');
 end;
 
@@ -1197,7 +1313,7 @@ begin
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
   Check(fOpts.DefinesUsed, 'DefinesUsed');
-  CheckEqualsString('.used', fOpts.UsedFileOrExtn, 'UsedFileOrExtn');
+  CheckEqualsString('.used', fOpts.DefinesUsedFoE, 'UsedFileOrExtn');
   CheckLog('');
 end;
 
@@ -1250,6 +1366,19 @@ begin
   CheckLog('');
 end;
 
+procedure TestTD2XOptions.TestParseOptionWBlank;
+var
+  ReturnValue: Boolean;
+  pOpt: string;
+begin
+  pOpt := '-W:';
+  ReturnValue := fOpts.ParseOption(pOpt);
+  Check(ReturnValue, 'ReturnValue');
+  Check(fOpts.WriteDefines, 'WriteDefines');
+  CheckEqualsString('', fOpts.DefinesDirectory, 'DefinesDirectory');
+  CheckLog('');
+end;
+
 procedure TestTD2XOptions.TestParseOptionWOff;
 var
   ReturnValue: Boolean;
@@ -1284,8 +1413,21 @@ begin
   pOpt := '-X';
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
-  Check(fOpts.Xml, 'Xml');
+  Check(fOpts.WriteXml, 'Xml');
   CheckEqualsString('Xml\', fOpts.XmlDirectory, 'XmlDirectory');
+  CheckLog('');
+end;
+
+procedure TestTD2XOptions.TestParseOptionXBlank;
+var
+  ReturnValue: Boolean;
+  pOpt: string;
+begin
+  pOpt := '-X:';
+  ReturnValue := fOpts.ParseOption(pOpt);
+  Check(ReturnValue, 'ReturnValue');
+  Check(fOpts.WriteXml, 'Xml');
+  CheckEqualsString('', fOpts.XmlDirectory, 'XmlDirectory');
   CheckLog('');
 end;
 
@@ -1297,7 +1439,7 @@ begin
   pOpt := '-X-';
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
-  CheckFalse(fOpts.Xml, 'Xml');
+  CheckFalse(fOpts.WriteXml, 'Xml');
   CheckEqualsString('Xml\', fOpts.XmlDirectory, 'XmlDirectory');
   CheckLog('');
 end;
@@ -1310,7 +1452,7 @@ begin
   pOpt := '-X+';
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
-  Check(fOpts.Xml, 'Xml');
+  Check(fOpts.WriteXml, 'Xml');
   CheckEqualsString('Xml\', fOpts.XmlDirectory, 'XmlDirectory');
   CheckLog('');
 end;
@@ -1323,7 +1465,7 @@ begin
   pOpt := '-X:Value';
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
-  Check(fOpts.Xml, 'Xml');
+  Check(fOpts.WriteXml, 'Xml');
   CheckEqualsString('Value\', fOpts.XmlDirectory, 'XmlDirectory');
   CheckLog('');
 end;
@@ -1402,17 +1544,17 @@ begin
   CheckEqualsString('', fOpts.BaseDirectory, 'BaseDirectory');
   CheckFalse(fOpts.WriteDefines, 'WriteDefines');
   CheckEqualsString('Defines\', fOpts.DefinesDirectory, 'DefinesDirectory');
-  Check(fOpts.Xml, 'Xml');
+  Check(fOpts.WriteXml, 'Xml');
   CheckEqualsString('Xml\', fOpts.XmlDirectory, 'XmlDirectory');
   Check(fOpts.DefinesUsed, 'DefinesUsed');
-  CheckEqualsString('.used', fOpts.UsedFileOrExtn, 'UsedFileOrExtn');
+  CheckEqualsString('.used', fOpts.DefinesUsedFoE, 'UsedFileOrExtn');
   Check(fOpts.LoadDefines, 'LoadDefines');
   CheckEqualsString('.def', fOpts.LoadFileOrExtn, 'LoadFileOrExtn');
   CheckEqualsString('', fOpts.Defines.CommaText, 'Defines');
   Check(fOpts.CountChildren, 'CountChildren');
-  CheckEqualsString('.cnt', fOpts.CountFileOrExtn, 'CountFileOrExtn');
+  CheckEqualsString('.cnt', fOpts.CountChildrenFoE, 'CountFileOrExtn');
   Check(fOpts.SkipMethods, 'SkipMethods');
-  CheckEqualsString(fOpts.GlobalName + '.skip', fOpts.SkipFileOrExtn, 'SkipFileOrExtn');
+  CheckEqualsString('.skip', fOpts.SkipMethodsFoE, 'SkipFileOrExtn');
   Check(fOpts.ParseMode = pmFull, 'ParseMode');
   Check(fOpts.ResultPer = rpFile, 'ResultPer');
   Check(fOpts.FinalToken, 'FinalToken');

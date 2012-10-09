@@ -143,7 +143,7 @@ begin
 
   if fOpts.ResultPer >= pPer then
   begin
-    if fOpts.Xml then
+    if fOpts.WriteXml then
       XmlNodeStart(pNodename);
   end;
 end;
@@ -244,7 +244,7 @@ end;
 
 procedure TD2XProcessor.DoBeginResults;
 begin
-  if fOpts.Xml then
+  if fOpts.WriteXml then
   begin
     fXmlDoc := NewXmlDocument;
     fXmlDoc.Options := fXmlDoc.Options + [doNodeAutoIndent];
@@ -261,7 +261,7 @@ var
 const
   DEF_BREAK: array [0 .. 9] of Byte = (13, 10, 42, 42, 42, 42, 13, 10, 13, 10);
 begin
-  if fOpts.Xml then
+  if fOpts.WriteXml then
   begin
     if fHasFiles then
     begin
@@ -338,7 +338,7 @@ procedure TD2XProcessor.EndResults(pFilename: string; pPer: TD2XResultPer);
 begin
   if fOpts.ResultPer >= pPer then
   begin
-    if fOpts.Xml then
+    if fOpts.WriteXml then
     begin
       XmlAddAttribute('fileName', pFilename);
       XmlNodeEnd;
@@ -437,7 +437,7 @@ begin
       Writeln('???? @ ', pX, ',', pY, ': ', pMsg);
     end;
 
-  if fOpts.Xml and Assigned(fXmlNode) then
+  if fOpts.WriteXml and Assigned(fXmlNode) then
   begin
     case pTyp of
       meError:
@@ -593,7 +593,7 @@ begin
   if fOpts.Verbose then
     Writeln('INCLUDE @ ', pLex.PosXY.X, ',', pLex.PosXY.Y, ': ', lFile);
 
-  if fOpts.Xml and Assigned(fXmlNode) then
+  if fOpts.WriteXml and Assigned(fXmlNode) then
   begin
     XmlNodeStart('IncludeFile');
     XmlAddAttribute('filename', lFile);
@@ -908,7 +908,7 @@ begin
         LogBefore(pMethod.Name);
       if fOpts.CountChildren then
         CountBefore(pMethod.Name);
-      if fOpts.Xml then
+      if fOpts.WriteXml then
         XmlNodeStart(pMethod.Name);
     end;
   fVMI.OnAfter :=
@@ -919,7 +919,7 @@ begin
         Exit;
       if fOpts.SkipMethods and SkipAfter(pMethod.Name) then
         Exit;
-      if fOpts.Xml then
+      if fOpts.WriteXml then
         XmlNodeEnd;
       if fOpts.CountChildren then
         CountAfter(pMethod.Name);
@@ -954,7 +954,7 @@ end;
 
 function TD2XProcessor.UseProxy: Boolean;
 begin
-  Result := fOpts.Xml or fOpts.CountChildren;
+  Result := fOpts.WriteXml or fOpts.CountChildren;
 end;
 
 procedure TD2XProcessor.XmlNodeEnd;

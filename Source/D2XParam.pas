@@ -47,7 +47,7 @@ type
 
   TD2XSingleParam<T> = class(TD2XParam)
   public type
-    TspConverter = function(pStr: string; out pVal: T): Boolean of object;
+    TspConverter = function(pStr: string; pDflt: T; out pVal: T): Boolean of object;
     TspFormatter = function(pVal: T): string of object;
     TspValidator = function(pVal: T): Boolean of object;
 
@@ -87,7 +87,7 @@ type
     constructor CreateBool(pCode, pLabel, pDescr: string; pDefault: Boolean = False);
 
   private
-    function ConvertBoolean(pStr: string; out pVal: Boolean): Boolean;
+    function ConvertBoolean(pStr: string; pDflt: Boolean; out pVal: Boolean): Boolean;
     function FormatBoolean(pVal: Boolean): string;
   end;
 
@@ -98,7 +98,7 @@ type
       pValidator: TD2XSingleParam<string>.TspValidator);
 
   private
-    function ConvertString(pStr: string; out pVal: string): Boolean;
+    function ConvertString(pStr: string; pDflt: string; out pVal: string): Boolean;
     function FormatString(pVal: string): string;
   end;
 
@@ -123,7 +123,7 @@ type
     fStrConverter: TD2XSingleParam<string>.TspConverter;
     fFormatter: TfspFormatter;
 
-    function ConvertString(pStr: string; out pVal: string): Boolean;
+    function ConvertString(pStr: string; pDflt: string; out pVal: string): Boolean;
     function FormatFlagString(pFlag: Boolean; pVal: string): string;
     function FormatString(pVal: string): string;
 
@@ -151,7 +151,7 @@ function TD2XSingleParam<T>.ConvertAndSet(pStr: string): Boolean;
 var
   lVal: T;
 begin
-  Result := fConverter(pStr, lVal) and CheckValue(lVal);
+  Result := fConverter(pStr, fDefault, lVal) and CheckValue(lVal);
   if Result then
     fValue := lVal;
 end;
@@ -228,7 +228,7 @@ end;
 
 { TD2XBooleanParam }
 
-function TD2XBooleanParam.ConvertBoolean(pStr: string; out pVal: Boolean): Boolean;
+function TD2XBooleanParam.ConvertBoolean(pStr: string; pDflt: Boolean; out pVal: Boolean): Boolean;
 begin
   Result := True;
   if Length(pStr) > 0 then
@@ -237,6 +237,8 @@ begin
         pVal := True;
       '-', 'F', 'f', 'N', 'n', '0':
         pVal := False;
+      '?', 'D':
+        pVal := pDflt;
     else
       Result := False;
     end
@@ -256,7 +258,7 @@ end;
 
 { TD2XStringParam }
 
-function TD2XStringParam.ConvertString(pStr: string; out pVal: string): Boolean;
+function TD2XStringParam.ConvertString(pStr: string; pDflt: string; out pVal: string): Boolean;
 begin
   Result := True;
   pVal := pStr;
@@ -369,23 +371,23 @@ end;
 
 { TD2XFlaggedStringParam }
 
-function TD2XFlaggedStringParam.ConvertString(pStr: string; out pVal: string): Boolean;
+function TD2XFlaggedStringParam.ConvertString(pStr: string; pDflt: string; out pVal: string): Boolean;
 begin
   Result := False;
-  pVal := '';
-  if (pStr = '') or (pStr = '+') or (pStr = ':') or (pStr = '-') then
+  pVal := fValue;
+  if (pStr = '') or (pStr = '+') or (pStr = '-') then
   begin
     fFlag := pStr <> '-';
     if Assigned(fStrConverter) then
-      Result := fStrConverter('', pVal)
+      Result := fStrConverter(fValue, pDflt, pVal)
     else
       Result := True;
   end;
-  if (Length(pStr) > 1) and (pStr[1] = ':') then
+  if (Length(pStr) >= 1) and (pStr[1] = ':') then
   begin
     fFlag := True;
     if Assigned(fStrConverter) then
-      Result := fStrConverter(Copy(pStr, 2, Length(pStr)), pVal)
+      Result := fStrConverter(Copy(pStr, 2, Length(pStr)), pDflt, pVal)
     else
     begin
       pVal := Copy(pStr, 2, Length(pStr));
