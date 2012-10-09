@@ -40,6 +40,7 @@
 			<Base>true</Base>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base)'!=''">
+			<DCC_SYMBOL_DEPRECATED>false</DCC_SYMBOL_DEPRECATED>
 			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
 			<Manifest_File>None</Manifest_File>
 			<VerInfo_Locale>5129</VerInfo_Locale>
@@ -59,6 +60,7 @@
 			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1)'!=''">
+			<DCC_SYMBOL_DEPRECATED>false</DCC_SYMBOL_DEPRECATED>
 			<DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
 			<DCC_Optimize>false</DCC_Optimize>
 			<DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
@@ -86,6 +88,7 @@
 			<DCCReference Include="..\Source\D2XParam.pas"/>
 			<DCCReference Include="D2XParamTest.pas"/>
 			<DCCReference Include="..\Source\D2XOptions.pas"/>
+			<DCCReference Include="D2XUtils.pas"/>
 			<None Include="Config\Load.def"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
@@ -132,9 +135,6 @@
 						<VersionInfoKeys Name="Comments"/>
 					</VersionInfoKeys>
 					<Excluded_Packages>
-						<Excluded_Packages Name="C:\Dev\components\3rdparty\source\dxpress\Library\RS16\dcldxServerModeRS16.bpl">File C:\Dev\components\3rdparty\source\dxpress\Library\RS16\dcldxServerModeRS16.bpl not found</Excluded_Packages>
-						<Excluded_Packages Name="C:\Dev\components\3rdparty\source\dxpress\Library\RS16\dcldxDBXServerModeRS16.bpl">File C:\Dev\components\3rdparty\source\dxpress\Library\RS16\dcldxDBXServerModeRS16.bpl not found</Excluded_Packages>
-						<Excluded_Packages Name="C:\Dev\components\3rdparty\source\dxpress\Library\RS16\dcldxADOServerModeRS16.bpl">File C:\Dev\components\3rdparty\source\dxpress\Library\RS16\dcldxADOServerModeRS16.bpl not found</Excluded_Packages>
 						<Excluded_Packages Name="$(BDSBIN)\dcloffice2k160.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
 						<Excluded_Packages Name="$(BDSBIN)\dclofficexp160.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
 					</Excluded_Packages>

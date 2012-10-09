@@ -24,7 +24,8 @@ uses
   D2X in '..\Source\D2X.pas',
   D2XParam in '..\Source\D2XParam.pas',
   D2XParamTest in 'D2XParamTest.pas',
-  D2XOptions in '..\Source\D2XOptions.pas';
+  D2XOptions in '..\Source\D2XOptions.pas',
+  D2XUtils in 'D2XUtils.pas';
 
 {$R *.RES}
 

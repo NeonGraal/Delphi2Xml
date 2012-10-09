@@ -38,14 +38,13 @@ type
     fUseInput: TD2XFlaggedStringParam;
     // fInputDirectory: string;
     fCountChildren: TD2XFlaggedStringParam;
-//    fCountFileOrExtn: string;
+    // fCountFileOrExtn: string;
     fSkipMethods: TD2XFlaggedStringParam;
-//    fSkipFileOrExtn: string;
+    // fSkipFileOrExtn: string;
     fDefinesUsed: TD2XFlaggedStringParam;
-//    fUsedFileOrExtn: string;
+    // fUsedFileOrExtn: string;
 
     fLoadDefines: boolean;
-    fLoadFileOrExtn: string;
     fOutputTimestamp: string;
 
     fDefines: TStringList;
@@ -53,10 +52,6 @@ type
     fLog: TStreamWriter;
 
     fParams: TD2XParams;
-
-    procedure AddDefine(pDef: string);
-    procedure DeleteDefine(pDef: string);
-    procedure LoadDefinesFile(pFile: string);
 
     function ConvertGlobalName(pStr: string; pDflt: string; out pVal: string): boolean;
     function ValidateGlobalName(pVal: string): boolean;
@@ -72,6 +67,10 @@ type
     function ConvertResultPer(pStr: string; pDflt: TD2XResultPer;
       out pVal: TD2XResultPer): boolean;
     function FormatResultPer(pVal: TD2XResultPer): string;
+
+    function ParseReportOptions(pStr: string): boolean;
+    function ParseShowOptions(pStr: string): boolean;
+    function ParseDefines(pStr: string): boolean;
 
     procedure Log(pFmt: string; pArgs: array of const);
     procedure LogOptionError(pLabel, pOpt: string);
@@ -126,7 +125,6 @@ type
     property DefinesUsedFoE: string read GetDefinesUsedFileOrExtn;
 
     property LoadDefines: boolean read fLoadDefines;
-    property LoadFileOrExtn: string read fLoadFileOrExtn;
     property Defines: TStringList read fDefines;
     property OutputTimestamp: string read fOutputTimestamp;
 
@@ -139,8 +137,6 @@ type
     procedure SetLog(pDest: TStream);
 
     function ParseOption(pOpt: string): boolean;
-    function ReportOptions: boolean;
-    function ShowOptions: boolean;
   end;
 
 implementation
@@ -154,13 +150,6 @@ type
 
   { TD2XOptions }
 
-procedure TD2XOptions.AddDefine(pDef: string);
-begin
-  fLoadDefines := True;
-  if fDefines.IndexOf(pDef) < 0 then
-    fDefines.Add(pDef);
-end;
-
 function TD2XOptions.ConvertDir(pStr: string; pDflt: string; out pVal: string): boolean;
 begin
   Result := True;
@@ -170,8 +159,7 @@ begin
     pVal := '';
 end;
 
-function TD2XOptions.ConvertExtn(pStr, pDflt: string;
-  out pVal: string): boolean;
+function TD2XOptions.ConvertExtn(pStr, pDflt: string; out pVal: string): boolean;
 begin
   Result := True;
   if pStr = '' then
@@ -250,11 +238,14 @@ begin
   inherited;
 
   fParams := TD2XParams.Create;
+  fParams.Add(TD2XParam.Create('?', 'Options', '', 'Show valid options', ParseShowOptions));
+  fParams.Add(TD2XParam.Create('!', 'Report', '', 'Report Current options',
+      ParseReportOptions));
   fVerbose := TD2XBooleanParam.CreateBool('V', 'Verbose', 'Log all Parser methods called');
   fParams.Add(fVerbose);
   fLogErrors := TD2XBooleanParam.CreateBool('E', 'Log Errors', 'Log Error messages', True);
   fParams.Add(fLogErrors);
-  fLogNotSupported := TD2XBooleanParam.CreateBool('N', 'Log Not Supported',
+  fLogNotSupported := TD2XBooleanParam.CreateBool('N', 'Log Not Supp',
     'Log Not Supported messages');
   fParams.Add(fLogNotSupported);
   fTimestampFiles := TD2XBooleanParam.CreateBool('T', 'Timestamp',
@@ -291,37 +282,23 @@ begin
     nil, nil);
   fParams.Add(fWriteDefines);
   fDefinesUsed := TD2XFlaggedStringParam.CreateFlagStr('U', 'Defines Used', '<f/e>',
-    'Report Defines Used into <f/e>', '.used', True, ConvertExtn,
-    nil, nil);
+    'Report Defines Used into <f/e>', '.used', True, ConvertExtn, nil, nil);
   fParams.Add(fDefinesUsed);
   fCountChildren := TD2XFlaggedStringParam.CreateFlagStr('C', 'Count Children', '<f/e>',
-    'Report Min/Max Children into <f/e>', '.cnt', True, ConvertExtn,
-    nil, nil);
+    'Report Min/Max Children into <f/e>', '.cnt', True, ConvertExtn, nil, nil);
   fParams.Add(fCountChildren);
   fSkipMethods := TD2XFlaggedStringParam.CreateFlagStr('S', 'Skipped Methods', '<f/e>',
-    'Load Skipped Methods from <f/e>', '.skip', True, ConvertFile,
-    nil, nil);
+    'Load Skipped Methods from <f/e>', '.skip', True, ConvertFile, nil, nil);
   fParams.Add(fSkipMethods);
+  fParams.Add(TD2XParam.Create('D', 'Defines', '[+-!:]<def>',
+      'Add(+), Remove(-), Clear(!) or Load(:) Defines', ParseDefines));
 
   fOutputTimestamp := FormatDateTime('-HH-mm', Now);
 
   fLoadDefines := True;
-  fLoadFileOrExtn := '.def';
   fDefines := TStringList.Create;
   fDefines.Sorted := True;
   fLog := nil;
-end;
-
-procedure TD2XOptions.DeleteDefine(pDef: string);
-var
-  lIdx: Integer;
-begin
-  lIdx := fDefines.IndexOf(pDef);
-  if lIdx >= 0 then
-  begin
-    fDefines.Delete(lIdx);
-    fLoadDefines := True;
-  end;
 end;
 
 destructor TD2XOptions.Destroy;
@@ -464,14 +441,6 @@ begin
     Result := GlobalFileOrExtn(pFileOrExtn);
 end;
 
-procedure TD2XOptions.LoadDefinesFile(pFile: string);
-begin
-  if pFile = '' then
-    fDefines.Clear
-  else
-    fDefines.LoadFromFile(InputFileOrExtn(pFile));
-end;
-
 procedure TD2XOptions.Log(pFmt: string; pArgs: array of const);
 begin
   if Assigned(fLog) then
@@ -516,6 +485,50 @@ begin
   ForceDirectories(lPath);
 end;
 
+function TD2XOptions.ParseDefines(pStr: string): boolean;
+var
+  lStr: string;
+  lIdx: Integer;
+begin
+  Result := False;
+  if pStr = '!' then
+  begin
+    Result := True;
+    fDefines.Clear;
+  end
+  else
+    if Length(pStr) > 1 then
+    begin
+      lStr := Copy(pStr, 2, Length(pStr));
+      case pStr[1] of
+        '+':
+          begin
+            Result := True;
+            fLoadDefines := True;
+            if fDefines.IndexOf(lStr) < 0 then
+              fDefines.Add(lStr);
+          end;
+        '-':
+          begin
+            Result := True;
+            lIdx := fDefines.IndexOf(lStr);
+            if lIdx >= 0 then
+            begin
+              fDefines.Delete(lIdx);
+              fLoadDefines := True;
+            end;
+          end;
+        ':':
+          begin
+            Result := True;
+            fLoadDefines := True;
+            ConvertFile(Copy(pStr, 2, Length(pStr)), '.def', lStr);
+            fDefines.LoadFromFile(InputFileOrExtn(lStr));
+          end;
+      end;
+    end;
+end;
+
 function TD2XOptions.ParseOption(pOpt: string): boolean;
 
   function ErrorUnlessSet(out pFlag: boolean): boolean;
@@ -537,13 +550,6 @@ function TD2XOptions.ParseOption(pOpt: string): boolean;
     else
       Result := True;
   end;
-  function ErrorUnlessSetter(pFunc: TD2XSetterFunc): boolean;
-  begin
-    if (Length(pOpt) > 2) and (pOpt[3] = ':') then
-      Result := not pFunc(Copy(pOpt, 4, 99))
-    else
-      Result := True;
-  end;
   function ErrorUnlessSetValue(out pFlag: boolean; out pVal: string): boolean;
   begin
     Result := False;
@@ -556,42 +562,8 @@ function TD2XOptions.ParseOption(pOpt: string): boolean;
       else
         Result := True;
   end;
-  function ErrorUnlessSetDefault(out pFlag: boolean; out pVal: string; pDflt: string): boolean;
-  begin
-    Result := False;
-    if ErrorUnlessSetValue(pFlag, pVal) then
-      Result := True
-    else
-      if pVal = '' then
-        pVal := pDflt;
-  end;
-  function ErrorUnlessSetExtension(out pFlag: boolean; out pExtn: string;
-    pDflt: string): boolean;
-  begin
-    Result := False;
-    if ErrorUnlessSetValue(pFlag, pExtn) then
-      Result := True
-    else
-      if pExtn = '' then
-        pExtn := pDflt
-      else
-        if not ContainsText(pExtn, '.') then
-          pExtn := '.' + pExtn;
-  end;
-  function ErrorUnlessSetDir(out pFlag: boolean; var pDir: string): boolean;
-  var
-    lDir: string;
-  begin
-    Result := False;
-    if ErrorUnlessSetValue(pFlag, lDir) then
-      Result := True
-    else
-      if lDir > '' then
-        pDir := IncludeTrailingPathDelimiter(lDir);
-  end;
 
 var
-  lValue: string;
   lPrm: TD2XParam;
 begin
   Result := False;
@@ -606,56 +578,11 @@ begin
       else
         LogOptionError('Invalid ' + lPrm.ParamLabel, pOpt)
     else
-      case pOpt[2] of
-        '?':
-          Result := False;
-        '!':
-          begin
-            ReportOptions;
-            Result := True;
-          end;
-        'D', 'd':
-          if ErrorUnlessValue(lValue) then
-            LogOptionError('Invalid Define', pOpt)
-          else
-          begin
-            AddDefine(lValue);
-            Result := True;
-          end;
-        'Z', 'z':
-          if ErrorUnlessValue(lValue) then
-            LogOptionError('Invalid Undefine', pOpt)
-          else
-          begin
-            DeleteDefine(lValue);
-            Result := True;
-          end;
-        'L', 'l':
-          if ErrorUnlessSetValue(fLoadDefines, fLoadFileOrExtn) then
-            LogOptionError('Invalid Load Defines', pOpt)
-          else
-          begin
-            LoadDefinesFile(fLoadFileOrExtn);
-            Result := True;
-          end;
-      else
-        LogOptionError('Unknown', pOpt);
-      end;
+      LogOptionError('Unknown', pOpt);
   end;
 end;
 
-function TD2XOptions.ReportOptions: boolean;
-  function ShowEnabled(pOpt: boolean; pLabel, pVal: string): string;
-  begin
-    if pOpt then
-      Result := 'Enabled  '
-    else
-      Result := 'Disabled ';
-
-    if pLabel > '' then
-      Result := Result + pLabel + pVal;
-  end;
-
+function TD2XOptions.ParseReportOptions(pStr: string): boolean;
 var
   lS: string;
   w: Integer;
@@ -673,8 +600,6 @@ begin
   Log('Current option settings:', []);
   fParams.Log := fLog;
   fParams.ReportAll;
-  Log('  Parse Mode              %s', [TD2X.ToLabel(fParseMode)]);
-  Log('  Result per              %s', [TD2X.ToLabel(fResultPer)]);
 
   if fLoadDefines then
     if fDefines.Count < 1 then
@@ -704,6 +629,22 @@ begin
     Log('Use default Defines', []);
 end;
 
+function TD2XOptions.ParseShowOptions(pStr: string): boolean;
+var
+  lBase: string;
+begin
+  Result := True;
+  lBase := ChangeFileExt(ExtractFileName(ParamStr(0)), '');
+
+  Log('Usage: %s [ Option | @Params | mFilename | Wildcard ] ... ', [lBase]);
+  Log('Options:        %-15s Description', ['Default']);
+  fParams.Log := fLog;
+  fParams.DescribeAll;
+  // Available option letters: AHJKQYZL
+  Log('  Definitions:', []);
+  Log('    <f/e> If value begins with "." is appended to global name to give file name', []);
+end;
+
 function TD2XOptions.ValidateGlobalName(pVal: string): boolean;
 begin
   if Assigned(fWriteXml) then
@@ -716,35 +657,6 @@ end;
 procedure TD2XOptions.SetLog(pDest: TStream);
 begin
   fLog := TStreamWriter.Create(pDest);
-end;
-
-function TD2XOptions.ShowOptions: boolean;
-var
-  lBase: string;
-begin
-  Result := True;
-  lBase := ChangeFileExt(ExtractFileName(ParamStr(0)), '');
-
-  Log('Usage: %s [ Option | @Params | mFilename | Wildcard ] ... ', [lBase]);
-  Log('  Options:        %-15s Description', ['Default']);
-  fParams.Log := fLog;
-  fParams.DescribeAll;
-  Log('    D:<define>    %-15s Define <define> (also enables "Load Defines")', ['']);
-  Log('    Z:<define>    %-15s Undefine <define> (also enables "Load Defines")', ['']);
-  Log('    L[+-]|:<f/e>  %-15s Load Defines from <f/e> (no <f/e> clears all defines)',
-    [':.def']);
-  Log('    W[+-]|:<dir>  %-15s Generate Final Defines files into current or given <dir>', ['-']
-    );
-  Log('    B[+-]|:<dir>  %-15s Use <dir> as a base for all file lookups', ['-']);
-  Log('    I[+-]|:<dir>  %-15s Use <dir> as a base for all file input', ['-']);
-  Log('    O[+-]|:<dir>  %-15s Use <dir> as a base for all file output', ['-']);
-  Log('    X[+-]|:<dir>  %-15s Generate XML files into current or given <dir>', ['+']);
-  Log('    C[+-]|:<f/e>  %-15s Report Min/Max Children into <f/e>', ['+:.cnt']);
-  Log('    U[+-]|:<f/e>  %-15s Report Defines Used into <f/e>', ['+:.used']);
-  Log('    S[+-]|:<f/e>  %-15s Load Skipped Methods from <f/e>', ['+:.skip']);
-  // Available option letters: AHJKQY
-  Log('  Definitions:', []);
-  Log('    <f/e> If value begins with "." is appended to global name to give file name', []);
 end;
 
 { TD2X }

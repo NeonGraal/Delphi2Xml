@@ -15,7 +15,7 @@ type
     TpParser = function(pVal: string): Boolean of object;
 
   public
-    constructor Create(pCode, pLabel, pDescr: string; pParser: TpParser); virtual;
+    constructor Create(pCode, pLabel, pSample, pDescr: string; pParser: TpParser); virtual;
 
     function IsCode(pStr: string): Boolean;
     function Parse(pStr: string): Boolean;
@@ -23,8 +23,11 @@ type
     function Report: string; virtual;
 
   protected
-    fCode, fLabel, fDescr: string;
+    fCode, fLabel, fSample, fDescr: string;
     fParser: TpParser;
+
+    function GetSample: string; virtual;
+    function GetFormatted(pDefault: Boolean): string; virtual;
 
   public
     property ParamLabel: string read fLabel;
@@ -52,22 +55,19 @@ type
     TspValidator = function(pVal: T): Boolean of object;
 
   public
-    constructor Create(pCode, pLabel, pDescr: string; pParser: TD2XParam.TpParser); override;
+    constructor Create(pCode, pLabel, pSample, pDescr: string; pParser: TD2XParam.TpParser); override;
     constructor CreateParam(pCode, pLabel, pSample, pDescr: string; pDefault: T;
       pConverter: TspConverter; pFormatter: TspFormatter; pValidator: TspValidator);
 
     procedure Reset; virtual;
-    function Describe: string; override;
     function Report: string; override;
 
     function ToString: string; override;
 
   protected
-    function GetSample: string; virtual;
-    function GetFormatted(pDefault: Boolean): string; virtual;
+    function GetFormatted(pDefault: Boolean): string; override;
 
   private
-    fSample: string;
     fDefault: T;
     fConverter: TspConverter;
     fFormatter: TspFormatter;
@@ -156,7 +156,7 @@ begin
     fValue := lVal;
 end;
 
-constructor TD2XSingleParam<T>.Create(pCode, pLabel, pDescr: string;
+constructor TD2XSingleParam<T>.Create(pCode, pLabel, pSample, pDescr: string;
   pParser: TD2XParam.TpParser);
 begin
   raise EInvalidParam.Create('Need to use specific constructor');
@@ -165,14 +165,13 @@ end;
 constructor TD2XSingleParam<T>.CreateParam(pCode, pLabel, pSample, pDescr: string; pDefault: T;
   pConverter: TspConverter; pFormatter: TspFormatter; pValidator: TspValidator);
 begin
-  inherited Create(pCode, pLabel, pDescr, ConvertAndSet);
+  inherited Create(pCode, pLabel, pSample, pDescr, ConvertAndSet);
 
   if not Assigned(pConverter) then
     raise EInvalidParam.Create('Need a Converter');
   if not Assigned(pFormatter) then
     raise EInvalidParam.Create('Need a Formatter');
 
-  fSample := pSample;
   fDefault := pDefault;
   fConverter := pConverter;
   fFormatter := pFormatter;
@@ -181,23 +180,12 @@ begin
   Reset;
 end;
 
-function TD2XSingleParam<T>.Describe: string;
-begin
-  Result := Format('  -%s %-15s %-15s %-15s %s', [fCode, fLabel, GetSample,
-      GetFormatted(True), fDescr]);
-end;
-
 function TD2XSingleParam<T>.GetFormatted(pDefault: Boolean): string;
 begin
   if pDefault then
     Result := fFormatter(fDefault)
   else
     Result := fFormatter(fValue);
-end;
-
-function TD2XSingleParam<T>.GetSample: string;
-begin
-  Result := fSample;
 end;
 
 function TD2XSingleParam<T>.Report: string;
@@ -282,7 +270,7 @@ end;
 
 { TD2XParam }
 
-constructor TD2XParam.Create(pCode, pLabel, pDescr: string; pParser: TpParser);
+constructor TD2XParam.Create(pCode, pLabel, pSample, pDescr: string; pParser: TpParser);
 begin
   if pCode = '' then
     raise EInvalidParam.Create('Need a Code');
@@ -293,13 +281,25 @@ begin
 
   fCode := pCode;
   fLabel := pLabel;
+  fSample := pSample;
   fDescr := pDescr;
   fParser := pParser;
 end;
 
 function TD2XParam.Describe: string;
 begin
-  Result := Format('  -%s %-45s   %s', [fCode, fLabel, fDescr]);
+  Result := Format('  %1s%-12s %-15s %s', [fCode, GetSample,
+      GetFormatted(True), fDescr]);
+end;
+
+function TD2XParam.GetFormatted(pDefault: Boolean): string;
+begin
+  Result := '';
+end;
+
+function TD2XParam.GetSample: string;
+begin
+  Result := fSample;
 end;
 
 function TD2XParam.IsCode(pStr: string): Boolean;

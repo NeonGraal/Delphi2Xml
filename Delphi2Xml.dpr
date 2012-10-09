@@ -35,7 +35,12 @@ begin
       bOk := prc.ProcessParam(ParamStr(i), 'Param', i) and bOk;
     prc.EndProcessing;
     if not bOk then
-      prc.Options.ShowOptions;
+      with TStreamWriter.Create(sOut) do
+      try
+        WriteLine('Errors ocurred processing parameters');
+      finally
+        Free;
+      end;
   finally
     FreeAndNil(prc);
     FreeAndNil(sOut);

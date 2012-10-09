@@ -182,14 +182,9 @@ type
 implementation
 
 uses
+  D2XUtils,
   System.Classes,
-  System.RegularExpressions,
   System.StrUtils;
-
-function ReduceString(pStr: string): string;
-begin
-  Result := Trim(TRegEx.Replace(pStr, '\s+', ' ', []));
-end;
 
 { TestTD2XSingleParam }
 
@@ -246,7 +241,7 @@ begin
     FmtBoolProp, nil);
 
   try
-    CheckEqualsString('-T Test +', ReduceString(lBoolP.Describe), 'Describe Param');
+    CheckEqualsString('T +', ReduceString(lBoolP.Describe), 'Describe Param');
     CheckEqualsString('Test +', ReduceString(lBoolP.Report), 'Report Default Value');
 
     CheckFalse(lBoolP.IsCode('A'), 'Check wrong code');
@@ -272,7 +267,7 @@ begin
     FmtBoolProp, nil);
 
   try
-    CheckEqualsString('-T Test -', ReduceString(lBoolP.Describe), 'Describe Param');
+    CheckEqualsString('T -', ReduceString(lBoolP.Describe), 'Describe Param');
     CheckEqualsString('Test -', ReduceString(lBoolP.Report), 'Report Default Value');
 
     CheckFalse(lBoolP.IsCode('A'), 'Check wrong code');
@@ -337,7 +332,7 @@ procedure TestTD2XSingleParam.TestInvalidCreate;
 begin
   StartExpectingException(EInvalidParam);
   try
-    TD2XSingleParam<string>.Create('', '', '', TstParser);
+    TD2XSingleParam<string>.Create('', '', '', '', TstParser);
   except
     on E: EInvalidParam do
     begin
@@ -383,7 +378,7 @@ begin
     FmtObjProp, nil);
 
   try
-    CheckEqualsString('-T Test nil', ReduceString(lObjP.Describe), 'Describe Param');
+    CheckEqualsString('T nil', ReduceString(lObjP.Describe), 'Describe Param');
     CheckEqualsString('Test nil', ReduceString(lObjP.Report), 'Report Default Value');
 
     CheckFalse(lObjP.IsCode('A'), 'Check Wrong code');
@@ -407,7 +402,7 @@ begin
     FmtStrProp, nil);
 
   try
-    CheckEqualsString('-T Test Tst', ReduceString(lStrP.Describe), 'Describe Param');
+    CheckEqualsString('T Tst', ReduceString(lStrP.Describe), 'Describe Param');
     CheckEqualsString('Test Tst', ReduceString(lStrP.Report), 'Report Default Value');
 
     CheckFalse(lStrP.IsCode('A'), 'Check Wrong code');
@@ -431,7 +426,7 @@ begin
     FmtStrProp, nil);
 
   try
-    CheckEqualsString('-T Test', ReduceString(lStrP.Describe), 'Describe Param');
+    CheckEqualsString('T', ReduceString(lStrP.Describe), 'Describe Param');
     CheckEqualsString('Test', ReduceString(lStrP.Report), 'Report Default Value');
 
     CheckFalse(lStrP.IsCode('A'), 'Check Wrong code');
@@ -466,7 +461,7 @@ end;
 
 procedure TestTD2XBooleanParam.TestDescribe;
 begin
-  CheckEqualsString('-T Test [+|-] - Test Boolean Param', ReduceString(fBoolP.Describe),
+  CheckEqualsString('T[+|-] - Test Boolean Param', ReduceString(fBoolP.Describe),
     'Describe Param');
 end;
 
@@ -531,7 +526,7 @@ end;
 
 procedure TestTD2XStringParam.TestDescribe;
 begin
-  CheckEqualsString('-T Test <Example> Tst Test String Param', ReduceString(fStrP.Describe),
+  CheckEqualsString('T<Example> Tst Test String Param', ReduceString(fStrP.Describe),
     'Describe Param');
 end;
 
@@ -599,16 +594,16 @@ end;
 
 procedure TestTD2XParam.TestDescribe;
 begin
-  fPrm := TD2XParam.Create('T', 'Test', '', TstParser);
+  fPrm := TD2XParam.Create('T', 'Test', '', '', TstParser);
 
-  CheckEqualsString('-T Test', ReduceString(fPrm.Describe), 'Describe');
+  CheckEqualsString('T', ReduceString(fPrm.Describe), 'Describe');
 end;
 
 procedure TestTD2XParam.TestInvalidAllBlank;
 begin
   StartExpectingException(EInvalidParam);
   try
-    fPrm := TD2XParam.Create('', '', '', TstParser);
+    fPrm := TD2XParam.Create('', '', '', '', TstParser);
   except
     on E: EInvalidParam do
     begin
@@ -622,7 +617,7 @@ procedure TestTD2XParam.TestInvalidBlankCode;
 begin
   StartExpectingException(EInvalidParam);
   try
-    fPrm := TD2XParam.Create('', 'Label', '', TstParser);
+    fPrm := TD2XParam.Create('', 'Label', '', '', TstParser);
   except
     on E: EInvalidParam do
     begin
@@ -636,7 +631,7 @@ procedure TestTD2XParam.TestInvalidBlankLabel;
 begin
   StartExpectingException(EInvalidParam);
   try
-    fPrm := TD2XParam.Create('Code', '', '', TstParser);
+    fPrm := TD2XParam.Create('Code', '', '', '', TstParser);
   except
     on E: EInvalidParam do
     begin
@@ -648,7 +643,7 @@ end;
 
 procedure TestTD2XParam.TestIsCode;
 begin
-  fPrm := TD2XParam.Create('T', 'Test', '', TstParser);
+  fPrm := TD2XParam.Create('T', 'Test', '', '', TstParser);
 
   CheckFalse(fPrm.IsCode('A'), 'Wrong code');
 
@@ -657,7 +652,7 @@ end;
 
 procedure TestTD2XParam.TestParse;
 begin
-  fPrm := TD2XParam.Create('T', 'Test', '', TstParser);
+  fPrm := TD2XParam.Create('T', 'Test', '', '', TstParser);
 
   fCalledParser := False;
   CheckFalse(fPrm.Parse('A'), 'Wrong code');
@@ -670,7 +665,7 @@ end;
 
 procedure TestTD2XParam.TestReport;
 begin
-  fPrm := TD2XParam.Create('T', 'Test', '', TstParser);
+  fPrm := TD2XParam.Create('T', 'Test', '', '', TstParser);
 
   CheckEqualsString('', fPrm.Report, 'Report');
 end;
@@ -706,15 +701,15 @@ begin
   fPs.DescribeAll;
   CheckEqualsString('', fSB.ToString, 'Describe No Params');
 
-  fPs.Add(TD2XParam.Create('T', 'Test', 'Test param', TstParser));
+  fPs.Add(TD2XParam.Create('T', 'Test', '<tst>', 'Test param', TstParser));
   fSB.Clear;
   fPs.DescribeAll;
-  CheckEqualsString('-T Test Test param', ReduceString(fSB.ToString), 'Describe One Param');
+  CheckEqualsString('T<tst> Test param', ReduceString(fSB.ToString), 'Describe One Param');
 
   fPs.Add(TD2XBooleanParam.CreateBool('B', 'Boolean', 'Boolean param'));
   fSB.Clear;
   fPs.DescribeAll;
-  CheckEqualsString('-T Test Test param -B Boolean [+|-] - Boolean param',
+  CheckEqualsString('T<tst> Test param B[+|-] - Boolean param',
     ReduceString(fSB.ToString), 'Describe Two Params');
 end;
 
@@ -722,7 +717,7 @@ procedure TestTD2XParams.TestForCode;
 begin
   CheckFalse(Assigned(fPs.ForCode('T')), 'Code not found with No Params');
 
-  fPs.Add(TD2XParam.Create('T', 'Test', 'Testing', TstParser));
+  fPs.Add(TD2XParam.Create('T', 'Test', '<tst>', 'Testing', TstParser));
   CheckFalse(Assigned(fPs.ForCode('Z')), 'Wrong Code not found with One Param');
   Check(Assigned(fPs.ForCode('T')), 'Code found with One Param');
 
@@ -737,7 +732,7 @@ begin
   fPs.ReportAll;
   CheckEqualsString('', fSB.ToString, 'Report No Params');
 
-  fPs.Add(TD2XParam.Create('T', 'Test', 'Testing', TstParser));
+  fPs.Add(TD2XParam.Create('T', 'Test', '<tst>', 'Testing', TstParser));
   fSB.Clear;
   fPs.ReportAll;
   CheckEqualsString('', fSB.ToString, 'Report One Param');
@@ -925,7 +920,7 @@ end;
 
 procedure TestTD2XFlaggedStringParam.TestDescribe;
 begin
-  CheckEqualsString('-T Test [+-]:<Example> -(Tst) Test String Param', ReduceString(fFlagP.Describe),
+  CheckEqualsString('T[+-]:<Example> -(Tst) Test String Param', ReduceString(fFlagP.Describe),
     'Describe Param');
 end;
 

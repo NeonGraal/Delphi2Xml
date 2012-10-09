@@ -325,13 +325,13 @@ begin
   EndResults('', rpRun);
 
   if fOpts.DefinesUsed then
-    OutputStrIntDict(fDefinesUsed, fOpts.UsedFileOrExtn, SimplePairLog);
+    OutputStrIntDict(fDefinesUsed, fOpts.DefinesUsedFoE, SimplePairLog);
 
   if fOpts.CountChildren then
-    OutputStrIntDict(fMaxChildren, fOpts.CountFileOrExtn, MinMaxPairLog);
+    OutputStrIntDict(fMaxChildren, fOpts.CountChildrenFoE, MinMaxPairLog);
 
   if fOpts.SkipMethods then
-    OutputStrIntDict(fSkippedMethods, fOpts.SkipFileOrExtn + '.log', SimplePairLog);
+    OutputStrIntDict(fSkippedMethods, fOpts.SkipMethodsFoE + '.log', SimplePairLog);
 end;
 
 procedure TD2XProcessor.EndResults(pFilename: string; pPer: TD2XResultPer);
@@ -745,7 +745,7 @@ begin
     if fOpts.SkipMethods then
       with TStringList.Create do
         try
-          LoadFromFile(fOpts.InputFileOrExtn(fOpts.SkipFileOrExtn));
+          LoadFromFile(fOpts.InputFileOrExtn(fOpts.SkipMethodsFoE));
           fSkippedMethods.Clear;
           for i := 0 to Count - 1 do
             if Names[i] = '' then

@@ -71,7 +71,10 @@ type
     procedure TestParseOptionCOn;
     procedure TestParseOptionCFile;
     procedure TestParseOptionD;
-    procedure TestParseOptionDValue;
+    procedure TestParseOptionDAdd;
+    procedure TestParseOptionDDelete;
+    procedure TestParseOptionDClear;
+    procedure TestParseOptionDLoad;
     procedure TestParseOptionDMany;
     procedure TestParseOptionE;
     procedure TestParseOptionEOff;
@@ -90,10 +93,6 @@ type
     procedure TestParseOptionJ;
     procedure TestParseOptionK;
     procedure TestParseOptionL;
-    procedure TestParseOptionLOff;
-    procedure TestParseOptionLOn;
-    procedure TestParseOptionLBlank;
-    procedure TestParseOptionLValue;
     procedure TestParseOptionM;
     procedure TestParseOptionMValue;
     procedure TestParseOptionN;
@@ -141,7 +140,6 @@ type
     procedure TestParseOptionXValue;
     procedure TestParseOptionY;
     procedure TestParseOptionZ;
-    procedure TestParseOptionZValue;
   end;
 
   // Test methods for class TD2XOptions
@@ -153,6 +151,9 @@ type
   end;
 
 implementation
+
+uses
+  D2XUtils;
 
 { TestTD2XOptionBase }
 
@@ -616,30 +617,66 @@ begin
   pOpt := '-D';
   ReturnValue := fOpts.ParseOption(pOpt);
   CheckFalse(ReturnValue, 'ReturnValue');
-  CheckLog('Invalid Define option: -D');
+  CheckLog('Invalid Defines option: -D');
+end;
+
+procedure TestTD2XOptions.TestParseOptionDAdd;
+var
+  ReturnValue: Boolean;
+  pOpt: string;
+begin
+  pOpt := '-D+Value';
+  ReturnValue := fOpts.ParseOption(pOpt);
+  Check(ReturnValue, 'ReturnValue');
+  CheckEqualsString('Alpha,Beta,Gamma,Value', fOpts.Defines.CommaText, 'Defines');
+  CheckLog('');
+end;
+
+procedure TestTD2XOptions.TestParseOptionDClear;
+var
+  ReturnValue: Boolean;
+  pOpt: string;
+begin
+  pOpt := '-D!';
+  ReturnValue := fOpts.ParseOption(pOpt);
+  Check(ReturnValue, 'ReturnValue');
+  CheckEqualsString('', fOpts.Defines.CommaText, 'Defines');
+  CheckLog('');
+end;
+
+procedure TestTD2XOptions.TestParseOptionDDelete;
+var
+  ReturnValue: Boolean;
+  pOpt: string;
+begin
+  pOpt := '-D-Beta';
+  ReturnValue := fOpts.ParseOption(pOpt);
+  Check(ReturnValue, 'ReturnValue');
+  CheckEqualsString('Alpha,Gamma', fOpts.Defines.CommaText, 'Defines');
+  CheckLog('');
+end;
+
+procedure TestTD2XOptions.TestParseOptionDLoad;
+var
+  ReturnValue: Boolean;
+  pOpt: string;
+begin
+  pOpt := '-D:Load';
+  ReturnValue := fOpts.ParseOption(pOpt);
+  Check(ReturnValue, 'ReturnValue');
+  CheckEqualsString('Tango,Uniform', fOpts.Defines.CommaText, 'Defines');
+  CheckLog('');
 end;
 
 procedure TestTD2XOptions.TestParseOptionDMany;
 var
   ReturnValue: Boolean;
 begin
-  ReturnValue := fOpts.ParseOption('-D:Value1');
+  ReturnValue := fOpts.ParseOption('-D+Value1');
   Check(ReturnValue, 'ReturnValue1');
-  ReturnValue := fOpts.ParseOption('-D:Value2');
+  ReturnValue := fOpts.ParseOption('-D+Value2');
   Check(ReturnValue, 'ReturnValue2');
   CheckEqualsString('Alpha,Beta,Gamma,Value1,Value2', fOpts.Defines.CommaText, 'Defines');
-  CheckLog('');
-end;
-
-procedure TestTD2XOptions.TestParseOptionDValue;
-var
-  ReturnValue: Boolean;
-  pOpt: string;
-begin
-  pOpt := '-D:Value';
-  ReturnValue := fOpts.ParseOption(pOpt);
-  Check(ReturnValue, 'ReturnValue');
-  CheckEqualsString('Alpha,Beta,Gamma,Value', fOpts.Defines.CommaText, 'Defines');
   CheckLog('');
 end;
 
@@ -848,70 +885,8 @@ var
 begin
   pOpt := '-L';
   ReturnValue := fOpts.ParseOption(pOpt);
-  Check(ReturnValue, 'ReturnValue');
-  Check(fOpts.LoadDefines, 'LoadDefines');
-  CheckEqualsString('', fOpts.LoadFileOrExtn, 'LoadFileOrExtn');
-  CheckEqualsString('', fOpts.Defines.CommaText, 'Defines');
-  CheckLog('');
-end;
-
-procedure TestTD2XOptions.TestParseOptionLBlank;
-var
-  ReturnValue: Boolean;
-  pOpt: string;
-begin
-  fOpts.Defines.CommaText := 'Alpha,Beta,Value';
-  pOpt := '-L:Load.def';
-  ReturnValue := fOpts.ParseOption(pOpt);
-  Check(ReturnValue, 'ReturnValue');
-  Check(fOpts.LoadDefines, 'LoadDefines');
-  CheckEqualsString('Load.def', fOpts.LoadFileOrExtn, 'LoadFileOrExtn');
-  CheckEqualsString('Tango,Uniform', fOpts.Defines.CommaText, 'Defines');
-  CheckLog('');
-end;
-
-procedure TestTD2XOptions.TestParseOptionLOff;
-var
-  ReturnValue: Boolean;
-  pOpt: string;
-begin
-  pOpt := '-L-';
-  ReturnValue := fOpts.ParseOption(pOpt);
-  Check(ReturnValue, 'ReturnValue');
-  CheckFalse(fOpts.LoadDefines, 'LoadDefines');
-  CheckEqualsString('', fOpts.LoadFileOrExtn, 'LoadFileOrExtn');
-  CheckEqualsString('', fOpts.Defines.CommaText, 'Defines');
-  CheckLog('');
-end;
-
-procedure TestTD2XOptions.TestParseOptionLOn;
-var
-  ReturnValue: Boolean;
-  pOpt: string;
-begin
-  fOpts.Defines.CommaText := 'Alpha,Beta,Value';
-  pOpt := '-L+';
-  ReturnValue := fOpts.ParseOption(pOpt);
-  Check(ReturnValue, 'ReturnValue');
-  Check(fOpts.LoadDefines, 'LoadDefines');
-  CheckEqualsString('', fOpts.LoadFileOrExtn, 'LoadFileOrExtn');
-  CheckEqualsString('', fOpts.Defines.CommaText, 'Defines');
-  CheckLog('');
-end;
-
-procedure TestTD2XOptions.TestParseOptionLValue;
-var
-  ReturnValue: Boolean;
-  pOpt: string;
-begin
-  fOpts.Defines.CommaText := 'Alpha,Beta,Value';
-  pOpt := '-L:Load.def';
-  ReturnValue := fOpts.ParseOption(pOpt);
-  Check(ReturnValue, 'ReturnValue');
-  Check(fOpts.LoadDefines, 'LoadDefines');
-  CheckEqualsString('Load.def', fOpts.LoadFileOrExtn, 'LoadFileOrExtn');
-  CheckEqualsString('Tango,Uniform', fOpts.Defines.CommaText, 'Defines');
-  CheckLog('');
+  CheckFalse(ReturnValue, 'ReturnValue');
+  CheckLog('Unknown option: -L');
 end;
 
 procedure TestTD2XOptions.TestParseOptionM;
@@ -1489,19 +1464,7 @@ begin
   pOpt := '-Z';
   ReturnValue := fOpts.ParseOption(pOpt);
   CheckFalse(ReturnValue, 'ReturnValue');
-  CheckLog('Invalid Undefine option: -Z');
-end;
-
-procedure TestTD2XOptions.TestParseOptionZValue;
-var
-  ReturnValue: Boolean;
-  pOpt: string;
-begin
-  pOpt := '-Z:Beta';
-  ReturnValue := fOpts.ParseOption(pOpt);
-  Check(ReturnValue, 'ReturnValue');
-  CheckEqualsString('Alpha,Gamma', fOpts.Defines.CommaText, 'Defines');
-  CheckLog('');
+  CheckLog('Unknown option: -Z');
 end;
 
 procedure TestTD2XOptions.TestParseOptionWrongPrefix;
@@ -1549,7 +1512,6 @@ begin
   Check(fOpts.DefinesUsed, 'DefinesUsed');
   CheckEqualsString('.used', fOpts.DefinesUsedFoE, 'UsedFileOrExtn');
   Check(fOpts.LoadDefines, 'LoadDefines');
-  CheckEqualsString('.def', fOpts.LoadFileOrExtn, 'LoadFileOrExtn');
   CheckEqualsString('', fOpts.Defines.CommaText, 'Defines');
   Check(fOpts.CountChildren, 'CountChildren');
   CheckEqualsString('.cnt', fOpts.CountChildrenFoE, 'CountFileOrExtn');
@@ -1563,21 +1525,50 @@ end;
 procedure TestTD2XOptionGeneral.TestReportOptions;
 var
   ReturnValue: Boolean;
+
+const
+  EXPECTED_REPORT_OPTIONS =
+    'Current option settings: Verbose - Log Errors + Log Not Supp - Timestamp - ' +
+    'Final Token + Recurse - Global name Delphi2XmlTests Parse mode Full Results per ' +
+    'File Base dir - Input dir :Config\ Output dir :Log\ Generate XML :Xml\ ' +
+    'Write Defines -(Defines\) Defines Used :.used Count Children :.cnt ' +
+    'Skipped Methods :.skip Use NO Defines';
 begin
-  ReturnValue := fOpts.ReportOptions;
+  ReturnValue := fOpts.ParseOption('-!');
 
   Check(ReturnValue, 'ReturnValue');
-  CheckNotEqualsString('', fLog.DataString, 'Log');
+  CheckEqualsString(EXPECTED_REPORT_OPTIONS, ReduceString(fLog.DataString), 'Log');
 end;
 
 procedure TestTD2XOptionGeneral.TestShowOptions;
 var
   ReturnValue: Boolean;
+
+const
+  EXPECTED_SHOW_OPTIONS =
+    'Usage: Delphi2XmlTests [ Option | @Params | mFilename | Wildcard ] ... ' +
+    'Options: Default Description ? Show valid options ! Report Current options ' +
+    'V[+|-] - Log all Parser methods called E[+|-] + Log Error messages ' +
+    'N[+|-] - Log Not Supported messages T[+|-] - Timestamp global output files ' +
+    'F[+|-] + Record Final Token R[+|-] - Recurse into subdirectories ' +
+    'G<str> Delphi2XmlTests Sets global name ' +
+    'M<mode> Full Set Parsing mode (F[ull], U[ses]) ' +
+    'P<per> File Set Result per (F[ile], [S]ubdir, D[ir], W[ildcard], P[aram], R[un]) ' +
+    'B[+-]:<dir> - Use <dir> as a base for all file lookups ' +
+    'I[+-]:<dir> :Config\ Use <dir> as a base for all file input ' +
+    'O[+-]:<dir> :Log\ Use <dir> as a base for all file output ' +
+    'X[+-]:<dir> :Xml\ Generate XML files into current or given <dir> ' +
+    'W[+-]:<dir> -(Defines\) Generate Final Defines files into current or given <dir> ' +
+    'U[+-]:<f/e> :.used Report Defines Used into <f/e> ' +
+    'C[+-]:<f/e> :.cnt Report Min/Max Children into <f/e> ' +
+    'S[+-]:<f/e> :.skip Load Skipped Methods from <f/e> ' +
+    'D[+-!:]<def> Add(+), Remove(-), Clear(!) or Load(:) Defines ' +
+    'Definitions: <f/e> If value begins with "." is appended to global name to give file name';
 begin
-  ReturnValue := fOpts.ShowOptions;
+  ReturnValue := fOpts.ParseOption('-?');
 
   Check(ReturnValue, 'ReturnValue');
-  CheckNotEqualsString('', fLog.DataString, 'Log');
+  CheckEqualsString(EXPECTED_SHOW_OPTIONS, ReduceString(fLog.DataString), 'Log');
 end;
 
 initialization
