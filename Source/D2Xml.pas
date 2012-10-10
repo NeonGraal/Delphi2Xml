@@ -21,14 +21,14 @@ type
     fTag: string;
     fDoc: TD2XmlDoc;
 
-    constructor Create(pTag: string; pParent: TD2XmlNode); virtual;
+    constructor CreateTag(pTag: string; pParent: TD2XmlNode); virtual;
 
   protected
     procedure MakeXml(pW: TTextWriter); virtual;
     function GetXml: TStringStream;
-    procedure WriteXml(pXml: TTextWriter; pOptions: TXMLDocOptions; pIndent: Integer); virtual;
 
   public
+    constructor Create;
     destructor Destroy; override;
 
     function AddChild(pTag: string): TD2XmlNode; virtual;
@@ -45,9 +45,6 @@ type
   TD2XmlAttribute = class(TD2XmlNode)
   protected
     procedure MakeXml(pW: TTextWriter); override;
-
-    procedure WriteXml(pXml: TTextWriter; pOptions: TXMLDocOptions; pIndent: Integer);
-      override;
   end;
 
   TD2XmlElement = class(TD2XmlNode)
@@ -56,12 +53,10 @@ type
     fAtttributes: TObjectList<TD2XmlNode>;
 
   strict protected
-    constructor Create(pTag: string; pParent: TD2XmlNode); override;
+    constructor CreateTag(pTag: string; pParent: TD2XmlNode); override;
 
   protected
     procedure MakeXml(pW: TTextWriter); override;
-    procedure WriteXml(pXml: TTextWriter; pOptions: TXMLDocOptions; pIndent: Integer);
-      override;
 
   public
     destructor Destroy; override;
@@ -115,7 +110,7 @@ end;
 
 constructor TD2XmlDoc.CreateDoc;
 begin
-  Create('', nil);
+  CreateTag('', nil);
   fDoc := Self;
 end;
 
@@ -137,7 +132,12 @@ begin
   Result := nil;
 end;
 
-constructor TD2XmlNode.Create(pTag: string; pParent: TD2XmlNode);
+constructor TD2XmlNode.Create;
+begin
+  Assert(False, 'Invalid constructor called');
+end;
+
+constructor TD2XmlNode.CreateTag(pTag: string; pParent: TD2XmlNode);
 begin
   fTag := pTag;
   fParent := pParent;
@@ -179,18 +179,13 @@ begin
 
 end;
 
-procedure TD2XmlNode.WriteXml(pXml: TTextWriter; pOptions: TXMLDocOptions; pIndent: Integer);
-begin
-  //
-end;
-
 { TD2XmlElement }
 
 function TD2XmlElement.AddAttribute(pTag: string): TD2XmlNode;
 begin
   Assert(Assigned(fAtttributes), 'AddAttribute called after Xml Generated');
 
-  Result := TD2XmlAttribute.Create(pTag, Self);
+  Result := TD2XmlAttribute.CreateTag(pTag, Self);
   fAtttributes.Add(Result);
 end;
 
@@ -198,11 +193,11 @@ function TD2XmlElement.AddChild(pTag: string): TD2XmlNode;
 begin
   Assert(Assigned(fChildren), 'AddChild called after Xml Generated');
 
-  Result := TD2XmlElement.Create(pTag, Self);
+  Result := TD2XmlElement.CreateTag(pTag, Self);
   fChildren.Add(Result);
 end;
 
-constructor TD2XmlElement.Create(pTag: string; pParent: TD2XmlNode);
+constructor TD2XmlElement.CreateTag(pTag: string; pParent: TD2XmlNode);
 begin
   inherited;
 
@@ -265,7 +260,7 @@ begin
         end
         else
           for lN in fChildren do
-            pW.Write(lN.GetXml);
+            pW.Write(lN.GetXml.DataString);
         FreeAndNil(fChildren);
       end;
       pW.Write('</');
@@ -281,52 +276,6 @@ begin
     pW.Write(Text);
 end;
 
-procedure TD2XmlElement.WriteXml(pXml: TTextWriter; pOptions: TXMLDocOptions;
-  pIndent: Integer);
-var
-  lN: TD2XmlNode;
-
-  procedure CheckIndent;
-  begin
-    if doNodeAutoIndent in pOptions then
-    begin
-      pXml.WriteLine;
-      pXml.Write(DupeString('  ', pIndent));
-    end;
-  end;
-
-begin
-  if fTag > '' then
-  begin
-    CheckIndent;
-    pXml.Write('<');
-    pXml.Write(fTag);
-    if fAtttributes.Count > 0 then
-      for lN in fAtttributes do
-        lN.WriteXml(pXml, pOptions, pIndent + 1);
-
-    if (fChildren.Count > 0) or (Text > '') then
-    begin
-      pXml.Write('>');
-      if Text > '' then
-        pXml.Write(Text)
-      else
-      begin
-        for lN in fChildren do
-          lN.WriteXml(pXml, pOptions, pIndent + 1);
-        CheckIndent;
-      end;
-      pXml.Write('</');
-      pXml.Write(fTag);
-      pXml.Write('>');
-    end
-    else
-      pXml.Write(' />');
-  end
-  else
-    pXml.Write(Text);
-end;
-
 { TD2XmlAttribute }
 
 procedure TD2XmlAttribute.MakeXml(pW: TTextWriter);
@@ -336,12 +285,6 @@ begin
   pW.Write('="');
   pW.Write(XmlEscape(Text));
   pW.Write('"');
-end;
-
-procedure TD2XmlAttribute.WriteXml(pXml: TTextWriter; pOptions: TXMLDocOptions;
-  pIndent: Integer);
-begin
-  MakeXml(pXml);
 end;
 
 end.

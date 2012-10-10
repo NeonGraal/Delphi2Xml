@@ -38,6 +38,7 @@ type
     fSB: TStringBuilder;
 
     function TstParser(pStr: string): Boolean;
+    procedure CheckLog(pExpected, pLabel: String);
 
   public
     procedure SetUp; override;
@@ -47,6 +48,7 @@ type
     procedure TestForCode;
     procedure TestDescribeAll;
     procedure TestReportAll;
+    procedure TestResetAll;
   end;
 
   TestTD2XSingleParam = class(TTestCase)
@@ -678,6 +680,12 @@ end;
 
 { TestTD2XParams }
 
+procedure TestTD2XParams.CheckLog(pExpected, pLabel: String);
+begin
+  CheckEqualsString(pExpected, ReduceString(fSB.ToString), pLabel);
+  fSB.Clear;
+end;
+
 procedure TestTD2XParams.SetUp;
 begin
   inherited;
@@ -699,18 +707,15 @@ end;
 procedure TestTD2XParams.TestDescribeAll;
 begin
   fPs.DescribeAll;
-  CheckEqualsString('', fSB.ToString, 'Describe No Params');
+  CheckLog('', 'Describe No Params');
 
   fPs.Add(TD2XParam.Create('T', 'Test', '<tst>', 'Test param', TstParser));
-  fSB.Clear;
   fPs.DescribeAll;
-  CheckEqualsString('T<tst> Test param', ReduceString(fSB.ToString), 'Describe One Param');
+  CheckLog('T<tst> Test param', 'Describe One Param');
 
   fPs.Add(TD2XBooleanParam.CreateBool('B', 'Boolean', 'Boolean param'));
-  fSB.Clear;
   fPs.DescribeAll;
-  CheckEqualsString('T<tst> Test param B[+|-] - Boolean param',
-    ReduceString(fSB.ToString), 'Describe Two Params');
+  CheckLog('T<tst> Test param B[+|-] - Boolean param', 'Describe Two Params');
 end;
 
 procedure TestTD2XParams.TestForCode;
@@ -730,17 +735,40 @@ end;
 procedure TestTD2XParams.TestReportAll;
 begin
   fPs.ReportAll;
-  CheckEqualsString('', fSB.ToString, 'Report No Params');
+  CheckLog('', 'Report No Params');
 
   fPs.Add(TD2XParam.Create('T', 'Test', '<tst>', 'Testing', TstParser));
-  fSB.Clear;
   fPs.ReportAll;
-  CheckEqualsString('', fSB.ToString, 'Report One Param');
+  CheckLog('', 'Report One Param');
 
   fPs.Add(TD2XBooleanParam.CreateBool('B', 'Boolean', 'Boolean param'));
-  fSB.Clear;
   fPs.ReportAll;
-  CheckEqualsString('Boolean -', ReduceString(fSB.ToString), 'Report Two Params');
+  CheckLog('Boolean -', 'Report Two Params');
+end;
+
+procedure TestTD2XParams.TestResetAll;
+var
+  lBP: TD2XBooleanParam;
+  lSP: TD2XStringParam;
+begin
+  fPs.Add(TD2XParam.Create('T', 'Test', '<tst>', 'Testing', TstParser));
+  lBP := TD2XBooleanParam.CreateBool('B', 'Boolean', 'Boolean param');
+  fPs.Add(lBP);
+  lSP := TD2XStringParam.CreateStr('S', 'String', '<str>', 'String param', 'Str', nil, nil);
+  fPs.Add(lSP);
+
+  fPs.ReportAll;
+  CheckLog('Boolean - String Str', 'All Params Default');
+
+  lBP.Value := True;
+  lSP.Value := 'Value';
+  fPs.ReportAll;
+  CheckLog('Boolean + String Value', 'All Params Changed');
+
+  fPs.ResetAll;
+
+  fPs.ReportAll;
+  CheckLog('Boolean - String Str', 'All Params Reset');
 end;
 
 function TestTD2XParams.TstParser(pStr: string): Boolean;

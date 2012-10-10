@@ -23,6 +23,7 @@ type
     fStartDefines: TStringList;
     FAddAttribute: TD2XAddAttributeEvent;
     FAddText: TD2XAddTextEvent;
+    fShowProgress: Boolean;
 
     function GetStartDefines: TStringList;
 
@@ -50,6 +51,8 @@ type
 
     property LastTokens: string read fLastTokens write fLastTokens;
     property StartDefines: TStringList read GetStartDefines;
+
+    property ShowProgress: Boolean read fShowProgress write fShowProgress;
 
     property AddAttribute: TD2XAddAttributeEvent read FAddAttribute write FAddAttribute;
     property AddText: TD2XAddTextEvent read FAddText write FAddText;
@@ -1613,6 +1616,7 @@ begin
   fStartDefines := nil;
   fLength := 0;
   fProcessed := 0;
+  fShowProgress := False;
 end;
 
 destructor TD2XDefinesParser.Destroy;
@@ -1685,7 +1689,8 @@ begin
     if lProcessed > fProcessed then
     begin
       fProcessed := lProcessed;
-      write(Format('%3d%%'#8#8#8#8, [fProcessed]));
+      if fShowProgress then
+        write(Format('%3d%%'#8#8#8#8, [fProcessed]));
     end;
   end;
 

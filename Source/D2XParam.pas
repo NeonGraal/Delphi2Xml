@@ -44,11 +44,17 @@ type
     function ForCode(pCode: string): TD2XParam;
     procedure DescribeAll;
     procedure ReportAll;
+    procedure ResetAll;
 
     property Log: TTextWriter read fLog write fLog;
   end;
 
-  TD2XSingleParam<T> = class(TD2XParam)
+  TD2XResettableParam = class(TD2XParam)
+  public
+    procedure Reset; virtual;
+  end;
+
+  TD2XSingleParam<T> = class(TD2XResettableParam)
   public type
     TspConverter = function(pStr: string; pDflt: T; out pVal: T): Boolean of object;
     TspFormatter = function(pVal: T): string of object;
@@ -59,7 +65,7 @@ type
     constructor CreateParam(pCode, pLabel, pSample, pDescr: string; pDefault: T;
       pConverter: TspConverter; pFormatter: TspFormatter; pValidator: TspValidator);
 
-    procedure Reset; virtual;
+    procedure Reset; override;
     function Report: string; override;
 
     function ToString: string; override;
@@ -198,7 +204,7 @@ begin
   if CheckValue(fDefault) then
     fValue := fDefault
   else
-    raise EInvalidParam.Create('Invalid default value');
+    inherited;
 end;
 
 procedure TD2XSingleParam<T>.SetValue(const pVal: T);
@@ -317,16 +323,11 @@ begin
   Result := '';
 end;
 
-type
-  TD2XParamEqCmp = class(TComparer<TD2XParam>)
-    function Compare(const pL, pR: TD2XParam): Integer; override;
-  end;
-
   { TD2XParams }
 
 constructor TD2XParams.Create;
 begin
-  inherited Create(TD2XParamEqCmp.Create, True);
+  inherited Create(True);
 end;
 
 procedure TD2XParams.DescribeAll;
@@ -362,11 +363,13 @@ begin
       fLog.WriteLine(lP.Report);
 end;
 
-{ TD2XParamEqCmp }
-
-function TD2XParamEqCmp.Compare(const pL, pR: TD2XParam): Integer;
+procedure TD2XParams.ResetAll;
+var
+  lP: TD2XParam;
 begin
-  Result := CompareStr(pL.fCode, pR.fCode);
+  for lP in Self do
+    if lP is TD2XResettableParam then
+      TD2XResettableParam(lP).Reset;
 end;
 
 { TD2XFlaggedStringParam }
@@ -449,6 +452,13 @@ begin
   inherited;
 
   fFlag := fFlagDefault;
+end;
+
+{ TD2XResettableParam }
+
+procedure TD2XResettableParam.Reset;
+begin
+  raise EInvalidParam.Create('Invalid default value');
 end;
 
 end.

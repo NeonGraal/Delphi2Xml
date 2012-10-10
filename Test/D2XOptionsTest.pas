@@ -147,6 +147,7 @@ type
   published
     procedure TestDefaultOptions;
     procedure TestReportOptions;
+    procedure TestReportOptionsDefines;
     procedure TestShowOptions;
   end;
 
@@ -1536,6 +1537,26 @@ const
 begin
   ReturnValue := fOpts.ParseOption('-!');
 
+  Check(ReturnValue, 'ReturnValue');
+  CheckEqualsString(EXPECTED_REPORT_OPTIONS, ReduceString(fLog.DataString), 'Log');
+end;
+
+procedure TestTD2XOptionGeneral.TestReportOptionsDefines;
+var
+  ReturnValue: Boolean;
+
+const
+  EXPECTED_REPORT_OPTIONS =
+    'Current option settings: Verbose - Log Errors + Log Not Supp - Timestamp - ' +
+    'Final Token + Recurse - Global name Delphi2XmlTests Parse mode Full Results per ' +
+    'File Base dir - Input dir :Config\ Output dir :Log\ Generate XML :Xml\ ' +
+    'Write Defines -(Defines\) Defines Used :.used Count Children :.cnt ' +
+    'Skipped Methods :.skip Use these Defines: CPU32';
+begin
+  ReturnValue := fOpts.ParseOption('-D+CPU32');
+  Check(ReturnValue, 'ReturnValue');
+
+  ReturnValue := fOpts.ParseOption('-!');
   Check(ReturnValue, 'ReturnValue');
   CheckEqualsString(EXPECTED_REPORT_OPTIONS, ReduceString(fLog.DataString), 'Log');
 end;
