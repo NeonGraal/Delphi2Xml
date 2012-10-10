@@ -50,8 +50,19 @@ type
   end;
 
   TD2XResettableParam = class(TD2XParam)
+  public type
+    TspResetter = procedure of object;
+
   public
+    constructor Create(pCode, pLabel, pSample, pDescr: string;
+      pParser: TD2XParam.TpParser); override;
+    constructor CreateReset(pCode, pLabel, pSample, pDescr: string;
+      pParser: TD2XParam.TpParser; pResetter: TspResetter); virtual;
+
     procedure Reset; virtual;
+
+  private
+    fResetter: TspResetter;
   end;
 
   TD2XSingleParam<T> = class(TD2XResettableParam)
@@ -61,11 +72,11 @@ type
     TspValidator = function(pVal: T): Boolean of object;
 
   public
-    constructor Create(pCode, pLabel, pSample, pDescr: string; pParser: TD2XParam.TpParser); override;
+    constructor CreateReset(pCode, pLabel, pSample, pDescr: string;
+      pParser: TD2XParam.TpParser; pResetter: TD2XResettableParam.TspResetter); override;
     constructor CreateParam(pCode, pLabel, pSample, pDescr: string; pDefault: T;
       pConverter: TspConverter; pFormatter: TspFormatter; pValidator: TspValidator);
 
-    procedure Reset; override;
     function Report: string; override;
 
     function ToString: string; override;
@@ -83,6 +94,7 @@ type
     function CheckValue(pVal: T): Boolean;
     function ConvertAndSet(pStr: string): Boolean;
     procedure SetValue(const pVal: T);
+    procedure ResetDefault;
 
   public
     property Value: T read fValue write SetValue;
@@ -162,16 +174,16 @@ begin
     fValue := lVal;
 end;
 
-constructor TD2XSingleParam<T>.Create(pCode, pLabel, pSample, pDescr: string;
-  pParser: TD2XParam.TpParser);
+constructor TD2XSingleParam<T>.CreateReset(pCode, pLabel, pSample, pDescr: string;
+  pParser: TD2XParam.TpParser; pResetter: TD2XResettableParam.TspResetter);
 begin
-  raise EInvalidParam.Create('Need to use specific constructor');
+  raise EInvalidParam.Create('Need to use correct constructor');
 end;
 
 constructor TD2XSingleParam<T>.CreateParam(pCode, pLabel, pSample, pDescr: string; pDefault: T;
   pConverter: TspConverter; pFormatter: TspFormatter; pValidator: TspValidator);
 begin
-  inherited Create(pCode, pLabel, pSample, pDescr, ConvertAndSet);
+  inherited CreateReset(pCode, pLabel, pSample, pDescr, ConvertAndSet, ResetDefault);
 
   if not Assigned(pConverter) then
     raise EInvalidParam.Create('Need a Converter');
@@ -199,12 +211,12 @@ begin
   Result := Format(' %-15s %s', [fLabel, GetFormatted(False)]);
 end;
 
-procedure TD2XSingleParam<T>.Reset;
+procedure TD2XSingleParam<T>.ResetDefault;
 begin
   if CheckValue(fDefault) then
     fValue := fDefault
   else
-    inherited;
+    raise EInvalidParam.Create('Invalid default value');
 end;
 
 procedure TD2XSingleParam<T>.SetValue(const pVal: T);
@@ -222,7 +234,8 @@ end;
 
 { TD2XBooleanParam }
 
-function TD2XBooleanParam.ConvertBoolean(pStr: string; pDflt: Boolean; out pVal: Boolean): Boolean;
+function TD2XBooleanParam.ConvertBoolean(pStr: string; pDflt: Boolean;
+  out pVal: Boolean): Boolean;
 begin
   Result := True;
   if Length(pStr) > 0 then
@@ -294,8 +307,7 @@ end;
 
 function TD2XParam.Describe: string;
 begin
-  Result := Format('  %1s%-12s %-15s %s', [fCode, GetSample,
-      GetFormatted(True), fDescr]);
+  Result := Format('  %1s%-12s %-15s %s', [fCode, GetSample, GetFormatted(True), fDescr]);
 end;
 
 function TD2XParam.GetFormatted(pDefault: Boolean): string;
@@ -323,7 +335,7 @@ begin
   Result := '';
 end;
 
-  { TD2XParams }
+{ TD2XParams }
 
 constructor TD2XParams.Create;
 begin
@@ -374,7 +386,8 @@ end;
 
 { TD2XFlaggedStringParam }
 
-function TD2XFlaggedStringParam.ConvertString(pStr: string; pDflt: string; out pVal: string): Boolean;
+function TD2XFlaggedStringParam.ConvertString(pStr: string; pDflt: string;
+  out pVal: string): Boolean;
 begin
   Result := False;
   pVal := fValue;
@@ -456,9 +469,24 @@ end;
 
 { TD2XResettableParam }
 
+constructor TD2XResettableParam.Create(pCode, pLabel, pSample, pDescr: string;
+  pParser: TD2XParam.TpParser);
+begin
+  raise EInvalidParam.Create('Need to use correct constructor');
+end;
+
+constructor TD2XResettableParam.CreateReset(pCode, pLabel, pSample, pDescr: string;
+  pParser: TD2XParam.TpParser; pResetter: TspResetter);
+begin
+  inherited Create(pCode, pLabel, pSample, pDescr, pParser);
+
+  fResetter := pResetter;
+end;
+
 procedure TD2XResettableParam.Reset;
 begin
-  raise EInvalidParam.Create('Invalid default value');
+  if Assigned(fResetter) then
+    fResetter;
 end;
 
 end.

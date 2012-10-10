@@ -148,6 +148,7 @@ type
     procedure TestDefaultOptions;
     procedure TestReportOptions;
     procedure TestReportOptionsDefines;
+    procedure TestResetOptions;
     procedure TestShowOptions;
   end;
 
@@ -160,7 +161,7 @@ uses
 
 procedure TestTD2XOptionBase.CheckLog(pMsg: string);
 begin
-  CheckEqualsString(pMsg, Trim(fLog.DataString), 'Log');
+  CheckEqualsString(pMsg, ReduceString(fLog.DataString), 'Log');
 end;
 
 procedure TestTD2XOptionBase.SetUp;
@@ -662,7 +663,7 @@ var
   ReturnValue: Boolean;
   pOpt: string;
 begin
-  pOpt := '-D:Load';
+  pOpt := '-D:Test';
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
   CheckEqualsString('Tango,Uniform', fOpts.Defines.CommaText, 'Defines');
@@ -1535,10 +1536,10 @@ const
     'Write Defines -(Defines\) Defines Used :.used Count Children :.cnt ' +
     'Skipped Methods :.skip Use NO Defines';
 begin
-  ReturnValue := fOpts.ParseOption('-!');
+  ReturnValue := fOpts.ParseOption('-@');
 
   Check(ReturnValue, 'ReturnValue');
-  CheckEqualsString(EXPECTED_REPORT_OPTIONS, ReduceString(fLog.DataString), 'Log');
+  CheckLog(EXPECTED_REPORT_OPTIONS);
 end;
 
 procedure TestTD2XOptionGeneral.TestReportOptionsDefines;
@@ -1556,9 +1557,45 @@ begin
   ReturnValue := fOpts.ParseOption('-D+CPU32');
   Check(ReturnValue, 'ReturnValue');
 
+  ReturnValue := fOpts.ParseOption('-@');
+  Check(ReturnValue, 'ReturnValue');
+  CheckLog(EXPECTED_REPORT_OPTIONS);
+end;
+
+procedure TestTD2XOptionGeneral.TestResetOptions;
+var
+  ReturnValue: Boolean;
+  C: AnsiChar;
+
+const
+  ALTERED_REPORT_OPTIONS =
+    'Current option settings: Verbose - Log Errors + Log Not Supp - Timestamp - ' +
+    'Final Token + Recurse - Global name :Test Parse mode Full Results per File ' +
+    'Base dir :Test\ Input dir :Test\ Output dir :Test\ Generate XML :Test\ ' +
+    'Write Defines :Test\ Defines Used :.Test Count Children :.Test ' +
+    'Skipped Methods :Test.skip Use these Defines: Tango, Uniform';
+  EXPECTED_REPORT_OPTIONS =
+    'Current option settings: Verbose - Log Errors + Log Not Supp - Timestamp - ' +
+    'Final Token + Recurse - Global name Delphi2XmlTests Parse mode Full Results per ' +
+    'File Base dir - Input dir :Config\ Output dir :Log\ Generate XML :Xml\ ' +
+    'Write Defines -(Defines\) Defines Used :.used Count Children :.cnt ' +
+    'Skipped Methods :.skip Use NO Defines';
+begin
+  for C := 'A' to 'Z' do
+    fOpts.ParseOption('-' + C + ':Test');
+
+  fLog.Clear;
+  ReturnValue := fOpts.ParseOption('-@');
+  Check(ReturnValue, 'ReturnValue');
+  CheckLog(ALTERED_REPORT_OPTIONS);
+
   ReturnValue := fOpts.ParseOption('-!');
   Check(ReturnValue, 'ReturnValue');
-  CheckEqualsString(EXPECTED_REPORT_OPTIONS, ReduceString(fLog.DataString), 'Log');
+
+  fLog.Clear;
+  ReturnValue := fOpts.ParseOption('-@');
+  Check(ReturnValue, 'ReturnValue');
+  CheckLog(EXPECTED_REPORT_OPTIONS);
 end;
 
 procedure TestTD2XOptionGeneral.TestShowOptions;
@@ -1568,7 +1605,8 @@ var
 const
   EXPECTED_SHOW_OPTIONS =
     'Usage: Delphi2XmlTests [ Option | @Params | mFilename | Wildcard ] ... ' +
-    'Options: Default Description ? Show valid options ! Report Current options ' +
+    'Options: Default Description ? Show valid options ' +
+    '@ Report Current options ! Reset all options to defaults ' +
     'V[+|-] - Log all Parser methods called E[+|-] + Log Error messages ' +
     'N[+|-] - Log Not Supported messages T[+|-] - Timestamp global output files ' +
     'F[+|-] + Record Final Token R[+|-] - Recurse into subdirectories ' +
@@ -1589,7 +1627,7 @@ begin
   ReturnValue := fOpts.ParseOption('-?');
 
   Check(ReturnValue, 'ReturnValue');
-  CheckEqualsString(EXPECTED_SHOW_OPTIONS, ReduceString(fLog.DataString), 'Log');
+  CheckLog(EXPECTED_SHOW_OPTIONS);
 end;
 
 initialization

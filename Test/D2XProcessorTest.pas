@@ -64,6 +64,6 @@ end;
 
 initialization
   // Register any test cases with the test runner
-  RegisterTest('Processor', TestTD2XProcessor.Suite);
+//  RegisterTest('Processor', TestTD2XProcessor.Suite);
 end.
 

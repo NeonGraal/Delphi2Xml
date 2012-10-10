@@ -69,8 +69,11 @@ type
     function FormatResultPer(pVal: TD2XResultPer): string;
 
     function ParseReportOptions(pStr: string): boolean;
+    function ParseResetOptions(pStr: string): boolean;
     function ParseShowOptions(pStr: string): boolean;
+
     function ParseDefines(pStr: string): boolean;
+    procedure ResetDefines;
 
     procedure Log(pFmt: string; pArgs: array of const);
     procedure LogOptionError(pLabel, pOpt: string);
@@ -239,8 +242,10 @@ begin
 
   fParams := TD2XParams.Create;
   fParams.Add(TD2XParam.Create('?', 'Options', '', 'Show valid options', ParseShowOptions));
-  fParams.Add(TD2XParam.Create('!', 'Report', '', 'Report Current options',
+  fParams.Add(TD2XParam.Create('@', 'Report', '', 'Report Current options',
       ParseReportOptions));
+  fParams.Add(TD2XParam.Create('!', 'Reset', '', 'Reset all options to defaults',
+      ParseResetOptions));
   fVerbose := TD2XBooleanParam.CreateBool('V', 'Verbose', 'Log all Parser methods called');
   fParams.Add(fVerbose);
   fLogErrors := TD2XBooleanParam.CreateBool('E', 'Log Errors', 'Log Error messages', True);
@@ -290,8 +295,8 @@ begin
   fSkipMethods := TD2XFlaggedStringParam.CreateFlagStr('S', 'Skipped Methods', '<f/e>',
     'Load Skipped Methods from <f/e>', '.skip', True, ConvertFile, nil, nil);
   fParams.Add(fSkipMethods);
-  fParams.Add(TD2XParam.Create('D', 'Defines', '[+-!:]<def>',
-      'Add(+), Remove(-), Clear(!) or Load(:) Defines', ParseDefines));
+  fParams.Add(TD2XResettableParam.CreateReset('D', 'Defines', '[+-!:]<def>',
+      'Add(+), Remove(-), Clear(!) or Load(:) Defines', ParseDefines, ResetDefines));
 
   fOutputTimestamp := FormatDateTime('-HH-mm', Now);
 
@@ -629,6 +634,12 @@ begin
     Log('Use default Defines', []);
 end;
 
+function TD2XOptions.ParseResetOptions(pStr: string): boolean;
+begin
+  Result := True;
+  fParams.ResetAll;
+end;
+
 function TD2XOptions.ParseShowOptions(pStr: string): boolean;
 var
   lBase: string;
@@ -643,6 +654,12 @@ begin
   // Available option letters: AHJKQYZL
   Log('  Definitions:', []);
   Log('    <f/e> If value begins with "." is appended to global name to give file name', []);
+end;
+
+procedure TD2XOptions.ResetDefines;
+begin
+  fLoadDefines := True;
+  fDefines.Clear;
 end;
 
 function TD2XOptions.ValidateGlobalName(pVal: string): boolean;
