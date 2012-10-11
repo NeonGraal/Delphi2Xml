@@ -16,7 +16,7 @@ type
 
   TD2XResultPer = (rpFile, rpWildcard, rpSubDir, rpDir, rpParam, rpRun);
 
-  TD2XOptions = class
+  TD2XOptions = class(TD2XLogger)
   private
     fVerbose: TD2XBooleanParam;
     fRecurse: TD2XBooleanParam;
@@ -49,8 +49,6 @@ type
 
     fDefines: TStringList;
 
-    fLog: TStreamWriter;
-
     fParams: TD2XParams;
 
     function ConvertGlobalName(pStr: string; pDflt: string; out pVal: string): boolean;
@@ -75,7 +73,6 @@ type
     function ParseDefines(pStr: string): boolean;
     procedure ResetDefines;
 
-    procedure Log(pFmt: string; pArgs: array of const);
     procedure LogOptionError(pLabel, pOpt: string);
     function GetVerbose: boolean;
     function GetLogErrors: boolean;
@@ -136,8 +133,6 @@ type
 
     function InputFileOrExtn(pFileOrExtn: string): string;
     function OutputFileOrExtn(pFileOrExtn: string): string;
-
-    procedure SetLog(pDest: TStream);
 
     function ParseOption(pOpt: string): boolean;
   end;
@@ -303,12 +298,10 @@ begin
   fLoadDefines := True;
   fDefines := TStringList.Create;
   fDefines.Sorted := True;
-  fLog := nil;
 end;
 
 destructor TD2XOptions.Destroy;
 begin
-  FreeAndNil(fLog);
   FreeAndNil(fDefines);
   FreeAndNil(fParams);
 
@@ -444,12 +437,6 @@ begin
     Result := fUseInput.Value + GlobalFileOrExtn(pFileOrExtn)
   else
     Result := GlobalFileOrExtn(pFileOrExtn);
-end;
-
-procedure TD2XOptions.Log(pFmt: string; pArgs: array of const);
-begin
-  if Assigned(fLog) then
-    fLog.WriteLine(pFmt, pArgs)
 end;
 
 procedure TD2XOptions.LogOptionError(pLabel, pOpt: string);
@@ -594,8 +581,7 @@ var
 
   procedure WriteWidth(pStr: string);
   begin
-    if Assigned(fLog) then
-      fLog.Write(pStr);
+    Log('%s', [pStr], False);
     Inc(w, Length(pStr));
   end;
 
@@ -603,7 +589,7 @@ begin
   Result := True;
 
   Log('Current option settings:', []);
-  fParams.Log := fLog;
+  fParams.Logger.JoinLog(Self);
   fParams.ReportAll;
 
   if fLoadDefines then
@@ -649,7 +635,7 @@ begin
 
   Log('Usage: %s [ Option | @Params | mFilename | Wildcard ] ... ', [lBase]);
   Log('Options:        %-15s Description', ['Default']);
-  fParams.Log := fLog;
+  fParams.Logger.JoinLog(Self);
   fParams.DescribeAll;
   // Available option letters: AHJKQYZL
   Log('  Definitions:', []);
@@ -670,12 +656,5 @@ begin
     fWriteDefines.Value := IncludeTrailingPathDelimiter(pVal);
   Result := True;
 end;
-
-procedure TD2XOptions.SetLog(pDest: TStream);
-begin
-  fLog := TStreamWriter.Create(pDest);
-end;
-
-{ TD2X }
 
 end.

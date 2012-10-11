@@ -837,6 +837,7 @@ begin
       fXmlNode.Text := fXmlNode.Text + pText;
 end;
 
+{$WARN SYMBOL_PLATFORM OFF}
 function TD2XProcessor.RecurseDirectory(pDir, pWildCards: string; pMainDir: Boolean): Boolean;
 var
   lFF: TSearchRec;
@@ -872,6 +873,7 @@ begin
       System.SysUtils.FindClose(lFF);
     end;
 end;
+{$WARN SYMBOL_PLATFORM ON}
 
 procedure TD2XProcessor.RemoveProxy;
 begin

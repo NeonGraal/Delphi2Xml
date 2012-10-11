@@ -202,6 +202,7 @@ type
 implementation
 
 uses
+  D2X,
   D2XUtils,
   System.Classes,
   System.StrUtils;
@@ -713,13 +714,12 @@ begin
 
   fPs := TD2XParams.Create;
   fSB := TStringBuilder.Create;
-  fPs.Log := TStringWriter.Create(fSB);
+  fPs.Logger.JoinLog(TD2XLogger.Create(fSB));
 end;
 
 procedure TestTD2XParams.TearDown;
 begin
   FreeAndNil(fSB);
-  fPs.Log.Free;
   FreeAndNil(fPs);
 
   inherited;

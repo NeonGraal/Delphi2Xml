@@ -5,7 +5,8 @@ interface
 uses
   System.Classes,
   System.Generics.Collections,
-  System.SysUtils;
+  System.SysUtils,
+  D2X;
 
 type
   EInvalidParam = class(Exception);
@@ -34,19 +35,20 @@ type
 
   end;
 
-  TD2XParams = class(TObjectList<TD2XParam>)
+  TD2XParams = class(TObjectList<TD2XParam>, ID2XLogger)
   private
-    fLog: TTextWriter;
+    fLogger: ID2XLogger;
 
   public
     constructor Create;
+    destructor Destroy; override;
 
     function ForCode(pCode: string): TD2XParam;
     procedure DescribeAll;
     procedure ReportAll;
     procedure ResetAll;
 
-    property Log: TTextWriter read fLog write fLog;
+    property Logger: ID2XLogger read fLogger implements ID2XLogger;
   end;
 
   TD2XResettableParam = class(TD2XParam)
@@ -340,17 +342,23 @@ end;
 constructor TD2XParams.Create;
 begin
   inherited Create(True);
+
+  fLogger := TD2XLogger.Create;
 end;
 
 procedure TD2XParams.DescribeAll;
 var
   lP: TD2XParam;
 begin
-  if not Assigned(fLog) then
-    Exit;
-
   for lP in Self do
-    fLog.WriteLine(lP.Describe);
+    fLogger.Log('%s', [lP.Describe]);
+end;
+
+destructor TD2XParams.Destroy;
+begin
+  fLogger := nil;
+
+  inherited;
 end;
 
 function TD2XParams.ForCode(pCode: string): TD2XParam;
@@ -367,12 +375,9 @@ procedure TD2XParams.ReportAll;
 var
   lP: TD2XParam;
 begin
-  if not Assigned(fLog) then
-    Exit;
-
   for lP in Self do
     if lP.Report > '' then
-      fLog.WriteLine(lP.Report);
+      fLogger.Log('%s', [lP.Report]);
 end;
 
 procedure TD2XParams.ResetAll;

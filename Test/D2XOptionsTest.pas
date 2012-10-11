@@ -168,13 +168,13 @@ procedure TestTD2XOptionBase.SetUp;
 begin
   fOpts := TD2XOptions.Create;
   fLog := TStringStream.Create;
-  fOpts.SetLog(fLog);
+  fOpts.StartLog(fLog);
 end;
 
 procedure TestTD2XOptionBase.TearDown;
 begin
   FreeAndNil(fLog);
-  FreeAndNil(fOpts);
+  fOpts := nil;
 end;
 
 { TestTD2XOptionFilenames }
