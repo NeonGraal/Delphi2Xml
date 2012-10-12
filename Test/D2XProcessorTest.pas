@@ -118,7 +118,7 @@ begin
 
   ReturnValue := FD2XProcessor.ProcessParam(pStr, pFrom, pIdx);
 
-  CheckFalse(ReturnValue, 'Return Value');
+  Check(ReturnValue, 'Return Value');
   CheckString(fSB, EXPECTED_RESULT , 'Nothing');
 end;
 

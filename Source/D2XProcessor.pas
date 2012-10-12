@@ -499,22 +499,24 @@ begin
   if fOpts.UseBase then
     lFile := fOpts.BaseDirectory + lFile;
   if FileExists(lFile) then
+  begin
+    lSS := TStringStream.Create;
     try
-      lSS := TStringStream.Create;
       try
         lSS.LoadFromFile(lFile);
+      except
+        on E: Exception do
+        begin
+          LogMessage('EXCEPTION', '(' + E.ClassName + ')' + E.Message);
+          Result := False;
+        end;
+      end;
 
-        Result := ProcessStream(lSS);
-      finally
-        FreeAndNil(lSS);
-      end;
-    except
-      on E: Exception do
-      begin
-        LogMessage('EXCEPTION', '(' + E.ClassName + ')' + E.Message);
-        Result := False;
-      end;
-    end
+      Result := ProcessStream(lSS);
+    finally
+      FreeAndNil(lSS);
+    end;
+  end
   else
     if fOpts.Verbose then
       Log('Cannot find "%s"', [lFile]);
@@ -751,18 +753,24 @@ begin
   lTimer := TStopwatch.StartNew;
   try
     if fOpts.SkipMethods then
-      with TStringList.Create do
-        try
-          LoadFromFile(fOpts.InputFileOrExtn(fOpts.SkipMethodsFoE));
-          fSkippedMethods.Clear;
-          for i := 0 to Count - 1 do
-            if Names[i] = '' then
-              fSkippedMethods.Add(Strings[i], 0)
-            else
-              fSkippedMethods.Add(Names[i], 0);
-        finally
-          Free;
-        end;
+    begin
+      lFile := fOpts.InputFileOrExtn(fOpts.SkipMethodsFoE);
+      if FileExists(lFile) then
+        with TStringList.Create do
+          try
+            LoadFromFile(lFile);
+            fSkippedMethods.Clear;
+            for i := 0 to Count - 1 do
+              if Names[i] = '' then
+                fSkippedMethods.Add(Strings[i], 0)
+              else
+                fSkippedMethods.Add(Names[i], 0);
+          finally
+            Free;
+          end
+      else
+        LogMessage('WARNING', 'Cannot find Skip methods file "' + lFile + '"');
+    end;
 
     InitParser;
     if UseProxy then
