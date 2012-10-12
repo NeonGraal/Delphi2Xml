@@ -48,7 +48,7 @@ type
     procedure ReportAll;
     procedure ResetAll;
 
-    property Logger: ID2XLogger read fLogger implements ID2XLogger;
+    property L: ID2XLogger read fLogger implements ID2XLogger;
   end;
 
   TD2XResettableParam = class(TD2XParam)

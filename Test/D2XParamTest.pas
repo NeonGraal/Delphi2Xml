@@ -714,7 +714,7 @@ begin
 
   fPs := TD2XParams.Create;
   fSB := TStringBuilder.Create;
-  fPs.Logger.JoinLog(TD2XLogger.Create(fSB));
+  fPs.L.JoinLog(TD2XLogger.Create(fSB));
 end;
 
 procedure TestTD2XParams.TearDown;

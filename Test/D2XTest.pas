@@ -2,25 +2,34 @@ unit D2XTest;
 
 interface
 
-implementation
-
 uses
   TestFramework,
-  D2X,
-  D2XOptions,
   System.Classes,
-  System.Rtti,
-  System.StrUtils,
   System.SysUtils;
 
 type
   TStringBuilderTestCase = class(TTestCase)
   protected
+    fSB: TStringBuilder;
+
     procedure CheckString(pSB: TStringBuilder; pExp, pLabel: string); overload;
     procedure CheckString(pSS: TStringStream; pExp, pLabel: string); overload;
+  public
+    procedure SetUp; override;
+    procedure TearDown; override;
 
   end;
 
+implementation
+
+uses
+  D2X,
+  D2XUtils,
+  D2XOptions,
+  System.Rtti,
+  System.StrUtils;
+
+type
   TestTD2X = class(TTestCase)
   strict private
     fD2X: TD2X;
@@ -34,7 +43,6 @@ type
   TestID2XLogger = class(TStringBuilderTestCase)
   strict private
     fID2XLogger: ID2XLogger;
-    fSB: TStringBuilder;
 
   public
     procedure SetUp; override;
@@ -100,16 +108,20 @@ begin
   CheckEqualsString('Full', ReturnValue, 'ReturnValue');
 end;
 
+{ TestID2XLogger }
+
 procedure TestID2XLogger.SetUp;
 begin
-  fSB := TStringBuilder.Create;
+  inherited;
+
   fID2XLogger := TD2XLogger.Create(fSB);
 end;
 
 procedure TestID2XLogger.TearDown;
 begin
   fID2XLogger := nil;
-  FreeAndNil(fSB);
+
+  inherited;
 end;
 
 procedure TestID2XLogger.TestJoinLog;
@@ -145,21 +157,29 @@ end;
 
 procedure TestID2XLogger.TestLog;
 begin
-  fID2XLogger.Log('Log String', [], False);
-  CheckString(fSB, 'Log String', 'No Arguments');
+  fID2XLogger.Log('Log', [], False);
+  fID2XLogger.Log('String', [], False);
+  CheckString(fSB, 'LogString', 'No Arguments');
 
-  fID2XLogger.Log('Log String', []);
-  CheckString(fSB, 'Log String'#13#10, 'No Arguments Line');
+  fID2XLogger.Log('Log', []);
+  fID2XLogger.Log('String', []);
+  CheckString(fSB, 'Log String', 'No Arguments Line');
 
   fID2XLogger.Log('Log %s %s', ['Arg1', 'Arg2'], False);
-  CheckString(fSB, 'Log Arg1 Arg2', 'Arguments');
+  fID2XLogger.Log('String', []);
+  CheckString(fSB, 'Log Arg1 Arg2String', 'Arguments');
 
   fID2XLogger.Log('Log %s %s', ['Arg1', 'Arg2']);
-  CheckString(fSB, 'Log Arg1 Arg2'#13#10, 'Arguments Line');
+  fID2XLogger.Log('String', []);
+  CheckString(fSB, 'Log Arg1 Arg2 String', 'Arguments Line');
 end;
+
+{ TestTD2XLogger }
 
 procedure TestTD2XLogger.SetUp;
 begin
+  inherited;
+
   FD2XLogger := TD2XLogger.Create;
 end;
 
@@ -167,6 +187,8 @@ procedure TestTD2XLogger.TearDown;
 begin
   FD2XLogger.Free;
   FD2XLogger := nil;
+
+  inherited;
 end;
 
 procedure TestTD2XLogger.TestStartLogStream;
@@ -525,6 +547,7 @@ var
     CheckString(lLogBuilder1, IfThen(pLog = 1, pLabel, ''), pLabel);
     CheckString(lLogBuilder2, IfThen(pLog = 2, pLabel, ''), pLabel);
   end;
+
 begin
   lMyBuilder := nil;
   lLogBuilder1 := nil;
@@ -582,14 +605,28 @@ end;
 
 procedure TStringBuilderTestCase.CheckString(pSB: TStringBuilder; pExp, pLabel: string);
 begin
-  CheckEqualsString(pExp, pSB.ToString, pLabel);
+  CheckEqualsString(pExp, ReduceString(pSB.ToString), pLabel);
   pSB.Clear;
 end;
 
 procedure TStringBuilderTestCase.CheckString(pSS: TStringStream; pExp, pLabel: string);
 begin
-  CheckEqualsString(pExp, pSS.DataString, pLabel);
+  CheckEqualsString(pExp, ReduceString(pSS.DataString), pLabel);
   pSS.Clear;
+end;
+
+procedure TStringBuilderTestCase.SetUp;
+begin
+  inherited;
+
+  fSB := TStringBuilder.Create;
+end;
+
+procedure TStringBuilderTestCase.TearDown;
+begin
+  FreeAndNil(fSB);
+
+  inherited;
 end;
 
 initialization

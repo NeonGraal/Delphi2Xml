@@ -24,7 +24,7 @@ type
     fLogger: ID2XLogger;
 
   public
-    constructor Create; overload;
+    constructor Create; overload; virtual;
     constructor Create(pStream: TStream); overload;
     constructor Create(pString: TStringBuilder); overload;
     constructor Create(pWriter: TTextWriter); overload;
@@ -67,32 +67,28 @@ end;
 
 constructor TD2XLogger.Create(pStream: TStream);
 begin
-  inherited Create;
-  fMyWriter := nil;
+  Create;
 
   StartLog(pStream);
 end;
 
 constructor TD2XLogger.Create(pWriter: TTextWriter);
 begin
-  inherited Create;
-  fMyWriter := nil;
+  Create;
 
   StartLog(pWriter);
 end;
 
 constructor TD2XLogger.Create(pLogger: ID2XLogger);
 begin
-  inherited Create;
-  fMyWriter := nil;
+  Create;
 
   StartLog(pLogger);
 end;
 
 constructor TD2XLogger.Create(pString: TStringBuilder);
 begin
-  inherited Create;
-  fMyWriter := nil;
+  Create;
 
   StartLog(pString);
 end;

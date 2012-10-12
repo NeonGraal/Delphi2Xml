@@ -77,8 +77,7 @@ type
     procedure TestParseOptionDLoad;
     procedure TestParseOptionDMany;
     procedure TestParseOptionE;
-    procedure TestParseOptionEOff;
-    procedure TestParseOptionEOn;
+    procedure TestParseOptionEValue;
     procedure TestParseOptionF;
     procedure TestParseOptionFOff;
     procedure TestParseOptionFOn;
@@ -93,6 +92,8 @@ type
     procedure TestParseOptionJ;
     procedure TestParseOptionK;
     procedure TestParseOptionL;
+    procedure TestParseOptionLOff;
+    procedure TestParseOptionLOn;
     procedure TestParseOptionM;
     procedure TestParseOptionMValue;
     procedure TestParseOptionN;
@@ -689,32 +690,19 @@ var
 begin
   pOpt := '-E';
   ReturnValue := fOpts.ParseOption(pOpt);
-  Check(ReturnValue, 'ReturnValue');
-  Check(fOpts.LogErrors, 'LogErrors');
-  CheckLog('');
+  CheckFalse(ReturnValue, 'ReturnValue');
+  CheckLog('Invalid Show elapsed option: -E');
 end;
 
-procedure TestTD2XOptions.TestParseOptionEOff;
+procedure TestTD2XOptions.TestParseOptionEValue;
 var
   ReturnValue: Boolean;
   pOpt: string;
 begin
-  pOpt := '-E-';
+  pOpt := '-ETotal';
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
-  CheckFalse(fOpts.LogErrors, 'LogErrors');
-  CheckLog('');
-end;
-
-procedure TestTD2XOptions.TestParseOptionEOn;
-var
-  ReturnValue: Boolean;
-  pOpt: string;
-begin
-  pOpt := '-E+';
-  ReturnValue := fOpts.ParseOption(pOpt);
-  Check(ReturnValue, 'ReturnValue');
-  Check(fOpts.LogErrors, 'LogErrors');
+  Check(fOpts.ElapsedMode = emTotal, 'ElapsedMode');
   CheckLog('');
 end;
 
@@ -887,8 +875,33 @@ var
 begin
   pOpt := '-L';
   ReturnValue := fOpts.ParseOption(pOpt);
-  CheckFalse(ReturnValue, 'ReturnValue');
-  CheckLog('Unknown option: -L');
+  Check(ReturnValue, 'ReturnValue');
+  Check(fOpts.LogErrors, 'LogErrors');
+  CheckLog('');
+end;
+
+procedure TestTD2XOptions.TestParseOptionLOff;
+var
+  ReturnValue: Boolean;
+  pOpt: string;
+begin
+  pOpt := '-L-';
+  ReturnValue := fOpts.ParseOption(pOpt);
+  Check(ReturnValue, 'ReturnValue');
+  CheckFalse(fOpts.LogErrors, 'LogErrors');
+  CheckLog('');
+end;
+
+procedure TestTD2XOptions.TestParseOptionLOn;
+var
+  ReturnValue: Boolean;
+  pOpt: string;
+begin
+  pOpt := '-L+';
+  ReturnValue := fOpts.ParseOption(pOpt);
+  Check(ReturnValue, 'ReturnValue');
+  Check(fOpts.LogErrors, 'LogErrors');
+  CheckLog('');
 end;
 
 procedure TestTD2XOptions.TestParseOptionM;
@@ -1521,6 +1534,7 @@ begin
   CheckEqualsString('.skip', fOpts.SkipMethodsFoE, 'SkipFileOrExtn');
   Check(fOpts.ParseMode = pmFull, 'ParseMode');
   Check(fOpts.ResultPer = rpFile, 'ResultPer');
+  Check(fOpts.ElapsedMode = emQuiet, 'ElapsedMode');
   Check(fOpts.FinalToken, 'FinalToken');
 end;
 
@@ -1531,8 +1545,8 @@ var
 const
   EXPECTED_REPORT_OPTIONS =
     'Current option settings: Verbose - Log Errors + Log Not Supp - Timestamp - ' +
-    'Final Token + Recurse - Global name Delphi2XmlTests Parse mode Full Results per ' +
-    'File Base dir - Input dir :Config\ Output dir :Log\ Generate XML :Xml\ ' +
+    'Final Token + Recurse - Global name Delphi2XmlTests Parse mode Full Results per File ' +
+    'Show elapsed Quiet Base dir - Input dir :Config\ Output dir :Log\ Generate XML :Xml\ ' +
     'Write Defines -(Defines\) Defines Used :.used Count Children :.cnt ' +
     'Skipped Methods :.skip Use NO Defines';
 begin
@@ -1549,8 +1563,8 @@ var
 const
   EXPECTED_REPORT_OPTIONS =
     'Current option settings: Verbose - Log Errors + Log Not Supp - Timestamp - ' +
-    'Final Token + Recurse - Global name Delphi2XmlTests Parse mode Full Results per ' +
-    'File Base dir - Input dir :Config\ Output dir :Log\ Generate XML :Xml\ ' +
+    'Final Token + Recurse - Global name Delphi2XmlTests Parse mode Full Results per File ' +
+    'Show elapsed Quiet Base dir - Input dir :Config\ Output dir :Log\ Generate XML :Xml\ ' +
     'Write Defines -(Defines\) Defines Used :.used Count Children :.cnt ' +
     'Skipped Methods :.skip Use these Defines: CPU32';
 begin
@@ -1571,13 +1585,13 @@ const
   ALTERED_REPORT_OPTIONS =
     'Current option settings: Verbose - Log Errors + Log Not Supp - Timestamp - ' +
     'Final Token + Recurse - Global name :Test Parse mode Full Results per File ' +
-    'Base dir :Test\ Input dir :Test\ Output dir :Test\ Generate XML :Test\ ' +
-    'Write Defines :Test\ Defines Used :.Test Count Children :.Test ' +
+    'Show elapsed Quiet Base dir :Test\ Input dir :Test\ Output dir :Test\ ' +
+    'Generate XML :Test\ Write Defines :Test\ Defines Used :.Test Count Children :.Test ' +
     'Skipped Methods :Test.skip Use these Defines: Tango, Uniform';
   EXPECTED_REPORT_OPTIONS =
     'Current option settings: Verbose - Log Errors + Log Not Supp - Timestamp - ' +
-    'Final Token + Recurse - Global name Delphi2XmlTests Parse mode Full Results per ' +
-    'File Base dir - Input dir :Config\ Output dir :Log\ Generate XML :Xml\ ' +
+    'Final Token + Recurse - Global name Delphi2XmlTests Parse mode Full Results per File ' +
+    'Show elapsed Quiet Base dir - Input dir :Config\ Output dir :Log\ Generate XML :Xml\ ' +
     'Write Defines -(Defines\) Defines Used :.used Count Children :.cnt ' +
     'Skipped Methods :.skip Use NO Defines';
 begin
@@ -1607,12 +1621,13 @@ const
     'Usage: Delphi2XmlTests [ Option | @Params | mFilename | Wildcard ] ... ' +
     'Options: Default Description ? Show valid options ' +
     '@ Report Current options ! Reset all options to defaults ' +
-    'V[+|-] - Log all Parser methods called E[+|-] + Log Error messages ' +
+    'V[+|-] - Log all Parser methods called L[+|-] + Log Error messages ' +
     'N[+|-] - Log Not Supported messages T[+|-] - Timestamp global output files ' +
     'F[+|-] + Record Final Token R[+|-] - Recurse into subdirectories ' +
     'G<str> Delphi2XmlTests Sets global name ' +
     'M<mode> Full Set Parsing mode (F[ull], U[ses]) ' +
-    'P<per> File Set Result per (F[ile], [S]ubdir, D[ir], W[ildcard], P[aram], R[un]) ' +
+    'P<per> File Set Result per (F[ile], S[ubdir], D[ir], W[ildcard], P[aram], R[un]) ' +
+    'E<mode> Quiet Set Elapsed time display to be (N[one], Q[uiet], T[otal], P[rocessing]) ' +
     'B[+-]:<dir> - Use <dir> as a base for all file lookups ' +
     'I[+-]:<dir> :Config\ Use <dir> as a base for all file input ' +
     'O[+-]:<dir> :Log\ Use <dir> as a base for all file output ' +

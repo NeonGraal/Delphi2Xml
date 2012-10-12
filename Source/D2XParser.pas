@@ -14,6 +14,7 @@ type
 
   TD2XAddAttributeEvent = procedure(pName, pValue: string) of object;
   TD2XAddTextEvent = procedure(pText: string) of object;
+  TD2XProgressEvent = procedure(pProgress: Integer) of object;
 
   TD2XDefinesParser = class(TD2XParser)
   private
@@ -23,7 +24,7 @@ type
     fStartDefines: TStringList;
     FAddAttribute: TD2XAddAttributeEvent;
     FAddText: TD2XAddTextEvent;
-    fShowProgress: Boolean;
+    fOnProgress: TD2XProgressEvent;
 
     function GetStartDefines: TStringList;
 
@@ -52,7 +53,7 @@ type
     property LastTokens: string read fLastTokens write fLastTokens;
     property StartDefines: TStringList read GetStartDefines;
 
-    property ShowProgress: Boolean read fShowProgress write fShowProgress;
+    property OnProgress: TD2XProgressEvent read fOnProgress write fOnProgress;
 
     property AddAttribute: TD2XAddAttributeEvent read FAddAttribute write FAddAttribute;
     property AddText: TD2XAddTextEvent read FAddText write FAddText;
@@ -1616,7 +1617,7 @@ begin
   fStartDefines := nil;
   fLength := 0;
   fProcessed := 0;
-  fShowProgress := False;
+  fOnProgress := nil;
 end;
 
 destructor TD2XDefinesParser.Destroy;
@@ -1683,14 +1684,13 @@ var
 begin
   fLastTokens := fLastTokens + Lexer.Token;
 
-  if fLength > 0 then
+  if Assigned(fOnProgress) and (fLength > 0) then
   begin
     lProcessed := Cardinal(Lexer.RunPos) * 100 div fLength;
     if lProcessed > fProcessed then
     begin
       fProcessed := lProcessed;
-      if fShowProgress then
-        write(Format('%3d%%'#8#8#8#8, [fProcessed]));
+      fOnProgress(fProcessed);
     end;
   end;
 

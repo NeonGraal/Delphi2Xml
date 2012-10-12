@@ -11,7 +11,8 @@ uses
   CastaliaPasLexTypes,
   D2XOptions,
   D2XParser,
-  D2Xml;
+  D2Xml,
+  D2X;
 
 type
   TStrIntPair = TPair<string, Integer>;
@@ -24,7 +25,7 @@ type
     Children: Integer;
   end;
 
-  TD2XProcessor = class
+  TD2XProcessor = class(TD2XLogger)
   private
     fOpts: TD2XOptions;
     fProgramDir: string;
@@ -114,7 +115,7 @@ type
     function MinMaxPairLog(pPair: TStrIntPair): string;
 
   public
-    constructor Create;
+    constructor Create; override;
     destructor Destroy; override;
 
     procedure EndProcessing;
@@ -128,7 +129,6 @@ type
 implementation
 
 uses
-  D2X,
   System.IOUtils,
   System.StrUtils,
   Xml.XMLIntf,
@@ -197,7 +197,7 @@ begin
 
   fStack := nil;
 
-  fOpts := TD2XOptions.Create;
+  fOpts := TD2XOptions.Create(Self);
 
   fDefinesUsed := TStrIntDict.Create;
   fMaxChildren := TStrIntDict.Create;
@@ -226,7 +226,14 @@ end;
 destructor TD2XProcessor.Destroy;
 begin
   fDuration.Stop;
-  Writeln(Format('Total processing time %0.3f', [fDuration.Elapsed.TotalSeconds]));
+  case fOpts.ElapsedMode of
+    emNone:
+      ;
+    emQuiet:
+      Log('Processing finished!', []);
+  else
+    Log('Total processing time %0.3f', [fDuration.Elapsed.TotalSeconds]);
+  end;
 
   RemoveProxy;
 
@@ -359,12 +366,12 @@ end;
 
 procedure TD2XProcessor.LogAfter(pMethod: string);
 begin
-  Writeln('AFTER  ', pMethod);
+  Log('AFTER  %s', [pMethod]);
 end;
 
 procedure TD2XProcessor.LogBefore(pMethod: string);
 begin
-  Writeln('BEFORE ', pMethod, ' @ ', fParser.Lexer.Token);
+  Log('BEFORE %s @ %s', [pMethod, fParser.Lexer.Token]);
 end;
 
 procedure TD2XProcessor.LogMessage(pType, pMsg: string);
@@ -430,11 +437,11 @@ begin
   if fOpts.Verbose then
     case pTyp of
       meError:
-        Writeln('ERROR @ ', pX, ',', pY, ': ', pMsg);
+        Log('ERROR @ %d,%d: %s', [pX, pY, pMsg]);
       meNotSupported:
-        Writeln('NOT SUPPORTED @ ', pX, ',', pY, ': ', pMsg);
+        Log('NOT SUPPORTED @ %d,%d: %s', [pX, pY, pMsg]);
     else
-      Writeln('???? @ ', pX, ',', pY, ': ', pMsg);
+      Log('???? @ %d,%d: %s', [pX, pY, pMsg]);
     end;
 
   if fOpts.WriteXml and Assigned(fXmlNode) then
@@ -510,7 +517,7 @@ begin
     end
   else
     if fOpts.Verbose then
-      Writeln('Cannot find "', lFile, '"');
+      Log('Cannot find "%s"', [lFile]);
 end;
 
 function TD2XProcessor.ProcessInput: Boolean;
@@ -591,7 +598,7 @@ begin
   lFile := pLex.DirectiveParam;
 
   if fOpts.Verbose then
-    Writeln('INCLUDE @ ', pLex.PosXY.X, ',', pLex.PosXY.Y, ': ', lFile);
+    Log('INCLUDE @ %d,%d: %s', [pLex.PosXY.X, pLex.PosXY.Y, lFile]);
 
   if fOpts.WriteXml and Assigned(fXmlNode) then
   begin
@@ -664,7 +671,7 @@ begin
     EndResults(pFrom + '-' + IntToStr(pIdx), rpParam);
   except
     on E: Exception do
-      Writeln('EXCEPTION (', E.ClassName, ') processing "', pStr, '" : ', E.Message);
+      Log('EXCEPTION (%s) processing "%s" : %s', [E.ClassName, pStr, E.Message]);
   end;
 end;
 
@@ -739,7 +746,8 @@ var
   lFile: string;
   lCurrNode: TD2XmlNode;
 begin
-  write('Processing ', fFilename, ' ... ');
+  if fOpts.ElapsedMode <> emNone then
+    Log('Processing %s ... ', [fFilename], False);
   lTimer := TStopwatch.StartNew;
   try
     if fOpts.SkipMethods then
@@ -792,7 +800,15 @@ begin
     EndResults(fFilename, rpFile);
   finally
     lTimer.Stop;
-    Writeln(Format('%0.3f', [lTimer.Elapsed.TotalSeconds]));
+    case fOpts.ElapsedMode of
+      emNone:
+        ;
+      emQuiet:
+        Log('done', []);
+    else
+      Log('%0.3f', [lTimer.Elapsed.TotalSeconds]);
+    end;
+
   end;
 end;
 
@@ -838,6 +854,7 @@ begin
 end;
 
 {$WARN SYMBOL_PLATFORM OFF}
+
 function TD2XProcessor.RecurseDirectory(pDir, pWildCards: string; pMainDir: Boolean): Boolean;
 var
   lFF: TSearchRec;

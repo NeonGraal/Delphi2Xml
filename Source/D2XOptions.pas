@@ -14,6 +14,8 @@ type
 
   TD2XParseMode = (pmFull, pmUses);
 
+  TD2XElapsedMode = (emNone, emQuiet, emTotal, emProcessing);
+
   TD2XResultPer = (rpFile, rpWildcard, rpSubDir, rpDir, rpParam, rpRun);
 
   TD2XOptions = class(TD2XLogger)
@@ -27,22 +29,15 @@ type
     fGlobalName: TD2XStringParam;
     fParseMode: TD2XSingleParam<TD2XParseMode>;
     fResultPer: TD2XSingleParam<TD2XResultPer>;
+    fElapsedMode: TD2XSingleParam<TD2XElapsedMode>;
     fWriteXml: TD2XFlaggedStringParam;
-    // fXmlDirectory: string;
     fWriteDefines: TD2XFlaggedStringParam;
-    // fDefinesDirectory: string;
     fUseBase: TD2XFlaggedStringParam;
-    // fBaseDirectory: string;
     fUseOutput: TD2XFlaggedStringParam;
-    // fOutputDirectory: string;
     fUseInput: TD2XFlaggedStringParam;
-    // fInputDirectory: string;
     fCountChildren: TD2XFlaggedStringParam;
-    // fCountFileOrExtn: string;
     fSkipMethods: TD2XFlaggedStringParam;
-    // fSkipFileOrExtn: string;
     fDefinesUsed: TD2XFlaggedStringParam;
-    // fUsedFileOrExtn: string;
 
     fLoadDefines: boolean;
     fOutputTimestamp: string;
@@ -65,6 +60,10 @@ type
     function ConvertResultPer(pStr: string; pDflt: TD2XResultPer;
       out pVal: TD2XResultPer): boolean;
     function FormatResultPer(pVal: TD2XResultPer): string;
+
+    function ConvertElapsedMode(pStr: string; pDflt: TD2XElapsedMode;
+      out pVal: TD2XElapsedMode): boolean;
+    function FormatElapsedMode(pVal: TD2XElapsedMode): string;
 
     function ParseReportOptions(pStr: string): boolean;
     function ParseResetOptions(pStr: string): boolean;
@@ -95,6 +94,7 @@ type
     function GetSkipFileOrExtn: string;
     function GetSkipMethods: boolean;
     function GetDefinesUsedFileOrExtn: string;
+    function GetElapsedMode: TD2XElapsedMode;
 
   public
     property LogErrors: boolean read GetLogErrors;
@@ -104,8 +104,10 @@ type
     property Recurse: boolean read GetRecurse;
     property FinalToken: boolean read GetFinalToken;
     property GlobalName: string read GetGlobalName;
+
     property ParseMode: TD2XParseMode read GetParseMode;
     property ResultPer: TD2XResultPer read GetResultPer;
+    property ElapsedMode: TD2XElapsedMode read GetElapsedMode;
 
     property UseBase: boolean read GetUseBase;
     property BaseDirectory: string read GetBaseDirectory;
@@ -128,7 +130,7 @@ type
     property Defines: TStringList read fDefines;
     property OutputTimestamp: string read fOutputTimestamp;
 
-    constructor Create;
+    constructor Create; override;
     destructor Destroy; override;
 
     function InputFileOrExtn(pFileOrExtn: string): string;
@@ -155,6 +157,27 @@ begin
     pVal := IncludeTrailingPathDelimiter(pStr)
   else
     pVal := '';
+end;
+
+function TD2XOptions.ConvertElapsedMode(pStr: string; pDflt: TD2XElapsedMode;
+  out pVal: TD2XElapsedMode): boolean;
+begin
+  Result := pStr > '';
+  if Result then
+    case pStr[1] of
+      'N', 'n':
+        pVal := emNone;
+      'Q', 'q':
+        pVal := emQuiet;
+      'T', 't':
+        pVal := emTotal;
+      'P', 'p':
+        pVal := emProcessing;
+      '!':
+        pVal := pDflt;
+    else
+      pVal := emQuiet;
+    end;
 end;
 
 function TD2XOptions.ConvertExtn(pStr, pDflt: string; out pVal: string): boolean;
@@ -236,6 +259,8 @@ begin
   inherited;
 
   fParams := TD2XParams.Create;
+  fParams.L.JoinLog(Self);
+
   fParams.Add(TD2XParam.Create('?', 'Options', '', 'Show valid options', ParseShowOptions));
   fParams.Add(TD2XParam.Create('@', 'Report', '', 'Report Current options',
       ParseReportOptions));
@@ -243,7 +268,7 @@ begin
       ParseResetOptions));
   fVerbose := TD2XBooleanParam.CreateBool('V', 'Verbose', 'Log all Parser methods called');
   fParams.Add(fVerbose);
-  fLogErrors := TD2XBooleanParam.CreateBool('E', 'Log Errors', 'Log Error messages', True);
+  fLogErrors := TD2XBooleanParam.CreateBool('L', 'Log Errors', 'Log Error messages', True);
   fParams.Add(fLogErrors);
   fLogNotSupported := TD2XBooleanParam.CreateBool('N', 'Log Not Supp',
     'Log Not Supported messages');
@@ -262,9 +287,13 @@ begin
     'Set Parsing mode (F[ull], U[ses])', pmFull, ConvertParsingMode, FormatParsingMode, nil);
   fParams.Add(fParseMode);
   fResultPer := TD2XSingleParam<TD2XResultPer>.CreateParam('P', 'Results per', '<per>',
-    'Set Result per (F[ile], [S]ubdir, D[ir], W[ildcard], P[aram], R[un])', rpFile,
+    'Set Result per (F[ile], S[ubdir], D[ir], W[ildcard], P[aram], R[un])', rpFile,
     ConvertResultPer, FormatResultPer, nil);
   fParams.Add(fResultPer);
+  fElapsedMode := TD2XSingleParam<TD2XElapsedMode>.CreateParam('E', 'Show elapsed', '<mode>',
+    'Set Elapsed time display to be (N[one], Q[uiet], T[otal], P[rocessing])', emQuiet,
+    ConvertElapsedMode, FormatElapsedMode, nil);
+  fParams.Add(fElapsedMode);
   fUseBase := TD2XFlaggedStringParam.CreateFlagStr('B', 'Base dir', '<dir>',
     'Use <dir> as a base for all file lookups', '', False, ConvertDir, nil, nil);
   fParams.Add(fUseBase);
@@ -293,6 +322,8 @@ begin
   fParams.Add(TD2XResettableParam.CreateReset('D', 'Defines', '[+-!:]<def>',
       'Add(+), Remove(-), Clear(!) or Load(:) Defines', ParseDefines, ResetDefines));
 
+  // Available option letters: AHJKLQYZ
+
   fOutputTimestamp := FormatDateTime('-HH-mm', Now);
 
   fLoadDefines := True;
@@ -306,6 +337,11 @@ begin
   FreeAndNil(fParams);
 
   inherited;
+end;
+
+function TD2XOptions.FormatElapsedMode(pVal: TD2XElapsedMode): string;
+begin
+  Result := TD2X.ToLabel(pVal);
 end;
 
 function TD2XOptions.FormatParsingMode(pVal: TD2XParseMode): string;
@@ -401,6 +437,11 @@ end;
 function TD2XOptions.GetDefinesUsedFileOrExtn: string;
 begin
   Result := fDefinesUsed.Value
+end;
+
+function TD2XOptions.GetElapsedMode: TD2XElapsedMode;
+begin
+  Result := fElapsedMode.Value;
 end;
 
 function TD2XOptions.GetVerbose: boolean;
@@ -589,7 +630,6 @@ begin
   Result := True;
 
   Log('Current option settings:', []);
-  fParams.Logger.JoinLog(Self);
   fParams.ReportAll;
 
   if fLoadDefines then
@@ -635,9 +675,7 @@ begin
 
   Log('Usage: %s [ Option | @Params | mFilename | Wildcard ] ... ', [lBase]);
   Log('Options:        %-15s Description', ['Default']);
-  fParams.Logger.JoinLog(Self);
   fParams.DescribeAll;
-  // Available option letters: AHJKQYZL
   Log('  Definitions:', []);
   Log('    <f/e> If value begins with "." is appended to global name to give file name', []);
 end;
