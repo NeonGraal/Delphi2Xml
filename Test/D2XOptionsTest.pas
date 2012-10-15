@@ -6,6 +6,7 @@ uses
   System.Classes,
   TestFramework,
   System.StrUtils,
+  D2XParam,
   D2XOptions,
   System.SysUtils;
 
@@ -22,6 +23,30 @@ type
   public
     procedure SetUp; override;
     procedure TearDown; override;
+  end;
+
+  // Test methods for class TD2X
+  TestTD2XOptionEnums = class(TTestCase)
+  strict private
+    function ConvertParsingMode(pStr: string; pDflt: TD2XParseMode;
+      out pVal: TD2XParseMode): boolean;
+    function FormatParsingMode(pVal: TD2XParseMode): string;
+
+    function ConvertResultPer(pStr: string; pDflt: TD2XResultPer;
+      out pVal: TD2XResultPer): boolean;
+    function FormatResultPer(pVal: TD2XResultPer): string;
+
+    function ConvertElapsedMode(pStr: string; pDflt: TD2XElapsedMode;
+      out pVal: TD2XElapsedMode): boolean;
+    function FormatElapsedMode(pVal: TD2XElapsedMode): string;
+  published
+    procedure TestElapsedModeInvalidCreate;
+    procedure TestParseModeInvalidCreate;
+    procedure TestResultPerInvalidCreate;
+
+    procedure TestElapsedModeParam;
+    procedure TestParseModeParam;
+    procedure TestResultPerParam;
   end;
 
   // Test methods for class TD2XOptions
@@ -74,6 +99,7 @@ type
     procedure TestParseOptionDAdd;
     procedure TestParseOptionDDelete;
     procedure TestParseOptionDClear;
+    procedure TestParseOptionDEmpty;
     procedure TestParseOptionDLoad;
     procedure TestParseOptionDMany;
     procedure TestParseOptionE;
@@ -145,10 +171,18 @@ type
 
   // Test methods for class TD2XOptions
   TestTD2XOptionGeneral = class(TestTD2XOptionBase)
+  private
+    procedure SetAllOptions;
   published
     procedure TestDefaultOptions;
     procedure TestReportOptions;
+    procedure TestReportOptionsDefault;
+    procedure TestReportOptionsFileDefault;
+    procedure TestReportOptionsFile;
+    procedure TestReportOptionsExtn;
     procedure TestReportOptionsDefines;
+    procedure TestReportOptionsEmpty;
+    procedure TestReportOptionsReset;
     procedure TestResetOptions;
     procedure TestShowOptions;
   end;
@@ -156,6 +190,7 @@ type
 implementation
 
 uses
+  D2X,
   D2XUtils;
 
 { TestTD2XOptionBase }
@@ -631,6 +666,7 @@ begin
   pOpt := '-D+Value';
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
+  Check(fOpts.LoadDefines, 'Load Defines');
   CheckEqualsString('Alpha,Beta,Gamma,Value', fOpts.Defines.CommaText, 'Defines');
   CheckLog('');
 end;
@@ -643,6 +679,7 @@ begin
   pOpt := '-D!';
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
+  CheckFalse(fOpts.LoadDefines, 'Load Defines');
   CheckEqualsString('', fOpts.Defines.CommaText, 'Defines');
   CheckLog('');
 end;
@@ -655,7 +692,21 @@ begin
   pOpt := '-D-Beta';
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
+  Check(fOpts.LoadDefines, 'Load Defines');
   CheckEqualsString('Alpha,Gamma', fOpts.Defines.CommaText, 'Defines');
+  CheckLog('');
+end;
+
+procedure TestTD2XOptions.TestParseOptionDEmpty;
+var
+  ReturnValue: Boolean;
+  pOpt: string;
+begin
+  pOpt := '-D:';
+  ReturnValue := fOpts.ParseOption(pOpt);
+  Check(ReturnValue, 'ReturnValue');
+  Check(fOpts.LoadDefines, 'Load Defines');
+  CheckEqualsString('', fOpts.Defines.CommaText, 'Defines');
   CheckLog('');
 end;
 
@@ -667,6 +718,7 @@ begin
   pOpt := '-D:Test';
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
+  Check(fOpts.LoadDefines, 'Load Defines');
   CheckEqualsString('Tango,Uniform', fOpts.Defines.CommaText, 'Defines');
   CheckLog('');
 end;
@@ -679,6 +731,7 @@ begin
   Check(ReturnValue, 'ReturnValue1');
   ReturnValue := fOpts.ParseOption('-D+Value2');
   Check(ReturnValue, 'ReturnValue2');
+  Check(fOpts.LoadDefines, 'Load Defines');
   CheckEqualsString('Alpha,Beta,Gamma,Value1,Value2', fOpts.Defines.CommaText, 'Defines');
   CheckLog('');
 end;
@@ -803,8 +856,7 @@ begin
   pOpt := '-I:';
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
-  CheckEqualsString('Input.File', fOpts.InputFileOrExtn('Input.File'),
-    'InputFileOrExtn');
+  CheckEqualsString('Input.File', fOpts.InputFileOrExtn('Input.File'), 'InputFileOrExtn');
   CheckLog('');
 end;
 
@@ -985,8 +1037,7 @@ begin
   pOpt := '-O:';
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
-  CheckEqualsString('Output.File', fOpts.OutputFileOrExtn('Output.File'),
-    'OutputFileOrExtn');
+  CheckEqualsString('Output.File', fOpts.OutputFileOrExtn('Output.File'), 'OutputFileOrExtn');
   CheckLog('');
 end;
 
@@ -1507,7 +1558,38 @@ begin
   CheckLog('');
 end;
 
+const
+  ALTERED_REPORT_OPTIONS =
+    'Current option settings: Verbose + Log Errors + Log Not Supp + Timestamp - ' +
+    'Final Token + Recurse + Global name :Test Parse mode Full Results per File ' +
+    'Show elapsed Quiet Base dir :Test\ Input dir :Test\ Output dir :Test\ ' +
+    'Generate XML :Test\ Write Defines :Test\ Defines Used :.Test Count Children :.Test ' +
+    'Skipped Methods :Test.skip Use these Defines: Tango, Uniform';
+  BASE_REPORT_OPTIONS =
+    'Current option settings: Verbose - Log Errors + Log Not Supp - Timestamp - ' +
+    'Final Token + Recurse - Global name Delphi2XmlTests Parse mode Full Results per File ' +
+    'Show elapsed Quiet Base dir - Input dir :Config\ Output dir :Log\ Generate XML :Xml\ ' +
+    'Write Defines -(Defines\) Defines Used :.used Count Children :.cnt ' +
+    'Skipped Methods :.skip ';
+  DEFAULT_REPORT_OPTIONS =
+    BASE_REPORT_OPTIONS + 'Use default Defines';
+  EMPTY_REPORT_OPTIONS =
+    BASE_REPORT_OPTIONS + 'Use NO Defines';
+  DEFINED_REPORT_OPTIONS =
+    BASE_REPORT_OPTIONS + 'Use these Defines: CPU32';
+
 { TestTD2XOptionGeneral }
+
+procedure TestTD2XOptionGeneral.SetAllOptions;
+var
+  C: Char;
+begin
+  for C := 'A' to 'Z' do
+    if not fOpts.ParseOption('-' + C + ':Test') then
+      fOpts.ParseOption('-' + C + '+');
+  fOpts.ParseOption('-T-');
+  fLog.Clear;
+end;
 
 procedure TestTD2XOptionGeneral.TestDefaultOptions;
 begin
@@ -1541,64 +1623,102 @@ end;
 procedure TestTD2XOptionGeneral.TestReportOptions;
 var
   ReturnValue: Boolean;
+begin
+  SetAllOptions;
 
-const
-  EXPECTED_REPORT_OPTIONS =
-    'Current option settings: Verbose - Log Errors + Log Not Supp - Timestamp - ' +
-    'Final Token + Recurse - Global name Delphi2XmlTests Parse mode Full Results per File ' +
-    'Show elapsed Quiet Base dir - Input dir :Config\ Output dir :Log\ Generate XML :Xml\ ' +
-    'Write Defines -(Defines\) Defines Used :.used Count Children :.cnt ' +
-    'Skipped Methods :.skip Use NO Defines';
+  ReturnValue := fOpts.ParseOption('-@');
+
+  Check(ReturnValue, 'ReturnValue');
+  CheckLog(ALTERED_REPORT_OPTIONS);
+end;
+
+procedure TestTD2XOptionGeneral.TestReportOptionsDefault;
+var
+  ReturnValue: Boolean;
 begin
   ReturnValue := fOpts.ParseOption('-@');
 
   Check(ReturnValue, 'ReturnValue');
-  CheckLog(EXPECTED_REPORT_OPTIONS);
+  CheckLog(EMPTY_REPORT_OPTIONS);
 end;
 
 procedure TestTD2XOptionGeneral.TestReportOptionsDefines;
 var
   ReturnValue: Boolean;
-
-const
-  EXPECTED_REPORT_OPTIONS =
-    'Current option settings: Verbose - Log Errors + Log Not Supp - Timestamp - ' +
-    'Final Token + Recurse - Global name Delphi2XmlTests Parse mode Full Results per File ' +
-    'Show elapsed Quiet Base dir - Input dir :Config\ Output dir :Log\ Generate XML :Xml\ ' +
-    'Write Defines -(Defines\) Defines Used :.used Count Children :.cnt ' +
-    'Skipped Methods :.skip Use these Defines: CPU32';
 begin
   ReturnValue := fOpts.ParseOption('-D+CPU32');
   Check(ReturnValue, 'ReturnValue');
 
   ReturnValue := fOpts.ParseOption('-@');
   Check(ReturnValue, 'ReturnValue');
-  CheckLog(EXPECTED_REPORT_OPTIONS);
+  CheckLog(DEFINED_REPORT_OPTIONS);
+end;
+
+procedure TestTD2XOptionGeneral.TestReportOptionsEmpty;
+var
+  ReturnValue: Boolean;
+begin
+  ReturnValue := fOpts.ParseOption('-D:');
+  Check(ReturnValue, 'ReturnValue');
+
+  ReturnValue := fOpts.ParseOption('-@');
+  Check(ReturnValue, 'ReturnValue');
+  CheckLog(EMPTY_REPORT_OPTIONS);
+end;
+
+procedure TestTD2XOptionGeneral.TestReportOptionsExtn;
+var
+  ReturnValue: Boolean;
+begin
+  SetAllOptions;
+
+  ReturnValue := fOpts.ParseOption('-@Test.tst');
+
+  Check(ReturnValue, 'ReturnValue');
+  CheckLog('');
+end;
+
+procedure TestTD2XOptionGeneral.TestReportOptionsFile;
+var
+  ReturnValue: Boolean;
+begin
+  SetAllOptions;
+
+  ReturnValue := fOpts.ParseOption('-@Test');
+
+  Check(ReturnValue, 'ReturnValue');
+  CheckLog('');
+end;
+
+procedure TestTD2XOptionGeneral.TestReportOptionsFileDefault;
+var
+  ReturnValue: Boolean;
+begin
+  ReturnValue := fOpts.ParseOption('-@Test');
+
+  Check(ReturnValue, 'ReturnValue');
+  CheckLog('');
+end;
+
+procedure TestTD2XOptionGeneral.TestReportOptionsReset;
+var
+  ReturnValue: Boolean;
+begin
+  ReturnValue := fOpts.ParseOption('-D!');
+  Check(ReturnValue, 'ReturnValue');
+
+  ReturnValue := fOpts.ParseOption('-@');
+  Check(ReturnValue, 'ReturnValue');
+  CheckLog(DEFAULT_REPORT_OPTIONS);
 end;
 
 procedure TestTD2XOptionGeneral.TestResetOptions;
 var
   ReturnValue: Boolean;
-  C: AnsiChar;
 
-const
-  ALTERED_REPORT_OPTIONS =
-    'Current option settings: Verbose - Log Errors + Log Not Supp - Timestamp - ' +
-    'Final Token + Recurse - Global name :Test Parse mode Full Results per File ' +
-    'Show elapsed Quiet Base dir :Test\ Input dir :Test\ Output dir :Test\ ' +
-    'Generate XML :Test\ Write Defines :Test\ Defines Used :.Test Count Children :.Test ' +
-    'Skipped Methods :Test.skip Use these Defines: Tango, Uniform';
-  EXPECTED_REPORT_OPTIONS =
-    'Current option settings: Verbose - Log Errors + Log Not Supp - Timestamp - ' +
-    'Final Token + Recurse - Global name Delphi2XmlTests Parse mode Full Results per File ' +
-    'Show elapsed Quiet Base dir - Input dir :Config\ Output dir :Log\ Generate XML :Xml\ ' +
-    'Write Defines -(Defines\) Defines Used :.used Count Children :.cnt ' +
-    'Skipped Methods :.skip Use NO Defines';
 begin
-  for C := 'A' to 'Z' do
-    fOpts.ParseOption('-' + C + ':Test');
+  SetAllOptions;
 
-  fLog.Clear;
   ReturnValue := fOpts.ParseOption('-@');
   Check(ReturnValue, 'ReturnValue');
   CheckLog(ALTERED_REPORT_OPTIONS);
@@ -1609,7 +1729,7 @@ begin
   fLog.Clear;
   ReturnValue := fOpts.ParseOption('-@');
   Check(ReturnValue, 'ReturnValue');
-  CheckLog(EXPECTED_REPORT_OPTIONS);
+  CheckLog(EMPTY_REPORT_OPTIONS);
 end;
 
 procedure TestTD2XOptionGeneral.TestShowOptions;
@@ -1620,7 +1740,7 @@ const
   EXPECTED_SHOW_OPTIONS =
     'Usage: Delphi2XmlTests [ Option | @Params | mFilename | Wildcard ] ... ' +
     'Options: Default Description ? Show valid options ' +
-    '@ Report Current options ! Reset all options to defaults ' +
+    '! Reset all options to defaults @<file> Report/Output Current options ' +
     'V[+|-] - Log all Parser methods called L[+|-] + Log Error messages ' +
     'N[+|-] - Log Not Supported messages T[+|-] - Timestamp global output files ' +
     'F[+|-] + Record Final Token R[+|-] - Recurse into subdirectories ' +
@@ -1645,9 +1765,161 @@ begin
   CheckLog(EXPECTED_SHOW_OPTIONS);
 end;
 
+{ TestTD2XOptionEnums }
+
+function TestTD2XOptionEnums.ConvertElapsedMode(pStr: string;
+  pDflt: TD2XElapsedMode; out pVal: TD2XElapsedMode): boolean;
+begin
+  pVal := pDflt;
+  Result := True;
+end;
+
+function TestTD2XOptionEnums.ConvertParsingMode(pStr: string;
+  pDflt: TD2XParseMode; out pVal: TD2XParseMode): boolean;
+begin
+  pVal := pDflt;
+  Result := True;
+end;
+
+function TestTD2XOptionEnums.ConvertResultPer(pStr: string;
+  pDflt: TD2XResultPer; out pVal: TD2XResultPer): boolean;
+begin
+  pVal := pDflt;
+  Result := True;
+end;
+
+function TestTD2XOptionEnums.FormatElapsedMode(pVal: TD2XElapsedMode): string;
+begin
+  Result := TD2X.ToLabel(pVal);
+end;
+
+function TestTD2XOptionEnums.FormatParsingMode(pVal: TD2XParseMode): string;
+begin
+  Result := TD2X.ToLabel(pVal);
+end;
+
+function TestTD2XOptionEnums.FormatResultPer(pVal: TD2XResultPer): string;
+begin
+  Result := TD2X.ToLabel(pVal);
+end;
+
+procedure TestTD2XOptionEnums.TestElapsedModeInvalidCreate;
+begin
+  StartExpectingException(EInvalidParam);
+  try
+    TD2XSingleParam<TD2XElapsedMode>.CreateReset('', '', '', '', nil, nil);
+  except
+    on E: EInvalidParam do
+    begin
+      CheckEqualsString('Need to use correct constructor', E.Message, 'Exception message');
+      raise;
+    end;
+  end;
+end;
+
+procedure TestTD2XOptionEnums.TestElapsedModeParam;
+var
+  lPrm : TD2XSingleParam<TD2XElapsedMode>;
+begin
+  lPrm := TD2XSingleParam<TD2XElapsedMode>.CreateParam('T', 'Test', '<tst>', 'Test Elapsed mode',
+    emTotal, ConvertElapsedMode, FormatElapsedMode, nil);
+  try
+    CheckEqualsString('T<tst> Total Test Elapsed mode', ReduceString(lPrm.Describe), 'Describe Param');
+    CheckEqualsString('Test Total', ReduceString(lPrm.Report), 'Report Default Value');
+    Check(lPrm.IsDefault, 'Check is Default');
+
+    Check(lPrm.Parse('T'), 'Parse right code with No value');
+    Check(lPrm.Parse('TQuiet'), 'Parse right code with value');
+
+    Check(emTotal = lPrm.Value, 'Returned value');
+    CheckEqualsString('TTotal', lPrm.ToString, 'String representation');
+
+    lPrm.Value := emQuiet;
+    CheckEqualsString('TQuiet', lPrm.ToString, 'String representation');
+  finally
+    FreeAndNil(lPrm);
+  end;
+end;
+
+procedure TestTD2XOptionEnums.TestParseModeInvalidCreate;
+begin
+  StartExpectingException(EInvalidParam);
+  try
+    TD2XSingleParam<TD2XParseMode>.CreateReset('', '', '', '', nil, nil);
+  except
+    on E: EInvalidParam do
+    begin
+      CheckEqualsString('Need to use correct constructor', E.Message, 'Exception message');
+      raise;
+    end;
+  end;
+end;
+
+procedure TestTD2XOptionEnums.TestParseModeParam;
+var
+  lPrm: TD2XSingleParam<TD2XParseMode>;
+begin
+  lPrm := TD2XSingleParam<TD2XParseMode>.CreateParam('T', 'Test', '<tst>', 'Test Parse mode',
+    pmFull, ConvertParsingMode, FormatParsingMode, nil);
+  try
+    CheckEqualsString('T<tst> Full Test Parse mode', ReduceString(lPrm.Describe), 'Describe Param');
+    CheckEqualsString('Test Full', ReduceString(lPrm.Report), 'Report Default Value');
+    Check(lPrm.IsDefault, 'Check is Default');
+
+    Check(lPrm.Parse('T'), 'Parse right code with No value');
+    Check(lPrm.Parse('TUses'), 'Parse right code with value');
+
+    Check(pmFull = lPrm.Value, 'Returned value');
+    CheckEqualsString('TFull', lPrm.ToString, 'String representation');
+
+    lPrm.Value := pmUses;
+    CheckEqualsString('TUses', lPrm.ToString, 'String representation');
+  finally
+    FreeAndNil(lPrm);
+  end;
+end;
+
+procedure TestTD2XOptionEnums.TestResultPerInvalidCreate;
+begin
+  StartExpectingException(EInvalidParam);
+  try
+    TD2XSingleParam<TD2XResultPer>.CreateReset('', '', '', '', nil, nil);
+  except
+    on E: EInvalidParam do
+    begin
+      CheckEqualsString('Need to use correct constructor', E.Message, 'Exception message');
+      raise;
+    end;
+  end;
+end;
+
+procedure TestTD2XOptionEnums.TestResultPerParam;
+var
+  lPrm: TD2XSingleParam<TD2XResultPer>;
+begin
+  lPrm := TD2XSingleParam<TD2XResultPer>.CreateParam('T', 'Test', '<tst>', 'Test Parse mode',
+    rpFile, ConvertResultPer, FormatResultPer, nil);
+  try
+    CheckEqualsString('T<tst> File Test Parse mode', ReduceString(lPrm.Describe), 'Describe Param');
+    CheckEqualsString('Test File', ReduceString(lPrm.Report), 'Report Default Value');
+    Check(lPrm.IsDefault, 'Check is Default');
+
+    Check(lPrm.Parse('T'), 'Parse right code with No value');
+    Check(lPrm.Parse('TDir'), 'Parse right code with value');
+
+    Check(rpFile = lPrm.Value, 'Returned value');
+    CheckEqualsString('TFile', lPrm.ToString, 'String representation');
+
+    lPrm.Value := rpDir;
+    CheckEqualsString('TDir', lPrm.ToString, 'String representation');
+  finally
+    FreeAndNil(lPrm);
+  end;
+end;
+
 initialization
 
-RegisterTests('Options', [TestTD2XOptionGeneral.Suite, TestTD2XOptionFilenames.Suite,
-    TestTD2XOptions.Suite]);
+RegisterTests('Options', [TestTD2XOptionGeneral.Suite, TestTD2XOptionEnums.Suite,
+    TestTD2XOptionFilenames.Suite, TestTD2XOptions.Suite]);
 
 end.

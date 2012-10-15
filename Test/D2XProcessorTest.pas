@@ -33,6 +33,8 @@ type
     procedure TestProcessParam;
     procedure TestProcessParamPasFiles;
     procedure TestProcessParamParamFile;
+
+    procedure TestProcessCountChildren;
   end;
 
   { TestTD2XProcessor }
@@ -55,6 +57,34 @@ procedure TestTD2XProcessor.TestEndProcessing;
 begin
   FD2XProcessor.EndProcessing;
   CheckString(fSB, '', 'Nothing');
+end;
+
+procedure TestTD2XProcessor.TestProcessCountChildren;
+var
+  ReturnValue: Boolean;
+  pIdx: Integer;
+  pFrom: string;
+  pStr: string;
+
+const
+  EXPECTED_RESULT = 'Processing D2XmlTest.pas ... done ' +
+  'Processing D2XOptionsTest.pas ... done Processing D2XParamTest.pas ... done ' +
+  'Processing D2XParserTest.pas ... done Processing D2XProcessorTest.pas ... done ' +
+  'Processing D2XTest.pas ... done Processing D2XUtils.pas ... done';
+begin
+  pStr := '-C+';
+  pFrom := 'Test';
+  pIdx := 0;
+
+  ReturnValue := FD2XProcessor.ProcessParam(pStr, pFrom, pIdx);
+
+  pStr := '*.pas';
+  pIdx := 1;
+
+  ReturnValue := FD2XProcessor.ProcessParam(pStr, pFrom, pIdx);
+
+  Check(ReturnValue, 'Return Value');
+  CheckString(fSB, EXPECTED_RESULT , 'Nothing');
 end;
 
 procedure TestTD2XProcessor.TestProcessParam;

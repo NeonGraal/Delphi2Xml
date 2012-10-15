@@ -262,10 +262,10 @@ begin
   fParams.L.JoinLog(Self);
 
   fParams.Add(TD2XParam.Create('?', 'Options', '', 'Show valid options', ParseShowOptions));
-  fParams.Add(TD2XParam.Create('@', 'Report', '', 'Report Current options',
-      ParseReportOptions));
   fParams.Add(TD2XParam.Create('!', 'Reset', '', 'Reset all options to defaults',
       ParseResetOptions));
+  fParams.Add(TD2XParam.Create('@', 'Report', '<file>', 'Report/Output Current options',
+      ParseReportOptions));
   fVerbose := TD2XBooleanParam.CreateBool('V', 'Verbose', 'Log all Parser methods called');
   fParams.Add(fVerbose);
   fLogErrors := TD2XBooleanParam.CreateBool('L', 'Log Errors', 'Log Error messages', True);
@@ -524,10 +524,11 @@ var
   lIdx: Integer;
 begin
   Result := False;
-  if pStr = '!' then
+  if (pStr = '!') or (pStr = ':') then
   begin
     Result := True;
     fDefines.Clear;
+    fLoadDefines := pStr = ':';
   end
   else
     if Length(pStr) > 1 then
@@ -619,6 +620,9 @@ function TD2XOptions.ParseReportOptions(pStr: string): boolean;
 var
   lS: string;
   w: Integer;
+  lSL: TStringList;
+  lFile: string;
+  lP: TD2XParam;
 
   procedure WriteWidth(pStr: string);
   begin
@@ -627,37 +631,62 @@ var
   end;
 
 begin
-  Result := True;
-
-  Log('Current option settings:', []);
-  fParams.ReportAll;
-
-  if fLoadDefines then
-    if fDefines.Count < 1 then
-      Log('Use NO Defines', [])
-    else
-    begin
-      Log('Use these Defines:', []);
-      w := 0;
-      for lS in fDefines do
+  if pStr > '' then
+  begin
+    Result := True;
+    ConvertFile(pStr, '.prm', lFile);
+    lFile := OutputFileOrExtn(lFile);
+    lSL := TStringList.Create;
+    try
+      for lP in fParams do
+        if not lP.IsDefault then
+          lSL.Add('-' + lP.ToString);
+      if fLoadDefines then
       begin
-        if w = 0 then
-          WriteWidth('    ')
-        else
-          if (w + Length(lS)) > 78 then
-          begin
-            Log('', []);
-            w := 0;
-            WriteWidth('    ');
-          end
-          else
-            WriteWidth(', ');
-        WriteWidth(lS);
+        lSL.Add('-D:');
+        for lS in fDefines do
+          lSL.Add('-D+' + lS);
       end;
-      Log('', []);
-    end
+      if lSL.Count > 0 then
+        lSL.SaveToFile(lFile);
+    finally
+      FreeAndNil(lSL);
+    end;
+  end
   else
-    Log('Use default Defines', []);
+  begin
+    Result := True;
+
+    Log('Current option settings:', []);
+    fParams.ReportAll;
+
+    if fLoadDefines then
+      if fDefines.Count < 1 then
+        Log('Use NO Defines', [])
+      else
+      begin
+        Log('Use these Defines:', []);
+        w := 0;
+        for lS in fDefines do
+        begin
+          if w = 0 then
+            WriteWidth('    ')
+          else
+            if (w + Length(lS)) > 78 then
+            begin
+              Log('', []);
+              w := 0;
+              WriteWidth('    ');
+            end
+            else
+              WriteWidth(', ');
+          WriteWidth(lS);
+        end;
+        Log('', []);
+      end
+    else
+      Log('Use default Defines', []);
+  end;
 end;
 
 function TD2XOptions.ParseResetOptions(pStr: string): boolean;

@@ -22,6 +22,8 @@ type
     function Parse(pStr: string): Boolean;
     function Describe: string; virtual;
     function Report: string; virtual;
+    function ToString: string; override;
+    function IsDefault: Boolean; virtual;
 
   protected
     fCode, fLabel, fSample, fDescr: string;
@@ -77,11 +79,10 @@ type
     constructor CreateReset(pCode, pLabel, pSample, pDescr: string;
       pParser: TD2XParam.TpParser; pResetter: TD2XResettableParam.TspResetter); override;
     constructor CreateParam(pCode, pLabel, pSample, pDescr: string; pDefault: T;
-      pConverter: TspConverter; pFormatter: TspFormatter; pValidator: TspValidator);
+      pConverter: TspConverter; pFormatter: TspFormatter; pValidator: TspValidator); virtual;
 
     function Report: string; override;
-
-    function ToString: string; override;
+    function IsDefault: Boolean; override;
 
   protected
     function GetFormatted(pDefault: Boolean): string; override;
@@ -104,6 +105,10 @@ type
 
   TD2XBooleanParam = class(TD2XSingleParam<Boolean>)
   public
+    constructor CreateParam(pCode, pLabel, pSample, pDescr: string; pDefault: Boolean;
+      pConverter: TD2XSingleParam<Boolean>.TspConverter;
+      pFormatter: TD2XSingleParam<Boolean>.TspFormatter;
+      pValidator: TD2XSingleParam<Boolean>.TspValidator); override;
     constructor CreateBool(pCode, pLabel, pDescr: string; pDefault: Boolean = False);
 
   private
@@ -113,6 +118,10 @@ type
 
   TD2XStringParam = class(TD2XSingleParam<string>)
   public
+    constructor CreateParam(pCode, pLabel, pSample, pDescr: string; pDefault: string;
+      pConverter: TD2XSingleParam<string>.TspConverter;
+      pFormatter: TD2XSingleParam<string>.TspFormatter;
+      pValidator: TD2XSingleParam<string>.TspValidator); override;
     constructor CreateStr(pCode, pLabel, pSample, pDescr, pDefault: string;
       pConverter: TD2XSingleParam<string>.TspConverter;
       pValidator: TD2XSingleParam<string>.TspValidator);
@@ -127,11 +136,16 @@ type
     TfspFormatter = function(pFlag: Boolean; pVal: string): string of object;
 
   public
+    constructor CreateParam(pCode, pLabel, pSample, pDescr: string; pDefault: string;
+      pConverter: TD2XSingleParam<string>.TspConverter;
+      pFormatter: TD2XSingleParam<string>.TspFormatter;
+      pValidator: TD2XSingleParam<string>.TspValidator); override;
     constructor CreateFlagStr(pCode, pLabel, pSample, pDescr, pStrDefault: string;
       pFlagDefault: Boolean; pStrConverter: TD2XSingleParam<string>.TspConverter;
       pStrValidator: TD2XSingleParam<string>.TspValidator; pFormatter: TfspFormatter);
 
     procedure Reset; override;
+    function IsDefault: Boolean; override;
 
   protected
     function GetSample: string; override;
@@ -208,6 +222,14 @@ begin
     Result := fFormatter(fValue);
 end;
 
+function TD2XSingleParam<T>.IsDefault: Boolean;
+var
+  lComparer: IEqualityComparer<T>;
+begin
+  lComparer := TEqualityComparer<T>.Default;
+  Result := lComparer.Equals(fValue, fDefault);
+end;
+
 function TD2XSingleParam<T>.Report: string;
 begin
   Result := Format(' %-15s %s', [fLabel, GetFormatted(False)]);
@@ -227,11 +249,6 @@ begin
     fValue := pVal
   else
     raise EInvalidParam.Create('Invalid value');
-end;
-
-function TD2XSingleParam<T>.ToString: string;
-begin
-  Result := GetFormatted(False);
 end;
 
 { TD2XBooleanParam }
@@ -257,7 +274,16 @@ end;
 
 constructor TD2XBooleanParam.CreateBool(pCode, pLabel, pDescr: string; pDefault: Boolean);
 begin
-  CreateParam(pCode, pLabel, '[+|-]', pDescr, pDefault, ConvertBoolean, FormatBoolean, nil);
+  inherited CreateParam(pCode, pLabel, '[+|-]', pDescr, pDefault, ConvertBoolean,
+    FormatBoolean, nil);
+end;
+
+constructor TD2XBooleanParam.CreateParam(pCode, pLabel, pSample, pDescr: string;
+  pDefault: Boolean; pConverter: TD2XSingleParam<Boolean>.TspConverter;
+  pFormatter: TD2XSingleParam<Boolean>.TspFormatter;
+  pValidator: TD2XSingleParam<Boolean>.TspValidator);
+begin
+  raise EInvalidParam.Create('Need to use correct constructor');
 end;
 
 function TD2XBooleanParam.FormatBoolean(pVal: Boolean): string;
@@ -273,15 +299,24 @@ begin
   pVal := pStr;
 end;
 
+constructor TD2XStringParam.CreateParam(pCode, pLabel, pSample, pDescr, pDefault: string;
+  pConverter: TD2XSingleParam<string>.TspConverter;
+  pFormatter: TD2XSingleParam<string>.TspFormatter;
+  pValidator: TD2XSingleParam<string>.TspValidator);
+begin
+  raise EInvalidParam.Create('Need to use correct constructor');
+end;
+
 constructor TD2XStringParam.CreateStr(pCode, pLabel, pSample, pDescr, pDefault: string;
   pConverter: TD2XSingleParam<string>.TspConverter;
   pValidator: TD2XSingleParam<string>.TspValidator);
 begin
   if Assigned(pConverter) then
-    CreateParam(pCode, pLabel, pSample, pDescr, pDefault, pConverter, FormatString, pValidator)
+    inherited CreateParam(pCode, pLabel, pSample, pDescr, pDefault, pConverter, FormatString,
+      pValidator)
   else
-    CreateParam(pCode, pLabel, pSample, pDescr, pDefault, ConvertString, FormatString,
-      pValidator);
+    inherited CreateParam(pCode, pLabel, pSample, pDescr, pDefault, ConvertString,
+      FormatString, pValidator);
 end;
 
 function TD2XStringParam.FormatString(pVal: string): string;
@@ -327,6 +362,11 @@ begin
   Result := StartsText(fCode, pStr);
 end;
 
+function TD2XParam.IsDefault: Boolean;
+begin
+  Result := True;
+end;
+
 function TD2XParam.Parse(pStr: string): Boolean;
 begin
   Result := IsCode(pStr) and fParser(Copy(pStr, Length(fCode) + 1, Length(pStr)));
@@ -335,6 +375,11 @@ end;
 function TD2XParam.Report: string;
 begin
   Result := '';
+end;
+
+function TD2XParam.ToString: string;
+begin
+  Result := fCode + GetFormatted(False);
 end;
 
 { TD2XParams }
@@ -429,8 +474,16 @@ begin
   else
     fFormatter := FormatFlagString;
 
-  CreateParam(pCode, pLabel, pSample, pDescr, pStrDefault, ConvertString, FormatString,
-    pStrValidator);
+  inherited CreateParam(pCode, pLabel, pSample, pDescr, pStrDefault, ConvertString,
+    FormatString, pStrValidator);
+end;
+
+constructor TD2XFlaggedStringParam.CreateParam(pCode, pLabel, pSample, pDescr,
+  pDefault: string; pConverter: TD2XSingleParam<string>.TspConverter;
+  pFormatter: TD2XSingleParam<string>.TspFormatter;
+  pValidator: TD2XSingleParam<string>.TspValidator);
+begin
+  raise EInvalidParam.Create('Need to use correct constructor');
 end;
 
 function TD2XFlaggedStringParam.FormatFlagString(pFlag: Boolean; pVal: string): string;
@@ -463,6 +516,11 @@ end;
 function TD2XFlaggedStringParam.GetSample: string;
 begin
   Result := '[+-]:' + fSample;
+end;
+
+function TD2XFlaggedStringParam.IsDefault: Boolean;
+begin
+  Result := (fValue = fDefault) and (fFlag = fFlagDefault);
 end;
 
 procedure TD2XFlaggedStringParam.Reset;
