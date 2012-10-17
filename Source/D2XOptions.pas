@@ -55,15 +55,12 @@ type
 
     function ConvertParsingMode(pStr: string; pDflt: TD2XParseMode;
       out pVal: TD2XParseMode): boolean;
-    function FormatParsingMode(pVal: TD2XParseMode): string;
 
     function ConvertResultPer(pStr: string; pDflt: TD2XResultPer;
       out pVal: TD2XResultPer): boolean;
-    function FormatResultPer(pVal: TD2XResultPer): string;
 
     function ConvertElapsedMode(pStr: string; pDflt: TD2XElapsedMode;
       out pVal: TD2XElapsedMode): boolean;
-    function FormatElapsedMode(pVal: TD2XElapsedMode): string;
 
     function ParseReportOptions(pStr: string): boolean;
     function ParseResetOptions(pStr: string): boolean;
@@ -71,6 +68,7 @@ type
 
     function ParseDefines(pStr: string): boolean;
     procedure ResetDefines;
+    procedure ZeroDefines;
 
     procedure LogOptionError(pLabel, pOpt: string);
     function GetVerbose: boolean;
@@ -284,15 +282,15 @@ begin
     ChangeFileExt(ExtractFileName(ParamStr(0)), ''), ConvertGlobalName, ValidateGlobalName);
   fParams.Add(fGlobalName);
   fParseMode := TD2XSingleParam<TD2XParseMode>.CreateParam('M', 'Parse mode', '<mode>',
-    'Set Parsing mode (F[ull], U[ses])', pmFull, ConvertParsingMode, FormatParsingMode, nil);
+    'Set Parsing mode (F[ull], U[ses])', pmFull, ConvertParsingMode, TD2X.ToLabel<TD2XParseMode>, nil);
   fParams.Add(fParseMode);
   fResultPer := TD2XSingleParam<TD2XResultPer>.CreateParam('P', 'Results per', '<per>',
     'Set Result per (F[ile], S[ubdir], D[ir], W[ildcard], P[aram], R[un])', rpFile,
-    ConvertResultPer, FormatResultPer, nil);
+    ConvertResultPer, TD2X.ToLabel<TD2XResultPer>, nil);
   fParams.Add(fResultPer);
   fElapsedMode := TD2XSingleParam<TD2XElapsedMode>.CreateParam('E', 'Show elapsed', '<mode>',
     'Set Elapsed time display to be (N[one], Q[uiet], T[otal], P[rocessing])', emQuiet,
-    ConvertElapsedMode, FormatElapsedMode, nil);
+    ConvertElapsedMode, TD2X.ToLabel<TD2XElapsedMode>, nil);
   fParams.Add(fElapsedMode);
   fUseBase := TD2XFlaggedStringParam.CreateFlagStr('B', 'Base dir', '<dir>',
     'Use <dir> as a base for all file lookups', '', False, ConvertDir, nil, nil);
@@ -320,7 +318,8 @@ begin
     'Load Skipped Methods from <f/e>', '.skip', True, ConvertFile, nil, nil);
   fParams.Add(fSkipMethods);
   fParams.Add(TD2XResettableParam.CreateReset('D', 'Defines', '[+-!:]<def>',
-      'Add(+), Remove(-), Clear(!) or Load(:) Defines', ParseDefines, ResetDefines));
+      'Add(+), Remove(-), Clear(!) or Load(:) Defines', ParseDefines, ResetDefines,
+      ZeroDefines));
 
   // Available option letters: AHJKLQYZ
 
@@ -337,21 +336,6 @@ begin
   FreeAndNil(fParams);
 
   inherited;
-end;
-
-function TD2XOptions.FormatElapsedMode(pVal: TD2XElapsedMode): string;
-begin
-  Result := TD2X.ToLabel(pVal);
-end;
-
-function TD2XOptions.FormatParsingMode(pVal: TD2XParseMode): string;
-begin
-  Result := TD2X.ToLabel(pVal);
-end;
-
-function TD2XOptions.FormatResultPer(pVal: TD2XResultPer): string;
-begin
-  Result := TD2X.ToLabel(pVal);
 end;
 
 function TD2XOptions.GetBaseDirectory: string;
@@ -692,7 +676,10 @@ end;
 function TD2XOptions.ParseResetOptions(pStr: string): boolean;
 begin
   Result := True;
-  fParams.ResetAll;
+  if StartsText('!', pStr) then
+    fParams.ZeroAll
+  else
+    fParams.ResetAll;
 end;
 
 function TD2XOptions.ParseShowOptions(pStr: string): boolean;
@@ -711,7 +698,7 @@ end;
 
 procedure TD2XOptions.ResetDefines;
 begin
-  fLoadDefines := True;
+  fLoadDefines := False;
   fDefines.Clear;
 end;
 
@@ -722,6 +709,12 @@ begin
   if Assigned(fWriteDefines) then
     fWriteDefines.Value := IncludeTrailingPathDelimiter(pVal);
   Result := True;
+end;
+
+procedure TD2XOptions.ZeroDefines;
+begin
+  fLoadDefines := True;
+  fDefines.Clear;
 end;
 
 end.

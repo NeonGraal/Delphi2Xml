@@ -3,6 +3,7 @@ unit D2XTest;
 interface
 
 uses
+  D2X,
   TestFramework,
   System.Classes,
   System.SysUtils;
@@ -20,10 +21,20 @@ type
 
   end;
 
+  TLoggerTestCase = class(TStringBuilderTestCase)
+  protected
+    fID2XLogger: ID2XLogger;
+
+    procedure CheckLog(pExp, pLabel: string);
+  public
+    procedure SetUp; override;
+    procedure TearDown; override;
+
+  end;
+
 implementation
 
 uses
-  D2X,
   D2XUtils,
   D2XOptions,
   System.Rtti,
@@ -40,13 +51,7 @@ type
     procedure TestToLabel;
   end;
 
-  TestID2XLogger = class(TStringBuilderTestCase)
-  strict private
-    fID2XLogger: ID2XLogger;
-
-  public
-    procedure SetUp; override;
-    procedure TearDown; override;
+  TestID2XLogger = class(TLoggerTestCase)
   published
     procedure TestJoinLog;
     procedure TestLog;
@@ -110,20 +115,6 @@ end;
 
 { TestID2XLogger }
 
-procedure TestID2XLogger.SetUp;
-begin
-  inherited;
-
-  fID2XLogger := TD2XLogger.Create(fSB);
-end;
-
-procedure TestID2XLogger.TearDown;
-begin
-  fID2XLogger := nil;
-
-  inherited;
-end;
-
 procedure TestID2XLogger.TestJoinLog;
 var
   pLogger: ID2XLogger;
@@ -137,18 +128,18 @@ begin
     pLogger := TD2XLogger.Create(lSB);
     pLogger.Log('Log String1', [], False);
     CheckString(lSB, 'Log String1', 'Check Logging 1');
-    CheckString(fSB, '', 'Check Not Logging 1');
+    CheckLog('', 'Check Not Logging 1');
 
     fID2XLogger.JoinLog(pLogger);
 
     fID2XLogger.Log('Log String2', [], False);
     CheckString(lSB, 'Log String2', 'Check Logging 2');
-    CheckString(fSB, '', 'Check Not Logging 2');
+    CheckLog('', 'Check Not Logging 2');
 
     fID2XLogger.JoinLog(nil);
 
     fID2XLogger.Log('Log String3', [], False);
-    CheckString(fSB, 'Log String3', 'Check Logging 3');
+    CheckLog('Log String3', 'Check Logging 3');
     CheckString(lSB, '', 'Check Not Logging 3');
   finally
     lSB.Free;
@@ -159,19 +150,19 @@ procedure TestID2XLogger.TestLog;
 begin
   fID2XLogger.Log('Log', [], False);
   fID2XLogger.Log('String', [], False);
-  CheckString(fSB, 'LogString', 'No Arguments');
+  CheckLog('LogString', 'No Arguments');
 
   fID2XLogger.Log('Log', []);
   fID2XLogger.Log('String', []);
-  CheckString(fSB, 'Log String', 'No Arguments Line');
+  CheckLog('Log String', 'No Arguments Line');
 
   fID2XLogger.Log('Log %s %s', ['Arg1', 'Arg2'], False);
   fID2XLogger.Log('String', []);
-  CheckString(fSB, 'Log Arg1 Arg2String', 'Arguments');
+  CheckLog('Log Arg1 Arg2String', 'Arguments');
 
   fID2XLogger.Log('Log %s %s', ['Arg1', 'Arg2']);
   fID2XLogger.Log('String', []);
-  CheckString(fSB, 'Log Arg1 Arg2 String', 'Arguments Line');
+  CheckLog('Log Arg1 Arg2 String', 'Arguments Line');
 end;
 
 { TestTD2XLogger }
@@ -625,6 +616,27 @@ end;
 procedure TStringBuilderTestCase.TearDown;
 begin
   FreeAndNil(fSB);
+
+  inherited;
+end;
+
+{ TLoggerTestCase }
+
+procedure TLoggerTestCase.CheckLog(pExp, pLabel: string);
+begin
+  CheckString(fSB, pExp, pLabel);
+end;
+
+procedure TLoggerTestCase.SetUp;
+begin
+  inherited;
+
+  fID2XLogger := TD2XLogger.Create(fSB);
+end;
+
+procedure TLoggerTestCase.TearDown;
+begin
+  fID2XLogger := nil;
 
   inherited;
 end;

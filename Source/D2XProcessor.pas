@@ -10,6 +10,7 @@ uses
   System.SysUtils,
   CastaliaPasLexTypes,
   D2XOptions,
+  D2XHandler,
   D2XParser,
   D2Xml,
   D2X;
@@ -981,7 +982,7 @@ end;
 
 function TD2XProcessor.UseProxy: Boolean;
 begin
-  Result := fOpts.WriteXml or fOpts.CountChildren;
+  Result := fOpts.Verbose or fOpts.WriteXml or fOpts.CountChildren;
 end;
 
 procedure TD2XProcessor.XmlNodeEnd;

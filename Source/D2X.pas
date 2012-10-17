@@ -9,7 +9,9 @@ uses
 
 type
   TD2X = class
+    class function Zero<T>: T;
     class function ToLabel<T>(pVal: T): string;
+    class function CnvDflt<T>(pStr: string; pDflt: T; out pVal: T): Boolean;
   end;
 
   ID2XLogger = interface
@@ -45,6 +47,12 @@ type
   end;
 
 implementation
+
+class function TD2X.CnvDflt<T>(pStr: string; pDflt: T; out pVal: T): Boolean;
+begin
+  pVal := pDflt;
+  Result := True;
+end;
 
 class function TD2X.ToLabel<T>(pVal: T): string;
 var
@@ -164,6 +172,11 @@ end;
 procedure TD2XLogger.Unlock;
 begin
   _Release;
+end;
+
+class function TD2X.Zero<T>: T;
+begin
+  Result := TValue.Empty.AsType<T>;
 end;
 
 end.

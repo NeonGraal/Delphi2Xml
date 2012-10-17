@@ -19,8 +19,6 @@ uses
   D2Xml;
 
 type
-  // Test methods for class TD2XProcessor
-
   TestTD2XProcessor = class(TStringBuilderTestCase)
   strict private
     FD2XProcessor: TD2XProcessor;
@@ -35,7 +33,11 @@ type
     procedure TestProcessParamParamFile;
 
     procedure TestProcessCountChildren;
+    procedure TestProcessVerbose;
   end;
+
+const
+  EXPECTED_PROCESSING = 'Processing Test.pas ... done';
 
   { TestTD2XProcessor }
 
@@ -65,26 +67,27 @@ var
   pIdx: Integer;
   pFrom: string;
   pStr: string;
-
-const
-  EXPECTED_RESULT = 'Processing D2XmlTest.pas ... done ' +
-  'Processing D2XOptionsTest.pas ... done Processing D2XParamTest.pas ... done ' +
-  'Processing D2XParserTest.pas ... done Processing D2XProcessorTest.pas ... done ' +
-  'Processing D2XTest.pas ... done Processing D2XUtils.pas ... done';
 begin
-  pStr := '-C+';
+  pStr := '-!!';
   pFrom := 'Test';
   pIdx := 0;
 
   ReturnValue := FD2XProcessor.ProcessParam(pStr, pFrom, pIdx);
+  Check(ReturnValue, 'Return Value 1');
 
-  pStr := '*.pas';
+  pStr := '-C+';
   pIdx := 1;
+
+  ReturnValue := FD2XProcessor.ProcessParam(pStr, pFrom, pIdx);
+  Check(ReturnValue, 'Return Value 2');
+
+  pStr := 'Test.pas';
+  pIdx := 2;
 
   ReturnValue := FD2XProcessor.ProcessParam(pStr, pFrom, pIdx);
 
   Check(ReturnValue, 'Return Value');
-  CheckString(fSB, EXPECTED_RESULT , 'Nothing');
+  CheckString(fSB, '', 'Empty Log');
 end;
 
 procedure TestTD2XProcessor.TestProcessParam;
@@ -111,13 +114,13 @@ var
   pFrom: string;
   pStr: string;
 const
-  EXPECTED_RESULT = 'Current option settings: Verbose - Log Errors + Log Not Supp - ' +
-  'Timestamp - Final Token + Recurse - Global name Delphi2XmlTests ' +
-  'Parse mode Full Results per File Show elapsed Quiet Base dir - ' +
-  'Input dir :Config\ Output dir :Log\ Generate XML :Xml\ ' +
-  'Write Defines -(Defines\) Defines Used :.used ' +
-  'Count Children :.cnt Skipped Methods :.skip ' +
-  'Use these Defines: CONDITIONALEXPRESSIONS, CPU386, MSWINDOWS, UNICODE, VER230, WIN32';
+  EXPECTED_REPORT = 'Current option settings: Verbose - Log Errors + Log Not Supp - ' +
+    'Timestamp - Final Token + Recurse - Global name Delphi2XmlTests ' +
+    'Parse mode Full Results per File Show elapsed Quiet Base dir - ' +
+    'Input dir :Config\ Output dir :Log\ Generate XML :Xml\ ' +
+    'Write Defines -(Defines\) Defines Used :.used ' +
+    'Count Children :.cnt Skipped Methods :.skip ' +
+    'Use these Defines: CONDITIONALEXPRESSIONS, CPU386, MSWINDOWS, UNICODE, VER230, WIN32';
 begin
   pStr := '@Test.prm';
   pFrom := 'Test';
@@ -126,7 +129,7 @@ begin
   ReturnValue := FD2XProcessor.ProcessParam(pStr, pFrom, pIdx);
 
   Check(ReturnValue, 'Return Value');
-  CheckString(fSB, EXPECTED_RESULT , 'Nothing');
+  CheckString(fSB, EXPECTED_REPORT, 'Nothing');
 end;
 
 procedure TestTD2XProcessor.TestProcessParamPasFiles;
@@ -135,21 +138,39 @@ var
   pIdx: Integer;
   pFrom: string;
   pStr: string;
-
-const
-  EXPECTED_RESULT = 'Processing D2XmlTest.pas ... done ' +
-  'Processing D2XOptionsTest.pas ... done Processing D2XParamTest.pas ... done ' +
-  'Processing D2XParserTest.pas ... done Processing D2XProcessorTest.pas ... done ' +
-  'Processing D2XTest.pas ... done Processing D2XUtils.pas ... done';
 begin
-  pStr := '*.pas';
+  pStr := 'Test.pas';
   pFrom := 'Test';
   pIdx := 0;
 
   ReturnValue := FD2XProcessor.ProcessParam(pStr, pFrom, pIdx);
 
   Check(ReturnValue, 'Return Value');
-  CheckString(fSB, EXPECTED_RESULT , 'Nothing');
+  CheckString(fSB, EXPECTED_PROCESSING, 'Nothing');
+end;
+
+procedure TestTD2XProcessor.TestProcessVerbose;
+var
+  ReturnValue: Boolean;
+  pIdx: Integer;
+  pFrom: string;
+  pStr: string;
+begin
+  pStr := '-!!';
+  pFrom := 'Test';
+  pIdx := 0;
+  FD2XProcessor.ProcessParam(pStr, pFrom, pIdx);
+
+  pStr := '-V+';
+  pIdx := 1;
+  FD2XProcessor.ProcessParam(pStr, pFrom, pIdx);
+
+  pStr := 'Test.pas';
+  pIdx := 2;
+  ReturnValue := FD2XProcessor.ProcessParam(pStr, pFrom, pIdx);
+
+  Check(ReturnValue, 'Return Value');
+  CheckNotEquals('', fSB.ToString, 'Log');
 end;
 
 initialization

@@ -2,13 +2,17 @@ unit D2XOptionsTest;
 
 interface
 
+implementation
+
 uses
-  System.Classes,
-  TestFramework,
-  System.StrUtils,
+  D2X,
+  D2XUtils,
   D2XParam,
   D2XOptions,
-  System.SysUtils;
+  System.Classes,
+  System.StrUtils,
+  System.SysUtils,
+  TestFramework;
 
 type
   // Test methods for class TD2X
@@ -27,18 +31,6 @@ type
 
   // Test methods for class TD2X
   TestTD2XOptionEnums = class(TTestCase)
-  strict private
-    function ConvertParsingMode(pStr: string; pDflt: TD2XParseMode;
-      out pVal: TD2XParseMode): boolean;
-    function FormatParsingMode(pVal: TD2XParseMode): string;
-
-    function ConvertResultPer(pStr: string; pDflt: TD2XResultPer;
-      out pVal: TD2XResultPer): boolean;
-    function FormatResultPer(pVal: TD2XResultPer): string;
-
-    function ConvertElapsedMode(pStr: string; pDflt: TD2XElapsedMode;
-      out pVal: TD2XElapsedMode): boolean;
-    function FormatElapsedMode(pVal: TD2XElapsedMode): string;
   published
     procedure TestElapsedModeInvalidCreate;
     procedure TestParseModeInvalidCreate;
@@ -184,14 +176,9 @@ type
     procedure TestReportOptionsEmpty;
     procedure TestReportOptionsReset;
     procedure TestResetOptions;
+    procedure TestZeroOptions;
     procedure TestShowOptions;
   end;
-
-implementation
-
-uses
-  D2X,
-  D2XUtils;
 
 { TestTD2XOptionBase }
 
@@ -483,7 +470,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionBlank;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '';
@@ -495,7 +482,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionA;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-A';
@@ -506,7 +493,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionB;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-B';
@@ -519,7 +506,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionBBlank;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-B:';
@@ -532,7 +519,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionBOff;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-B-';
@@ -545,7 +532,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionBOn;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-B+';
@@ -558,7 +545,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionBValue;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-B:Base';
@@ -571,7 +558,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionC;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-C';
@@ -584,7 +571,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionCBlank;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-C:';
@@ -597,7 +584,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionCExtn;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-C:Extn';
@@ -610,7 +597,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionCOff;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-C-';
@@ -623,7 +610,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionCOn;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-C+';
@@ -636,7 +623,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionCFile;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-C:File.Extn';
@@ -649,7 +636,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionD;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-D';
@@ -660,7 +647,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionDAdd;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-D+Value';
@@ -673,7 +660,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionDClear;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-D!';
@@ -686,7 +673,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionDDelete;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-D-Beta';
@@ -699,7 +686,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionDEmpty;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-D:';
@@ -712,7 +699,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionDLoad;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-D:Test';
@@ -725,7 +712,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionDMany;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
 begin
   ReturnValue := fOpts.ParseOption('-D+Value1');
   Check(ReturnValue, 'ReturnValue1');
@@ -738,7 +725,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionE;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-E';
@@ -749,7 +736,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionEValue;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-ETotal';
@@ -761,7 +748,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionF;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-F';
@@ -773,7 +760,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionFOff;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-F-';
@@ -785,7 +772,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionFOn;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-F+';
@@ -797,7 +784,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionG;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-G';
@@ -810,7 +797,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionGValue;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-GGlobal';
@@ -826,7 +813,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionH;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-H';
@@ -837,7 +824,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionI;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-I';
@@ -850,7 +837,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionIBlank;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-I:';
@@ -862,7 +849,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionIOff;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-I-';
@@ -874,7 +861,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionIOn;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-I+';
@@ -887,7 +874,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionIValue;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-I:Input';
@@ -900,7 +887,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionJ;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-J';
@@ -911,7 +898,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionK;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-K';
@@ -922,7 +909,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionL;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-L';
@@ -934,7 +921,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionLOff;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-L-';
@@ -946,7 +933,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionLOn;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-L+';
@@ -958,7 +945,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionM;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-M';
@@ -969,7 +956,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionMValue;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-MUses';
@@ -982,7 +969,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionN;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-N';
@@ -994,7 +981,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionNOff;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-N-';
@@ -1006,7 +993,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionNOn;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-N+';
@@ -1018,7 +1005,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionO;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-O';
@@ -1031,7 +1018,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionOBlank;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-O:';
@@ -1043,7 +1030,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionOOff;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-O-';
@@ -1055,7 +1042,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionOOn;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-O+';
@@ -1068,7 +1055,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionOValue;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-O:Output';
@@ -1081,7 +1068,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionP;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-P';
@@ -1092,7 +1079,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionPValue;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-PDir';
@@ -1105,7 +1092,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionQ;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-Q';
@@ -1116,7 +1103,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionR;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-R';
@@ -1128,7 +1115,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionROff;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-R-';
@@ -1140,7 +1127,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionROn;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-R+';
@@ -1152,7 +1139,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionS;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-S';
@@ -1165,7 +1152,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionSBlank;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-S:';
@@ -1178,7 +1165,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionSExtn;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-S:.Extn';
@@ -1191,7 +1178,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionSSimple;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-S:Extn';
@@ -1204,7 +1191,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionSFile;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-S:File.Extn';
@@ -1217,7 +1204,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionSOff;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-S-';
@@ -1230,7 +1217,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionSOn;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-S+';
@@ -1243,7 +1230,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionT;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-T';
@@ -1256,7 +1243,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionTOff;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-T-';
@@ -1269,7 +1256,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionTOn;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-T+';
@@ -1282,7 +1269,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionU;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-U';
@@ -1295,7 +1282,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionUBlank;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-U:';
@@ -1308,7 +1295,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionUExtn;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-U:Extn';
@@ -1321,7 +1308,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionUFile;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-U:File.Extn';
@@ -1334,7 +1321,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionUOff;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-U-';
@@ -1347,7 +1334,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionUOn;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-U+';
@@ -1360,7 +1347,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionV;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-V';
@@ -1372,7 +1359,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionVOff;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-V-';
@@ -1384,7 +1371,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionVOn;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-V+';
@@ -1396,7 +1383,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionW;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-W';
@@ -1409,7 +1396,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionWBlank;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-W:';
@@ -1422,7 +1409,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionWOff;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-W-';
@@ -1435,7 +1422,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionWOn;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-W+';
@@ -1448,7 +1435,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionX;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-X';
@@ -1461,7 +1448,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionXBlank;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-X:';
@@ -1474,7 +1461,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionXOff;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-X-';
@@ -1487,7 +1474,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionXOn;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-X+';
@@ -1500,7 +1487,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionXValue;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-X:Value';
@@ -1513,7 +1500,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionY;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-Y';
@@ -1524,7 +1511,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionZ;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-Z';
@@ -1535,7 +1522,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionWrongPrefix;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '=V';
@@ -1547,7 +1534,7 @@ end;
 
 procedure TestTD2XOptions.TestParseOptionWValue;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
   pOpt: string;
 begin
   pOpt := '-W:Write';
@@ -1565,20 +1552,22 @@ const
     'Show elapsed Quiet Base dir :Test\ Input dir :Test\ Output dir :Test\ ' +
     'Generate XML :Test\ Write Defines :Test\ Defines Used :.Test Count Children :.Test ' +
     'Skipped Methods :Test.skip Use these Defines: Tango, Uniform';
+  ZERO_REPORT_OPTIONS =
+    'Current option settings: Verbose - Log Errors - Log Not Supp - Timestamp - ' +
+    'Final Token - Recurse - Global name Parse mode Full Results per File ' +
+    'Show elapsed None Base dir - Input dir - Output dir - Generate XML - ' +
+    'Write Defines - Defines Used - Count Children - Skipped Methods - Use NO Defines';
   BASE_REPORT_OPTIONS =
     'Current option settings: Verbose - Log Errors + Log Not Supp - Timestamp - ' +
     'Final Token + Recurse - Global name Delphi2XmlTests Parse mode Full Results per File ' +
     'Show elapsed Quiet Base dir - Input dir :Config\ Output dir :Log\ Generate XML :Xml\ ' +
     'Write Defines -(Defines\) Defines Used :.used Count Children :.cnt ' +
     'Skipped Methods :.skip ';
-  DEFAULT_REPORT_OPTIONS =
-    BASE_REPORT_OPTIONS + 'Use default Defines';
-  EMPTY_REPORT_OPTIONS =
-    BASE_REPORT_OPTIONS + 'Use NO Defines';
-  DEFINED_REPORT_OPTIONS =
-    BASE_REPORT_OPTIONS + 'Use these Defines: CPU32';
+  DEFAULT_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Use default Defines';
+  EMPTY_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Use NO Defines';
+  DEFINED_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Use these Defines: CPU32';
 
-{ TestTD2XOptionGeneral }
+  { TestTD2XOptionGeneral }
 
 procedure TestTD2XOptionGeneral.SetAllOptions;
 var
@@ -1622,7 +1611,7 @@ end;
 
 procedure TestTD2XOptionGeneral.TestReportOptions;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
 begin
   SetAllOptions;
 
@@ -1634,7 +1623,7 @@ end;
 
 procedure TestTD2XOptionGeneral.TestReportOptionsDefault;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
 begin
   ReturnValue := fOpts.ParseOption('-@');
 
@@ -1644,7 +1633,7 @@ end;
 
 procedure TestTD2XOptionGeneral.TestReportOptionsDefines;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
 begin
   ReturnValue := fOpts.ParseOption('-D+CPU32');
   Check(ReturnValue, 'ReturnValue');
@@ -1656,7 +1645,7 @@ end;
 
 procedure TestTD2XOptionGeneral.TestReportOptionsEmpty;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
 begin
   ReturnValue := fOpts.ParseOption('-D:');
   Check(ReturnValue, 'ReturnValue');
@@ -1668,7 +1657,7 @@ end;
 
 procedure TestTD2XOptionGeneral.TestReportOptionsExtn;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
 begin
   SetAllOptions;
 
@@ -1680,7 +1669,7 @@ end;
 
 procedure TestTD2XOptionGeneral.TestReportOptionsFile;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
 begin
   SetAllOptions;
 
@@ -1692,7 +1681,7 @@ end;
 
 procedure TestTD2XOptionGeneral.TestReportOptionsFileDefault;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
 begin
   ReturnValue := fOpts.ParseOption('-@Test');
 
@@ -1702,7 +1691,7 @@ end;
 
 procedure TestTD2XOptionGeneral.TestReportOptionsReset;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
 begin
   ReturnValue := fOpts.ParseOption('-D!');
   Check(ReturnValue, 'ReturnValue');
@@ -1714,7 +1703,7 @@ end;
 
 procedure TestTD2XOptionGeneral.TestResetOptions;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
 
 begin
   SetAllOptions;
@@ -1729,12 +1718,12 @@ begin
   fLog.Clear;
   ReturnValue := fOpts.ParseOption('-@');
   Check(ReturnValue, 'ReturnValue');
-  CheckLog(EMPTY_REPORT_OPTIONS);
+  CheckLog(DEFAULT_REPORT_OPTIONS);
 end;
 
 procedure TestTD2XOptionGeneral.TestShowOptions;
 var
-  ReturnValue: Boolean;
+  ReturnValue: boolean;
 
 const
   EXPECTED_SHOW_OPTIONS =
@@ -1765,49 +1754,33 @@ begin
   CheckLog(EXPECTED_SHOW_OPTIONS);
 end;
 
+procedure TestTD2XOptionGeneral.TestZeroOptions;
+var
+  ReturnValue: boolean;
+
+begin
+  SetAllOptions;
+
+  ReturnValue := fOpts.ParseOption('-@');
+  Check(ReturnValue, 'ReturnValue');
+  CheckLog(ALTERED_REPORT_OPTIONS);
+
+  ReturnValue := fOpts.ParseOption('-!!');
+  Check(ReturnValue, 'ReturnValue');
+
+  fLog.Clear;
+  ReturnValue := fOpts.ParseOption('-@');
+  Check(ReturnValue, 'ReturnValue');
+  CheckLog(ZERO_REPORT_OPTIONS);
+end;
+
 { TestTD2XOptionEnums }
-
-function TestTD2XOptionEnums.ConvertElapsedMode(pStr: string;
-  pDflt: TD2XElapsedMode; out pVal: TD2XElapsedMode): boolean;
-begin
-  pVal := pDflt;
-  Result := True;
-end;
-
-function TestTD2XOptionEnums.ConvertParsingMode(pStr: string;
-  pDflt: TD2XParseMode; out pVal: TD2XParseMode): boolean;
-begin
-  pVal := pDflt;
-  Result := True;
-end;
-
-function TestTD2XOptionEnums.ConvertResultPer(pStr: string;
-  pDflt: TD2XResultPer; out pVal: TD2XResultPer): boolean;
-begin
-  pVal := pDflt;
-  Result := True;
-end;
-
-function TestTD2XOptionEnums.FormatElapsedMode(pVal: TD2XElapsedMode): string;
-begin
-  Result := TD2X.ToLabel(pVal);
-end;
-
-function TestTD2XOptionEnums.FormatParsingMode(pVal: TD2XParseMode): string;
-begin
-  Result := TD2X.ToLabel(pVal);
-end;
-
-function TestTD2XOptionEnums.FormatResultPer(pVal: TD2XResultPer): string;
-begin
-  Result := TD2X.ToLabel(pVal);
-end;
 
 procedure TestTD2XOptionEnums.TestElapsedModeInvalidCreate;
 begin
   StartExpectingException(EInvalidParam);
   try
-    TD2XSingleParam<TD2XElapsedMode>.CreateReset('', '', '', '', nil, nil);
+    TD2XSingleParam<TD2XElapsedMode>.Create('', '', '', '', nil);
   except
     on E: EInvalidParam do
     begin
@@ -1819,23 +1792,24 @@ end;
 
 procedure TestTD2XOptionEnums.TestElapsedModeParam;
 var
-  lPrm : TD2XSingleParam<TD2XElapsedMode>;
+  lPrm: TD2XSingleParam<TD2XElapsedMode>;
 begin
-  lPrm := TD2XSingleParam<TD2XElapsedMode>.CreateParam('T', 'Test', '<tst>', 'Test Elapsed mode',
-    emTotal, ConvertElapsedMode, FormatElapsedMode, nil);
+  lPrm := TD2XSingleParam<TD2XElapsedMode>.CreateParam('T', 'Test', '<tst>',
+    'Test Elapsed mode', emQuiet, TD2X.CnvDflt<TD2XElapsedMode>, TD2X.ToLabel<TD2XElapsedMode>, nil);
   try
-    CheckEqualsString('T<tst> Total Test Elapsed mode', ReduceString(lPrm.Describe), 'Describe Param');
-    CheckEqualsString('Test Total', ReduceString(lPrm.Report), 'Report Default Value');
+    CheckEqualsString('T<tst> Quiet Test Elapsed mode', ReduceString(lPrm.Describe),
+      'Describe Param');
+    CheckEqualsString('Test Quiet', ReduceString(lPrm.Report), 'Report Default Value');
     Check(lPrm.IsDefault, 'Check is Default');
 
     Check(lPrm.Parse('T'), 'Parse right code with No value');
-    Check(lPrm.Parse('TQuiet'), 'Parse right code with value');
+    Check(lPrm.Parse('TTotal'), 'Parse right code with value');
 
-    Check(emTotal = lPrm.Value, 'Returned value');
-    CheckEqualsString('TTotal', lPrm.ToString, 'String representation');
-
-    lPrm.Value := emQuiet;
+    Check(emQuiet = lPrm.Value, 'Returned value');
     CheckEqualsString('TQuiet', lPrm.ToString, 'String representation');
+
+    lPrm.Value := emTotal;
+    CheckEqualsString('TTotal', lPrm.ToString, 'String representation');
   finally
     FreeAndNil(lPrm);
   end;
@@ -1845,7 +1819,7 @@ procedure TestTD2XOptionEnums.TestParseModeInvalidCreate;
 begin
   StartExpectingException(EInvalidParam);
   try
-    TD2XSingleParam<TD2XParseMode>.CreateReset('', '', '', '', nil, nil);
+    TD2XSingleParam<TD2XParseMode>.Create('', '', '', '', nil);
   except
     on E: EInvalidParam do
     begin
@@ -1860,9 +1834,10 @@ var
   lPrm: TD2XSingleParam<TD2XParseMode>;
 begin
   lPrm := TD2XSingleParam<TD2XParseMode>.CreateParam('T', 'Test', '<tst>', 'Test Parse mode',
-    pmFull, ConvertParsingMode, FormatParsingMode, nil);
+    pmFull, TD2X.CnvDflt<TD2XParseMode>, TD2X.ToLabel<TD2XParseMode>, nil);
   try
-    CheckEqualsString('T<tst> Full Test Parse mode', ReduceString(lPrm.Describe), 'Describe Param');
+    CheckEqualsString('T<tst> Full Test Parse mode', ReduceString(lPrm.Describe),
+      'Describe Param');
     CheckEqualsString('Test Full', ReduceString(lPrm.Report), 'Report Default Value');
     Check(lPrm.IsDefault, 'Check is Default');
 
@@ -1883,7 +1858,7 @@ procedure TestTD2XOptionEnums.TestResultPerInvalidCreate;
 begin
   StartExpectingException(EInvalidParam);
   try
-    TD2XSingleParam<TD2XResultPer>.CreateReset('', '', '', '', nil, nil);
+    TD2XSingleParam<TD2XResultPer>.Create('', '', '', '', nil);
   except
     on E: EInvalidParam do
     begin
@@ -1898,9 +1873,10 @@ var
   lPrm: TD2XSingleParam<TD2XResultPer>;
 begin
   lPrm := TD2XSingleParam<TD2XResultPer>.CreateParam('T', 'Test', '<tst>', 'Test Parse mode',
-    rpFile, ConvertResultPer, FormatResultPer, nil);
+    rpFile, TD2X.CnvDflt<TD2XResultPer>, TD2X.ToLabel<TD2XResultPer>, nil);
   try
-    CheckEqualsString('T<tst> File Test Parse mode', ReduceString(lPrm.Describe), 'Describe Param');
+    CheckEqualsString('T<tst> File Test Parse mode', ReduceString(lPrm.Describe),
+      'Describe Param');
     CheckEqualsString('Test File', ReduceString(lPrm.Report), 'Report Default Value');
     Check(lPrm.IsDefault, 'Check is Default');
 
