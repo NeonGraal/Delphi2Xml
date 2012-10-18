@@ -20,8 +20,8 @@ type
     procedure Init(pLexer: TD2XLexer);
     procedure Copy(pFrom: TD2XHandler); override;
 
-    procedure BeginMethod(pMethod: string); override;
-    procedure EndMethod(pMethod: string); override;
+    procedure DoBeginMethod(pMethod: string); override;
+    procedure DoEndMethod(pMethod: string); override;
 
     property L: ID2XLogger read fLogger implements ID2XLogger;
     property Lexer: TD2XLexer read fLexer;
@@ -31,7 +31,7 @@ implementation
 
 { TD2XLogHandler }
 
-procedure TD2XLogHandler.BeginMethod(pMethod: string);
+procedure TD2XLogHandler.DoBeginMethod(pMethod: string);
 begin
   if Assigned(fLexer) then
     L.Log('BEFORE %s @ %s', [pMethod, fLexer.Token])
@@ -60,7 +60,7 @@ begin
   inherited;
 end;
 
-procedure TD2XLogHandler.EndMethod(pMethod: string);
+procedure TD2XLogHandler.DoEndMethod(pMethod: string);
 begin
   L.Log('AFTER  %s', [pMethod]);
 end;

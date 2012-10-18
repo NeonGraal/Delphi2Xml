@@ -16,6 +16,10 @@ type
     procedure BeginResults; virtual;
     procedure EndResults(pFile: string); virtual;
 
+    function CheckMethod(pMethod: string): Boolean; virtual;
+    procedure DoBeginMethod(pMethod: string); virtual;
+    procedure DoEndMethod(pMethod: string); virtual;
+
     procedure BeginMethod(pMethod: string); virtual;
     procedure EndMethod(pMethod: string); virtual;
   end;
@@ -34,8 +38,9 @@ type
     procedure BeginResults; override;
     procedure EndResults(pFile: string); override;
 
-    procedure BeginMethod(pMethod: string); override;
-    procedure EndMethod(pMethod: string); override;
+    function CheckMethod(pMethod: string): Boolean; override;
+    procedure DoBeginMethod(pMethod: string); override;
+    procedure DoEndMethod(pMethod: string); override;
 
     function Add(pHandler: TD2XHandler): TD2XHandler;
   end;
@@ -47,9 +52,15 @@ uses
 
 { TD2XHandler }
 
-procedure TD2XHandler.BeginMethod(pMethod: string);
+procedure TD2XHandler.DoBeginMethod(pMethod: string);
 begin
 
+end;
+
+procedure TD2XHandler.BeginMethod(pMethod: string);
+begin
+  if CheckMethod(pMethod) then
+    DoBeginMethod(pMethod);
 end;
 
 procedure TD2XHandler.BeginProcessing;
@@ -62,14 +73,25 @@ begin
 
 end;
 
+function TD2XHandler.CheckMethod(pMethod: string): Boolean;
+begin
+  Result := True;
+end;
+
 procedure TD2XHandler.Copy(pFrom: TD2XHandler);
+begin
+
+end;
+
+procedure TD2XHandler.DoEndMethod(pMethod: string);
 begin
 
 end;
 
 procedure TD2XHandler.EndMethod(pMethod: string);
 begin
-
+  if CheckMethod(pMethod) then
+    DoEndMethod(pMethod);
 end;
 
 procedure TD2XHandler.EndProcessing;
@@ -104,12 +126,12 @@ begin
   end;
 end;
 
-procedure TD2XHandlers.BeginMethod(pMethod: string);
+procedure TD2XHandlers.DoBeginMethod(pMethod: string);
 var
   lH: TD2XHandler;
 begin
   for lH in fHandlers do
-    lH.BeginMethod(pMethod);
+    lH.DoBeginMethod(pMethod);
 end;
 
 procedure TD2XHandlers.BeginProcessing;
@@ -128,6 +150,15 @@ begin
     lH.BeginResults;
 end;
 
+function TD2XHandlers.CheckMethod(pMethod: string): Boolean;
+var
+  lH: TD2XHandler;
+begin
+  Result := True;
+  for lH in fHandlers do
+    Result := lH.CheckMethod(pMethod) and Result;
+end;
+
 constructor TD2XHandlers.Create;
 begin
   inherited;
@@ -142,12 +173,12 @@ begin
   inherited;
 end;
 
-procedure TD2XHandlers.EndMethod(pMethod: string);
+procedure TD2XHandlers.DoEndMethod(pMethod: string);
 var
   lH: TD2XHandler;
 begin
   for lH in fHandlers do
-    lH.EndMethod(pMethod);
+    lH.DoEndMethod(pMethod);
 end;
 
 procedure TD2XHandlers.EndProcessing;

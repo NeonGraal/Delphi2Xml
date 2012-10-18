@@ -16,16 +16,18 @@ type
     CalledEndProcessing: Boolean;
     CalledBeginResults: Boolean;
     CalledEndResults: Boolean;
-    CalledBeginMethod: Boolean;
-    CalledEndMethod: Boolean;
+    CalledCheckMethod: Boolean;
+    CalledDoBeginMethod: Boolean;
+    CalledDoEndMethod: Boolean;
     CalledCopy: Boolean;
 
     procedure BeginProcessing; override;
     procedure EndProcessing; override;
     procedure BeginResults; override;
     procedure EndResults(pFile: String); override;
-    procedure BeginMethod(pMethod: String); override;
-    procedure EndMethod(pMethod: String); override;
+    function CheckMethod(pMethod: String): Boolean; override;
+    procedure DoBeginMethod(pMethod: String); override;
+    procedure DoEndMethod(pMethod: String); override;
 
     procedure Copy(pFrom: TD2XHandler); override;
 
@@ -43,6 +45,9 @@ type
     procedure TestEndProcessing;
     procedure TestBeginResults;
     procedure TestEndResults;
+    procedure TestCheckMethod;
+    procedure TestDoBeginMethod;
+    procedure TestDoEndMethod;
     procedure TestBeginMethod;
     procedure TestEndMethod;
     procedure TestCopy; virtual;
@@ -93,11 +98,32 @@ begin
   CheckTrue(FD2XTester.CalledBeginResults, 'Called Begin Results');
 end;
 
+procedure TestTD2XHandler.TestCheckMethod;
+begin
+  FD2XHandler.CheckMethod('');
+
+  CheckTrue(FD2XTester.CalledCheckMethod, 'Called Check Method');
+end;
+
 procedure TestTD2XHandler.TestCopy;
 begin
   FD2XHandler.Copy(nil);
 
   CheckTrue(FD2XTester.CalledCopy, 'Called Copy');
+end;
+
+procedure TestTD2XHandler.TestDoBeginMethod;
+begin
+  FD2XHandler.DoBeginMethod('');
+
+  CheckTrue(FD2XTester.CalledDoBeginMethod, 'Called Begin Method');
+end;
+
+procedure TestTD2XHandler.TestDoEndMethod;
+begin
+  FD2XHandler.DoEndMethod('');
+
+  CheckTrue(FD2XTester.CalledDoEndMethod, 'Called End Method');
 end;
 
 procedure TestTD2XHandler.TestEndResults;
@@ -111,14 +137,16 @@ procedure TestTD2XHandler.TestBeginMethod;
 begin
   FD2XHandler.BeginMethod('');
 
-  CheckTrue(FD2XTester.CalledBeginMethod, 'Called Begin Method');
+  CheckTrue(FD2XTester.CalledCheckMethod, 'Called Check Method');
+  CheckTrue(FD2XTester.CalledDoBeginMethod, 'Called Begin Method');
 end;
 
 procedure TestTD2XHandler.TestEndMethod;
 begin
   FD2XHandler.EndMethod('');
 
-  CheckTrue(FD2XTester.CalledEndMethod, 'Called End Method');
+  CheckTrue(FD2XTester.CalledCheckMethod, 'Called Check Method');
+  CheckTrue(FD2XTester.CalledDoEndMethod, 'Called End Method');
 end;
 
 { TestTD2XHandlers }
@@ -145,11 +173,11 @@ end;
 
 { TD2XHandlerTester }
 
-procedure TD2XHandlerTester.BeginMethod(pMethod: String);
+procedure TD2XHandlerTester.DoBeginMethod(pMethod: String);
 begin
   inherited;
 
-  CalledBeginMethod := true;
+  CalledDoBeginMethod := true;
 end;
 
 procedure TD2XHandlerTester.BeginProcessing;
@@ -166,6 +194,13 @@ begin
   CalledBeginResults := true;
 end;
 
+function TD2XHandlerTester.CheckMethod(pMethod: String): Boolean;
+begin
+  CalledCheckMethod := True;
+
+  Result := inherited CheckMethod(pMethod);
+end;
+
 procedure TD2XHandlerTester.Copy(pFrom: TD2XHandler);
 begin
   inherited;
@@ -173,11 +208,11 @@ begin
   CalledCopy := true;
 end;
 
-procedure TD2XHandlerTester.EndMethod(pMethod: String);
+procedure TD2XHandlerTester.DoEndMethod(pMethod: String);
 begin
   inherited;
 
-  CalledEndMethod := true;
+  CalledDoEndMethod := true;
 end;
 
 procedure TD2XHandlerTester.EndProcessing;

@@ -87,7 +87,7 @@ procedure TestTD2XLogHandler.TestBeginMethod;
 begin
   FD2XLogHandler.L.JoinLog(fID2XLogger);
 
-  FD2XLogHandler.BeginMethod('Method');
+  FD2XLogHandler.DoBeginMethod('Method');
 
   CheckLog('BEFORE Method', 'Begin Method');
 end;
@@ -96,7 +96,7 @@ procedure TestTD2XLogHandler.TestEndMethod;
 begin
   FD2XLogHandler.L.JoinLog(fID2XLogger);
 
-  FD2XLogHandler.EndMethod('Method');
+  FD2XLogHandler.DoEndMethod('Method');
 
   CheckLog('AFTER Method', 'End Method');
 end;
