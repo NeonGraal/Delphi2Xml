@@ -13,7 +13,7 @@ type
 
   TD2XParam = class
   public type
-    TpParser = function(pVal: string): Boolean of object;
+    TpParser = reference to function(pVal: string): Boolean;
 
   public
     constructor Create(pCode, pLabel, pSample, pDescr: string; pParser: TpParser); virtual;
@@ -58,7 +58,7 @@ type
 
   TD2XResettableParam = class(TD2XParam)
   public type
-    TspSetter = procedure of object;
+    TspSetter = reference to procedure;
   public
     constructor Create(pCode, pLabel, pSample, pDescr: string;
       pParser: TD2XParam.TpParser); override;
@@ -73,9 +73,9 @@ type
 
   TD2XSingleParam<T> = class(TD2XParam)
   public type
-    TspConverter = function(pStr: string; pDflt: T; out pVal: T): Boolean of object;
-    TspFormatter = function(pVal: T): string of object;
-    TspValidator = function(pVal: T): Boolean of object;
+    TspConverter = reference to function(pStr: string; pDflt: T; out pVal: T): Boolean;
+    TspFormatter = reference to function(pVal: T): string;
+    TspValidator = reference to function(pVal: T): Boolean;
 
   public
     constructor Create(pCode, pLabel, pSample, pDescr: string;
@@ -136,7 +136,7 @@ type
 
   TD2XFlaggedStringParam = class(TD2XSingleParam<string>)
   public type
-    TfspFormatter = function(pFlag: Boolean; pVal: string): string of object;
+    TfspFormatter = reference to function(pFlag: Boolean; pVal: string): string;
 
   public
     constructor CreateParam(pCode, pLabel, pSample, pDescr: string; pDefault: string;

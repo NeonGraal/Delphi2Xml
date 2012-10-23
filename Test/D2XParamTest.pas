@@ -19,7 +19,6 @@ type
   TestTD2XParam = class(TTestCase)
   strict private
     fPrm: TD2XParam;
-    fCalledParser: Boolean;
 
     function TstParser(pStr: string): Boolean;
 
@@ -43,7 +42,6 @@ type
   TestTD2XParams = class(TTestCase)
   strict private
     fPs: TD2XParams;
-    fCalledParser: Boolean;
     fSB: TStringBuilder;
 
     function TstParser(pStr: string): Boolean;
@@ -64,12 +62,9 @@ type
   TestTD2XResettableParam = class(TTestCase)
   strict private
     fPrm: TD2XResettableParam;
-    fCalledResetter: Boolean;
-    fCalledZeroer: Boolean;
 
     function TstParser(pStr: string): Boolean;
-    procedure TstResetter;
-    procedure TstZeroer;
+    procedure TstSetter;
 
   public
     procedure SetUp; override;
@@ -84,15 +79,10 @@ type
 
   TestTD2XSingleParam = class(TTestCase)
   private
-    function CnvStrProp(pStr: string; pDflt: string; out pVal: string): Boolean;
     function FmtStrProp(pVal: string): string;
     function InvStrProp(pVal: string): Boolean;
 
-    function CnvBoolProp(pStr: string; pDflt: Boolean; out pVal: Boolean): Boolean;
     function FmtBoolProp(pVal: Boolean): string;
-
-    function CnvObjProp(pStr: string; pDflt: TObject; out pVal: TObject): Boolean;
-    function FmtObjProp(pVal: TObject): string;
 
   published
     procedure TestInvalidAllNil;
@@ -156,8 +146,6 @@ type
   strict private
     fStrP: TD2XStringParam;
 
-    function NotBlank(pStr: string): Boolean;
-
   public
     procedure SetUp; override;
     procedure TearDown; override;
@@ -171,8 +159,6 @@ type
   strict private
     fStrP: TD2XStringParam;
 
-    function LeadingColon(pStr: string; pDflt: string; out pVal: string): Boolean;
-
   public
     procedure SetUp; override;
     procedure TearDown; override;
@@ -184,9 +170,6 @@ type
   TestTD2XFormatValidStringParam = class(TTestCase)
   strict private
     fStrP: TD2XStringParam;
-
-    function LeadingColon(pStr: string; pDflt: string; out pVal: string): Boolean;
-    function NotBlank(pStr: string): Boolean;
 
   public
     procedure SetUp; override;
@@ -218,37 +201,11 @@ type
     procedure TestIsDefault;
   end;
 
-{ TestTD2XSingleParam }
-
-function TestTD2XSingleParam.CnvBoolProp(pStr: string; pDflt: Boolean;
-  out pVal: Boolean): Boolean;
-begin
-  pVal := False;
-  Result := True;
-end;
-
-function TestTD2XSingleParam.CnvObjProp(pStr: string; pDflt: TObject;
-  out pVal: TObject): Boolean;
-begin
-  Result := True;
-  pVal := nil;
-end;
-
-function TestTD2XSingleParam.CnvStrProp(pStr: string; pDflt: string; out pVal: string)
-  : Boolean;
-begin
-  Result := True;
-  pVal := '';
-end;
+  { TestTD2XSingleParam }
 
 function TestTD2XSingleParam.FmtBoolProp(pVal: Boolean): string;
 begin
   Result := IfThen(pVal, '+', '-');
-end;
-
-function TestTD2XSingleParam.FmtObjProp(pVal: TObject): string;
-begin
-  Result := 'nil';
 end;
 
 function TestTD2XSingleParam.FmtStrProp(pVal: string): string;
@@ -292,8 +249,12 @@ procedure TestTD2XSingleParam.TestBooleanParam;
 var
   lBoolP: TD2XSingleParam<Boolean>;
 begin
-  lBoolP := TD2XSingleParam<Boolean>.CreateParam('T', 'Test', '', '', False, CnvBoolProp,
-    FmtBoolProp, nil);
+  lBoolP := TD2XSingleParam<Boolean>.CreateParam('T', 'Test', '', '', False,
+      function(pStr: string; pDflt: Boolean; out pVal: Boolean): Boolean
+    begin
+      pVal := False;
+      Result := True;
+    end, FmtBoolProp, nil);
 
   try
     CheckEqualsString('T -', ReduceString(lBoolP.Describe), 'Describe Param');
@@ -319,7 +280,8 @@ procedure TestTD2XSingleParam.TestInvalidAllBlank;
 begin
   StartExpectingException(EInvalidParam);
   try
-    TD2XSingleParam<string>.CreateParam('', '', '', '', '', CnvStrProp, FmtStrProp, nil);
+    TD2XSingleParam<string>.CreateParam('', '', '', '', '', TD2X.CnvDflt<string>,
+      FmtStrProp, nil);
   except
     on E: EInvalidParam do
     begin
@@ -333,8 +295,8 @@ procedure TestTD2XSingleParam.TestInvalidDefaultValue;
 begin
   StartExpectingException(EInvalidParam);
   try
-    TD2XSingleParam<string>.CreateParam('Code', 'Label', '', '', '', CnvStrProp, FmtStrProp,
-      InvStrProp);
+    TD2XSingleParam<string>.CreateParam('Code', 'Label', '', '', '', TD2X.CnvDflt<string>,
+      FmtStrProp, InvStrProp);
   except
     on E: EInvalidParam do
     begin
@@ -376,7 +338,8 @@ procedure TestTD2XSingleParam.TestInvalidNilFormatter;
 begin
   StartExpectingException(EInvalidParam);
   try
-    TD2XSingleParam<string>.CreateParam('Code', 'Label', '', '', '', CnvStrProp, nil, nil);
+    TD2XSingleParam<string>.CreateParam('Code', 'Label', '', '', '', TD2X.CnvDflt<string>,
+      nil, nil);
   except
     on E: EInvalidParam do
     begin
@@ -390,8 +353,16 @@ procedure TestTD2XSingleParam.TestObjectParam;
 var
   lObjP: TD2XSingleParam<TObject>;
 begin
-  lObjP := TD2XSingleParam<TObject>.CreateParam('T', 'Test', '', '', nil, CnvObjProp,
-    FmtObjProp, nil);
+  lObjP := TD2XSingleParam<TObject>.CreateParam('T', 'Test', '', '', nil,
+    function(pStr: string; pDflt: TObject; out pVal: TObject): Boolean
+    begin
+      Result := True;
+      pVal := nil;
+    end,
+    function(pVal: TObject): string
+    begin
+      Result := 'nil';
+    end, nil);
 
   try
     CheckEqualsString('T nil', ReduceString(lObjP.Describe), 'Describe Param');
@@ -440,8 +411,12 @@ procedure TestTD2XSingleParam.TestStringParam;
 var
   lStrP: TD2XSingleParam<string>;
 begin
-  lStrP := TD2XSingleParam<string>.CreateParam('T', 'Test', '', '', '', CnvStrProp,
-    FmtStrProp, nil);
+  lStrP := TD2XSingleParam<string>.CreateParam('T', 'Test', '', '', '',
+    function(pStr: string; pDflt: string; out pVal: string): Boolean
+    begin
+      Result := True;
+      pVal := '';
+    end, FmtStrProp, nil);
 
   try
     CheckEqualsString('T', ReduceString(lStrP.Describe), 'Describe Param');
@@ -697,7 +672,6 @@ begin
   inherited;
 
   fPrm := nil;
-  fCalledParser := False;
 end;
 
 procedure TestTD2XParam.TearDown;
@@ -773,16 +747,23 @@ begin
 end;
 
 procedure TestTD2XParam.TestParse;
+var
+  lCalledParser: Boolean;
 begin
-  fPrm := TD2XParam.Create('T', 'Test', '', '', TstParser);
+  fPrm := TD2XParam.Create('T', 'Test', '', '',
+    function(pStr: string): Boolean
+    begin
+      lCalledParser := True;
+      Result := True;
+    end);
 
-  fCalledParser := False;
+  lCalledParser := False;
   CheckFalse(fPrm.Parse('A'), 'Wrong code');
-  CheckFalse(fCalledParser, 'Wrong code didn''t call Parser');
+  CheckFalse(lCalledParser, 'Wrong code didn''t call Parser');
 
-  fCalledParser := False;
+  lCalledParser := False;
   Check(fPrm.Parse('T'), 'Correct code');
-  Check(fCalledParser, 'Correct code called Parser');
+  Check(lCalledParser, 'Correct code called Parser');
 end;
 
 procedure TestTD2XParam.TestReport;
@@ -801,7 +782,6 @@ end;
 
 function TestTD2XParam.TstParser(pStr: string): Boolean;
 begin
-  fCalledParser := True;
   Result := True;
 end;
 
@@ -936,21 +916,18 @@ end;
 
 function TestTD2XParams.TstParser(pStr: string): Boolean;
 begin
-  fCalledParser := True;
   Result := True;
 end;
 
 { TestTD2XValidStringParam }
 
-function TestTD2XValidStringParam.NotBlank(pStr: string): Boolean;
-begin
-  Result := pStr > '';
-end;
-
 procedure TestTD2XValidStringParam.SetUp;
 begin
   fStrP := TD2XStringParam.CreateStr('T', 'Test', '<Example>', 'Test String Param', 'Tst', nil,
-    NotBlank);
+    function(pStr: string): Boolean
+    begin
+      Result := pStr > '';
+    end);
 end;
 
 procedure TestTD2XValidStringParam.TearDown;
@@ -990,23 +967,20 @@ end;
 
 { TestTD2XFormatStringParam }
 
-function TestTD2XFormatStringParam.LeadingColon(pStr: string; pDflt: string;
-  out pVal: string): Boolean;
-begin
-  Result := True;
-  if pStr = '' then
-    pVal := ''
-  else
-    if pStr[1] = ':' then
-      pVal := Copy(pStr, 2, Length(pStr))
-    else
-      Result := False;
-end;
-
 procedure TestTD2XFormatStringParam.SetUp;
 begin
   fStrP := TD2XStringParam.CreateStr('T', 'Test', '<Example>', 'Test String Param', 'Tst',
-    LeadingColon, nil);
+    function(pStr: string; pDflt: string; out pVal: string): Boolean
+    begin
+      Result := True;
+      if pStr = '' then
+        pVal := ''
+      else
+        if pStr[1] = ':' then
+          pVal := Copy(pStr, 2, Length(pStr))
+        else
+          Result := False;
+    end, nil);
 end;
 
 procedure TestTD2XFormatStringParam.TearDown;
@@ -1033,28 +1007,24 @@ end;
 
 { TestTD2XFormatValidStringParam }
 
-function TestTD2XFormatValidStringParam.LeadingColon(pStr: string; pDflt: string;
-  out pVal: string): Boolean;
-begin
-  Result := True;
-  if pStr = '' then
-    pVal := ''
-  else
-    if pStr[1] = ':' then
-      pVal := Copy(pStr, 2, Length(pStr))
-    else
-      Result := False;
-end;
-
-function TestTD2XFormatValidStringParam.NotBlank(pStr: string): Boolean;
-begin
-  Result := pStr > '';
-end;
-
 procedure TestTD2XFormatValidStringParam.SetUp;
 begin
   fStrP := TD2XStringParam.CreateStr('T', 'Test', '<Example>', 'Test String Param', 'Tst',
-    LeadingColon, NotBlank);
+    function(pStr: string; pDflt: string; out pVal: string): Boolean
+    begin
+      Result := True;
+      if pStr = '' then
+        pVal := ''
+      else
+        if pStr[1] = ':' then
+          pVal := Copy(pStr, 2, Length(pStr))
+        else
+          Result := False;
+    end,
+    function(pStr: string): Boolean
+    begin
+      Result := pStr > '';
+    end);
 end;
 
 procedure TestTD2XFormatValidStringParam.TearDown;
@@ -1265,7 +1235,6 @@ begin
   inherited;
 
   fPrm := nil;
-  fCalledResetter := False;
 end;
 
 procedure TestTD2XResettableParam.TearDown;
@@ -1290,23 +1259,33 @@ begin
 end;
 
 procedure TestTD2XResettableParam.TestReset;
+var
+  lCalledResetter: Boolean;
 begin
-  fPrm := TD2XResettableParam.CreateReset('T', 'Test', '', '', TstParser, TstResetter,
-    TstZeroer);
+  fPrm := TD2XResettableParam.CreateReset('T', 'Test', '', '', TstParser,
+    procedure
+    begin
+      lCalledResetter := True;
+    end, TstSetter);
 
-  fCalledResetter := False;
+  lCalledResetter := False;
   fPrm.Reset;
-  Check(fCalledResetter, 'Called resetter');
+  Check(lCalledResetter, 'Called resetter');
 end;
 
 procedure TestTD2XResettableParam.TestZero;
+var
+  lCalledZeroer: Boolean;
 begin
-  fPrm := TD2XResettableParam.CreateReset('T', 'Test', '', '', TstParser, TstResetter,
-    TstZeroer);
+  fPrm := TD2XResettableParam.CreateReset('T', 'Test', '', '', TstParser, TstSetter,
+    procedure
+    begin
+      lCalledZeroer := True;
+    end);
 
-  fCalledZeroer := False;
+  lCalledZeroer := False;
   fPrm.Zero;
-  Check(fCalledZeroer, 'Called zeroer');
+  Check(lCalledZeroer, 'Called zeroer');
 end;
 
 function TestTD2XResettableParam.TstParser(pStr: string): Boolean;
@@ -1314,21 +1293,16 @@ begin
   Result := True;
 end;
 
-procedure TestTD2XResettableParam.TstResetter;
+procedure TestTD2XResettableParam.TstSetter;
 begin
-  fCalledResetter := True;
-end;
-
-procedure TestTD2XResettableParam.TstZeroer;
-begin
-  fCalledZeroer := True;
+  //  fCalledResetter := True;
 end;
 
 initialization
 
 RegisterTests('Params', [TestTD2XParam.Suite, TestTD2XResettableParam.Suite,
-    TestTD2XParams.Suite, TestTD2XSingleParam.Suite, TestTD2XBooleanParam.Suite,
-    TestTD2XStringParam.Suite, TestTD2XValidStringParam.Suite, TestTD2XFormatStringParam.Suite,
-    TestTD2XFormatValidStringParam.Suite, TestTD2XFlaggedStringParam.Suite]);
+  TestTD2XParams.Suite, TestTD2XSingleParam.Suite, TestTD2XBooleanParam.Suite,
+  TestTD2XStringParam.Suite, TestTD2XValidStringParam.Suite, TestTD2XFormatStringParam.Suite,
+  TestTD2XFormatValidStringParam.Suite, TestTD2XFlaggedStringParam.Suite]);
 
 end.

@@ -19,7 +19,7 @@ uses
   D2Xml;
 
 type
-  TestTD2XProcessor = class(TStringBuilderTestCase)
+  TestTD2XProcessor = class(TStringTestCase)
   strict private
     FD2XProcessor: TD2XProcessor;
   public

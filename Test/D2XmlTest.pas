@@ -43,8 +43,6 @@ uses
   Xml.XMLIntf;
 
 type
-  // Test methods for class TD2XmlNode
-
   TestTD2XmlNode = class(TD2XmlTestCase)
   strict private
     FD2XmlNode: TD2XmlNode;
@@ -58,7 +56,6 @@ type
     procedure TestAddAttribute;
     procedure TestHasChildNodes;
   end;
-  // Test methods for class TD2XmlAttribute
 
   TestTD2XmlAttribute = class(TD2XmlElementTestCase)
   strict private
@@ -69,7 +66,6 @@ type
     procedure TestGetXml;
     procedure TestText;
   end;
-  // Test methods for class TD2XmlElement
 
   TestTD2XmlElement = class(TD2XmlDocTestCase)
   strict private

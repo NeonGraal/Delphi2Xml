@@ -46,9 +46,6 @@ type
 
     fParams: TD2XParams;
 
-    function ConvertGlobalName(pStr: string; pDflt: string; out pVal: string): boolean;
-    function ValidateGlobalName(pVal: string): boolean;
-
     function ConvertDir(pStr: string; pDflt: string; out pVal: string): boolean;
     function ConvertFile(pStr: string; pDflt: string; out pVal: string): boolean;
     function ConvertExtn(pStr: string; pDflt: string; out pVal: string): boolean;
@@ -63,14 +60,12 @@ type
       out pVal: TD2XElapsedMode): boolean;
 
     function ParseReportOptions(pStr: string): boolean;
-    function ParseResetOptions(pStr: string): boolean;
     function ParseShowOptions(pStr: string): boolean;
 
     function ParseDefines(pStr: string): boolean;
-    procedure ResetDefines;
-    procedure ZeroDefines;
 
     procedure LogOptionError(pLabel, pOpt: string);
+
     function GetVerbose: boolean;
     function GetLogErrors: boolean;
     function GetLogNotSupported: boolean;
@@ -144,7 +139,7 @@ uses
   System.TypInfo;
 
 type
-  TD2XSetterFunc = function(pVal: string): boolean of object;
+  TD2XSetterFunc = reference to function(pVal: string): boolean;
 
   { TD2XOptions }
 
@@ -202,15 +197,6 @@ begin
       pVal := pStr + pDflt;
 end;
 
-function TD2XOptions.ConvertGlobalName(pStr: string; pDflt: string; out pVal: string): boolean;
-begin
-  Result := True;
-  if pStr = '' then
-    pVal := ChangeFileExt(ExtractFileName(ParamStr(0)), '')
-  else
-    pVal := pStr;
-end;
-
 function TD2XOptions.ConvertParsingMode(pStr: string; pDflt: TD2XParseMode;
   out pVal: TD2XParseMode): boolean;
 begin
@@ -261,28 +247,60 @@ begin
 
   fParams.Add(TD2XParam.Create('?', 'Options', '', 'Show valid options', ParseShowOptions));
   fParams.Add(TD2XParam.Create('!', 'Reset', '', 'Reset all options to defaults',
-      ParseResetOptions));
+        function(pStr: string): boolean
+    begin
+      Result := True;
+      if StartsText('!', pStr) then
+        fParams.ZeroAll
+      else
+        fParams.ResetAll;
+    end));
   fParams.Add(TD2XParam.Create('@', 'Report', '<file>', 'Report/Output Current options',
-      ParseReportOptions));
+    ParseReportOptions));
+
   fVerbose := TD2XBooleanParam.CreateBool('V', 'Verbose', 'Log all Parser methods called');
   fParams.Add(fVerbose);
+
   fLogErrors := TD2XBooleanParam.CreateBool('L', 'Log Errors', 'Log Error messages', True);
   fParams.Add(fLogErrors);
+
   fLogNotSupported := TD2XBooleanParam.CreateBool('N', 'Log Not Supp',
     'Log Not Supported messages');
   fParams.Add(fLogNotSupported);
+
   fTimestampFiles := TD2XBooleanParam.CreateBool('T', 'Timestamp',
     'Timestamp global output files');
   fParams.Add(fTimestampFiles);
+
   fFinalToken := TD2XBooleanParam.CreateBool('F', 'Final Token', 'Record Final Token', True);
   fParams.Add(fFinalToken);
+
   fRecurse := TD2XBooleanParam.CreateBool('R', 'Recurse', 'Recurse into subdirectories');
   fParams.Add(fRecurse);
+
   fGlobalName := TD2XStringParam.CreateStr('G', 'Global name', '<str>', 'Sets global name',
-    ChangeFileExt(ExtractFileName(ParamStr(0)), ''), ConvertGlobalName, ValidateGlobalName);
+    ChangeFileExt(ExtractFileName(ParamStr(0)), ''),
+    function(pStr: string; pDflt: string; out pVal: string): boolean
+    begin
+      Result := True;
+      if pStr = '' then
+        pVal := ChangeFileExt(ExtractFileName(ParamStr(0)), '')
+      else
+        pVal := pStr;
+    end,
+    function(pVal: string): boolean
+    begin
+      if Assigned(fWriteXml) then
+        fWriteXml.Value := IncludeTrailingPathDelimiter(pVal);
+      if Assigned(fWriteDefines) then
+        fWriteDefines.Value := IncludeTrailingPathDelimiter(pVal);
+      Result := True;
+    end);
   fParams.Add(fGlobalName);
+
   fParseMode := TD2XSingleParam<TD2XParseMode>.CreateParam('M', 'Parse mode', '<mode>',
-    'Set Parsing mode (F[ull], U[ses])', pmFull, ConvertParsingMode, TD2X.ToLabel<TD2XParseMode>, nil);
+    'Set Parsing mode (F[ull], U[ses])', pmFull, ConvertParsingMode,
+    TD2X.ToLabel<TD2XParseMode>, nil);
   fParams.Add(fParseMode);
   fResultPer := TD2XSingleParam<TD2XResultPer>.CreateParam('P', 'Results per', '<per>',
     'Set Result per (F[ile], S[ubdir], D[ir], W[ildcard], P[aram], R[un])', rpFile,
@@ -292,34 +310,52 @@ begin
     'Set Elapsed time display to be (N[one], Q[uiet], T[otal], P[rocessing])', emQuiet,
     ConvertElapsedMode, TD2X.ToLabel<TD2XElapsedMode>, nil);
   fParams.Add(fElapsedMode);
+
   fUseBase := TD2XFlaggedStringParam.CreateFlagStr('B', 'Base dir', '<dir>',
     'Use <dir> as a base for all file lookups', '', False, ConvertDir, nil, nil);
   fParams.Add(fUseBase);
+
   fUseInput := TD2XFlaggedStringParam.CreateFlagStr('I', 'Input dir', '<dir>',
     'Use <dir> as a base for all file input', 'Config\', True, ConvertDir, nil, nil);
   fParams.Add(fUseInput);
+
   fUseOutput := TD2XFlaggedStringParam.CreateFlagStr('O', 'Output dir', '<dir>',
     'Use <dir> as a base for all file output', 'Log\', True, ConvertDir, nil, nil);
   fParams.Add(fUseOutput);
+
   fWriteXml := TD2XFlaggedStringParam.CreateFlagStr('X', 'Generate XML', '<dir>',
     'Generate XML files into current or given <dir>', 'Xml\', True, ConvertDir, nil, nil);
   fParams.Add(fWriteXml);
+
   fWriteDefines := TD2XFlaggedStringParam.CreateFlagStr('W', 'Write Defines', '<dir>',
     'Generate Final Defines files into current or given <dir>', 'Defines\', False, ConvertDir,
     nil, nil);
   fParams.Add(fWriteDefines);
+
   fDefinesUsed := TD2XFlaggedStringParam.CreateFlagStr('U', 'Defines Used', '<f/e>',
     'Report Defines Used into <f/e>', '.used', True, ConvertExtn, nil, nil);
   fParams.Add(fDefinesUsed);
+
   fCountChildren := TD2XFlaggedStringParam.CreateFlagStr('C', 'Count Children', '<f/e>',
     'Report Min/Max Children into <f/e>', '.cnt', True, ConvertExtn, nil, nil);
   fParams.Add(fCountChildren);
+
   fSkipMethods := TD2XFlaggedStringParam.CreateFlagStr('S', 'Skipped Methods', '<f/e>',
     'Load Skipped Methods from <f/e>', '.skip', True, ConvertFile, nil, nil);
   fParams.Add(fSkipMethods);
+
   fParams.Add(TD2XResettableParam.CreateReset('D', 'Defines', '[+-!:]<def>',
-      'Add(+), Remove(-), Clear(!) or Load(:) Defines', ParseDefines, ResetDefines,
-      ZeroDefines));
+    'Add(+), Remove(-), Clear(!) or Load(:) Defines', ParseDefines,
+      procedure
+    begin
+      fLoadDefines := False;
+      fDefines.Clear;
+    end,
+    procedure
+    begin
+      fLoadDefines := True;
+      fDefines.Clear;
+    end));
 
   // Available option letters: AHJKLQYZ
 
@@ -673,15 +709,6 @@ begin
   end;
 end;
 
-function TD2XOptions.ParseResetOptions(pStr: string): boolean;
-begin
-  Result := True;
-  if StartsText('!', pStr) then
-    fParams.ZeroAll
-  else
-    fParams.ResetAll;
-end;
-
 function TD2XOptions.ParseShowOptions(pStr: string): boolean;
 var
   lBase: string;
@@ -694,27 +721,6 @@ begin
   fParams.DescribeAll;
   Log('  Definitions:', []);
   Log('    <f/e> If value begins with "." is appended to global name to give file name', []);
-end;
-
-procedure TD2XOptions.ResetDefines;
-begin
-  fLoadDefines := False;
-  fDefines.Clear;
-end;
-
-function TD2XOptions.ValidateGlobalName(pVal: string): boolean;
-begin
-  if Assigned(fWriteXml) then
-    fWriteXml.Value := IncludeTrailingPathDelimiter(pVal);
-  if Assigned(fWriteDefines) then
-    fWriteDefines.Value := IncludeTrailingPathDelimiter(pVal);
-  Result := True;
-end;
-
-procedure TD2XOptions.ZeroDefines;
-begin
-  fLoadDefines := True;
-  fDefines.Clear;
 end;
 
 end.

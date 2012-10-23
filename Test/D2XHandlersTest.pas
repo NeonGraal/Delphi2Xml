@@ -6,10 +6,12 @@ implementation
 
 uses
   D2X,
+  D2XParser,
   D2XHandlers,
   D2XHandler,
-  D2XParser,
   D2XTest,
+  System.Classes,
+  System.Generics.Collections,
   TestFramework;
 
 type
@@ -25,6 +27,22 @@ type
     procedure TestBeginMethod;
     procedure TestEndMethod;
   end;
+
+  TestTD2XCountHandler = class(TStringTestCase)
+  strict private
+    FD2XCountHandler: TD2XCountHandler;
+  public
+    procedure SetUp; override;
+    procedure TearDown; override;
+  published
+    procedure TestEndProcessing;
+    procedure TestBeginFile;
+    procedure TestEndFile;
+    procedure TestBeginMethod;
+    procedure TestEndMethod;
+  end;
+
+  { TestTD2XLogHandler }
 
 procedure TestTD2XLogHandler.SetUp;
 begin
@@ -87,7 +105,7 @@ procedure TestTD2XLogHandler.TestBeginMethod;
 begin
   FD2XLogHandler.L.JoinLog(fID2XLogger);
 
-  FD2XLogHandler.DoBeginMethod('Method');
+  FD2XLogHandler.BeginMethod('Method');
 
   CheckLog('BEFORE Method', 'Begin Method');
 end;
@@ -96,14 +114,74 @@ procedure TestTD2XLogHandler.TestEndMethod;
 begin
   FD2XLogHandler.L.JoinLog(fID2XLogger);
 
-  FD2XLogHandler.DoEndMethod('Method');
+  FD2XLogHandler.EndMethod('Method');
 
   CheckLog('AFTER Method', 'End Method');
+end;
+
+{ TestTD2XCountHandler }
+
+procedure TestTD2XCountHandler.SetUp;
+begin
+  inherited;
+
+  FD2XCountHandler := TD2XCountHandler.Create;
+end;
+
+procedure TestTD2XCountHandler.TearDown;
+begin
+  FD2XCountHandler.Free;
+  FD2XCountHandler := nil;
+
+  inherited;
+end;
+
+procedure TestTD2XCountHandler.TestEndProcessing;
+begin
+  FD2XCountHandler.EndProcessing(function: TStream begin Result := fSS; end);
+
+  CheckStream('', 'End Processing');
+end;
+
+procedure TestTD2XCountHandler.TestBeginFile;
+begin
+  FD2XCountHandler.BeginFile;
+
+  CheckStream('', 'Begin File');
+end;
+
+procedure TestTD2XCountHandler.TestEndFile;
+begin
+  FD2XCountHandler.EndFile(function: TStream begin Result := fSS; end);
+
+  CheckStream('', 'End File');
+end;
+
+procedure TestTD2XCountHandler.TestBeginMethod;
+var
+  pMethod: string;
+begin
+  FD2XCountHandler.BeginFile;
+
+  FD2XCountHandler.BeginMethod(pMethod);
+
+  CheckStream('', 'Begin Method');
+end;
+
+procedure TestTD2XCountHandler.TestEndMethod;
+var
+  pMethod: string;
+begin
+  FD2XCountHandler.BeginFile;
+
+  FD2XCountHandler.EndMethod(pMethod);
+
+  CheckStream('', 'End Method');
 end;
 
 initialization
 
 // Register any test cases with the test runner
-RegisterTests('Handlers', [TestTD2XLogHandler.Suite]);
+RegisterTests('Handlers', [TestTD2XLogHandler.Suite, TestTD2XCountHandler.Suite]);
 
 end.

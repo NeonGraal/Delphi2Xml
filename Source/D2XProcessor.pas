@@ -19,7 +19,7 @@ type
   TStrIntPair = TPair<string, Integer>;
   TStrIntDict = TDictionary<string, Integer>;
 
-  TPairLogMethod = function(pPair: TStrIntPair): string of object;
+  TPairLogMethod = reference to function(pPair: TStrIntPair): string;
 
   TMethodCount = record
     Method: string;
@@ -39,12 +39,12 @@ type
     fXmlDoc: TD2XmlDoc;
     fXmlNode: TD2XmlNode;
 
-    fStack: TStack<TMethodCount>;
-    fCurrent: TMethodCount;
+//    fStack: TStack<TMethodCount>;
+//    fCurrent: TMethodCount;
 
     fDefinesUsed: TStrIntDict;
-    fMinChildren: TStrIntDict;
-    fMaxChildren: TStrIntDict;
+//    fMinChildren: TStrIntDict;
+//    fMaxChildren: TStrIntDict;
     fSkippedMethods: TStrIntDict;
 
     fFilename: string;
@@ -59,10 +59,8 @@ type
     function SkipBefore(pMethod: string): Boolean;
     function SkipAfter(pMethod: string): Boolean;
 
-    procedure XmlAddAttribute(pName: string); overload;
-    procedure XmlAddAttribute(pName, pValue: string); overload;
-    procedure XmlAddText; overload;
-    procedure XmlAddText(pText: string); overload;
+    procedure XmlAddAttribute(pName: string; pValue: string = '');
+    procedure XmlAddText(pText: string = '');
 
     procedure XmlNodeStart(pMethod: string);
     procedure XmlNodeEnd;
@@ -150,43 +148,43 @@ begin
 end;
 
 procedure TD2XProcessor.CountAfter(pMethod: string);
-var
-  lVal: Integer;
+//var
+//  lVal: Integer;
 begin
-  if fCurrent.Method = pMethod then
-  begin
-    if fMaxChildren.TryGetValue(fCurrent.Method, lVal) then
-    begin
-      if fCurrent.Children > lVal then
-        fMaxChildren.AddOrSetValue(fCurrent.Method, fCurrent.Children);
-    end
-    else
-      fMaxChildren.AddOrSetValue(fCurrent.Method, fCurrent.Children);
-
-    if fMinChildren.TryGetValue(fCurrent.Method, lVal) then
-    begin
-      if fCurrent.Children < lVal then
-        fMinChildren.AddOrSetValue(fCurrent.Method, fCurrent.Children);
-    end
-    else
-      fMinChildren.AddOrSetValue(fCurrent.Method, fCurrent.Children);
-  end;
-
-  if fStack.Count > 0 then
-    fCurrent := fStack.Pop
-  else
-  begin
-    fCurrent.Method := '';
-    fCurrent.Children := 0;
-  end;
+//  if fCurrent.Method = pMethod then
+//  begin
+//    if fMaxChildren.TryGetValue(fCurrent.Method, lVal) then
+//    begin
+//      if fCurrent.Children > lVal then
+//        fMaxChildren.AddOrSetValue(fCurrent.Method, fCurrent.Children);
+//    end
+//    else
+//      fMaxChildren.AddOrSetValue(fCurrent.Method, fCurrent.Children);
+//
+//    if fMinChildren.TryGetValue(fCurrent.Method, lVal) then
+//    begin
+//      if fCurrent.Children < lVal then
+//        fMinChildren.AddOrSetValue(fCurrent.Method, fCurrent.Children);
+//    end
+//    else
+//      fMinChildren.AddOrSetValue(fCurrent.Method, fCurrent.Children);
+//  end;
+//
+//  if fStack.Count > 0 then
+//    fCurrent := fStack.Pop
+//  else
+//  begin
+//    fCurrent.Method := '';
+//    fCurrent.Children := 0;
+//  end;
 end;
 
 procedure TD2XProcessor.CountBefore(pMethod: string);
 begin
-  Inc(fCurrent.Children);
-  fStack.Push(fCurrent);
-  fCurrent.Method := pMethod;
-  fCurrent.Children := 0;
+//  Inc(fCurrent.Children);
+//  fStack.Push(fCurrent);
+//  fCurrent.Method := pMethod;
+//  fCurrent.Children := 0;
 end;
 
 constructor TD2XProcessor.Create;
@@ -196,13 +194,13 @@ begin
   fProgramDir := ExtractFilePath(ParamStr(0));
   fDuration := TStopwatch.StartNew;
 
-  fStack := nil;
+//  fStack := nil;
 
   fOpts := TD2XOptions.Create(Self);
 
   fDefinesUsed := TStrIntDict.Create;
-  fMaxChildren := TStrIntDict.Create;
-  fMinChildren := TStrIntDict.Create;
+//  fMaxChildren := TStrIntDict.Create;
+//  fMinChildren := TStrIntDict.Create;
   fSkippedMethods := TStrIntDict.Create;
 
   fXmlDoc := nil;
@@ -241,8 +239,8 @@ begin
   FreeAndNil(fParser);
 
   FreeAndNil(fDefinesUsed);
-  FreeAndNil(fMinChildren);
-  FreeAndNil(fMaxChildren);
+//  FreeAndNil(fMinChildren);
+//  FreeAndNil(fMaxChildren);
   FreeAndNil(fSkippedMethods);
 
   FreeAndNil(fOpts);
@@ -335,8 +333,8 @@ begin
   if fOpts.DefinesUsed then
     OutputStrIntDict(fDefinesUsed, fOpts.DefinesUsedFoE, SimplePairLog);
 
-  if fOpts.CountChildren then
-    OutputStrIntDict(fMaxChildren, fOpts.CountChildrenFoE, MinMaxPairLog);
+//  if fOpts.CountChildren then
+//    OutputStrIntDict(fMaxChildren, fOpts.CountChildrenFoE, MinMaxPairLog);
 
   if fOpts.SkipMethods then
     OutputStrIntDict(fSkippedMethods, fOpts.SkipMethodsFoE + '.log', SimplePairLog);
@@ -399,7 +397,7 @@ begin
       write(',');
       write(pX);
       write(',');
-      write(fCurrent.Method);
+      write(''{fCurrent.Method});
       write(',');
       write(pType);
       write(',');
@@ -410,13 +408,13 @@ begin
 end;
 
 function TD2XProcessor.MinMaxPairLog(pPair: TStrIntPair): string;
-var
-  lMin: Integer;
+//var
+//  lMin: Integer;
 begin
-  if fMinChildren.TryGetValue(pPair.Key, lMin) then
-    Result := IntToStr(lMin) + ',' + IntToStr(pPair.Value)
-  else
-    Result := '0,' + IntToStr(pPair.Value);
+//  if fMinChildren.TryGetValue(pPair.Key, lMin) then
+//    Result := IntToStr(lMin) + ',' + IntToStr(pPair.Value)
+//  else
+//    Result := '0,' + IntToStr(pPair.Value);
 end;
 
 procedure TD2XProcessor.ParserMessage(pSender: TObject; const pTyp: TMessageEventType;
@@ -830,20 +828,14 @@ begin
     // lAttr := fXmlDoc.CreateNode(pName, ntAttribute);
     // fXmlNode.AttributeNodes.Add(lAttr);
     lAttr := fXmlNode.AddAttribute(pName);
-    lAttr.Text := pValue;
+    if pValue = '' then
+    begin
+      lAttr.Text := fParser.LastTokens;
+      fParser.LastTokens := '';
+    end
+    else
+      lAttr.Text := pValue;
   end;
-end;
-
-procedure TD2XProcessor.XmlAddText;
-begin
-  XmlAddText(fParser.LastTokens);
-  fParser.LastTokens := '';
-end;
-
-procedure TD2XProcessor.XmlAddAttribute(pName: string);
-begin
-  XmlAddAttribute(pName, fParser.LastTokens);
-  fParser.LastTokens := '';
 end;
 
 procedure TD2XProcessor.XmlAddText(pText: string);
@@ -856,7 +848,13 @@ begin
       // lText := fXmlDoc.CreateNode('', ntText);
       // fXmlNode.ChildNodes.Add(lText);
       lText := fXmlNode.AddChild('');
-      lText.Text := pText;
+      if pText = '' then
+      begin
+        lText.Text := fParser.LastTokens;
+        fParser.LastTokens := '';
+      end
+      else
+        lText.Text := pText;
     end
     else
       fXmlNode.Text := fXmlNode.Text + pText;
@@ -905,7 +903,7 @@ procedure TD2XProcessor.RemoveProxy;
 begin
   if Assigned(fVMI) then
   begin
-    FreeAndNil(fStack);
+//    FreeAndNil(fStack);
 
     fVMI.Unproxify(fParser);
     FreeAndNil(fVMI);
@@ -914,12 +912,12 @@ end;
 
 procedure TD2XProcessor.SetProxy;
 begin
-  if fOpts.CountChildren then
-  begin
-    fCurrent.Method := '';
-    fCurrent.Children := 0;
-    fStack := TStack<TMethodCount>.Create;
-  end;
+//  if fOpts.CountChildren then
+//  begin
+//    fCurrent.Method := '';
+//    fCurrent.Children := 0;
+//    fStack := TStack<TMethodCount>.Create;
+//  end;
 
   fVMI := TVirtualMethodInterceptor.Create(TObject(fParser).ClassType);
   fVMI.Proxify(fParser);

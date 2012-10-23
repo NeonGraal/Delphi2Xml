@@ -12,9 +12,9 @@ type
   TD2XLexer = TmwBasePasLex;
   TD2XParser = TmwSimplePasPar;
 
-  TD2XAddAttributeEvent = procedure(pName, pValue: string) of object;
-  TD2XAddTextEvent = procedure(pText: string) of object;
-  TD2XProgressEvent = procedure(pProgress: Integer) of object;
+  TD2XAddAttributeEvent = reference to procedure(pName, pValue: string);
+  TD2XAddTextEvent = reference to procedure(pText: string);
+  TD2XProgressEvent = reference to procedure(pProgress: Integer);
 
   TD2XDefinesParser = class(TD2XParser)
   private
