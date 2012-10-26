@@ -6,6 +6,7 @@ uses
   D2X,
   D2XParser,
   D2XHandler,
+  D2XUtils,
   System.Classes,
   System.Generics.Collections;
 
@@ -29,11 +30,6 @@ type
     property Lexer: TD2XLexer read fLexer;
   end;
 
-  TStrIntPair = TPair<string, Integer>;
-  TStrIntDict = TDictionary<string, Integer>;
-
-  TPairLogMethod = reference to function(pPair: TStrIntPair): string;
-
   TMethodCount = record
     Method: string;
     Children: Integer;
@@ -55,33 +51,33 @@ type
 
     procedure EndProcessing(pOutput: TD2XHandler.ThStreamCreator); override;
 
-    procedure BeginFile; override;
+    procedure BeginFile(pInput: TD2XHandler.ThStreamCreator); override;
     procedure EndFile(pOutput: TD2XHandler.ThStreamCreator); override;
 
     procedure BeginMethod(pMethod: string); override;
     procedure EndMethod(pMethod: string); override;
   end;
 
+  TD2XSkipHandler = class(TD2XHandler)
+  private
+    fSkippedMethods: TStrIntDict;
+
+  public
+    constructor Create;
+    destructor Destroy; override;
+
+    function CheckBeforeMethod(pMethod: string): Boolean; override;
+    function CheckAfterMethod(pMethod: string): Boolean; override;
+
+    procedure BeginFile(pInput: TD2XHandler.ThStreamCreator); override;
+
+    procedure EndProcessing(pOutput: TD2XHandler.ThStreamCreator); override;
+  end;
+
 implementation
 
 uses
   System.SysUtils;
-
-procedure OutputStrIntDict(pDict: TStrIntDict; pStream: TStream; pFunc: TPairLogMethod);
-var
-  lP: TStrIntPair;
-begin
-  with TStringList.Create do
-    try
-      for lP in pDict do
-        if lP.Value > 0 then
-          Values[lP.Key] := pFunc(lP);
-      Sort;
-      SaveToStream(pStream);
-    finally
-      Free;
-    end;
-end;
 
 { TD2XLogHandler }
 
@@ -126,7 +122,7 @@ end;
 
 { TD2XCountHandler }
 
-procedure TD2XCountHandler.BeginFile;
+procedure TD2XCountHandler.BeginFile(pInput: TD2XHandler.ThStreamCreator);
 begin
   fCurrent.Method := '';
   fCurrent.Children := 0;
@@ -213,6 +209,63 @@ begin
     Result := IntToStr(lMin) + ',' + IntToStr(pPair.Value)
   else
     Result := '0,' + IntToStr(pPair.Value);
+end;
+
+{ TD2XSkipHandler }
+
+procedure TD2XSkipHandler.BeginFile(pInput: TD2XHandler.ThStreamCreator);
+var
+  i: Integer;
+begin
+  with TStringList.Create do
+    try
+      LoadFromStream(pInput);
+      fSkippedMethods.Clear;
+      for i := 0 to Count - 1 do
+        if Names[i] = '' then
+          fSkippedMethods.Add(Strings[i], 0)
+        else
+          fSkippedMethods.Add(Names[i], 0);
+    finally
+      Free;
+    end
+end;
+
+function TD2XSkipHandler.CheckAfterMethod(pMethod: string): Boolean;
+begin
+  Result := fSkippedMethods.ContainsKey(pMethod);
+end;
+
+function TD2XSkipHandler.CheckBeforeMethod(pMethod: string): Boolean;
+var
+  lVal: Integer;
+begin
+  Result := fSkippedMethods.TryGetValue(pMethod, lVal);
+  if Result then
+    fSkippedMethods[pMethod] := lVal + 1;
+end;
+
+constructor TD2XSkipHandler.Create;
+begin
+  inherited;
+
+  fSkippedMethods := TStrIntDict.Create;
+end;
+
+destructor TD2XSkipHandler.Destroy;
+begin
+  FreeAndNil(fSkippedMethods);
+
+  inherited;
+end;
+
+procedure TD2XSkipHandler.EndProcessing(pOutput: TD2XHandler.ThStreamCreator);
+begin
+  OutputStrIntDict(fSkippedMethods, pOutput,
+      function(pPair: TStrIntPair): string
+    begin
+      Result := IntToStr(pPair.Value);
+    end);
 end;
 
 end.

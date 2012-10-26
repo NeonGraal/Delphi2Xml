@@ -58,6 +58,17 @@ type
     procedure TestToLabel;
   end;
 
+  TestTD2XUtils = class(TStringTestCase)
+  private
+    function PairFormat(pPair: TStrIntPair): string;
+  published
+    procedure TestReduceString;
+    procedure TestOutputStrIntDictNoStream;
+    procedure TestOutputStrIntDictNoFunc;
+    procedure TestOutputStrIntDictNoDict;
+    procedure TestOutputStrIntDict;
+  end;
+
   TestID2XLogger = class(TLoggerTestCase)
   published
     procedure TestJoinLog;
@@ -665,8 +676,85 @@ begin
   inherited;
 end;
 
+{ TestTD2XUtils }
+
+function TestTD2XUtils.PairFormat(pPair: TStrIntPair): string;
+begin
+  Result := pPair.Key + ' = ' + IntToStr(pPair.Value);
+end;
+
+procedure TestTD2XUtils.TestOutputStrIntDict;
+var
+  lDict: TStrIntDict;
+begin
+  lDict := TStrIntDict.Create;
+  try
+    OutputStrIntDict(lDict, fSS, PairFormat);
+    CheckStream('', 'No Entries');
+    lDict.Add('Test', 1);
+    OutputStrIntDict(lDict, fSS, PairFormat);
+    CheckStream('Test=Test = 1', 'An Entry');
+  finally
+    lDict.Free;
+  end;
+end;
+
+procedure TestTD2XUtils.TestOutputStrIntDictNoDict;
+begin
+  StartExpectingException(EAssertionFailed);
+  try
+    OutputStrIntDict(nil, fSS, PairFormat);
+  except
+    on E: EAssertionFailed do
+    begin
+      CheckTrue(StartsText('Need a Dictionary', E.Message), 'Exception message');
+      raise;
+    end;
+  end;
+end;
+
+procedure TestTD2XUtils.TestOutputStrIntDictNoFunc;
+begin
+  StartExpectingException(EAssertionFailed);
+  try
+    OutputStrIntDict(nil, fSS, nil);
+  except
+    on E: EAssertionFailed do
+    begin
+      CheckTrue(StartsText('Need a Function', E.Message), 'Exception message');
+      raise;
+    end;
+  end;
+end;
+
+procedure TestTD2XUtils.TestOutputStrIntDictNoStream;
+begin
+  StartExpectingException(EAssertionFailed);
+  try
+    OutputStrIntDict(nil, nil, nil);
+  except
+    on E: EAssertionFailed do
+    begin
+      CheckTrue(StartsText('Need a Stream', E.Message), 'Exception message');
+      raise;
+    end;
+  end;
+end;
+
+procedure TestTD2XUtils.TestReduceString;
+begin
+  CheckEqualsString('', ReduceString(' '), 'Blank');
+  CheckEqualsString('A', ReduceString('A'), 'Simple');
+  CheckEqualsString('A', ReduceString(' A'), 'Leading');
+  CheckEqualsString('A', ReduceString('A'#13), 'Trailing');
+  CheckEqualsString('A', ReduceString(#9'A'#10), 'Leading and Trailing');
+  CheckEqualsString('A B', ReduceString('A '#13#10' B'), 'Extended');
+  CheckEqualsString('A B C D', ReduceString('A  B'#13#10'C'#9#9'D'), 'Extended');
+end;
+
 initialization
 
-RegisterTests('Global', [TestTD2X.Suite, TestID2XLogger.Suite, TestTD2XLogger.Suite]);
+RegisterTests('Global', [TestTD2X.Suite, TestTD2XUtils.Suite, TestID2XLogger.Suite,
+    TestTD2XLogger.Suite]);
 
 end.

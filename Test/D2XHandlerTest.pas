@@ -24,13 +24,13 @@ type
     CalledDoEndMethod: Boolean;
     CalledCopy: Boolean;
 
-    procedure BeginProcessing; override;
+    procedure BeginProcessing(pInput: TD2XHandler.ThStreamCreator); override;
     procedure EndProcessing(pOutput: TD2XHandler.ThStreamCreator); override;
-    procedure BeginFile; override;
+    procedure BeginFile(pInput: TD2XHandler.ThStreamCreator); override;
     procedure EndFile(pOutput: TD2XHandler.ThStreamCreator); override;
     procedure BeginResults; override;
     procedure EndResults(pFile: String); override;
-    function CheckMethod(pMethod: String): Boolean; override;
+    function CheckBeforeMethod(pMethod: String): Boolean; override;
     procedure BeginMethod(pMethod: String); override;
     procedure EndMethod(pMethod: String); override;
 
@@ -74,14 +74,14 @@ end;
 
 procedure TestTD2XHandler.TestBeginProcessing;
 begin
-  FD2XHandler.BeginProcessing;
+  FD2XHandler.BeginProcessing(nil);
 
   CheckTrue(FD2XTester.CalledBeginProcessing, 'Called Begin Processing');
 end;
 
 procedure TestTD2XHandler.TestEndProcessing;
 begin
-  FD2XHandler.EndProcessing(function: TStream begin Result := nil; end);
+  FD2XHandler.EndProcessing(nil);
 
   CheckTrue(FD2XTester.CalledEndProcessing, 'Called End Processing');
 end;
@@ -95,7 +95,7 @@ end;
 
 procedure TestTD2XHandler.TestCheckMethod;
 begin
-  FD2XHandler.CheckMethod('');
+  FD2XHandler.CheckBeforeMethod('');
 
   CheckTrue(FD2XTester.CalledCheckMethod, 'Called Check Method');
 end;
@@ -130,7 +130,7 @@ end;
 
 procedure TestTD2XHandler.TestBeginFile;
 begin
-  FD2XHandler.BeginFile;
+  FD2XHandler.BeginFile(nil);
 
   CheckTrue(FD2XTester.CalledBeginFile, 'Called Begin File');
 end;
@@ -139,7 +139,7 @@ procedure TestTD2XHandler.TestEndFile;
 var
   pOutput: TStream;
 begin
-  FD2XHandler.EndFile(function: TStream begin Result := nil; end);
+  FD2XHandler.EndFile(nil);
 
   CheckTrue(FD2XTester.CalledEndFile, 'Called End File');
 end;
@@ -153,14 +153,14 @@ begin
   CalledDoBeginMethod := true;
 end;
 
-procedure TD2XHandlerTester.BeginFile;
+procedure TD2XHandlerTester.BeginFile(pInput: TD2XHandler.ThStreamCreator);
 begin
   inherited;
 
   CalledBeginFile := true;
 end;
 
-procedure TD2XHandlerTester.BeginProcessing;
+procedure TD2XHandlerTester.BeginProcessing(pInput: TD2XHandler.ThStreamCreator);
 begin
   inherited;
 
@@ -174,11 +174,11 @@ begin
   CalledBeginResults := true;
 end;
 
-function TD2XHandlerTester.CheckMethod(pMethod: String): Boolean;
+function TD2XHandlerTester.CheckBeforeMethod(pMethod: String): Boolean;
 begin
   CalledCheckMethod := True;
 
-  Result := inherited CheckMethod(pMethod);
+  Result := inherited CheckBeforeMethod(pMethod);
 end;
 
 procedure TD2XHandlerTester.Copy(pFrom: TD2XHandler);

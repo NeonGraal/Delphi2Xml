@@ -12,15 +12,11 @@ uses
   D2XOptions,
   D2XHandler,
   D2XParser,
+  D2XUtils,
   D2Xml,
   D2X;
 
 type
-  TStrIntPair = TPair<string, Integer>;
-  TStrIntDict = TDictionary<string, Integer>;
-
-  TPairLogMethod = reference to function(pPair: TStrIntPair): string;
-
   TMethodCount = record
     Method: string;
     Children: Integer;
@@ -651,6 +647,8 @@ begin
           end;
       end;
     end;
+
+
 
     BeginResults('D2X_Param', rpParam);
     if pStr = '-' then
