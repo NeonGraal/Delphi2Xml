@@ -13,10 +13,12 @@ uses
   D2XOptions in 'Source\D2XOptions.pas',
   D2Xml in 'Source\D2Xml.pas',
   D2X in 'Source\D2X.pas',
-  D2XParam in 'Source\D2XParam.pas';
+  D2XParam in 'Source\D2XParam.pas',
+  D2XHandlers in 'Source\D2XHandlers.pas',
+  D2XHandler in 'Source\D2XHandler.pas';
 
 var
-  prc: TD2XProcessor;
+  prc: TD2XParamProcessor;
   i: Integer;
   bOk : Boolean;
   sOut: THandleStream;
@@ -28,7 +30,7 @@ begin
 
   try
     sOut := THandleStream.Create(GetStdHandle(STD_OUTPUT_HANDLE));
-    prc := TD2XProcessor.Create;
+    prc := TD2XParamProcessor.Create;
     prc.Options.JoinLog(TD2XLogger.Create(sOut));
     bOk := True;
     for i := 1 to ParamCount do

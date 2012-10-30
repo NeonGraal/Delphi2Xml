@@ -12,6 +12,8 @@ type
     ThStreamCreator = reference to function: TStream;
 
   public
+    function Description: String; virtual; abstract;
+
     procedure Copy(pFrom: TD2XHandler); virtual;
 
     procedure BeginProcessing(pInput: ThStreamCreator); virtual;

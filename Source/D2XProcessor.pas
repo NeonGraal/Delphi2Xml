@@ -11,8 +11,8 @@ uses
   CastaliaPasLexTypes,
   D2XOptions,
   D2XHandler,
+  D2XHandlers,
   D2XParser,
-  D2XUtils,
   D2Xml,
   D2X;
 
@@ -23,8 +23,48 @@ type
   end;
 
   TD2XProcessor = class(TD2XLogger)
+  public type
+    TpActive = reference to function: Boolean;
+    TpFilename = reference to function: string;
+  public
+    constructor Create(pActive: TpActive; pHandler: TD2XHandler);
+
+    procedure BeginProcessing;
+    procedure EndProcessing;
+
+    procedure BeginFile;
+    procedure EndFile;
+
+    procedure BeginResults;
+    procedure EndResults(pFile: string);
+
+    function CheckBeforeMethod(pMethod: string): Boolean;
+    function CheckAfterMethod(pMethod: string): Boolean;
+
+    procedure BeginMethod(pMethod: string);
+    procedure EndMethod(pMethod: string);
+
+    procedure SetProcessingInput(pFilename: TpFilename);
+    procedure SetProcessingOutput(pFilename: TpFilename);
+    procedure SetFileInput(pFilename: TpFilename);
+    procedure SetFileOutput(pFilename: TpFilename);
+
+  private
+    fActive: TpActive;
+    fHandler: TD2XHandler;
+
+    fProcessingInput: TpFilename;
+    fProcessingOutput: TpFilename;
+    fFileInput: TpFilename;
+    fFileOutput: TpFilename;
+
+  end;
+
+  TD2XParamProcessor = class(TD2XLogger)
   private
     fOpts: TD2XOptions;
+    fProcs: TObjectList<TD2XProcessor>;
+
     fProgramDir: string;
 
     fDuration: TStopwatch;
@@ -35,25 +75,21 @@ type
     fXmlDoc: TD2XmlDoc;
     fXmlNode: TD2XmlNode;
 
-//    fStack: TStack<TMethodCount>;
-//    fCurrent: TMethodCount;
+    //    fStack: TStack<TMethodCount>;
+    //    fCurrent: TMethodCount;
 
     fDefinesUsed: TStrIntDict;
-//    fMinChildren: TStrIntDict;
-//    fMaxChildren: TStrIntDict;
+    //    fMinChildren: TStrIntDict;
+    //    fMaxChildren: TStrIntDict;
     fSkippedMethods: TStrIntDict;
 
     fFilename: string;
     fHasFiles: Boolean;
 
-    procedure LogBefore(pMethod: string);
-    procedure LogAfter(pMethod: string);
+    fLogHandler: TD2XLogHandler;
 
     procedure CountBefore(pMethod: string);
     procedure CountAfter(pMethod: string);
-
-    function SkipBefore(pMethod: string): Boolean;
-    function SkipAfter(pMethod: string): Boolean;
 
     procedure XmlAddAttribute(pName: string; pValue: string = '');
     procedure XmlAddText(pText: string = '');
@@ -91,6 +127,7 @@ type
 
     function ProcessParamsFile(pFileOrExtn: string): Boolean;
 
+    procedure InitProcessors;
     procedure InitParser;
 
     function TidyFilename(pFilename: string): string;
@@ -107,7 +144,6 @@ type
     function RecurseDirectory(pDir, pWildCards: string; pMainDir: Boolean): Boolean;
 
     function SimplePairLog(pPair: TStrIntPair): string;
-    function MinMaxPairLog(pPair: TStrIntPair): string;
 
   public
     constructor Create; override;
@@ -129,9 +165,14 @@ uses
   Xml.XMLIntf,
   Winapi.Windows;
 
-{ TD2XProcessor }
+type
+  TD2XOptionProcessor = class(TD2XProcessor)
 
-procedure TD2XProcessor.BeginResults(pNodename: string; pPer: TD2XResultPer);
+  end;
+
+  { TD2XParamProcessor }
+
+procedure TD2XParamProcessor.BeginResults(pNodename: string; pPer: TD2XResultPer);
 begin
   if fOpts.ResultPer = pPer then
     DoBeginResults;
@@ -143,60 +184,62 @@ begin
   end;
 end;
 
-procedure TD2XProcessor.CountAfter(pMethod: string);
+procedure TD2XParamProcessor.CountAfter(pMethod: string);
 //var
 //  lVal: Integer;
 begin
-//  if fCurrent.Method = pMethod then
-//  begin
-//    if fMaxChildren.TryGetValue(fCurrent.Method, lVal) then
-//    begin
-//      if fCurrent.Children > lVal then
-//        fMaxChildren.AddOrSetValue(fCurrent.Method, fCurrent.Children);
-//    end
-//    else
-//      fMaxChildren.AddOrSetValue(fCurrent.Method, fCurrent.Children);
-//
-//    if fMinChildren.TryGetValue(fCurrent.Method, lVal) then
-//    begin
-//      if fCurrent.Children < lVal then
-//        fMinChildren.AddOrSetValue(fCurrent.Method, fCurrent.Children);
-//    end
-//    else
-//      fMinChildren.AddOrSetValue(fCurrent.Method, fCurrent.Children);
-//  end;
-//
-//  if fStack.Count > 0 then
-//    fCurrent := fStack.Pop
-//  else
-//  begin
-//    fCurrent.Method := '';
-//    fCurrent.Children := 0;
-//  end;
+  //  if fCurrent.Method = pMethod then
+  //  begin
+  //    if fMaxChildren.TryGetValue(fCurrent.Method, lVal) then
+  //    begin
+  //      if fCurrent.Children > lVal then
+  //        fMaxChildren.AddOrSetValue(fCurrent.Method, fCurrent.Children);
+  //    end
+  //    else
+  //      fMaxChildren.AddOrSetValue(fCurrent.Method, fCurrent.Children);
+  //
+  //    if fMinChildren.TryGetValue(fCurrent.Method, lVal) then
+  //    begin
+  //      if fCurrent.Children < lVal then
+  //        fMinChildren.AddOrSetValue(fCurrent.Method, fCurrent.Children);
+  //    end
+  //    else
+  //      fMinChildren.AddOrSetValue(fCurrent.Method, fCurrent.Children);
+  //  end;
+  //
+  //  if fStack.Count > 0 then
+  //    fCurrent := fStack.Pop
+  //  else
+  //  begin
+  //    fCurrent.Method := '';
+  //    fCurrent.Children := 0;
+  //  end;
 end;
 
-procedure TD2XProcessor.CountBefore(pMethod: string);
+procedure TD2XParamProcessor.CountBefore(pMethod: string);
 begin
-//  Inc(fCurrent.Children);
-//  fStack.Push(fCurrent);
-//  fCurrent.Method := pMethod;
-//  fCurrent.Children := 0;
+  //  Inc(fCurrent.Children);
+  //  fStack.Push(fCurrent);
+  //  fCurrent.Method := pMethod;
+  //  fCurrent.Children := 0;
 end;
 
-constructor TD2XProcessor.Create;
+constructor TD2XParamProcessor.Create;
 begin
   inherited Create;
 
   fProgramDir := ExtractFilePath(ParamStr(0));
   fDuration := TStopwatch.StartNew;
 
-//  fStack := nil;
+  //  fStack := nil;
 
   fOpts := TD2XOptions.Create(Self);
+  fProcs := TObjectList<TD2XProcessor>.Create;
+  InitProcessors;
 
   fDefinesUsed := TStrIntDict.Create;
-//  fMaxChildren := TStrIntDict.Create;
-//  fMinChildren := TStrIntDict.Create;
+  //  fMaxChildren := TStrIntDict.Create;
+  //  fMinChildren := TStrIntDict.Create;
   fSkippedMethods := TStrIntDict.Create;
 
   fXmlDoc := nil;
@@ -208,7 +251,7 @@ begin
   fParser.Lexer.GetDefines(fOpts.Defines);
 end;
 
-procedure TD2XProcessor.DefineUsed(pDef: string);
+procedure TD2XParamProcessor.DefineUsed(pDef: string);
 var
   lVal: Integer;
 begin
@@ -218,7 +261,7 @@ begin
     fDefinesUsed.Add(pDef, 1)
 end;
 
-destructor TD2XProcessor.Destroy;
+destructor TD2XParamProcessor.Destroy;
 begin
   fDuration.Stop;
   case fOpts.ElapsedMode of
@@ -235,16 +278,17 @@ begin
   FreeAndNil(fParser);
 
   FreeAndNil(fDefinesUsed);
-//  FreeAndNil(fMinChildren);
-//  FreeAndNil(fMaxChildren);
+  //  FreeAndNil(fMinChildren);
+  //  FreeAndNil(fMaxChildren);
   FreeAndNil(fSkippedMethods);
 
+  FreeAndNil(fProcs);
   FreeAndNil(fOpts);
 
   inherited;
 end;
 
-procedure TD2XProcessor.DoBeginResults;
+procedure TD2XParamProcessor.DoBeginResults;
 begin
   if fOpts.WriteXml then
   begin
@@ -254,7 +298,7 @@ begin
   end;
 end;
 
-procedure TD2XProcessor.DoEndResults(pFilename: string);
+procedure TD2XParamProcessor.DoEndResults(pFilename: string);
 var
   lFile: string;
   lSL: TStringList;
@@ -306,7 +350,7 @@ begin
   end;
 end;
 
-procedure TD2XProcessor.EndProcessing;
+procedure TD2XParamProcessor.EndProcessing;
   procedure OutputStrIntDict(pDict: TStrIntDict; pExtn: string; pFunc: TPairLogMethod);
   var
     lP: TStrIntPair;
@@ -323,20 +367,22 @@ procedure TD2XProcessor.EndProcessing;
       end;
   end;
 
+var
+  lP: TD2XProcessor;
 begin
   EndResults('', rpRun);
 
   if fOpts.DefinesUsed then
     OutputStrIntDict(fDefinesUsed, fOpts.DefinesUsedFoE, SimplePairLog);
 
-//  if fOpts.CountChildren then
-//    OutputStrIntDict(fMaxChildren, fOpts.CountChildrenFoE, MinMaxPairLog);
+  for lP in fProcs do
+    lP.EndProcessing;
 
-  if fOpts.SkipMethods then
-    OutputStrIntDict(fSkippedMethods, fOpts.SkipMethodsFoE + '.log', SimplePairLog);
+  //  if fOpts.CountChildren then
+  //    OutputStrIntDict(fMaxChildren, fOpts.CountChildrenFoE, MinMaxPairLog);
 end;
 
-procedure TD2XProcessor.EndResults(pFilename: string; pPer: TD2XResultPer);
+procedure TD2XParamProcessor.EndResults(pFilename: string; pPer: TD2XResultPer);
 begin
   if fOpts.ResultPer >= pPer then
   begin
@@ -354,27 +400,17 @@ begin
       DoEndResults(pFilename);
 end;
 
-function TD2XProcessor.IsInternalMethod(pMethod: string): Boolean;
+function TD2XParamProcessor.IsInternalMethod(pMethod: string): Boolean;
 begin
   Result := MatchText(pMethod, ['SynError', 'Run']);
 end;
 
-procedure TD2XProcessor.LogAfter(pMethod: string);
-begin
-  Log('AFTER  %s', [pMethod]);
-end;
-
-procedure TD2XProcessor.LogBefore(pMethod: string);
-begin
-  Log('BEFORE %s @ %s', [pMethod, fParser.Lexer.Token]);
-end;
-
-procedure TD2XProcessor.LogMessage(pType, pMsg: string);
+procedure TD2XParamProcessor.LogMessage(pType, pMsg: string);
 begin
   LogMessage(pType, pMsg, fParser.Lexer.PosXY.X, fParser.Lexer.PosXY.Y);
 end;
 
-procedure TD2XProcessor.LogMessage(pType, pMsg: string; pX, pY: Integer);
+procedure TD2XParamProcessor.LogMessage(pType, pMsg: string; pX, pY: Integer);
 var
   lErrFile: string;
   lExists: Boolean;
@@ -403,17 +439,7 @@ begin
     end;
 end;
 
-function TD2XProcessor.MinMaxPairLog(pPair: TStrIntPair): string;
-//var
-//  lMin: Integer;
-begin
-//  if fMinChildren.TryGetValue(pPair.Key, lMin) then
-//    Result := IntToStr(lMin) + ',' + IntToStr(pPair.Value)
-//  else
-//    Result := '0,' + IntToStr(pPair.Value);
-end;
-
-procedure TD2XProcessor.ParserMessage(pSender: TObject; const pTyp: TMessageEventType;
+procedure TD2XParamProcessor.ParserMessage(pSender: TObject; const pTyp: TMessageEventType;
   const pMsg: string; pX, pY: Integer);
 var
   lNode, lAttr: TD2XmlNode;
@@ -457,7 +483,7 @@ begin
   end;
 end;
 
-function TD2XProcessor.ProcessDirectory(pDir, pWildCards: string): Boolean;
+function TD2XParamProcessor.ProcessDirectory(pDir, pWildCards: string): Boolean;
 var
   lFF: TSearchRec;
   lPath: string;
@@ -483,7 +509,7 @@ begin
       end;
 end;
 
-function TD2XProcessor.ProcessFile(pFilename: string): Boolean;
+function TD2XParamProcessor.ProcessFile(pFilename: string): Boolean;
 var
   lSS: TStringStream;
   lFile: string;
@@ -517,7 +543,7 @@ begin
       Log('Cannot find "%s"', [lFile]);
 end;
 
-function TD2XProcessor.ProcessInput: Boolean;
+function TD2XParamProcessor.ProcessInput: Boolean;
 var
   lSS: TStringStream;
   lIS: THandleStream;
@@ -539,56 +565,56 @@ begin
 end;
 
 (*
-  procedure TD2XProcessor.LexerOnDefine(pLex: TD2XLexer);
-  begin
-  pLex.Next;
-  end;
+ procedure TD2XParamProcessor.LexerOnDefine(pLex: TD2XLexer);
+ begin
+ pLex.Next;
+ end;
 
-  procedure TD2XProcessor.LexerOnElse(pLex: TD2XLexer);
-  begin
-  pLex.Next;
-  end;
+ procedure TD2XParamProcessor.LexerOnElse(pLex: TD2XLexer);
+ begin
+ pLex.Next;
+ end;
 *)
-procedure TD2XProcessor.LexerOnElseIf(pLex: TD2XLexer);
+procedure TD2XParamProcessor.LexerOnElseIf(pLex: TD2XLexer);
 begin
   pLex.Next;
 end;
 
 (*
-  procedure TD2XProcessor.LexerOnEndIf(pLex: TD2XLexer);
-  begin
-  pLex.Next;
-  end;
+ procedure TD2XParamProcessor.LexerOnEndIf(pLex: TD2XLexer);
+ begin
+ pLex.Next;
+ end;
 *)
-procedure TD2XProcessor.LexerOnIf(pLex: TD2XLexer);
+procedure TD2XParamProcessor.LexerOnIf(pLex: TD2XLexer);
 begin
   pLex.Next;
 end;
 
-procedure TD2XProcessor.LexerOnIfDef(pLex: TD2XLexer);
+procedure TD2XParamProcessor.LexerOnIfDef(pLex: TD2XLexer);
 begin
   DefineUsed(pLex.DirectiveParam);
   pLex.Next;
 end;
 
 (*
-  procedure TD2XProcessor.LexerOnIfEnd(pLex: TD2XLexer);
-  begin
-  pLex.Next;
-  end;
+ procedure TD2XParamProcessor.LexerOnIfEnd(pLex: TD2XLexer);
+ begin
+ pLex.Next;
+ end;
 *)
-procedure TD2XProcessor.LexerOnIfNDef(pLex: TD2XLexer);
+procedure TD2XParamProcessor.LexerOnIfNDef(pLex: TD2XLexer);
 begin
   DefineUsed(pLex.DirectiveParam);
   pLex.Next;
 end;
 
-procedure TD2XProcessor.LexerOnIfOpt(pLex: TD2XLexer);
+procedure TD2XParamProcessor.LexerOnIfOpt(pLex: TD2XLexer);
 begin
   pLex.Next;
 end;
 
-procedure TD2XProcessor.LexerOnInclude(pLex: TD2XLexer);
+procedure TD2XParamProcessor.LexerOnInclude(pLex: TD2XLexer);
 var
   lFile: string;
 begin
@@ -608,12 +634,12 @@ begin
 end;
 
 (*
-  procedure TD2XProcessor.LexerOnUnDef(pLex: TD2XLexer);
-  begin
-  pLex.Next;
-  end;
+ procedure TD2XParamProcessor.LexerOnUnDef(pLex: TD2XLexer);
+ begin
+ pLex.Next;
+ end;
 *)
-function TD2XProcessor.ProcessParam(pStr, pFrom: string; pIdx: Integer): Boolean;
+function TD2XParamProcessor.ProcessParam(pStr, pFrom: string; pIdx: Integer): Boolean;
 var
   lPath, lFile: string;
   lPrevPer: TD2XResultPer;
@@ -648,8 +674,6 @@ begin
       end;
     end;
 
-
-
     BeginResults('D2X_Param', rpParam);
     if pStr = '-' then
       Result := ProcessInput
@@ -674,7 +698,7 @@ begin
   end;
 end;
 
-procedure TD2XProcessor.InitParser;
+procedure TD2XParamProcessor.InitParser;
 begin
   if Assigned(fParser) then
   begin
@@ -717,10 +741,65 @@ begin
     fParser.Lexer.OnElseIfDirect := LexerOnElseIf;
     // fParser.Lexer.OnEndIfDirect := LexerOnEndIf;
     // fParser.Lexer.OnIfEndDirect := LexerOnIfEnd;
+
+    fLogHandler.Init(fParser.Lexer);
   end;
 end;
 
-function TD2XProcessor.ProcessParamsFile(pFileOrExtn: string): Boolean;
+procedure TD2XParamProcessor.InitProcessors;
+var
+  lProc: TD2XProcessor;
+begin
+  fLogHandler := TD2XLogHandler.Create;
+  fLogHandler.L.JoinLog(Self);
+
+  fProcs.Add(TD2XProcessor.Create(
+        function: Boolean
+    begin
+      Result := fOpts.Verbose;
+    end, fLogHandler));
+
+  lProc := TD2XProcessor.Create(
+    function: Boolean
+    begin
+      Result := fOpts.SkipMethods;
+    end, TD2XSkipHandler.Create);
+  lProc.SetFileInput(
+    function: string
+    begin
+      Result := fOpts.InputFileOrExtn(fOpts.SkipMethodsFoE);
+    end);
+  lProc.SetProcessingOutput(
+    function: string
+    begin
+      Result := fOpts.OutputFileOrExtn(fOpts.SkipMethodsFoE + '.log');
+    end);
+  fProcs.Add(lProc);
+
+  lProc := TD2XProcessor.Create(
+    function: Boolean
+    begin
+      Result := fOpts.CountChildren;
+    end, TD2XCountHandler.Create);
+  lProc.SetFileInput(
+    function: string
+    begin
+      Result := '';
+    end);
+  lProc.SetFileOutput(
+    function: string
+    begin
+      Result := '';
+    end);
+  lProc.SetProcessingOutput(
+    function: string
+    begin
+      Result := fOpts.OutputFileOrExtn(fOpts.SkipMethodsFoE + '.log');
+    end);
+  fProcs.Add(lProc);
+end;
+
+function TD2XParamProcessor.ProcessParamsFile(pFileOrExtn: string): Boolean;
 var
   lSL: TStringList;
   i: Integer;
@@ -738,36 +817,19 @@ begin
   end;
 end;
 
-function TD2XProcessor.ProcessStream(pStream: TStringStream): Boolean;
+function TD2XParamProcessor.ProcessStream(pStream: TStringStream): Boolean;
 var
   lTimer: TStopwatch;
-  i: Integer;
   lFile: string;
   lCurrNode: TD2XmlNode;
+  lP: TD2XProcessor;
 begin
   if fOpts.ElapsedMode <> emNone then
     Log('Processing %s ... ', [fFilename], False);
   lTimer := TStopwatch.StartNew;
   try
-    if fOpts.SkipMethods then
-    begin
-      lFile := fOpts.InputFileOrExtn(fOpts.SkipMethodsFoE);
-      if FileExists(lFile) then
-        with TStringList.Create do
-          try
-            LoadFromFile(lFile);
-            fSkippedMethods.Clear;
-            for i := 0 to Count - 1 do
-              if Names[i] = '' then
-                fSkippedMethods.Add(Strings[i], 0)
-              else
-                fSkippedMethods.Add(Names[i], 0);
-          finally
-            Free;
-          end
-      else
-        LogMessage('WARNING', 'Cannot find Skip methods file "' + lFile + '"');
-    end;
+    for lP in fProcs do
+      lP.BeginFile;
 
     InitParser;
     if UseProxy then
@@ -817,7 +879,7 @@ begin
   end;
 end;
 
-procedure TD2XProcessor.XmlAddAttribute(pName, pValue: string);
+procedure TD2XParamProcessor.XmlAddAttribute(pName, pValue: string);
 var
   lAttr: TD2XmlNode;
 begin
@@ -836,7 +898,7 @@ begin
   end;
 end;
 
-procedure TD2XProcessor.XmlAddText(pText: string);
+procedure TD2XParamProcessor.XmlAddText(pText: string);
 var
   lText: TD2XmlNode;
 begin
@@ -860,7 +922,8 @@ end;
 
 {$WARN SYMBOL_PLATFORM OFF}
 
-function TD2XProcessor.RecurseDirectory(pDir, pWildCards: string; pMainDir: Boolean): Boolean;
+function TD2XParamProcessor.RecurseDirectory(pDir, pWildCards: string;
+  pMainDir: Boolean): Boolean;
 var
   lFF: TSearchRec;
   lPath: string;
@@ -897,39 +960,43 @@ begin
 end;
 {$WARN SYMBOL_PLATFORM ON}
 
-procedure TD2XProcessor.RemoveProxy;
+procedure TD2XParamProcessor.RemoveProxy;
 begin
   if Assigned(fVMI) then
   begin
-//    FreeAndNil(fStack);
+    //    FreeAndNil(fStack);
 
     fVMI.Unproxify(fParser);
     FreeAndNil(fVMI);
   end;
 end;
 
-procedure TD2XProcessor.SetProxy;
+procedure TD2XParamProcessor.SetProxy;
 begin
-//  if fOpts.CountChildren then
-//  begin
-//    fCurrent.Method := '';
-//    fCurrent.Children := 0;
-//    fStack := TStack<TMethodCount>.Create;
-//  end;
+  //  if fOpts.CountChildren then
+  //  begin
+  //    fCurrent.Method := '';
+  //    fCurrent.Children := 0;
+  //    fStack := TStack<TMethodCount>.Create;
+  //  end;
 
   fVMI := TVirtualMethodInterceptor.Create(TObject(fParser).ClassType);
   fVMI.Proxify(fParser);
   fVMI.OnBefore :=
       procedure(pInst: TObject; pMethod: TRttiMethod; const pArgs: TArray<TValue>;
-      out pDoInvoke: Boolean; out pResult: TValue)
+    out pDoInvoke: Boolean; out pResult: TValue)
+    var
+      lP: TD2XProcessor;
     begin
       pDoInvoke := True;
       if IsInternalMethod(pMethod.Name) then
         Exit;
-      if fOpts.SkipMethods and SkipBefore(pMethod.Name) then
-        Exit;
-      if fOpts.Verbose then
-        LogBefore(pMethod.Name);
+      for lP in fProcs do
+        if not lP.CheckBeforeMethod(pMethod.Name) then
+          Exit;
+      for lP in fProcs do
+        lP.BeginMethod(pMethod.Name);
+
       if fOpts.CountChildren then
         CountBefore(pMethod.Name);
       if fOpts.WriteXml then
@@ -937,51 +1004,41 @@ begin
     end;
   fVMI.OnAfter :=
       procedure(pInst: TObject; pMethod: TRttiMethod; const pArgs: TArray<TValue>;
-      var pResult: TValue)
+    var pResult: TValue)
+    var
+      lP: TD2XProcessor;
     begin
       if IsInternalMethod(pMethod.Name) then
         Exit;
-      if fOpts.SkipMethods and SkipAfter(pMethod.Name) then
-        Exit;
+      for lP in fProcs do
+        if not lP.CheckAfterMethod(pMethod.Name) then
+          Exit;
+      for lP in fProcs do
+        lP.EndMethod(pMethod.Name);
+
       if fOpts.WriteXml then
         XmlNodeEnd;
       if fOpts.CountChildren then
         CountAfter(pMethod.Name);
-      if fOpts.Verbose then
-        LogAfter(pMethod.Name);
     end;
 end;
 
-function TD2XProcessor.SimplePairLog(pPair: TStrIntPair): string;
+function TD2XParamProcessor.SimplePairLog(pPair: TStrIntPair): string;
 begin
   Result := IntToStr(pPair.Value);
 end;
 
-function TD2XProcessor.SkipAfter(pMethod: string): Boolean;
-begin
-  Result := fSkippedMethods.ContainsKey(pMethod);
-end;
-
-function TD2XProcessor.SkipBefore(pMethod: string): Boolean;
-var
-  lVal: Integer;
-begin
-  Result := fSkippedMethods.TryGetValue(pMethod, lVal);
-  if Result then
-    fSkippedMethods[pMethod] := lVal + 1;
-end;
-
-function TD2XProcessor.TidyFilename(pFilename: string): string;
+function TD2XParamProcessor.TidyFilename(pFilename: string): string;
 begin
   Result := ReplaceStr(ReplaceStr(ReplaceStr(pFilename, '*', ''), '.', ''), '?', '');
 end;
 
-function TD2XProcessor.UseProxy: Boolean;
+function TD2XParamProcessor.UseProxy: Boolean;
 begin
   Result := fOpts.Verbose or fOpts.WriteXml or fOpts.CountChildren;
 end;
 
-procedure TD2XProcessor.XmlNodeEnd;
+procedure TD2XParamProcessor.XmlNodeEnd;
 begin
   if Assigned(fXmlNode) then
   begin
@@ -993,7 +1050,7 @@ begin
   end;
 end;
 
-procedure TD2XProcessor.XmlNodeStart(pMethod: string);
+procedure TD2XParamProcessor.XmlNodeStart(pMethod: string);
 begin
   if Assigned(fXmlDoc) then
   begin
@@ -1008,6 +1065,170 @@ begin
   end;
 end;
 
-{ TD2XOptions }
+{ TD2XProcessor }
+
+procedure TD2XProcessor.BeginFile;
+var
+  lFS: TFileStream;
+begin
+  lFS := nil;
+  if fActive then
+    if Assigned(fFileInput) then
+      try
+        fHandler.BeginFile(
+          function: TStream
+          var
+            lFile: string;
+          begin
+            lFile := fFileInput;
+            if FileExists(lFile) then
+              lFS := TFileStream.Create(lFile, fmOpenRead)
+            else
+              Log('WARNING: %1 file "%2" not found', [fHandler.Description, lFile]);
+            Result := lFS;
+          end);
+      finally
+        FreeAndNil(lFS);
+      end
+    else
+      fHandler.BeginFile(nil);
+end;
+
+procedure TD2XProcessor.BeginMethod(pMethod: string);
+begin
+  if fActive then
+    fHandler.BeginMethod(pMethod);
+end;
+
+procedure TD2XProcessor.BeginProcessing;
+var
+  lFS: TFileStream;
+begin
+  lFS := nil;
+  if fActive then
+    if Assigned(fProcessingInput) then
+      try
+        fHandler.BeginProcessing(
+          function: TStream
+          var
+            lFile: string;
+          begin
+            lFile := fProcessingInput;
+            if FileExists(lFile) then
+              lFS := TFileStream.Create(lFile, fmOpenRead);
+            Result := lFS;
+          end);
+      finally
+        FreeAndNil(lFS);
+      end
+    else
+      fHandler.BeginProcessing(nil);
+end;
+
+procedure TD2XProcessor.BeginResults;
+begin
+  if fActive then
+    fHandler.BeginResults;
+end;
+
+function TD2XProcessor.CheckAfterMethod(pMethod: string): Boolean;
+begin
+  Result := not fActive or fHandler.CheckAfterMethod(pMethod);
+end;
+
+function TD2XProcessor.CheckBeforeMethod(pMethod: string): Boolean;
+begin
+  Result := not fActive or fHandler.CheckBeforeMethod(pMethod);
+end;
+
+constructor TD2XProcessor.Create(pActive: TpActive; pHandler: TD2XHandler);
+begin
+  inherited Create;
+
+  fActive := pActive;
+  fHandler := pHandler;
+end;
+
+procedure TD2XProcessor.EndFile;
+var
+  lFS: TFileStream;
+begin
+  lFS := nil;
+  if fActive then
+    if Assigned(fFileOutput) then
+      try
+        fHandler.EndFile(
+          function: TStream
+          var
+            lFile: string;
+          begin
+            lFile := fFileOutput;
+            if lFile > '' then
+              lFS := TFileStream.Create(lFile, fmOpenWrite);
+            Result := lFS;
+          end);
+      finally
+        FreeAndNil(lFS);
+      end
+    else
+      fHandler.EndFile(nil);
+end;
+
+procedure TD2XProcessor.EndMethod(pMethod: string);
+begin
+  if fActive then
+    fHandler.EndMethod(pMethod);
+end;
+
+procedure TD2XProcessor.EndProcessing;
+var
+  lFS: TFileStream;
+begin
+  lFS := nil;
+  if fActive then
+    if Assigned(fProcessingOutput) then
+      try
+        fHandler.EndProcessing(
+          function: TStream
+          var
+            lFile: string;
+          begin
+            lFile := fProcessingOutput;
+            if lFile > '' then
+              lFS := TFileStream.Create(lFile, fmOpenWrite);
+            Result := lFS;
+          end);
+      finally
+        FreeAndNil(lFS);
+      end
+    else
+      fHandler.EndProcessing(nil);
+end;
+
+procedure TD2XProcessor.EndResults(pFile: string);
+begin
+  if fActive then
+    fHandler.EndResults(pFile);
+end;
+
+procedure TD2XProcessor.SetFileInput(pFilename: TpFilename);
+begin
+  fFileInput := pFilename;
+end;
+
+procedure TD2XProcessor.SetFileOutput(pFilename: TpFilename);
+begin
+  fFileOutput := pFilename;
+end;
+
+procedure TD2XProcessor.SetProcessingInput(pFilename: TpFilename);
+begin
+  fProcessingInput := pFilename;
+end;
+
+procedure TD2XProcessor.SetProcessingOutput(pFilename: TpFilename);
+begin
+  fProcessingOutput := pFilename;
+end;
 
 end.

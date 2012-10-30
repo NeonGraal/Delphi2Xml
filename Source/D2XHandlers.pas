@@ -6,7 +6,6 @@ uses
   D2X,
   D2XParser,
   D2XHandler,
-  D2XUtils,
   System.Classes,
   System.Generics.Collections;
 
@@ -21,6 +20,9 @@ type
     destructor Destroy; override;
 
     procedure Init(pLexer: TD2XLexer);
+
+    function Description: string; override;
+
     procedure Copy(pFrom: TD2XHandler); override;
 
     procedure BeginMethod(pMethod: string); override;
@@ -49,6 +51,8 @@ type
     constructor Create;
     destructor Destroy; override;
 
+    function Description: string; override;
+
     procedure EndProcessing(pOutput: TD2XHandler.ThStreamCreator); override;
 
     procedure BeginFile(pInput: TD2XHandler.ThStreamCreator); override;
@@ -65,6 +69,8 @@ type
   public
     constructor Create;
     destructor Destroy; override;
+
+    function Description: string; override;
 
     function CheckBeforeMethod(pMethod: string): Boolean; override;
     function CheckAfterMethod(pMethod: string): Boolean; override;
@@ -103,6 +109,11 @@ begin
   fLogger := TD2XLogger.Create;
 end;
 
+function TD2XLogHandler.Description: string;
+begin
+  Result := 'Verbose Logging';
+end;
+
 destructor TD2XLogHandler.Destroy;
 begin
   fLogger := nil;
@@ -136,6 +147,11 @@ begin
   fStack := nil;
   fMaxChildren := TStrIntDict.Create;
   fMinChildren := TStrIntDict.Create;
+end;
+
+function TD2XCountHandler.Description: string;
+begin
+  Result := 'Count Children';
 end;
 
 destructor TD2XCountHandler.Destroy;
@@ -216,10 +232,13 @@ end;
 procedure TD2XSkipHandler.BeginFile(pInput: TD2XHandler.ThStreamCreator);
 var
   i: Integer;
+  lS: TStream;
 begin
   with TStringList.Create do
     try
-      LoadFromStream(pInput);
+      lS := pInput;
+      if Assigned(lS) then
+        LoadFromStream(lS);
       fSkippedMethods.Clear;
       for i := 0 to Count - 1 do
         if Names[i] = '' then
@@ -250,6 +269,11 @@ begin
   inherited;
 
   fSkippedMethods := TStrIntDict.Create;
+end;
+
+function TD2XSkipHandler.Description: string;
+begin
+  Result := 'Skip Methods';
 end;
 
 destructor TD2XSkipHandler.Destroy;

@@ -4,6 +4,7 @@ interface
 
 uses
   System.Classes,
+  System.Generics.Collections,
   System.Rtti,
   System.SysUtils;
 
@@ -46,7 +47,35 @@ type
     procedure Unlock;
   end;
 
+  TStrIntPair = TPair<string, Integer>;
+  TStrIntDict = TDictionary<string, Integer>;
+  TPairLogMethod = reference to function(pPair: TStrIntPair): string;
+
+procedure OutputStrIntDict(pDict: TStrIntDict; pStream: TStream; pFunc: TPairLogMethod);
+
 implementation
+
+procedure OutputStrIntDict(pDict: TStrIntDict; pStream: TStream; pFunc: TPairLogMethod);
+var
+  lP: TStrIntPair;
+begin
+  Assert(Assigned(pStream), 'Need a Stream');
+  Assert(Assigned(pFunc), 'Need a Function');
+  Assert(Assigned(pDict), 'Need a Dictionary');
+  if pDict.Count > 0 then
+    with TStringList.Create do
+      try
+        for lP in pDict do
+          if lP.Value > 0 then
+            Values[lP.Key] := pFunc(lP);
+        Sort;
+        SaveToStream(pStream);
+      finally
+        Free;
+      end;
+end;
+
+{ TD2X }
 
 class function TD2X.CnvDflt<T>(pStr: string; pDflt: T; out pVal: T): Boolean;
 begin
