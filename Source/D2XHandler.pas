@@ -45,12 +45,12 @@ begin
 end;
 { TD2XHandler }
 
-procedure TD2XHandler.BeginMethod(pMethod: string);
+procedure TD2XHandler.BeginFile(pInput: ThStreamCreator);
 begin
 
 end;
 
-procedure TD2XHandler.BeginFile(pInput: ThStreamCreator);
+procedure TD2XHandler.BeginMethod(pMethod: string);
 begin
 
 end;
@@ -80,12 +80,12 @@ begin
 
 end;
 
-procedure TD2XHandler.EndMethod(pMethod: string);
+procedure TD2XHandler.EndFile(pOutput: ThStreamCreator);
 begin
 
 end;
 
-procedure TD2XHandler.EndFile(pOutput: ThStreamCreator);
+procedure TD2XHandler.EndMethod(pMethod: string);
 begin
 
 end;

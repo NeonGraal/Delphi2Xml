@@ -47,6 +47,9 @@ type
     procedure Unlock;
   end;
 
+  TD2XCheckRef = reference to function: Boolean;
+  TD2XStringRef = reference to function: string;
+
   TStrIntPair = TPair<string, Integer>;
   TStrIntDict = TDictionary<string, Integer>;
   TPairLogMethod = reference to function(pPair: TStrIntPair): string;

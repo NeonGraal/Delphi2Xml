@@ -23,11 +23,8 @@ type
   end;
 
   TD2XProcessor = class(TD2XLogger)
-  public type
-    TpActive = reference to function: Boolean;
-    TpFilename = reference to function: string;
   public
-    constructor Create(pActive: TpActive; pHandler: TD2XHandler);
+    constructor Create(pActive: TD2XCheckRef; pHandler: TD2XHandler);
 
     procedure BeginProcessing;
     procedure EndProcessing;
@@ -44,19 +41,19 @@ type
     procedure BeginMethod(pMethod: string);
     procedure EndMethod(pMethod: string);
 
-    procedure SetProcessingInput(pFilename: TpFilename);
-    procedure SetProcessingOutput(pFilename: TpFilename);
-    procedure SetFileInput(pFilename: TpFilename);
-    procedure SetFileOutput(pFilename: TpFilename);
+    procedure SetProcessingInput(pFilename: TD2XStringRef);
+    procedure SetProcessingOutput(pFilename: TD2XStringRef);
+    procedure SetFileInput(pFilename: TD2XStringRef);
+    procedure SetFileOutput(pFilename: TD2XStringRef);
 
   private
-    fActive: TpActive;
+    fActive: TD2XCheckRef;
     fHandler: TD2XHandler;
 
-    fProcessingInput: TpFilename;
-    fProcessingOutput: TpFilename;
-    fFileInput: TpFilename;
-    fFileOutput: TpFilename;
+    fProcessingInput: TD2XStringRef;
+    fProcessingOutput: TD2XStringRef;
+    fFileInput: TD2XStringRef;
+    fFileOutput: TD2XStringRef;
 
   end;
 
@@ -72,30 +69,12 @@ type
     fParser: TD2XDefinesParser;
     fVMI: TVirtualMethodInterceptor;
 
-    fXmlDoc: TD2XmlDoc;
-    fXmlNode: TD2XmlNode;
-
-    //    fStack: TStack<TMethodCount>;
-    //    fCurrent: TMethodCount;
-
     fDefinesUsed: TStrIntDict;
-    //    fMinChildren: TStrIntDict;
-    //    fMaxChildren: TStrIntDict;
-    fSkippedMethods: TStrIntDict;
 
     fFilename: string;
-    fHasFiles: Boolean;
 
     fLogHandler: TD2XLogHandler;
-
-    procedure CountBefore(pMethod: string);
-    procedure CountAfter(pMethod: string);
-
-    procedure XmlAddAttribute(pName: string; pValue: string = '');
-    procedure XmlAddText(pText: string = '');
-
-    procedure XmlNodeStart(pMethod: string);
-    procedure XmlNodeEnd;
+    fXmlHandler: TD2XXmlHandler;
 
     procedure RemoveProxy;
     procedure SetProxy;
@@ -134,7 +113,6 @@ type
     procedure BeginResults(pNodename: string; pPer: TD2XResultPer);
     procedure EndResults(pFilename: string; pPer: TD2XResultPer);
 
-    procedure DoBeginResults;
     procedure DoEndResults(pFilename: string);
 
     function ProcessStream(pStream: TStringStream): Boolean;
@@ -173,55 +151,15 @@ type
   { TD2XParamProcessor }
 
 procedure TD2XParamProcessor.BeginResults(pNodename: string; pPer: TD2XResultPer);
+var
+  lP: TD2XProcessor;
 begin
   if fOpts.ResultPer = pPer then
-    DoBeginResults;
+    for lP in fProcs do
+      lP.BeginResults;
 
   if fOpts.ResultPer >= pPer then
-  begin
-    if fOpts.WriteXml then
-      XmlNodeStart(pNodename);
-  end;
-end;
-
-procedure TD2XParamProcessor.CountAfter(pMethod: string);
-//var
-//  lVal: Integer;
-begin
-  //  if fCurrent.Method = pMethod then
-  //  begin
-  //    if fMaxChildren.TryGetValue(fCurrent.Method, lVal) then
-  //    begin
-  //      if fCurrent.Children > lVal then
-  //        fMaxChildren.AddOrSetValue(fCurrent.Method, fCurrent.Children);
-  //    end
-  //    else
-  //      fMaxChildren.AddOrSetValue(fCurrent.Method, fCurrent.Children);
-  //
-  //    if fMinChildren.TryGetValue(fCurrent.Method, lVal) then
-  //    begin
-  //      if fCurrent.Children < lVal then
-  //        fMinChildren.AddOrSetValue(fCurrent.Method, fCurrent.Children);
-  //    end
-  //    else
-  //      fMinChildren.AddOrSetValue(fCurrent.Method, fCurrent.Children);
-  //  end;
-  //
-  //  if fStack.Count > 0 then
-  //    fCurrent := fStack.Pop
-  //  else
-  //  begin
-  //    fCurrent.Method := '';
-  //    fCurrent.Children := 0;
-  //  end;
-end;
-
-procedure TD2XParamProcessor.CountBefore(pMethod: string);
-begin
-  //  Inc(fCurrent.Children);
-  //  fStack.Push(fCurrent);
-  //  fCurrent.Method := pMethod;
-  //  fCurrent.Children := 0;
+    fXmlHandler.BeginMethod(pNodename);
 end;
 
 constructor TD2XParamProcessor.Create;
@@ -231,19 +169,11 @@ begin
   fProgramDir := ExtractFilePath(ParamStr(0));
   fDuration := TStopwatch.StartNew;
 
-  //  fStack := nil;
-
   fOpts := TD2XOptions.Create(Self);
   fProcs := TObjectList<TD2XProcessor>.Create;
   InitProcessors;
 
   fDefinesUsed := TStrIntDict.Create;
-  //  fMaxChildren := TStrIntDict.Create;
-  //  fMinChildren := TStrIntDict.Create;
-  fSkippedMethods := TStrIntDict.Create;
-
-  fXmlDoc := nil;
-  fXmlNode := nil;
 
   InitParser;
 
@@ -278,24 +208,11 @@ begin
   FreeAndNil(fParser);
 
   FreeAndNil(fDefinesUsed);
-  //  FreeAndNil(fMinChildren);
-  //  FreeAndNil(fMaxChildren);
-  FreeAndNil(fSkippedMethods);
 
   FreeAndNil(fProcs);
   FreeAndNil(fOpts);
 
   inherited;
-end;
-
-procedure TD2XParamProcessor.DoBeginResults;
-begin
-  if fOpts.WriteXml then
-  begin
-    fXmlDoc := NewXmlDocument;
-    fXmlDoc.Options := fXmlDoc.Options + [doNodeAutoIndent];
-    fHasFiles := False;
-  end;
 end;
 
 procedure TD2XParamProcessor.DoEndResults(pFilename: string);
@@ -307,20 +224,6 @@ var
 const
   DEF_BREAK: array [0 .. 9] of Byte = (13, 10, 42, 42, 42, 42, 13, 10, 13, 10);
 begin
-  if fOpts.WriteXml then
-  begin
-    if fHasFiles then
-    begin
-      lFile := fProgramDir + fOpts.XmlDirectory + ExtractFilePath(pFilename);
-      ForceDirectories(lFile);
-      lFile := fOpts.XmlDirectory + pFilename;
-      fXmlDoc.Xml.SaveToFile(lFile + '.xml');
-    end;
-
-    fXmlNode := nil;
-    FreeAndNil(fXmlDoc);
-  end;
-
   if fOpts.WriteDefines then
   begin
     lSL := TStringList.Create;
@@ -383,21 +286,25 @@ begin
 end;
 
 procedure TD2XParamProcessor.EndResults(pFilename: string; pPer: TD2XResultPer);
+var
+  lP: TD2XProcessor;
 begin
   if fOpts.ResultPer >= pPer then
   begin
     if fOpts.WriteXml then
     begin
-      XmlAddAttribute('fileName', pFilename);
-      XmlNodeEnd;
+      fXmlHandler.AddAttr('fileName', pFilename);
+      fXmlHandler.EndMethod('');
     end;
   end;
 
-  if fOpts.ResultPer = pPer then
+  if fOpts.ResultPer = pPer then begin
     if pFilename = '' then
-      DoEndResults('(' + TD2X.ToLabel(pPer) + ')')
-    else
-      DoEndResults(pFilename);
+      pFilename := '(' + TD2X.ToLabel(pPer) + ')';
+    for lP in fProcs do
+      lP.EndResults(pFilename);
+    DoEndResults(pFilename);
+  end;
 end;
 
 function TD2XParamProcessor.IsInternalMethod(pMethod: string): Boolean;
@@ -441,8 +348,6 @@ end;
 
 procedure TD2XParamProcessor.ParserMessage(pSender: TObject; const pTyp: TMessageEventType;
   const pMsg: string; pX, pY: Integer);
-var
-  lNode, lAttr: TD2XmlNode;
 begin
   case pTyp of
     meError:
@@ -465,21 +370,21 @@ begin
       Log('???? @ %d,%d: %s', [pX, pY, pMsg]);
     end;
 
-  if fOpts.WriteXml and Assigned(fXmlNode) then
+  if fOpts.WriteXml then
   begin
     case pTyp of
       meError:
-        lNode := fXmlNode.AddChild('D2X_errorMsg');
+        fXmlHandler.BeginMethod('D2X_errorMsg');
       meNotSupported:
-        lNode := fXmlNode.AddChild('D2X_notSuppMsg');
+        fXmlHandler.BeginMethod('D2X_notSuppMsg');
     else
-      lNode := fXmlNode.AddChild('D2X_unknownMsg');
+      fXmlHandler.BeginMethod('D2X_unknownMsg');
     end;
-    lNode.Text := pMsg;
+    fXmlHandler.AddText(pMsg);
     // lAttr := fXmlDoc.CreateNode('msgAt', ntAttribute);
     // lNode.AttributeNodes.Add(lAttr);
-    lAttr := lNode.AddAttribute('msgAt');
-    lAttr.Text := IntToStr(pX) + ',' + IntToStr(pY);
+    fXmlHandler.AddAttr('msgAt',IntToStr(pX) + ',' + IntToStr(pY));
+    fXmlHandler.EndMethod('');
   end;
 end;
 
@@ -623,11 +528,11 @@ begin
   if fOpts.Verbose then
     Log('INCLUDE @ %d,%d: %s', [pLex.PosXY.X, pLex.PosXY.Y, lFile]);
 
-  if fOpts.WriteXml and Assigned(fXmlNode) then
+  if fOpts.WriteXml then
   begin
-    XmlNodeStart('IncludeFile');
-    XmlAddAttribute('filename', lFile);
-    XmlNodeEnd;
+    fXmlHandler.BeginMethod('IncludeFile');
+    fXmlHandler.AddAttr('filename', lFile);
+    fXmlHandler.EndMethod('');
   end;
 
   pLex.Next;
@@ -727,8 +632,8 @@ begin
     end;
 
     fParser.OnMessage := ParserMessage;
-    fParser.AddAttribute := XmlAddAttribute;
-    fParser.AddText := XmlAddText;
+    fParser.AddAttribute := fXmlHandler.AddAttr;
+    fParser.AddText := fXmlHandler.AddText;
 
     fParser.Lexer.OnIncludeDirect := LexerOnInclude;
     // fParser.Lexer.OnDefineDirect := LexerOnDefine;
@@ -743,6 +648,23 @@ begin
     // fParser.Lexer.OnIfEndDirect := LexerOnIfEnd;
 
     fLogHandler.Init(fParser.Lexer);
+    fXmlHandler.Init(fParser,
+        function: Boolean
+      begin
+        Result := fOpts.FinalToken;
+      end,
+      function: string
+      begin
+        Result := TD2X.ToLabel(fOpts.ParseMode);
+      end,
+      function: string
+      begin
+        Result := fProgramDir;
+      end,
+      function: string
+      begin
+        Result := fOpts.XmlDirectory;
+      end);
   end;
 end;
 
@@ -754,7 +676,7 @@ begin
   fLogHandler.L.JoinLog(Self);
 
   fProcs.Add(TD2XProcessor.Create(
-        function: Boolean
+      function: Boolean
     begin
       Result := fOpts.Verbose;
     end, fLogHandler));
@@ -797,6 +719,13 @@ begin
       Result := fOpts.OutputFileOrExtn(fOpts.SkipMethodsFoE + '.log');
     end);
   fProcs.Add(lProc);
+
+  fXmlHandler := TD2XXmlHandler.Create;
+  fProcs.Add(TD2XProcessor.Create(
+      function: Boolean
+    begin
+      Result := fOpts.WriteXml;
+    end, fXmlHandler));
 end;
 
 function TD2XParamProcessor.ProcessParamsFile(pFileOrExtn: string): Boolean;
@@ -821,7 +750,6 @@ function TD2XParamProcessor.ProcessStream(pStream: TStringStream): Boolean;
 var
   lTimer: TStopwatch;
   lFile: string;
-  lCurrNode: TD2XmlNode;
   lP: TD2XProcessor;
 begin
   if fOpts.ElapsedMode <> emNone then
@@ -842,7 +770,7 @@ begin
       Exit;
 
     BeginResults('D2X_File', rpFile);
-    fHasFiles := True;
+    fXmlHandler.HasFiles := True;
 
     if fOpts.LoadDefines then
       fParser.StartDefines.Assign(fOpts.Defines);
@@ -855,12 +783,7 @@ begin
       begin
         LogMessage('EXCEPTION', '(' + E.ClassName + ')' + E.Message);
 
-        lCurrNode := fXmlNode;
-        while Assigned(lCurrNode) and (lCurrNode.LocalName <> 'D2X_File') do
-          lCurrNode := lCurrNode.ParentNode;
-
-        if Assigned(lCurrNode) then
-          fXmlNode := lCurrNode;
+        fXmlHandler.RollbackTo('D2X_File');
       end;
     end;
 
@@ -879,51 +802,10 @@ begin
   end;
 end;
 
-procedure TD2XParamProcessor.XmlAddAttribute(pName, pValue: string);
-var
-  lAttr: TD2XmlNode;
-begin
-  if Assigned(fXmlNode) then
-  begin
-    // lAttr := fXmlDoc.CreateNode(pName, ntAttribute);
-    // fXmlNode.AttributeNodes.Add(lAttr);
-    lAttr := fXmlNode.AddAttribute(pName);
-    if pValue = '' then
-    begin
-      lAttr.Text := fParser.LastTokens;
-      fParser.LastTokens := '';
-    end
-    else
-      lAttr.Text := pValue;
-  end;
-end;
-
-procedure TD2XParamProcessor.XmlAddText(pText: string);
-var
-  lText: TD2XmlNode;
-begin
-  if Assigned(fXmlNode) then
-    if fXmlNode.HasChildNodes then
-    begin
-      // lText := fXmlDoc.CreateNode('', ntText);
-      // fXmlNode.ChildNodes.Add(lText);
-      lText := fXmlNode.AddChild('');
-      if pText = '' then
-      begin
-        lText.Text := fParser.LastTokens;
-        fParser.LastTokens := '';
-      end
-      else
-        lText.Text := pText;
-    end
-    else
-      fXmlNode.Text := fXmlNode.Text + pText;
-end;
-
 {$WARN SYMBOL_PLATFORM OFF}
 
 function TD2XParamProcessor.RecurseDirectory(pDir, pWildCards: string;
-  pMainDir: Boolean): Boolean;
+pMainDir: Boolean): Boolean;
 var
   lFF: TSearchRec;
   lPath: string;
@@ -964,8 +846,6 @@ procedure TD2XParamProcessor.RemoveProxy;
 begin
   if Assigned(fVMI) then
   begin
-    //    FreeAndNil(fStack);
-
     fVMI.Unproxify(fParser);
     FreeAndNil(fVMI);
   end;
@@ -973,13 +853,6 @@ end;
 
 procedure TD2XParamProcessor.SetProxy;
 begin
-  //  if fOpts.CountChildren then
-  //  begin
-  //    fCurrent.Method := '';
-  //    fCurrent.Children := 0;
-  //    fStack := TStack<TMethodCount>.Create;
-  //  end;
-
   fVMI := TVirtualMethodInterceptor.Create(TObject(fParser).ClassType);
   fVMI.Proxify(fParser);
   fVMI.OnBefore :=
@@ -996,11 +869,6 @@ begin
           Exit;
       for lP in fProcs do
         lP.BeginMethod(pMethod.Name);
-
-      if fOpts.CountChildren then
-        CountBefore(pMethod.Name);
-      if fOpts.WriteXml then
-        XmlNodeStart(pMethod.Name);
     end;
   fVMI.OnAfter :=
       procedure(pInst: TObject; pMethod: TRttiMethod; const pArgs: TArray<TValue>;
@@ -1015,11 +883,6 @@ begin
           Exit;
       for lP in fProcs do
         lP.EndMethod(pMethod.Name);
-
-      if fOpts.WriteXml then
-        XmlNodeEnd;
-      if fOpts.CountChildren then
-        CountAfter(pMethod.Name);
     end;
 end;
 
@@ -1036,33 +899,6 @@ end;
 function TD2XParamProcessor.UseProxy: Boolean;
 begin
   Result := fOpts.Verbose or fOpts.WriteXml or fOpts.CountChildren;
-end;
-
-procedure TD2XParamProcessor.XmlNodeEnd;
-begin
-  if Assigned(fXmlNode) then
-  begin
-    if fOpts.FinalToken and (Length(fParser.LastTokens) > 1) then
-      XmlAddAttribute('lastToken');
-
-    fXmlNode.Xml;
-    fXmlNode := fXmlNode.ParentNode;
-  end;
-end;
-
-procedure TD2XParamProcessor.XmlNodeStart(pMethod: string);
-begin
-  if Assigned(fXmlDoc) then
-  begin
-    if Assigned(fXmlNode) then
-      fXmlNode := fXmlNode.AddChild(pMethod)
-    else
-    begin
-      fXmlNode := fXmlDoc.AddChild(pMethod);
-      XmlAddAttribute('parseMode', TD2X.ToLabel(fOpts.ParseMode));
-    end;
-    fParser.LastTokens := '';
-  end;
 end;
 
 { TD2XProcessor }
@@ -1141,7 +977,7 @@ begin
   Result := not fActive or fHandler.CheckBeforeMethod(pMethod);
 end;
 
-constructor TD2XProcessor.Create(pActive: TpActive; pHandler: TD2XHandler);
+constructor TD2XProcessor.Create(pActive: TD2XCheckRef; pHandler: TD2XHandler);
 begin
   inherited Create;
 
@@ -1211,22 +1047,22 @@ begin
     fHandler.EndResults(pFile);
 end;
 
-procedure TD2XProcessor.SetFileInput(pFilename: TpFilename);
+procedure TD2XProcessor.SetFileInput(pFilename: TD2XStringRef);
 begin
   fFileInput := pFilename;
 end;
 
-procedure TD2XProcessor.SetFileOutput(pFilename: TpFilename);
+procedure TD2XProcessor.SetFileOutput(pFilename: TD2XStringRef);
 begin
   fFileOutput := pFilename;
 end;
 
-procedure TD2XProcessor.SetProcessingInput(pFilename: TpFilename);
+procedure TD2XProcessor.SetProcessingInput(pFilename: TD2XStringRef);
 begin
   fProcessingInput := pFilename;
 end;
 
-procedure TD2XProcessor.SetProcessingOutput(pFilename: TpFilename);
+procedure TD2XProcessor.SetProcessingOutput(pFilename: TD2XStringRef);
 begin
   fProcessingOutput := pFilename;
 end;

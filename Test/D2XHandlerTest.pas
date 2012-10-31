@@ -162,15 +162,11 @@ end;
 
 procedure TD2XHandlerTester.BeginMethod(pMethod: String);
 begin
-  inherited;
-
   CalledBeginMethod := true;
 end;
 
 procedure TD2XHandlerTester.BeginFile(pInput: TD2XHandler.ThStreamCreator);
 begin
-  inherited;
-
   CalledBeginFile := true;
   if CreateStreams then
     pInput;
@@ -178,8 +174,6 @@ end;
 
 procedure TD2XHandlerTester.BeginProcessing(pInput: TD2XHandler.ThStreamCreator);
 begin
-  inherited;
-
   CalledBeginProcessing := true;
   if CreateStreams then
     pInput;
@@ -187,8 +181,6 @@ end;
 
 procedure TD2XHandlerTester.BeginResults;
 begin
-  inherited;
-
   CalledBeginResults := true;
 end;
 
@@ -208,8 +200,6 @@ end;
 
 procedure TD2XHandlerTester.Copy(pFrom: TD2XHandler);
 begin
-  inherited;
-
   CalledCopy := true;
 end;
 
@@ -220,15 +210,11 @@ end;
 
 procedure TD2XHandlerTester.EndMethod(pMethod: String);
 begin
-  inherited;
-
   CalledEndMethod := true;
 end;
 
 procedure TD2XHandlerTester.EndFile(pOutput: TD2XHandler.ThStreamCreator);
 begin
-  inherited;
-
   CalledEndFile := true;
   if CreateStreams then
     pOutput;
@@ -236,8 +222,6 @@ end;
 
 procedure TD2XHandlerTester.EndProcessing(pOutput: TD2XHandler.ThStreamCreator);
 begin
-  inherited;
-
   CalledEndProcessing := true;
   if CreateStreams then
     pOutput;
@@ -245,8 +229,6 @@ end;
 
 procedure TD2XHandlerTester.EndResults(pFile: String);
 begin
-  inherited;
-
   CalledEndResults := true;
 end;
 
