@@ -34,6 +34,7 @@ type
   published
     procedure TestSetProcessingInput;
     procedure TestSetProcessingOutput;
+    procedure TestSetResultsOutput;
     procedure TestSetFileInput;
     procedure TestSetFileOutput;
 
@@ -348,6 +349,12 @@ end;
 
 procedure TestTD2XProcessor.TestEndResults;
 begin
+  FD2XProcessor.SetResultsOutput(
+    function(pFile: string): string
+    begin
+      Result := '';
+    end);
+
   FD2XProcessor.EndResults('');
   CheckFalse(FHandler.CalledEndResults, 'Ignored End Results');
 
@@ -440,6 +447,27 @@ begin
   fActive := True;
   FD2XProcessor.EndProcessing;
   CheckTrue(lCalled, 'Called Processing Output');
+end;
+
+procedure TestTD2XProcessor.TestSetResultsOutput;
+var
+  lCalled: Boolean;
+begin
+  FHandler.CreateStreams := True;
+  lCalled := False;
+  FD2XProcessor.SetResultsOutput(
+    function(pFile: string): string
+    begin
+      lCalled := True;
+      Result := '';
+    end);
+
+  FD2XProcessor.EndResults('');
+  CheckFalse(lCalled, 'Ignored Results Output');
+
+  fActive := True;
+  FD2XProcessor.EndResults('');
+  CheckTrue(lCalled, 'Called Results Output');
 end;
 
 initialization

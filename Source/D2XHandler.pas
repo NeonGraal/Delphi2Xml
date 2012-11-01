@@ -23,7 +23,7 @@ type
     procedure EndFile(pOutput: ThStreamCreator); virtual;
 
     procedure BeginResults; virtual;
-    procedure EndResults(pFile: string); virtual;
+    procedure EndResults(pOutput: ThStreamCreator); virtual;
 
     function CheckBeforeMethod(pMethod: string): Boolean; virtual;
     function CheckAfterMethod(pMethod: string): Boolean; virtual;
@@ -95,7 +95,7 @@ begin
 
 end;
 
-procedure TD2XHandler.EndResults(pFile: string);
+procedure TD2XHandler.EndResults(pOutput: ThStreamCreator);
 begin
 
 end;

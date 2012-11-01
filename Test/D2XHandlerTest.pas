@@ -28,7 +28,7 @@ type
     procedure BeginFile(pInput: TD2XHandler.ThStreamCreator); override;
     procedure EndFile(pOutput: TD2XHandler.ThStreamCreator); override;
     procedure BeginResults; override;
-    procedure EndResults(pFile: String); override;
+    procedure EndResults(pOutput: TD2XHandler.ThStreamCreator); override;
     function CheckBeforeMethod(pMethod: String): Boolean; override;
     function CheckAfterMethod(pMethod: String): Boolean; override;
     procedure BeginMethod(pMethod: String); override;
@@ -139,7 +139,7 @@ end;
 
 procedure TestTD2XHandler.TestEndResults;
 begin
-  FD2XHandler.EndResults('');
+  FD2XHandler.EndResults(nil);
 
   CheckTrue(FD2XTester.CalledEndResults, 'Called End Results');
 end;
@@ -227,9 +227,11 @@ begin
     pOutput;
 end;
 
-procedure TD2XHandlerTester.EndResults(pFile: String);
+procedure TD2XHandlerTester.EndResults(pOutput: TD2XHandler.ThStreamCreator);
 begin
   CalledEndResults := true;
+  if CreateStreams then
+    pOutput;
 end;
 
 initialization

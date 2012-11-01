@@ -49,6 +49,7 @@ type
 
   TD2XCheckRef = reference to function: Boolean;
   TD2XStringRef = reference to function: string;
+  TD2XNamedStringRef = reference to function(pFile: String): string;
 
   TStrIntPair = TPair<string, Integer>;
   TStrIntDict = TDictionary<string, Integer>;

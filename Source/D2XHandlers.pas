@@ -14,6 +14,8 @@ type
   TD2XLogHandler = class(TD2XHandler, ID2XLogger)
   private
     fLogger: ID2XLogger;
+
+  protected
     fLexer: TD2XLexer;
 
   public
@@ -30,7 +32,6 @@ type
     procedure EndMethod(pMethod: string); override;
 
     property L: ID2XLogger read fLogger implements ID2XLogger;
-    property Lexer: TD2XLexer read fLexer;
   end;
 
   TMethodCount = record
@@ -65,35 +66,32 @@ type
 
   TD2XXmlHandler = class(TD2XHandler)
   private
+    fHasFiles: Boolean;
+
+  protected
     fXmlDoc: TD2XmlDoc;
     fXmlNode: TD2XmlNode;
 
     fParser: TD2XDefinesParser;
     fFinalToken: TD2XCheckRef;
     fParseMode: TD2XStringRef;
-    fProgramDir: TD2XStringRef;
-    fXmlDir: TD2XStringRef;
-    fHasFiles : Boolean;
 
   public
     constructor Create;
     destructor Destroy; override;
 
     procedure Init(pParser: TD2XDefinesParser; pFinalToken: TD2XCheckRef;
-      pParseMode, pProgramDir, pXmlDir: TD2XStringRef);
+      pParseMode: TD2XStringRef);
 
     function Description: string; override;
 
     procedure Copy(pFrom: TD2XHandler); override;
 
-    procedure EndFile(pOutput: TD2XHandler.ThStreamCreator); override;
-
     procedure BeginResults; override;
-    procedure EndResults(pFile: string); override;
+    procedure EndResults(pOutput: TD2XHandler.ThStreamCreator); override;
 
     procedure BeginMethod(pMethod: string); override;
     procedure EndMethod(pMethod: string); override;
-
 
     procedure AddAttr(pName: string; pValue: string = '');
     procedure AddText(pText: string = '');
@@ -141,9 +139,12 @@ procedure TD2XLogHandler.Copy(pFrom: TD2XHandler);
 var
   lFrom: TD2XLogHandler;
 begin
-  lFrom := TD2XLogHandler(pFrom);
-  fLogger := lFrom.fLogger;
-  fLexer := lFrom.fLexer;
+  if Assigned(pFrom) then
+  begin
+    lFrom := TD2XLogHandler(pFrom);
+    fLogger := lFrom.fLogger;
+    fLexer := lFrom.fLexer;
+  end;
 end;
 
 constructor TD2XLogHandler.Create;
@@ -382,34 +383,45 @@ begin
     else
     begin
       fXmlNode := fXmlDoc.AddChild(pMethod);
-      AddAttr('parseMode', fParseMode); // TD2X.ToLabel(fOpts.ParseMode));
+      if Assigned(fParseMode) then
+        AddAttr('parseMode', fParseMode); // TD2X.ToLabel(fOpts.ParseMode));
     end;
-    fParser.LastTokens := '';
+    if Assigned(fParser) then
+      fParser.LastTokens := '';
   end;
 end;
 
 procedure TD2XXmlHandler.BeginResults;
 begin
-    fXmlDoc := NewXmlDocument;
-    fXmlDoc.Options := fXmlDoc.Options + [doNodeAutoIndent];
-    fHasFiles := False;
+  fXmlDoc := NewXmlDocument;
+  fXmlDoc.Options := fXmlDoc.Options + [doNodeAutoIndent];
+  fHasFiles := False;
 end;
 
 procedure TD2XXmlHandler.Copy(pFrom: TD2XHandler);
 var
   lFrom: TD2XXmlHandler;
 begin
-  lFrom := TD2XXmlHandler(pFrom);
-  fParser := lFrom.fParser;
-  fFinalToken := lFrom.fFinalToken;
-  fParseMode := lFrom.fParseMode;
-  fProgramDir := lFrom.fProgramDir;
-  fXmlDir := lFrom.fXmlDir;
+  if Assigned(pFrom) then
+  begin
+    lFrom := TD2XXmlHandler(pFrom);
+    fParser := lFrom.fParser;
+    fFinalToken := lFrom.fFinalToken;
+    fParseMode := lFrom.fParseMode;
+  end;
 end;
 
 constructor TD2XXmlHandler.Create;
 begin
+  inherited;
 
+  fXmlDoc := nil;
+  fXmlNode := nil;
+
+  fParser := nil;
+  fFinalToken := nil;
+  fParseMode := nil;
+  fHasFiles := False;
 end;
 
 function TD2XXmlHandler.Description: string;
@@ -419,21 +431,18 @@ end;
 
 destructor TD2XXmlHandler.Destroy;
 begin
+  fXmlNode := nil;
+  FreeAndNil(fXmlDoc);
 
   inherited;
-end;
-
-procedure TD2XXmlHandler.EndFile(pOutput: TD2XHandler.ThStreamCreator);
-begin
-  inherited;
-
 end;
 
 procedure TD2XXmlHandler.EndMethod(pMethod: string);
 begin
   if Assigned(fXmlNode) then
   begin
-    if fFinalToken and (Length(fParser.LastTokens) > 1) then
+    if Assigned(fFinalToken) and Assigned(fParser) and fFinalToken and
+      (Length(fParser.LastTokens) > 1) then
       AddAttr('lastToken');
 
     fXmlNode.Xml;
@@ -441,16 +450,15 @@ begin
   end;
 end;
 
-procedure TD2XXmlHandler.EndResults(pFile: string);
+procedure TD2XXmlHandler.EndResults(pOutput: TD2XHandler.ThStreamCreator);
 var
-  lFile: String;
+  lFile: TStream;
 begin
   if fHasFiles then
   begin
-    lFile := fProgramDir + fXmlDir + ExtractFilePath(pFile);
-    ForceDirectories(lFile);
-    lFile := fXmlDir + pFile;
-    fXmlDoc.Xml.SaveToFile(lFile + '.xml');
+    lFile := pOutput;
+    if Assigned(lFile) then
+      fXmlDoc.Xml.SaveToStream(lFile);
   end;
 
   fXmlNode := nil;
@@ -458,13 +466,11 @@ begin
 end;
 
 procedure TD2XXmlHandler.Init(pParser: TD2XDefinesParser; pFinalToken: TD2XCheckRef;
-pParseMode, pProgramDir, pXmlDir: TD2XStringRef);
+  pParseMode: TD2XStringRef);
 begin
   fParser := pParser;
   fFinalToken := pFinalToken;
   fParseMode := pParseMode;
-  fProgramDir := pProgramDir;
-  fXmlDir := pXmlDir;
 end;
 
 procedure TD2XXmlHandler.RollbackTo(pNodeName: string);

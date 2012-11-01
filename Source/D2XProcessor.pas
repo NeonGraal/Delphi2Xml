@@ -43,6 +43,7 @@ type
 
     procedure SetProcessingInput(pFilename: TD2XStringRef);
     procedure SetProcessingOutput(pFilename: TD2XStringRef);
+    procedure SetResultsOutput(pFilename: TD2XNamedStringRef);
     procedure SetFileInput(pFilename: TD2XStringRef);
     procedure SetFileOutput(pFilename: TD2XStringRef);
 
@@ -52,6 +53,7 @@ type
 
     fProcessingInput: TD2XStringRef;
     fProcessingOutput: TD2XStringRef;
+    fResultsOutput: TD2XNamedStringRef;
     fFileInput: TD2XStringRef;
     fFileOutput: TD2XStringRef;
 
@@ -298,7 +300,8 @@ begin
     end;
   end;
 
-  if fOpts.ResultPer = pPer then begin
+  if fOpts.ResultPer = pPer then
+  begin
     if pFilename = '' then
       pFilename := '(' + TD2X.ToLabel(pPer) + ')';
     for lP in fProcs do
@@ -383,7 +386,7 @@ begin
     fXmlHandler.AddText(pMsg);
     // lAttr := fXmlDoc.CreateNode('msgAt', ntAttribute);
     // lNode.AttributeNodes.Add(lAttr);
-    fXmlHandler.AddAttr('msgAt',IntToStr(pX) + ',' + IntToStr(pY));
+    fXmlHandler.AddAttr('msgAt', IntToStr(pX) + ',' + IntToStr(pY));
     fXmlHandler.EndMethod('');
   end;
 end;
@@ -656,14 +659,6 @@ begin
       function: string
       begin
         Result := TD2X.ToLabel(fOpts.ParseMode);
-      end,
-      function: string
-      begin
-        Result := fProgramDir;
-      end,
-      function: string
-      begin
-        Result := fOpts.XmlDirectory;
       end);
   end;
 end;
@@ -1042,9 +1037,28 @@ begin
 end;
 
 procedure TD2XProcessor.EndResults(pFile: string);
+var
+  lFS: TFileStream;
 begin
+  lFS := nil;
   if fActive then
-    fHandler.EndResults(pFile);
+    if Assigned(fResultsOutput) then
+      try
+        fHandler.EndResults(
+          function: TStream
+          var
+            lFile: string;
+          begin
+            lFile := fResultsOutput(pFile);
+            if lFile > '' then
+              lFS := TFileStream.Create(lFile, fmOpenWrite);
+            Result := lFS;
+          end);
+      finally
+        FreeAndNil(lFS);
+      end
+    else
+      fHandler.EndResults(nil);
 end;
 
 procedure TD2XProcessor.SetFileInput(pFilename: TD2XStringRef);
@@ -1065,6 +1079,11 @@ end;
 procedure TD2XProcessor.SetProcessingOutput(pFilename: TD2XStringRef);
 begin
   fProcessingOutput := pFilename;
+end;
+
+procedure TD2XProcessor.SetResultsOutput(pFilename: TD2XNamedStringRef);
+begin
+  fResultsOutput := pFilename;
 end;
 
 end.

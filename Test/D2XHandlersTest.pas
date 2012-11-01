@@ -9,6 +9,7 @@ uses
   D2XParser,
   D2XHandlers,
   D2XHandler,
+  D2Xml,
   D2XTest,
   System.Classes,
   System.Generics.Collections,
@@ -17,13 +18,20 @@ uses
   TestFramework;
 
 type
+  TTestLogHandler = class(TD2XLogHandler)
+  public
+    property Lexer: TD2XLexer read fLexer;
+
+  end;
+
   TestTD2XLogHandler = class(TLoggerTestCase)
   strict private
-    FD2XLogHandler: TD2XLogHandler;
+    FD2XLogHandler: TTestLogHandler;
   public
     procedure SetUp; override;
     procedure TearDown; override;
   published
+    procedure TestDescription;
     procedure TestInit;
     procedure TestCopy;
     procedure TestBeginMethod;
@@ -37,6 +45,7 @@ type
     procedure SetUp; override;
     procedure TearDown; override;
   published
+    procedure TestDescription;
     procedure TestEndProcessing;
     procedure TestBeginFile;
     procedure TestEndFile;
@@ -53,10 +62,43 @@ type
     procedure SetUp; override;
     procedure TearDown; override;
   published
+    procedure TestDescription;
     procedure TestEndProcessing;
     procedure TestBeginFile;
     procedure TestCheckBeforeMethod;
     procedure TestCheckAfterMethod;
+
+    procedure TestProcessing;
+  end;
+
+  TTestXmlHandler = class(TD2XXmlHandler)
+  public
+    property XmlDoc: TD2XmlDoc read fXmlDoc;
+    property XmlNode: TD2XmlNode read fXmlNode;
+
+    property Parser: TD2XDefinesParser read fParser;
+    property FinalToken: TD2XCheckRef read fFinalToken;
+    property ParseMode: TD2XStringRef read fParseMode;
+
+  end;
+
+  TestTD2XXmlHandler = class(TStringTestCase)
+  strict private
+    FD2XXmlHandler: TTestXmlHandler;
+  public
+    procedure SetUp; override;
+    procedure TearDown; override;
+  published
+    procedure TestDescription;
+    procedure TestInit;
+    procedure TestCopy;
+    procedure TestBeginResults;
+    procedure TestEndResults;
+    procedure TestBeginMethod;
+    procedure TestEndMethod;
+    procedure TestAddAttr;
+    procedure TestAddText;
+    procedure TestRollbackTo;
 
     procedure TestProcessing;
   end;
@@ -67,7 +109,7 @@ procedure TestTD2XLogHandler.SetUp;
 begin
   inherited;
 
-  FD2XLogHandler := TD2XLogHandler.Create;
+  FD2XLogHandler := TTestLogHandler.Create;
 end;
 
 procedure TestTD2XLogHandler.TearDown;
@@ -99,6 +141,8 @@ var
 begin
   pFrom := nil;
   pLexer := nil;
+
+  FD2XLogHandler.Copy(pFrom);
   try
     pFrom := TD2XLogHandler.Create;
     pLexer := TD2XLexer.Create;
@@ -118,6 +162,11 @@ begin
     pLexer.Free;
     pFrom.Free;
   end;
+end;
+
+procedure TestTD2XLogHandler.TestDescription;
+begin
+  CheckEqualsString('Verbose Logging', FD2XLogHandler.Description, 'Description');
 end;
 
 procedure TestTD2XLogHandler.TestBeginMethod;
@@ -185,7 +234,7 @@ begin
   lCalled := False;
 
   FD2XCountHandler.EndFile(
-    function: TStream
+      function: TStream
     begin
       Result := nil;
       lCalled := True;
@@ -204,6 +253,11 @@ begin
   FD2XCountHandler.BeginMethod(pMethod);
 
   CheckStream('', 'Begin Method');
+end;
+
+procedure TestTD2XCountHandler.TestDescription;
+begin
+  CheckEqualsString('Count Children', FD2XCountHandler.Description, 'Description');
 end;
 
 procedure TestTD2XCountHandler.TestEndMethod;
@@ -269,6 +323,11 @@ begin
   CheckFalse(FD2XSkipHandler.CheckBeforeMethod('Alpha'), 'Check Before Method');
 end;
 
+procedure TestTD2XSkipHandler.TestDescription;
+begin
+  CheckEqualsString('Skip Methods', FD2XSkipHandler.Description, 'Description');
+end;
+
 procedure TestTD2XSkipHandler.TestCheckAfterMethod;
 begin
   CheckFalse(FD2XSkipHandler.CheckAfterMethod('Alpha'), 'Check After Method');
@@ -298,10 +357,189 @@ begin
   CheckStream('Alpha=1 Gamma=1', 'End Processing');
 end;
 
+{ TestTD2XXmlHandler }
+
+procedure TestTD2XXmlHandler.SetUp;
+begin
+  inherited;
+
+  FD2XXmlHandler := TTestXmlHandler.Create;
+end;
+
+procedure TestTD2XXmlHandler.TearDown;
+begin
+  FD2XXmlHandler.Free;
+  FD2XXmlHandler := nil;
+
+  inherited;
+end;
+
+procedure TestTD2XXmlHandler.TestAddAttr;
+begin
+  FD2XXmlHandler.AddAttr('');
+end;
+
+procedure TestTD2XXmlHandler.TestAddText;
+begin
+  FD2XXmlHandler.AddText;
+end;
+
+procedure TestTD2XXmlHandler.TestBeginMethod;
+begin
+  FD2XXmlHandler.BeginResults;
+  FD2XXmlHandler.HasFiles := True;
+  FD2XXmlHandler.BeginMethod('Test');
+  FD2XXmlHandler.EndResults(
+    function: TStream
+    begin
+      Result := fSS;
+    end);
+  CheckStream('<?xml version="1.0"?> <Test />', 'End Results');
+end;
+
+procedure TestTD2XXmlHandler.TestBeginResults;
+begin
+  FD2XXmlHandler.HasFiles := True;
+
+  CheckTrue(FD2XXmlHandler.HasFiles, 'Has files set');
+
+  FD2XXmlHandler.BeginResults;
+  CheckFalse(FD2XXmlHandler.HasFiles, 'Has files reset');
+end;
+
+procedure TestTD2XXmlHandler.TestCopy;
+var
+  pFrom: TD2XXmlHandler;
+  pParser: TD2XDefinesParser;
+  lCalledFinalToken, lCalledParseMode: Boolean;
+begin
+  pFrom := nil;
+  pParser := nil;
+  lCalledFinalToken := False;
+  lCalledParseMode := False;
+
+  FD2XXmlHandler.Copy(pFrom);
+  try
+    pFrom := TD2XXmlHandler.Create;
+    pParser := TD2XDefinesParser.Create;
+
+    pFrom.Init(pParser,
+      function: Boolean
+      begin
+        lCalledFinalToken := True;
+        Result := True;
+      end,
+      function: string
+      begin
+        lCalledParseMode := True;
+        Result := 'ParseMode';
+      end);
+
+    CheckFalse(Assigned(FD2XXmlHandler.Parser), 'Parser not set');
+    CheckFalse(Assigned(FD2XXmlHandler.FinalToken), 'Final Token not set');
+    CheckFalse(Assigned(FD2XXmlHandler.ParseMode), 'Parse Mode not set');
+
+    FD2XXmlHandler.Copy(pFrom);
+
+    Check(pParser = FD2XXmlHandler.Parser, 'Parser set');
+    CheckTrue(Assigned(FD2XXmlHandler.FinalToken), 'Final Token set');
+    CheckTrue(FD2XXmlHandler.FinalToken(), 'Final Token correct');
+    CheckTrue(lCalledFinalToken, 'Final Token called');
+    CheckTrue(Assigned(FD2XXmlHandler.ParseMode), 'Parse Mode set');
+    CheckEqualsString('ParseMode', FD2XXmlHandler.ParseMode(), 'Parse Mode correct');
+    CheckTrue(lCalledParseMode, 'Parse Mode called');
+  finally
+    pParser.Free;
+    pFrom.Free;
+  end;
+end;
+
+procedure TestTD2XXmlHandler.TestDescription;
+begin
+  CheckEqualsString('Xml', FD2XXmlHandler.Description, 'Description');
+end;
+
+procedure TestTD2XXmlHandler.TestEndMethod;
+begin
+  FD2XXmlHandler.BeginResults;
+  FD2XXmlHandler.HasFiles := True;
+  FD2XXmlHandler.BeginMethod('Test');
+  FD2XXmlHandler.EndMethod('Test');
+  FD2XXmlHandler.EndResults(
+    function: TStream
+    begin
+      Result := fSS;
+    end);
+  CheckStream('<?xml version="1.0"?> <Test />', 'End Results');
+end;
+
+procedure TestTD2XXmlHandler.TestEndResults;
+begin
+  FD2XXmlHandler.BeginResults;
+  FD2XXmlHandler.EndResults(
+    function: TStream
+    begin
+      Result := fSS;
+    end);
+  CheckStream('', 'End Results');
+
+  FD2XXmlHandler.BeginResults;
+  FD2XXmlHandler.HasFiles := True;
+  FD2XXmlHandler.EndResults(
+    function: TStream
+    begin
+      Result := fSS;
+    end);
+  CheckStream('<?xml version="1.0"?>', 'End Results');
+end;
+
+procedure TestTD2XXmlHandler.TestInit;
+var
+  lParser: TD2XDefinesParser;
+  lCalledFinalToken, lCalledParseMode: Boolean;
+begin
+  lCalledFinalToken := False;
+  lCalledParseMode := False;
+  lParser := TD2XDefinesParser.Create;
+  try
+    FD2XXmlHandler.Init(lParser,
+      function: Boolean
+      begin
+        lCalledFinalToken := True;
+        Result := True;
+      end,
+      function: string
+      begin
+        lCalledParseMode := True;
+        Result := 'ParseMode';
+      end);
+
+    Check(lParser = FD2XXmlHandler.Parser, 'Parser set');
+    CheckTrue(Assigned(FD2XXmlHandler.FinalToken), 'Final Token set');
+    CheckTrue(FD2XXmlHandler.FinalToken(), 'Final Token correct');
+    CheckTrue(lCalledFinalToken, 'Final Token called');
+    CheckTrue(Assigned(FD2XXmlHandler.Parser), 'Parse Mode set');
+    CheckEqualsString('ParseMode', FD2XXmlHandler.ParseMode(), 'Parse Mode correct');
+    CheckTrue(lCalledParseMode, 'Parse Mode called');
+  finally
+    lParser.Free;
+  end;
+end;
+
+procedure TestTD2XXmlHandler.TestProcessing;
+begin
+
+end;
+
+procedure TestTD2XXmlHandler.TestRollbackTo;
+begin
+  FD2XXmlHandler.RollbackTo('Test');
+end;
+
 initialization
 
 // Register any test cases with the test runner
 RegisterTests('Handlers', [TestTD2XLogHandler.Suite, TestTD2XCountHandler.Suite,
-  TestTD2XSkipHandler.Suite]);
+  TestTD2XSkipHandler.Suite, TestTD2XXmlHandler.Suite]);
 
 end.
