@@ -9,6 +9,7 @@ uses
   System.Rtti,
   System.SysUtils,
   CastaliaPasLexTypes,
+  D2XParam,
   D2XOptions,
   D2XHandler,
   D2XHandlers,
@@ -24,7 +25,8 @@ type
 
   TD2XProcessor = class(TD2XLogger)
   public
-    constructor Create(pActive: TD2XCheckRef; pHandler: TD2XHandler);
+    constructor Create(pActive: IParamFlag; pHandler: TD2XHandler);
+    destructor Destroy; override;
 
     procedure BeginProcessing;
     procedure EndProcessing;
@@ -48,7 +50,7 @@ type
     procedure SetFileOutput(pFilename: TD2XStringRef);
 
   private
-    fActive: TD2XCheckRef;
+    fActive: IParamFlag;
     fHandler: TD2XHandler;
 
     fProcessingInput: TD2XStringRef;
@@ -670,17 +672,9 @@ begin
   fLogHandler := TD2XLogHandler.Create;
   fLogHandler.L.JoinLog(Self);
 
-  fProcs.Add(TD2XProcessor.Create(
-      function: Boolean
-    begin
-      Result := fOpts.Verbose;
-    end, fLogHandler));
+  fProcs.Add(TD2XProcessor.Create(fOpts.VerboseFlag, fLogHandler));
 
-  lProc := TD2XProcessor.Create(
-    function: Boolean
-    begin
-      Result := fOpts.SkipMethods;
-    end, TD2XSkipHandler.Create);
+  lProc := TD2XProcessor.Create(fOpts.SkipMethodsFlag, TD2XSkipHandler.Create);
   lProc.SetFileInput(
     function: string
     begin
@@ -693,11 +687,7 @@ begin
     end);
   fProcs.Add(lProc);
 
-  lProc := TD2XProcessor.Create(
-    function: Boolean
-    begin
-      Result := fOpts.CountChildren;
-    end, TD2XCountHandler.Create);
+  lProc := TD2XProcessor.Create(fOpts.CountChildrenFlag, TD2XCountHandler.Create);
   lProc.SetFileInput(
     function: string
     begin
@@ -716,11 +706,7 @@ begin
   fProcs.Add(lProc);
 
   fXmlHandler := TD2XXmlHandler.Create;
-  fProcs.Add(TD2XProcessor.Create(
-      function: Boolean
-    begin
-      Result := fOpts.WriteXml;
-    end, fXmlHandler));
+  fProcs.Add(TD2XProcessor.Create(fOpts.WriteXmlFlag, fXmlHandler));
 end;
 
 function TD2XParamProcessor.ProcessParamsFile(pFileOrExtn: string): Boolean;
@@ -903,7 +889,7 @@ var
   lFS: TFileStream;
 begin
   lFS := nil;
-  if fActive then
+  if fActive.Flag then
     if Assigned(fFileInput) then
       try
         fHandler.BeginFile(
@@ -927,7 +913,7 @@ end;
 
 procedure TD2XProcessor.BeginMethod(pMethod: string);
 begin
-  if fActive then
+  if fActive.Flag then
     fHandler.BeginMethod(pMethod);
 end;
 
@@ -936,7 +922,7 @@ var
   lFS: TFileStream;
 begin
   lFS := nil;
-  if fActive then
+  if fActive.Flag then
     if Assigned(fProcessingInput) then
       try
         fHandler.BeginProcessing(
@@ -958,21 +944,21 @@ end;
 
 procedure TD2XProcessor.BeginResults;
 begin
-  if fActive then
+  if fActive.Flag then
     fHandler.BeginResults;
 end;
 
 function TD2XProcessor.CheckAfterMethod(pMethod: string): Boolean;
 begin
-  Result := not fActive or fHandler.CheckAfterMethod(pMethod);
+  Result := not fActive.Flag or fHandler.CheckAfterMethod(pMethod);
 end;
 
 function TD2XProcessor.CheckBeforeMethod(pMethod: string): Boolean;
 begin
-  Result := not fActive or fHandler.CheckBeforeMethod(pMethod);
+  Result := not fActive.Flag or fHandler.CheckBeforeMethod(pMethod);
 end;
 
-constructor TD2XProcessor.Create(pActive: TD2XCheckRef; pHandler: TD2XHandler);
+constructor TD2XProcessor.Create(pActive: IParamFlag; pHandler: TD2XHandler);
 begin
   inherited Create;
 
@@ -980,12 +966,19 @@ begin
   fHandler := pHandler;
 end;
 
+destructor TD2XProcessor.Destroy;
+begin
+  fActive := nil;
+
+  inherited;
+end;
+
 procedure TD2XProcessor.EndFile;
 var
   lFS: TFileStream;
 begin
   lFS := nil;
-  if fActive then
+  if fActive.Flag then
     if Assigned(fFileOutput) then
       try
         fHandler.EndFile(
@@ -1007,7 +1000,7 @@ end;
 
 procedure TD2XProcessor.EndMethod(pMethod: string);
 begin
-  if fActive then
+  if fActive.Flag then
     fHandler.EndMethod(pMethod);
 end;
 
@@ -1016,7 +1009,7 @@ var
   lFS: TFileStream;
 begin
   lFS := nil;
-  if fActive then
+  if fActive.Flag then
     if Assigned(fProcessingOutput) then
       try
         fHandler.EndProcessing(
@@ -1041,7 +1034,7 @@ var
   lFS: TFileStream;
 begin
   lFS := nil;
-  if fActive then
+  if fActive.Flag then
     if Assigned(fResultsOutput) then
       try
         fHandler.EndResults(

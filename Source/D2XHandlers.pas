@@ -454,7 +454,7 @@ procedure TD2XXmlHandler.EndResults(pOutput: TD2XHandler.ThStreamCreator);
 var
   lFile: TStream;
 begin
-  if fHasFiles then
+  if fHasFiles and Assigned(pOutput) then
   begin
     lFile := pOutput;
     if Assigned(lFile) then

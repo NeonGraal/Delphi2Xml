@@ -11,7 +11,15 @@ uses
 type
   EInvalidParam = class(Exception);
 
-  TD2XParam = class
+  IParamFlag = interface
+    ['{1986FC52-3D32-4988-BE5E-9C936D0890C5}']
+    function GetFlag: Boolean;
+    procedure SetFlag(pVal: Boolean);
+
+    property Flag: Boolean read GetFlag write SetFlag;
+  end;
+
+  TD2XParam = class(TInterfacedObject)
   public type
     TpParser = reference to function(pVal: string): Boolean;
 
@@ -106,7 +114,7 @@ type
     property Value: T read fValue write SetValue;
   end;
 
-  TD2XBooleanParam = class(TD2XSingleParam<Boolean>)
+  TD2XBooleanParam = class(TD2XSingleParam<Boolean>, IParamFlag)
   public
     constructor CreateParam(pCode, pLabel, pSample, pDescr: string; pDefault: Boolean;
       pConverter: TD2XSingleParam<Boolean>.TspConverter;
@@ -117,6 +125,9 @@ type
   private
     function ConvertBoolean(pStr: string; pDflt: Boolean; out pVal: Boolean): Boolean;
     function FormatBoolean(pVal: Boolean): string;
+
+    function GetFlag: Boolean;
+    procedure SetFlag(pVal: Boolean);
   end;
 
   TD2XStringParam = class(TD2XSingleParam<string>)
@@ -134,7 +145,7 @@ type
     function FormatString(pVal: string): string;
   end;
 
-  TD2XFlaggedStringParam = class(TD2XSingleParam<string>)
+  TD2XFlaggedStringParam = class(TD2XSingleParam<string>, IParamFlag)
   public type
     TfspFormatter = reference to function(pFlag: Boolean; pVal: string): string;
 
@@ -165,8 +176,8 @@ type
     function FormatFlagString(pFlag: Boolean; pVal: string): string;
     function FormatString(pVal: string): string;
 
-  public
-    property Flag: Boolean read fFlag write fFlag;
+    function GetFlag: Boolean;
+    procedure SetFlag(pVal: Boolean);
   end;
 
 implementation
@@ -299,6 +310,16 @@ end;
 function TD2XBooleanParam.FormatBoolean(pVal: Boolean): string;
 begin
   Result := IfThen(pVal, '+', '-');
+end;
+
+function TD2XBooleanParam.GetFlag: Boolean;
+begin
+  Result := fValue;
+end;
+
+procedure TD2XBooleanParam.SetFlag(pVal: Boolean);
+begin
+  SetValue(pVal);
 end;
 
 { TD2XStringParam }
@@ -533,6 +554,11 @@ begin
   raise EInvalidParam.Create('Incorrect call to TD2XFlaggedStringParam.FormatString');
 end;
 
+function TD2XFlaggedStringParam.GetFlag: Boolean;
+begin
+  Result := fFlag;
+end;
+
 function TD2XFlaggedStringParam.GetFormatted(pDefault: Boolean): string;
 begin
   if pDefault then
@@ -556,6 +582,11 @@ begin
   inherited;
 
   fFlag := fFlagDefault;
+end;
+
+procedure TD2XFlaggedStringParam.SetFlag(pVal: Boolean);
+begin
+  fFlag := pVal;
 end;
 
 procedure TD2XFlaggedStringParam.Zero;

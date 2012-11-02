@@ -76,7 +76,7 @@ type
     function GetParseMode: TD2XParseMode;
     function GetResultPer: TD2XResultPer;
     function GetXmlDirectory: string;
-    function GetXmlFlag: boolean;
+    function GetWriteXml: boolean;
     function GetBaseDirectory: string;
     function GetDefinesDirectory: string;
     function GetUseBase: boolean;
@@ -88,12 +88,17 @@ type
     function GetSkipMethods: boolean;
     function GetDefinesUsedFileOrExtn: string;
     function GetElapsedMode: TD2XElapsedMode;
+    function GetVerboseFlag: IParamFlag;
+    function GetSkipMethodsFlag: IParamFlag;
+    function GetCountChildrenFlag: IParamFlag;
+    function GetWriteXmlFlag: IParamFlag;
 
   public
     property LogErrors: boolean read GetLogErrors;
     property LogNotSupported: boolean read GetLogNotSupported;
     property TimestampFiles: boolean read GetTimestampFiles;
     property Verbose: boolean read GetVerbose;
+    property VerboseFlag: IParamFlag read GetVerboseFlag;
     property Recurse: boolean read GetRecurse;
     property FinalToken: boolean read GetFinalToken;
     property GlobalName: string read GetGlobalName;
@@ -110,11 +115,14 @@ type
     // property OutputDirectory: string read fOutputDirectory;
     property WriteDefines: boolean read GetWriteDefines;
     property DefinesDirectory: string read GetDefinesDirectory;
-    property WriteXml: boolean read GetXmlFlag;
+    property WriteXml: boolean read GetWriteXml;
+    property WriteXmlFlag: IParamFlag read GetWriteXmlFlag;
     property XmlDirectory: string read GetXmlDirectory;
     property CountChildren: boolean read GetCountChildren;
+    property CountChildrenFlag: IParamFlag read GetCountChildrenFlag;
     property CountChildrenFoE: string read GetCountFileOrExtn;
     property SkipMethods: boolean read GetSkipMethods;
+    property SkipMethodsFlag: IParamFlag read GetSkipMethodsFlag;
     property SkipMethodsFoE: string read GetSkipFileOrExtn;
     property DefinesUsed: boolean read GetDefinesUsed;
     property DefinesUsedFoE: string read GetDefinesUsedFileOrExtn;
@@ -381,7 +389,12 @@ end;
 
 function TD2XOptions.GetCountChildren: boolean;
 begin
-  Result := fCountChildren.Flag
+  Result := IParamFlag(fCountChildren).Flag;
+end;
+
+function TD2XOptions.GetCountChildrenFlag: IParamFlag;
+begin
+  Result := fCountChildren;
 end;
 
 function TD2XOptions.GetCountFileOrExtn: string;
@@ -396,7 +409,7 @@ end;
 
 function TD2XOptions.GetDefinesUsed: boolean;
 begin
-  Result := fDefinesUsed.Flag
+  Result := IParamFlag(fDefinesUsed).Flag
 end;
 
 function TD2XOptions.GetFinalToken: boolean;
@@ -441,7 +454,12 @@ end;
 
 function TD2XOptions.GetSkipMethods: boolean;
 begin
-  Result := fSkipMethods.Flag
+  Result := IParamFlag(fSkipMethods).Flag
+end;
+
+function TD2XOptions.GetSkipMethodsFlag: IParamFlag;
+begin
+  Result := fSkipMethods;
 end;
 
 function TD2XOptions.GetTimestampFiles: boolean;
@@ -451,7 +469,7 @@ end;
 
 function TD2XOptions.GetUseBase: boolean;
 begin
-  Result := fUseBase.Flag
+  Result := IParamFlag(fUseBase).Flag
 end;
 
 function TD2XOptions.GetDefinesUsedFileOrExtn: string;
@@ -469,9 +487,14 @@ begin
   Result := fVerbose.Value;
 end;
 
+function TD2XOptions.GetVerboseFlag: IParamFlag;
+begin
+  Result := fVerbose;
+end;
+
 function TD2XOptions.GetWriteDefines: boolean;
 begin
-  Result := fWriteDefines.Flag;
+  Result := IParamFlag(fWriteDefines).Flag;
 end;
 
 function TD2XOptions.GetXmlDirectory: string;
@@ -479,9 +502,14 @@ begin
   Result := fWriteXml.Value;
 end;
 
-function TD2XOptions.GetXmlFlag: boolean;
+function TD2XOptions.GetWriteXml: boolean;
 begin
-  Result := fWriteXml.Flag;
+  Result := IParamFlag(fWriteXml).Flag;
+end;
+
+function TD2XOptions.GetWriteXmlFlag: IParamFlag;
+begin
+  Result := fWriteXml;
 end;
 
 function TD2XOptions.InputFileOrExtn(pFileOrExtn: string): string;
@@ -494,7 +522,7 @@ function TD2XOptions.InputFileOrExtn(pFileOrExtn: string): string;
   end;
 
 begin
-  if fUseInput.Flag then
+  if IParamFlag(fUseInput).Flag then
     Result := fUseInput.Value + GlobalFileOrExtn(pFileOrExtn)
   else
     Result := GlobalFileOrExtn(pFileOrExtn);
@@ -529,7 +557,7 @@ var
   lPath: string;
 
 begin
-  if fUseOutput.Flag then
+  if IParamFlag(fUseOutput).Flag then
     Result := fUseOutput.Value + GlobalFileOrExtn(pFileOrExtn)
   else
     Result := GlobalFileOrExtn(pFileOrExtn);
