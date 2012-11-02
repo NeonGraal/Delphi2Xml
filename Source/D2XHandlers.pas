@@ -3,6 +3,7 @@ unit D2XHandlers;
 interface
 
 uses
+  CastaliaPasLexTypes,
   D2X,
   D2XParser,
   D2XHandler,
@@ -25,11 +26,16 @@ type
     procedure Init(pLexer: TD2XLexer);
 
     function Description: string; override;
+    function UseProxy: Boolean; override;
 
     procedure Copy(pFrom: TD2XHandler); override;
 
     procedure BeginMethod(pMethod: string); override;
     procedure EndMethod(pMethod: string); override;
+
+    procedure ParserMessage(const pTyp: TMessageEventType; const pMsg: string;
+      pX, pY: Integer); override;
+    procedure LexerInclude(const pFile: string; pX, pY: Integer); override;
 
     property L: ID2XLogger read fLogger implements ID2XLogger;
   end;
@@ -54,6 +60,7 @@ type
     destructor Destroy; override;
 
     function Description: string; override;
+    function UseProxy: Boolean; override;
 
     procedure EndProcessing(pOutput: TD2XHandler.ThStreamCreator); override;
 
@@ -84,6 +91,7 @@ type
       pParseMode: TD2XStringRef);
 
     function Description: string; override;
+    function UseProxy: Boolean; override;
 
     procedure Copy(pFrom: TD2XHandler); override;
 
@@ -92,6 +100,10 @@ type
 
     procedure BeginMethod(pMethod: string); override;
     procedure EndMethod(pMethod: string); override;
+
+    procedure ParserMessage(const pTyp: TMessageEventType; const pMsg: string;
+      pX, pY: Integer); override;
+    procedure LexerInclude(const pFile: string; pX, pY: Integer); override;
 
     procedure AddAttr(pName: string; pValue: string = '');
     procedure AddText(pText: string = '');
@@ -110,6 +122,7 @@ type
     destructor Destroy; override;
 
     function Description: string; override;
+    function UseProxy: Boolean; override;
 
     function CheckBeforeMethod(pMethod: string): Boolean; override;
     function CheckAfterMethod(pMethod: string): Boolean; override;
@@ -172,6 +185,29 @@ end;
 procedure TD2XLogHandler.Init(pLexer: TD2XLexer);
 begin
   fLexer := pLexer;
+end;
+
+procedure TD2XLogHandler.LexerInclude(const pFile: string; pX, pY: Integer);
+begin
+  L.Log('INCLUDE @ %d,%d: %s', [pX, pY, pFile]);
+end;
+
+procedure TD2XLogHandler.ParserMessage(const pTyp: TMessageEventType;
+  const pMsg: string; pX, pY: Integer);
+begin
+  case pTyp of
+    meError:
+      L.Log('ERROR @ %d,%d: %s', [pX, pY, pMsg]);
+    meNotSupported:
+      L.Log('NOT SUPPORTED @ %d,%d: %s', [pX, pY, pMsg]);
+  else
+    L.Log('???? @ %d,%d: %s', [pX, pY, pMsg]);
+  end;
+end;
+
+function TD2XLogHandler.UseProxy: Boolean;
+begin
+  Result := True;
 end;
 
 { TD2XCountHandler }
@@ -270,6 +306,11 @@ begin
     Result := '0,' + IntToStr(pPair.Value);
 end;
 
+function TD2XCountHandler.UseProxy: Boolean;
+begin
+  Result := True;
+end;
+
 { TD2XSkipHandler }
 
 procedure TD2XSkipHandler.BeginFile(pInput: TD2XHandler.ThStreamCreator);
@@ -333,6 +374,11 @@ begin
     begin
       Result := IntToStr(pPair.Value);
     end);
+end;
+
+function TD2XSkipHandler.UseProxy: Boolean;
+begin
+  Result := False;
 end;
 
 { TD2XXmlHandler }
@@ -473,6 +519,30 @@ begin
   fParseMode := pParseMode;
 end;
 
+procedure TD2XXmlHandler.LexerInclude(const pFile: string; pX, pY: Integer);
+begin
+  BeginMethod('IncludeFile');
+  AddAttr('filename', pFile);
+  AddAttr('msgAt', IntToStr(pX) + ',' + IntToStr(pY));
+  EndMethod('');
+end;
+
+procedure TD2XXmlHandler.ParserMessage(const pTyp: TMessageEventType;
+  const pMsg: string; pX, pY: Integer);
+begin
+  case pTyp of
+    meError:
+      BeginMethod('D2X_errorMsg');
+    meNotSupported:
+      BeginMethod('D2X_notSuppMsg');
+  else
+    BeginMethod('D2X_unknownMsg');
+  end;
+  AddText(pMsg);
+  AddAttr('msgAt', IntToStr(pX) + ',' + IntToStr(pY));
+  EndMethod('');
+end;
+
 procedure TD2XXmlHandler.RollbackTo(pNodeName: string);
 var
   lCurrNode: TD2XmlNode;
@@ -483,6 +553,11 @@ begin
 
   if Assigned(lCurrNode) then
     fXmlNode := lCurrNode;
+end;
+
+function TD2XXmlHandler.UseProxy: Boolean;
+begin
+  Result := True;
 end;
 
 end.

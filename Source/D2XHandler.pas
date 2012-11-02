@@ -3,6 +3,7 @@ unit D2XHandler;
 interface
 
 uses
+  CastaliaPasLexTypes,
   System.Classes,
   System.Generics.Collections;
 
@@ -13,6 +14,7 @@ type
 
   public
     function Description: String; virtual; abstract;
+    function UseProxy: Boolean; virtual; abstract;
 
     procedure Copy(pFrom: TD2XHandler); virtual;
 
@@ -30,6 +32,9 @@ type
 
     procedure BeginMethod(pMethod: string); virtual;
     procedure EndMethod(pMethod: string); virtual;
+
+    procedure ParserMessage(const pTyp: TMessageEventType; const pMsg: string; pX, pY: Integer); virtual;
+    procedure LexerInclude(const pFile: string; pX, pY: Integer); virtual;
   end;
 
 function MakeStream(pS: TStream): TD2XHandler.ThStreamCreator;
@@ -96,6 +101,17 @@ begin
 end;
 
 procedure TD2XHandler.EndResults(pOutput: ThStreamCreator);
+begin
+
+end;
+
+procedure TD2XHandler.LexerInclude(const pFile: string; pX, pY: Integer);
+begin
+
+end;
+
+procedure TD2XHandler.ParserMessage(const pTyp: TMessageEventType;
+  const pMsg: string; pX, pY: Integer);
 begin
 
 end;

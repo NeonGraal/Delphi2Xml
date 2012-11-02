@@ -3,12 +3,12 @@ unit D2XProcessor;
 interface
 
 uses
+  CastaliaPasLexTypes,
   System.Classes,
   System.Diagnostics,
   System.Generics.Collections,
   System.Rtti,
   System.SysUtils,
-  CastaliaPasLexTypes,
   D2XParam,
   D2XOptions,
   D2XHandler,
@@ -28,6 +28,8 @@ type
     constructor Create(pActive: IParamFlag; pHandler: TD2XHandler);
     destructor Destroy; override;
 
+    function UseProxy: Boolean;
+
     procedure BeginProcessing;
     procedure EndProcessing;
 
@@ -42,6 +44,10 @@ type
 
     procedure BeginMethod(pMethod: string);
     procedure EndMethod(pMethod: string);
+
+    procedure ParserMessage(const pTyp: TMessageEventType; const pMsg: string;
+      pX, pY: Integer);
+    procedure LexerInclude(const pFile: string; pX, pY: Integer);
 
     procedure SetProcessingInput(pFilename: TD2XStringRef);
     procedure SetProcessingOutput(pFilename: TD2XStringRef);
@@ -284,9 +290,6 @@ begin
 
   for lP in fProcs do
     lP.EndProcessing;
-
-  //  if fOpts.CountChildren then
-  //    OutputStrIntDict(fMaxChildren, fOpts.CountChildrenFoE, MinMaxPairLog);
 end;
 
 procedure TD2XParamProcessor.EndResults(pFilename: string; pPer: TD2XResultPer);
@@ -295,11 +298,8 @@ var
 begin
   if fOpts.ResultPer >= pPer then
   begin
-    if fOpts.WriteXml then
-    begin
-      fXmlHandler.AddAttr('fileName', pFilename);
-      fXmlHandler.EndMethod('');
-    end;
+    fXmlHandler.AddAttr('fileName', pFilename);
+    fXmlHandler.EndMethod('');
   end;
 
   if fOpts.ResultPer = pPer then
@@ -353,6 +353,8 @@ end;
 
 procedure TD2XParamProcessor.ParserMessage(pSender: TObject; const pTyp: TMessageEventType;
   const pMsg: string; pX, pY: Integer);
+var
+  lP: TD2XProcessor;
 begin
   case pTyp of
     meError:
@@ -365,32 +367,8 @@ begin
     LogMessage('????', pMsg, pX, pY);
   end;
 
-  if fOpts.Verbose then
-    case pTyp of
-      meError:
-        Log('ERROR @ %d,%d: %s', [pX, pY, pMsg]);
-      meNotSupported:
-        Log('NOT SUPPORTED @ %d,%d: %s', [pX, pY, pMsg]);
-    else
-      Log('???? @ %d,%d: %s', [pX, pY, pMsg]);
-    end;
-
-  if fOpts.WriteXml then
-  begin
-    case pTyp of
-      meError:
-        fXmlHandler.BeginMethod('D2X_errorMsg');
-      meNotSupported:
-        fXmlHandler.BeginMethod('D2X_notSuppMsg');
-    else
-      fXmlHandler.BeginMethod('D2X_unknownMsg');
-    end;
-    fXmlHandler.AddText(pMsg);
-    // lAttr := fXmlDoc.CreateNode('msgAt', ntAttribute);
-    // lNode.AttributeNodes.Add(lAttr);
-    fXmlHandler.AddAttr('msgAt', IntToStr(pX) + ',' + IntToStr(pY));
-    fXmlHandler.EndMethod('');
-  end;
+  for lP in fProcs do
+    lP.ParserMessage(pTyp, pMsg, pX, pY);
 end;
 
 function TD2XParamProcessor.ProcessDirectory(pDir, pWildCards: string): Boolean;
@@ -449,6 +427,7 @@ begin
     end;
   end
   else
+  { TODO -oStruan -cTodo : Is thi sthe correct flag to check? }
     if fOpts.Verbose then
       Log('Cannot find "%s"', [lFile]);
 end;
@@ -527,18 +506,15 @@ end;
 procedure TD2XParamProcessor.LexerOnInclude(pLex: TD2XLexer);
 var
   lFile: string;
+  lX, lY: Integer;
+  lP: TD2XProcessor;
 begin
   lFile := pLex.DirectiveParam;
+  lX := pLex.PosXY.X;
+  lY := pLex.PosXY.Y;
 
-  if fOpts.Verbose then
-    Log('INCLUDE @ %d,%d: %s', [pLex.PosXY.X, pLex.PosXY.Y, lFile]);
-
-  if fOpts.WriteXml then
-  begin
-    fXmlHandler.BeginMethod('IncludeFile');
-    fXmlHandler.AddAttr('filename', lFile);
-    fXmlHandler.EndMethod('');
-  end;
+  for lP in fProcs do
+    lP.LexerInclude(lFile, lX, lY);
 
   pLex.Next;
 end;
@@ -786,7 +762,7 @@ end;
 {$WARN SYMBOL_PLATFORM OFF}
 
 function TD2XParamProcessor.RecurseDirectory(pDir, pWildCards: string;
-pMainDir: Boolean): Boolean;
+  pMainDir: Boolean): Boolean;
 var
   lFF: TSearchRec;
   lPath: string;
@@ -878,8 +854,12 @@ begin
 end;
 
 function TD2XParamProcessor.UseProxy: Boolean;
+var
+  lP: TD2XProcessor;
 begin
-  Result := fOpts.Verbose or fOpts.WriteXml or fOpts.CountChildren;
+  Result := False;
+  for lP in fProcs do
+    Result := Result or lP.UseProxy;
 end;
 
 { TD2XProcessor }
@@ -1054,6 +1034,19 @@ begin
       fHandler.EndResults(nil);
 end;
 
+procedure TD2XProcessor.LexerInclude(const pFile: string; pX, pY: Integer);
+begin
+  if fActive.Flag then
+    fHandler.LexerInclude(pFile, pX, pY);
+end;
+
+procedure TD2XProcessor.ParserMessage(const pTyp: TMessageEventType;
+  const pMsg: string; pX, pY: Integer);
+begin
+  if fActive.Flag then
+    fHandler.ParserMessage(pTyp, pMsg, pX, pY);
+end;
+
 procedure TD2XProcessor.SetFileInput(pFilename: TD2XStringRef);
 begin
   fFileInput := pFilename;
@@ -1077,6 +1070,11 @@ end;
 procedure TD2XProcessor.SetResultsOutput(pFilename: TD2XNamedStringRef);
 begin
   fResultsOutput := pFilename;
+end;
+
+function TD2XProcessor.UseProxy: Boolean;
+begin
+  Result := fActive.Flag and fHandler.UseProxy;
 end;
 
 end.
