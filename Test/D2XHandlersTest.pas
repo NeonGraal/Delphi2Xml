@@ -5,6 +5,7 @@ interface
 implementation
 
 uses
+  CastaliaPasLexTypes,
   D2X,
   D2XParser,
   D2XHandlers,
@@ -32,10 +33,13 @@ type
     procedure TearDown; override;
   published
     procedure TestDescription;
+    procedure TestUseProxy;
     procedure TestInit;
     procedure TestCopy;
     procedure TestBeginMethod;
     procedure TestEndMethod;
+    procedure TestLexerInclude;
+    procedure TestParserMessage;
   end;
 
   TestTD2XCountHandler = class(TStringTestCase)
@@ -46,6 +50,7 @@ type
     procedure TearDown; override;
   published
     procedure TestDescription;
+    procedure TestUseProxy;
     procedure TestEndProcessing;
     procedure TestBeginFile;
     procedure TestEndFile;
@@ -90,6 +95,7 @@ type
     procedure TearDown; override;
   published
     procedure TestDescription;
+    procedure TestUseProxy;
     procedure TestInit;
     procedure TestCopy;
     procedure TestBeginResults;
@@ -99,6 +105,8 @@ type
     procedure TestAddAttr;
     procedure TestAddText;
     procedure TestRollbackTo;
+    procedure TestLexerInclude;
+    procedure TestParserMessage;
 
     procedure TestProcessing;
   end;
@@ -132,6 +140,21 @@ begin
   finally
     pLexer.Free;
   end;
+end;
+
+procedure TestTD2XLogHandler.TestLexerInclude;
+begin
+  FD2XLogHandler.LexerInclude('', 0, 0);
+end;
+
+procedure TestTD2XLogHandler.TestParserMessage;
+begin
+  FD2XLogHandler.ParserMessage(meNotSupported, '', 0, 0);
+end;
+
+procedure TestTD2XLogHandler.TestUseProxy;
+begin
+  CheckTrue(FD2XLogHandler.UseProxy, 'Uses proxy');
 end;
 
 procedure TestTD2XLogHandler.TestCopy;
@@ -218,6 +241,11 @@ begin
   FD2XCountHandler.EndProcessing(MakeStream(fSS));
 
   CheckStream('Alpha=2,2', 'Processing');
+end;
+
+procedure TestTD2XCountHandler.TestUseProxy;
+begin
+  CheckTrue(FD2XCountHandler.UseProxy, 'Uses proxy');
 end;
 
 procedure TestTD2XCountHandler.TestBeginFile;
@@ -376,12 +404,30 @@ end;
 
 procedure TestTD2XXmlHandler.TestAddAttr;
 begin
-  FD2XXmlHandler.AddAttr('');
+  FD2XXmlHandler.BeginResults;
+  FD2XXmlHandler.HasFiles := True;
+  FD2XXmlHandler.BeginMethod('Test');
+  FD2XXmlHandler.AddAttr('Test', 'Test');
+  FD2XXmlHandler.EndResults(
+    function: TStream
+    begin
+      Result := fSS;
+    end);
+  CheckStream('<?xml version="1.0"?> <Test Test="Test" />', 'End Results');
 end;
 
 procedure TestTD2XXmlHandler.TestAddText;
 begin
-  FD2XXmlHandler.AddText;
+  FD2XXmlHandler.BeginResults;
+  FD2XXmlHandler.HasFiles := True;
+  FD2XXmlHandler.BeginMethod('Test');
+  FD2XXmlHandler.AddText('Test');
+  FD2XXmlHandler.EndResults(
+    function: TStream
+    begin
+      Result := fSS;
+    end);
+  CheckStream('<?xml version="1.0"?> <Test>Test</Test>', 'End Results');
 end;
 
 procedure TestTD2XXmlHandler.TestBeginMethod;
@@ -526,14 +572,59 @@ begin
   end;
 end;
 
+procedure TestTD2XXmlHandler.TestLexerInclude;
+begin
+  FD2XXmlHandler.LexerInclude('', 0, 0);
+end;
+
+procedure TestTD2XXmlHandler.TestParserMessage;
+begin
+  FD2XXmlHandler.ParserMessage(meNotSupported, '', 0, 0);
+end;
+
 procedure TestTD2XXmlHandler.TestProcessing;
 begin
-
+  FD2XXmlHandler.BeginResults;
+  FD2XXmlHandler.HasFiles := True;
+  FD2XXmlHandler.BeginMethod('Test');
+  FD2XXmlHandler.BeginMethod('Test1');
+  FD2XXmlHandler.AddAttr('Test', 'Test');
+  FD2XXmlHandler.BeginMethod('Test2');
+  FD2XXmlHandler.AddText('Test');
+  FD2XXmlHandler.EndMethod('Test2');
+  FD2XXmlHandler.BeginMethod('Test3');
+  FD2XXmlHandler.AddAttr('Test', 'Test');
+  FD2XXmlHandler.RollbackTo('Test1');
+  FD2XXmlHandler.BeginMethod('Test4');
+  FD2XXmlHandler.EndResults(
+    function: TStream
+    begin
+      Result := fSS;
+    end);
+  CheckStream('<?xml version="1.0"?> <Test> <Test1 Test="Test"> <Test2>Test</Test2> <Test3 Test="Test" /> <Test4 /> </Test1> </Test>', 'End Results');
 end;
 
 procedure TestTD2XXmlHandler.TestRollbackTo;
 begin
-  FD2XXmlHandler.RollbackTo('Test');
+  FD2XXmlHandler.BeginResults;
+  FD2XXmlHandler.HasFiles := True;
+  FD2XXmlHandler.BeginMethod('Test');
+  FD2XXmlHandler.BeginMethod('Test1');
+  FD2XXmlHandler.BeginMethod('Test2');
+  FD2XXmlHandler.BeginMethod('Test3');
+  FD2XXmlHandler.RollbackTo('Test1');
+  FD2XXmlHandler.BeginMethod('Test4');
+  FD2XXmlHandler.EndResults(
+    function: TStream
+    begin
+      Result := fSS;
+    end);
+  CheckStream('<?xml version="1.0"?> <Test> <Test1> <Test2> <Test3 /> </Test2> <Test4 /> </Test1> </Test>', 'End Results');
+end;
+
+procedure TestTD2XXmlHandler.TestUseProxy;
+begin
+  CheckTrue(FD2XXmlHandler.UseProxy, 'Uses proxy');
 end;
 
 initialization

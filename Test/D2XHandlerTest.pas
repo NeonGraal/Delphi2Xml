@@ -23,6 +23,7 @@ type
     CreateStreams: Boolean;
 
     function Description: String; override;
+    function UseProxy: Boolean; override;
     procedure BeginProcessing(pInput: TD2XHandler.ThStreamCreator); override;
     procedure EndProcessing(pOutput: TD2XHandler.ThStreamCreator); override;
     procedure BeginFile(pInput: TD2XHandler.ThStreamCreator); override;
@@ -232,6 +233,11 @@ begin
   CalledEndResults := true;
   if CreateStreams then
     pOutput;
+end;
+
+function TD2XHandlerTester.UseProxy: Boolean;
+begin
+  Result := True;
 end;
 
 initialization

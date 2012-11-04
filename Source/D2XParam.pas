@@ -178,6 +178,9 @@ type
 
     function GetFlag: Boolean;
     procedure SetFlag(pVal: Boolean);
+
+  public
+    property FlagValue: Boolean read fFlag write fFlag;
   end;
 
 implementation

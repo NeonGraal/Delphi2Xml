@@ -100,13 +100,26 @@ type
     procedure TestBooleanDfltParam;
   end;
 
-  TestTD2XBooleanParam = class(TTestCase)
+  TFlagParamTestCase = class(TTestCase)
+  protected
+      fFlag: IParamFlag;
+
+  public
+    procedure SetUp; override;
+    procedure TearDown; override;
+
+  published
+    procedure TestGetFlag; virtual; abstract;
+    procedure TestSetFlag; virtual; abstract;
+
+  end;
+
+  TestTD2XBooleanParam = class(TFlagParamTestCase)
   strict private
     fBoolP: TD2XBooleanParam;
 
   public
     procedure SetUp; override;
-    procedure TearDown; override;
 
   published
     procedure TestInvalidCreateReset;
@@ -119,6 +132,8 @@ type
     procedure TestValue;
     procedure TestToString;
     procedure TestIsDefault;
+    procedure TestGetFlag; override;
+    procedure TestSetFlag; override;
   end;
 
   TestTD2XStringParam = class(TTestCase)
@@ -180,13 +195,13 @@ type
     procedure TestValue;
   end;
 
-  TestTD2XFlaggedStringParam = class(TTestCase)
+  TestTD2XFlaggedStringParam = class(TFlagParamTestCase)
   strict private
     fFlagP: TD2XFlaggedStringParam;
+    fFlag: IParamFlag;
 
   public
     procedure SetUp; override;
-    procedure TearDown; override;
 
   published
     procedure TestInvalidCreateParam;
@@ -199,6 +214,8 @@ type
     procedure TestValue;
     procedure TestToString;
     procedure TestIsDefault;
+    procedure TestGetFlag; override;
+    procedure TestSetFlag; override;
   end;
 
   { TestTD2XSingleParam }
@@ -440,18 +457,27 @@ end;
 
 procedure TestTD2XBooleanParam.SetUp;
 begin
-  fBoolP := TD2XBooleanParam.CreateBool('T', 'Test', 'Test Boolean Param');
-end;
+  inherited;
 
-procedure TestTD2XBooleanParam.TearDown;
-begin
-  FreeAndNil(fBoolP);
+  fBoolP := TD2XBooleanParam.CreateBool('T', 'Test', 'Test Boolean Param');
+  fFlag := fBoolP;
 end;
 
 procedure TestTD2XBooleanParam.TestDescribe;
 begin
   CheckEqualsString('T[+|-] - Test Boolean Param', ReduceString(fBoolP.Describe),
     'Describe Param');
+end;
+
+procedure TestTD2XBooleanParam.TestGetFlag;
+begin
+  CheckFalse(fFlag.Flag, 'Check is Default');
+
+  fBoolP.Value := True;
+  CheckTrue(fFlag.Flag, 'Check is not Default');
+
+  fBoolP.Reset;
+  CheckFalse(fFlag.Flag, 'Check is Default');
 end;
 
 procedure TestTD2XBooleanParam.TestInvalidCreateParam;
@@ -521,6 +547,17 @@ begin
 
   fBoolP.Reset;
   CheckEquals(False, fBoolP.Value, 'Default Value Reset');
+end;
+
+procedure TestTD2XBooleanParam.TestSetFlag;
+begin
+  CheckFalse(fBoolP.Value, 'Check is Default');
+
+  fFlag.Flag := True;
+  CheckTrue(fBoolP.Value, 'Check is not Default');
+
+  fFlag.Flag := False;
+  CheckFalse(fBoolP.Value, 'Check is Default');
 end;
 
 procedure TestTD2XBooleanParam.TestToString;
@@ -1074,11 +1111,7 @@ procedure TestTD2XFlaggedStringParam.SetUp;
 begin
   fFlagP := TD2XFlaggedStringParam.CreateFlagStr('T', 'Test', '<Example>', 'Test String Param',
     'Tst', False, nil, nil, nil);
-end;
-
-procedure TestTD2XFlaggedStringParam.TearDown;
-begin
-  FreeAndNil(fFlagP);
+  fFlag := fFlagP;
 end;
 
 procedure TestTD2XFlaggedStringParam.TestDescribe;
@@ -1093,6 +1126,17 @@ begin
 
   IParamFlag(fFlagP).Flag := True;
   CheckEquals(True, IParamFlag(fFlagP).Flag, 'Other Flag Set');
+end;
+
+procedure TestTD2XFlaggedStringParam.TestGetFlag;
+begin
+  CheckFalse(fFlag.Flag, 'Check is Default');
+
+  fFlagP.FlagValue := True;
+  CheckTrue(fFlag.Flag, 'Check is not Default');
+
+  fFlagP.Reset;
+  CheckFalse(fFlag.Flag, 'Check is Default');
 end;
 
 procedure TestTD2XFlaggedStringParam.TestInvalidCreateParam;
@@ -1191,6 +1235,17 @@ begin
   CheckEquals(False, IParamFlag(fFlagP).Flag, 'Default Flag Reset');
 end;
 
+procedure TestTD2XFlaggedStringParam.TestSetFlag;
+begin
+  CheckFalse(fFlagP.FlagValue, 'Check is Default');
+
+  fFlag.Flag := True;
+  CheckTrue(fFlagP.FlagValue, 'Check is not Default');
+
+  fFlag.Flag := False;
+  CheckFalse(fFlagP.FlagValue, 'Check is Default');
+end;
+
 procedure TestTD2XFlaggedStringParam.TestToString;
 begin
   CheckEqualsString('T-(Tst)', fFlagP.ToString, 'Check Default Value');
@@ -1248,7 +1303,7 @@ procedure TestTD2XResettableParam.TestInvalidCreate;
 begin
   StartExpectingException(EInvalidParam);
   try
-    TD2XSingleParam<string>.Create('', '', '', '', TstParser);
+    TD2XResettableParam.Create('', '', '', '', TstParser);
   except
     on E: EInvalidParam do
     begin
@@ -1296,6 +1351,22 @@ end;
 procedure TestTD2XResettableParam.TstSetter;
 begin
   //  fCalledResetter := True;
+end;
+
+{ TestFlagParam }
+
+procedure TFlagParamTestCase.SetUp;
+begin
+  inherited;
+
+  fFlag := nil;
+end;
+
+procedure TFlagParamTestCase.TearDown;
+begin
+  fFlag := nil;
+
+  inherited;
 end;
 
 initialization

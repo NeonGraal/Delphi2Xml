@@ -8,7 +8,7 @@ uses
   System.Generics.Collections;
 
 type
-  TD2XHandler = class
+  TD2XHandler = class abstract
   public type
     ThStreamCreator = reference to function: TStream;
 

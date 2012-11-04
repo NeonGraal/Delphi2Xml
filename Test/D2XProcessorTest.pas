@@ -60,6 +60,9 @@ type
 
     procedure TestBeginMethod;
     procedure TestEndMethod;
+
+    procedure TestLexerInclude;
+    procedure TestParserMessage;
   end;
 
   TestTD2XParamProcessor = class(TStringTestCase)
@@ -365,6 +368,16 @@ begin
   fActive.Flag := True;
   FD2XProcessor.EndResults('');
   CheckTrue(FHandler.CalledEndResults, 'Called End Results');
+end;
+
+procedure TestTD2XProcessor.TestLexerInclude;
+begin
+  FD2XProcessor.LexerInclude('', 0, 0);
+end;
+
+procedure TestTD2XProcessor.TestParserMessage;
+begin
+  FD2XProcessor.ParserMessage(meNotSupported, '', 0, 0);
 end;
 
 procedure TestTD2XProcessor.TestSetFileInput;
