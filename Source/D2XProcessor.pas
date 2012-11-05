@@ -8,13 +8,10 @@ uses
   System.Diagnostics,
   System.Generics.Collections,
   System.Rtti,
-  System.SysUtils,
   D2XParam,
   D2XOptions,
-  D2XHandler,
   D2XHandlers,
   D2XParser,
-  D2Xml,
   D2X;
 
 type
@@ -23,47 +20,34 @@ type
     Children: Integer;
   end;
 
-  TD2XProcessor = class(TD2XLogger)
+  TD2XProcessor = class abstract(TD2XLogger)
   public
-    constructor Create(pActive: IParamFlag; pHandler: TD2XHandler);
+    constructor Create(pActive: IParamFlag);
     destructor Destroy; override;
 
-    function UseProxy: Boolean;
+    function UseProxy: Boolean; virtual;
 
-    procedure BeginProcessing;
-    procedure EndProcessing;
+    procedure BeginProcessing; virtual; abstract;
+    procedure EndProcessing; virtual; abstract;
 
-    procedure BeginFile;
-    procedure EndFile;
+    procedure BeginFile; virtual; abstract;
+    procedure EndFile; virtual; abstract;
 
-    procedure BeginResults;
-    procedure EndResults(pFile: string);
+    procedure BeginResults; virtual; abstract;
+    procedure EndResults(pFile: string); virtual; abstract;
 
-    function CheckBeforeMethod(pMethod: string): Boolean;
-    function CheckAfterMethod(pMethod: string): Boolean;
+    function CheckBeforeMethod(pMethod: string): Boolean; virtual;
+    function CheckAfterMethod(pMethod: string): Boolean; virtual;
 
-    procedure BeginMethod(pMethod: string);
-    procedure EndMethod(pMethod: string);
+    procedure BeginMethod(pMethod: string); virtual; abstract;
+    procedure EndMethod(pMethod: string); virtual; abstract;
 
     procedure ParserMessage(const pTyp: TMessageEventType; const pMsg: string;
-      pX, pY: Integer);
-    procedure LexerInclude(const pFile: string; pX, pY: Integer);
+      pX, pY: Integer); virtual; abstract;
+    procedure LexerInclude(const pFile: string; pX, pY: Integer); virtual; abstract;
 
-    procedure SetProcessingInput(pFilename: TD2XStringRef);
-    procedure SetProcessingOutput(pFilename: TD2XStringRef);
-    procedure SetResultsOutput(pFilename: TD2XNamedStringRef);
-    procedure SetFileInput(pFilename: TD2XStringRef);
-    procedure SetFileOutput(pFilename: TD2XStringRef);
-
-  private
+  protected
     fActive: IParamFlag;
-    fHandler: TD2XHandler;
-
-    fProcessingInput: TD2XStringRef;
-    fProcessingOutput: TD2XStringRef;
-    fResultsOutput: TD2XNamedStringRef;
-    fFileInput: TD2XStringRef;
-    fFileOutput: TD2XStringRef;
 
   end;
 
@@ -148,8 +132,10 @@ type
 implementation
 
 uses
+  D2XProcessors,
   System.IOUtils,
   System.StrUtils,
+  System.SysUtils,
   Xml.XMLIntf,
   Winapi.Windows;
 
@@ -427,7 +413,7 @@ begin
     end;
   end
   else
-  { TODO -oStruan -cTodo : Is thi sthe correct flag to check? }
+    { TODO -oStruan -cTodo : Is thi sthe correct flag to check? }
     if fOpts.Verbose then
       Log('Cannot find "%s"', [lFile]);
 end;
@@ -643,46 +629,46 @@ end;
 
 procedure TD2XParamProcessor.InitProcessors;
 var
-  lProc: TD2XProcessor;
+  lHProc: TD2XHandlerProcessor;
 begin
   fLogHandler := TD2XLogHandler.Create;
   fLogHandler.L.JoinLog(Self);
 
-  fProcs.Add(TD2XProcessor.Create(fOpts.VerboseFlag, fLogHandler));
+  fProcs.Add(TD2XHandlerProcessor.CreateHandler(fOpts.VerboseFlag, fLogHandler));
 
-  lProc := TD2XProcessor.Create(fOpts.SkipMethodsFlag, TD2XSkipHandler.Create);
-  lProc.SetFileInput(
+  lHProc := TD2XHandlerProcessor.CreateHandler(fOpts.SkipMethodsFlag, TD2XSkipHandler.Create);
+  lHProc.SetFileInput(
     function: string
     begin
       Result := fOpts.InputFileOrExtn(fOpts.SkipMethodsFoE);
     end);
-  lProc.SetProcessingOutput(
+  lHProc.SetProcessingOutput(
     function: string
     begin
       Result := fOpts.OutputFileOrExtn(fOpts.SkipMethodsFoE + '.log');
     end);
-  fProcs.Add(lProc);
+  fProcs.Add(lHProc);
 
-  lProc := TD2XProcessor.Create(fOpts.CountChildrenFlag, TD2XCountHandler.Create);
-  lProc.SetFileInput(
+  lHProc := TD2XHandlerProcessor.CreateHandler(fOpts.CountChildrenFlag, TD2XCountHandler.Create);
+  lHProc.SetFileInput(
     function: string
     begin
       Result := '';
     end);
-  lProc.SetFileOutput(
+  lHProc.SetFileOutput(
     function: string
     begin
       Result := '';
     end);
-  lProc.SetProcessingOutput(
+  lHProc.SetProcessingOutput(
     function: string
     begin
       Result := fOpts.OutputFileOrExtn(fOpts.SkipMethodsFoE + '.log');
     end);
-  fProcs.Add(lProc);
+  fProcs.Add(lHProc);
 
   fXmlHandler := TD2XXmlHandler.Create;
-  fProcs.Add(TD2XProcessor.Create(fOpts.WriteXmlFlag, fXmlHandler));
+  fProcs.Add(TD2XHandlerProcessor.CreateHandler(fOpts.WriteXmlFlag, fXmlHandler));
 end;
 
 function TD2XParamProcessor.ProcessParamsFile(pFileOrExtn: string): Boolean;
@@ -864,86 +850,21 @@ end;
 
 { TD2XProcessor }
 
-procedure TD2XProcessor.BeginFile;
-var
-  lFS: TFileStream;
-begin
-  lFS := nil;
-  if fActive.Flag then
-    if Assigned(fFileInput) then
-      try
-        fHandler.BeginFile(
-          function: TStream
-          var
-            lFile: string;
-          begin
-            lFile := fFileInput;
-            if FileExists(lFile) then
-              lFS := TFileStream.Create(lFile, fmOpenRead)
-            else
-              Log('WARNING: %1 file "%2" not found', [fHandler.Description, lFile]);
-            Result := lFS;
-          end);
-      finally
-        FreeAndNil(lFS);
-      end
-    else
-      fHandler.BeginFile(nil);
-end;
-
-procedure TD2XProcessor.BeginMethod(pMethod: string);
-begin
-  if fActive.Flag then
-    fHandler.BeginMethod(pMethod);
-end;
-
-procedure TD2XProcessor.BeginProcessing;
-var
-  lFS: TFileStream;
-begin
-  lFS := nil;
-  if fActive.Flag then
-    if Assigned(fProcessingInput) then
-      try
-        fHandler.BeginProcessing(
-          function: TStream
-          var
-            lFile: string;
-          begin
-            lFile := fProcessingInput;
-            if FileExists(lFile) then
-              lFS := TFileStream.Create(lFile, fmOpenRead);
-            Result := lFS;
-          end);
-      finally
-        FreeAndNil(lFS);
-      end
-    else
-      fHandler.BeginProcessing(nil);
-end;
-
-procedure TD2XProcessor.BeginResults;
-begin
-  if fActive.Flag then
-    fHandler.BeginResults;
-end;
-
 function TD2XProcessor.CheckAfterMethod(pMethod: string): Boolean;
 begin
-  Result := not fActive.Flag or fHandler.CheckAfterMethod(pMethod);
+  Result := True;
 end;
 
 function TD2XProcessor.CheckBeforeMethod(pMethod: string): Boolean;
 begin
-  Result := not fActive.Flag or fHandler.CheckBeforeMethod(pMethod);
+  Result := True;
 end;
 
-constructor TD2XProcessor.Create(pActive: IParamFlag; pHandler: TD2XHandler);
+constructor TD2XProcessor.Create(pActive: IParamFlag);
 begin
   inherited Create;
 
   fActive := pActive;
-  fHandler := pHandler;
 end;
 
 destructor TD2XProcessor.Destroy;
@@ -953,128 +874,9 @@ begin
   inherited;
 end;
 
-procedure TD2XProcessor.EndFile;
-var
-  lFS: TFileStream;
-begin
-  lFS := nil;
-  if fActive.Flag then
-    if Assigned(fFileOutput) then
-      try
-        fHandler.EndFile(
-          function: TStream
-          var
-            lFile: string;
-          begin
-            lFile := fFileOutput;
-            if lFile > '' then
-              lFS := TFileStream.Create(lFile, fmOpenWrite);
-            Result := lFS;
-          end);
-      finally
-        FreeAndNil(lFS);
-      end
-    else
-      fHandler.EndFile(nil);
-end;
-
-procedure TD2XProcessor.EndMethod(pMethod: string);
-begin
-  if fActive.Flag then
-    fHandler.EndMethod(pMethod);
-end;
-
-procedure TD2XProcessor.EndProcessing;
-var
-  lFS: TFileStream;
-begin
-  lFS := nil;
-  if fActive.Flag then
-    if Assigned(fProcessingOutput) then
-      try
-        fHandler.EndProcessing(
-          function: TStream
-          var
-            lFile: string;
-          begin
-            lFile := fProcessingOutput;
-            if lFile > '' then
-              lFS := TFileStream.Create(lFile, fmOpenWrite);
-            Result := lFS;
-          end);
-      finally
-        FreeAndNil(lFS);
-      end
-    else
-      fHandler.EndProcessing(nil);
-end;
-
-procedure TD2XProcessor.EndResults(pFile: string);
-var
-  lFS: TFileStream;
-begin
-  lFS := nil;
-  if fActive.Flag then
-    if Assigned(fResultsOutput) then
-      try
-        fHandler.EndResults(
-          function: TStream
-          var
-            lFile: string;
-          begin
-            lFile := fResultsOutput(pFile);
-            if lFile > '' then
-              lFS := TFileStream.Create(lFile, fmOpenWrite);
-            Result := lFS;
-          end);
-      finally
-        FreeAndNil(lFS);
-      end
-    else
-      fHandler.EndResults(nil);
-end;
-
-procedure TD2XProcessor.LexerInclude(const pFile: string; pX, pY: Integer);
-begin
-  if fActive.Flag then
-    fHandler.LexerInclude(pFile, pX, pY);
-end;
-
-procedure TD2XProcessor.ParserMessage(const pTyp: TMessageEventType;
-  const pMsg: string; pX, pY: Integer);
-begin
-  if fActive.Flag then
-    fHandler.ParserMessage(pTyp, pMsg, pX, pY);
-end;
-
-procedure TD2XProcessor.SetFileInput(pFilename: TD2XStringRef);
-begin
-  fFileInput := pFilename;
-end;
-
-procedure TD2XProcessor.SetFileOutput(pFilename: TD2XStringRef);
-begin
-  fFileOutput := pFilename;
-end;
-
-procedure TD2XProcessor.SetProcessingInput(pFilename: TD2XStringRef);
-begin
-  fProcessingInput := pFilename;
-end;
-
-procedure TD2XProcessor.SetProcessingOutput(pFilename: TD2XStringRef);
-begin
-  fProcessingOutput := pFilename;
-end;
-
-procedure TD2XProcessor.SetResultsOutput(pFilename: TD2XNamedStringRef);
-begin
-  fResultsOutput := pFilename;
-end;
-
 function TD2XProcessor.UseProxy: Boolean;
 begin
-  Result := fActive.Flag and fHandler.UseProxy;
+  Result := False;
 end;
 
 end.

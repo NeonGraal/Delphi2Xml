@@ -32,11 +32,12 @@ uses
   D2XProcessorTest in 'D2XProcessorTest.pas',
   D2Xml in '..\Source\D2Xml.pas',
   D2XmlTest in 'D2XmlTest.pas',
-  Test in 'Test.pas',
   D2XHandler in '..\Source\D2XHandler.pas',
   D2XHandlerTest in 'D2XHandlerTest.pas',
   D2XHandlers in '..\Source\D2XHandlers.pas',
-  D2XHandlersTest in 'D2XHandlersTest.pas';
+  D2XHandlersTest in 'D2XHandlersTest.pas',
+  D2XProcessors in '..\Source\D2XProcessors.pas',
+  D2XProcessorsTest in 'D2XProcessorsTest.pas';
 
 {$R *.RES}
 

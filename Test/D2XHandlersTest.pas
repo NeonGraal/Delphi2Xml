@@ -144,12 +144,24 @@ end;
 
 procedure TestTD2XLogHandler.TestLexerInclude;
 begin
-  FD2XLogHandler.LexerInclude('', 0, 0);
+  FD2XLogHandler.L.JoinLog(fID2XLogger);
+
+  FD2XLogHandler.LexerInclude('Test', 1, 2);
+
+  CheckLog('INCLUDE @ 1,2: Test', 'Lexer Include');
 end;
 
 procedure TestTD2XLogHandler.TestParserMessage;
 begin
-  FD2XLogHandler.ParserMessage(meNotSupported, '', 0, 0);
+  FD2XLogHandler.L.JoinLog(fID2XLogger);
+
+  FD2XLogHandler.ParserMessage(meNotSupported, 'Test', 1, 2);
+
+  CheckLog('NOT SUPPORTED @ 1,2: Test', 'Begin Method');
+
+  FD2XLogHandler.ParserMessage(meError, 'Test', 1, 2);
+
+  CheckLog('ERROR @ 1,2: Test', 'Begin Method');
 end;
 
 procedure TestTD2XLogHandler.TestUseProxy;
@@ -574,12 +586,45 @@ end;
 
 procedure TestTD2XXmlHandler.TestLexerInclude;
 begin
-  FD2XXmlHandler.LexerInclude('', 0, 0);
+  FD2XXmlHandler.BeginResults;
+  FD2XXmlHandler.HasFiles := True;
+  FD2XXmlHandler.BeginMethod('Test');
+
+  FD2XXmlHandler.LexerInclude('Test', 1, 2);
+
+  FD2XXmlHandler.EndResults(
+    function: TStream
+    begin
+      Result := fSS;
+    end);
+  CheckStream('<?xml version="1.0"?> <Test> <IncludeFile filename="Test" msgAt="1,2" /> </Test>', 'End Results');
 end;
 
 procedure TestTD2XXmlHandler.TestParserMessage;
 begin
-  FD2XXmlHandler.ParserMessage(meNotSupported, '', 0, 0);
+  FD2XXmlHandler.BeginResults;
+  FD2XXmlHandler.HasFiles := True;
+  FD2XXmlHandler.BeginMethod('Test');
+
+  FD2XXmlHandler.ParserMessage(meNotSupported, 'Test', 1, 2);
+
+  FD2XXmlHandler.EndResults(
+    function: TStream
+    begin
+      Result := fSS;
+    end);
+  CheckStream('<?xml version="1.0"?> <Test> <D2X_notSuppMsg msgAt="1,2">Test</D2X_notSuppMsg> </Test>', 'End Results');
+
+  FD2XXmlHandler.BeginResults;
+  FD2XXmlHandler.HasFiles := True;
+  FD2XXmlHandler.BeginMethod('Test');
+  FD2XXmlHandler.ParserMessage(meError, 'Test', 1, 2);
+  FD2XXmlHandler.EndResults(
+    function: TStream
+    begin
+      Result := fSS;
+    end);
+  CheckStream('<?xml version="1.0"?> <Test> <D2X_errorMsg msgAt="1,2">Test</D2X_errorMsg> </Test>', 'End Results');
 end;
 
 procedure TestTD2XXmlHandler.TestProcessing;

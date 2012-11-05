@@ -3,6 +3,7 @@ unit D2XHandlerTest;
 interface
 
 uses
+  CastaliaPasLexTypes,
   D2XHandler;
 
 type
@@ -19,6 +20,8 @@ type
     CalledBeginMethod: Boolean;
     CalledEndMethod: Boolean;
     CalledCopy: Boolean;
+    CalledLexerInclude: Boolean;
+    CalledParserMessage: Boolean;
 
     CreateStreams: Boolean;
 
@@ -34,8 +37,9 @@ type
     function CheckAfterMethod(pMethod: String): Boolean; override;
     procedure BeginMethod(pMethod: String); override;
     procedure EndMethod(pMethod: String); override;
-
     procedure Copy(pFrom: TD2XHandler); override;
+    procedure ParserMessage(const pTyp: TMessageEventType; const pMsg: string; pX, pY: Integer); override;
+    procedure LexerInclude(const pFile: string; pX, pY: Integer); override;
 
   end;
 
@@ -233,6 +237,17 @@ begin
   CalledEndResults := true;
   if CreateStreams then
     pOutput;
+end;
+
+procedure TD2XHandlerTester.LexerInclude(const pFile: string; pX, pY: Integer);
+begin
+  CalledLexerInclude := true;
+end;
+
+procedure TD2XHandlerTester.ParserMessage(const pTyp: TMessageEventType;
+  const pMsg: string; pX, pY: Integer);
+begin
+  CalledParserMessage := true;
 end;
 
 function TD2XHandlerTester.UseProxy: Boolean;

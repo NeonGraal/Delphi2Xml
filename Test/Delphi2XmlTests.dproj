@@ -41,6 +41,8 @@
 		</PropertyGroup>
 		<Import Condition="'$(Base)'!='' And Exists('..\CastaliaParser.optset')" Project="..\CastaliaParser.optset"/>
 		<PropertyGroup Condition="'$(Base)'!=''">
+			<DCC_OutputDependencies>true</DCC_OutputDependencies>
+			<DCC_OutputXMLDocumentation>true</DCC_OutputXMLDocumentation>
 			<DCC_SYMBOL_DEPRECATED>false</DCC_SYMBOL_DEPRECATED>
 			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
 			<Manifest_File>None</Manifest_File>
@@ -101,14 +103,16 @@
 			<DCCReference Include="D2XProcessorTest.pas"/>
 			<DCCReference Include="..\Source\D2Xml.pas"/>
 			<DCCReference Include="D2XmlTest.pas"/>
-			<DCCReference Include="Test.pas"/>
 			<DCCReference Include="..\Source\D2XHandler.pas"/>
 			<DCCReference Include="D2XHandlerTest.pas"/>
 			<DCCReference Include="..\Source\D2XHandlers.pas"/>
 			<DCCReference Include="D2XHandlersTest.pas"/>
+			<DCCReference Include="..\Source\D2XProcessors.pas"/>
+			<DCCReference Include="D2XProcessorsTest.pas"/>
 			<None Include="Profiling\Delphi2XmlTest.aqt"/>
 			<None Include="Config\Test.def"/>
 			<None Include="Config\Test.prm"/>
+			<None Include="Test.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>

@@ -22,6 +22,7 @@ type
 
   strict protected
     fOpts: TD2XOptions;
+    fLogger: ID2XLogger;
 
     procedure CheckLog(pMsg: string);
   public
@@ -197,6 +198,7 @@ end;
 procedure TestTD2XOptionBase.TearDown;
 begin
   FreeAndNil(fLog);
+//  FreeAndNil(fOpts);
   fOpts := nil;
 end;
 
