@@ -1,14 +1,14 @@
-unit D2XProcessors;
+unit D2X.Processors;
 
 interface
 
 uses
   CastaliaPasLexTypes,
   D2X,
-  D2XParam,
-  D2XParser,
-  D2XHandler,
-  D2XProcessor;
+  D2X.Param,
+  D2X.Parser,
+  D2X.Handler,
+  D2X.Processor;
 
 type
   TD2XLexerProcessor = class(TD2XProcessor)

@@ -1,10 +1,10 @@
-unit D2XOptions;
+unit D2X.Options;
 
 interface
 
 uses
   D2X,
-  D2XParam,
+  D2X.Param,
   System.SysUtils,
   System.StrUtils,
   System.Classes;

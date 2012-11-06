@@ -1,4 +1,4 @@
-unit D2XHandlersTest;
+unit D2X.Handlers.Test;
 
 interface
 
@@ -7,11 +7,11 @@ implementation
 uses
   CastaliaPasLexTypes,
   D2X,
-  D2XParser,
-  D2XHandlers,
-  D2XHandler,
-  D2Xml,
-  D2XTest,
+  D2X.Parser,
+  D2X.Handlers,
+  D2X.Handler,
+  D2X.Xml,
+  D2X.Test,
   System.Classes,
   System.Generics.Collections,
   System.StrUtils,

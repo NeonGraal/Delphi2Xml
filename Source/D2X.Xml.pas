@@ -1,4 +1,4 @@
-unit D2Xml;
+unit D2X.Xml;
 
 interface
 

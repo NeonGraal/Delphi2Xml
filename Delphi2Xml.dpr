@@ -8,14 +8,16 @@ uses
   System.StrUtils,
   System.SysUtils,
   Winapi.Windows,
-  D2XProcessor in 'Source\D2XProcessor.pas',
-  D2XParser in 'Source\D2XParser.pas',
-  D2XOptions in 'Source\D2XOptions.pas',
-  D2Xml in 'Source\D2Xml.pas',
   D2X in 'Source\D2X.pas',
-  D2XParam in 'Source\D2XParam.pas',
-  D2XHandlers in 'Source\D2XHandlers.pas',
-  D2XHandler in 'Source\D2XHandler.pas';
+  D2X.Handler in 'Source\D2X.Handler.pas',
+  D2X.Handlers in 'Source\D2X.Handlers.pas',
+  D2X.Options in 'Source\D2X.Options.pas',
+  D2X.Param in 'Source\D2X.Param.pas',
+  D2X.ParamProcessor in 'Source\D2X.ParamProcessor.pas',
+  D2X.Parser in 'Source\D2X.Parser.pas',
+  D2X.Processor in 'Source\D2X.Processor.pas',
+  D2X.Processors in 'Source\D2X.Processors.pas',
+  D2X.Xml in 'Source\D2X.Xml.pas';
 
 var
   prc: TD2XParamProcessor;

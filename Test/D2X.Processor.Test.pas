@@ -1,9 +1,9 @@
-unit D2XProcessorTest;
+unit D2X.Processor.Test;
 
 interface
 
 uses
-  D2XParam;
+  D2X.Param;
 
 type
   TTestBoolFlag = class(TInterfacedObject, IParamFlag)
@@ -19,13 +19,13 @@ implementation
 uses
   TestFramework,
   CastaliaPasLexTypes,
-  D2Xml,
-  D2XTest,
-  D2XHandler,
-  D2XHandlerTest,
-  D2XOptions,
-  D2XParser,
-  D2XParamProcessor,
+  D2X.Xml,
+  D2X.Test,
+  D2X.Handler,
+  D2X.Handler.Test,
+  D2X.Options,
+  D2X.Parser,
+  D2X.ParamProcessor,
   System.Classes,
   System.Diagnostics,
   System.Generics.Collections,

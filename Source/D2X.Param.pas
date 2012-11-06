@@ -1,4 +1,4 @@
-unit D2XParam;
+unit D2X.Param;
 
 interface
 

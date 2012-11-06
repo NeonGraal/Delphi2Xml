@@ -1,4 +1,4 @@
-unit D2XParamTest;
+unit D2X.Param.Test;
 
 interface
 
@@ -6,8 +6,8 @@ implementation
 
 uses
   D2X,
-  D2XParam,
-  D2XUtils,
+  D2X.Param,
+  D2X.Utils,
   System.Classes,
   System.Rtti,
   System.StrUtils,

@@ -1,13 +1,13 @@
-unit D2XHandlers;
+unit D2X.Handlers;
 
 interface
 
 uses
   CastaliaPasLexTypes,
   D2X,
-  D2XParser,
-  D2XHandler,
-  D2Xml,
+  D2X.Parser,
+  D2X.Handler,
+  D2X.Xml,
   System.Classes,
   System.Generics.Collections;
 

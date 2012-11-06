@@ -92,14 +92,16 @@
 			<DelphiCompile Include="$(MainSource)">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
-			<DCCReference Include="Source\D2XProcessor.pas"/>
-			<DCCReference Include="Source\D2XParser.pas"/>
-			<DCCReference Include="Source\D2XOptions.pas"/>
-			<DCCReference Include="Source\D2Xml.pas"/>
 			<DCCReference Include="Source\D2X.pas"/>
-			<DCCReference Include="Source\D2XParam.pas"/>
-			<DCCReference Include="Source\D2XHandlers.pas"/>
-			<DCCReference Include="Source\D2XHandler.pas"/>
+			<DCCReference Include="Source\D2X.Handler.pas"/>
+			<DCCReference Include="Source\D2X.Handlers.pas"/>
+			<DCCReference Include="Source\D2X.Options.pas"/>
+			<DCCReference Include="Source\D2X.Param.pas"/>
+			<DCCReference Include="Source\D2X.ParamProcessor.pas"/>
+			<DCCReference Include="Source\D2X.Parser.pas"/>
+			<DCCReference Include="Source\D2X.Processor.pas"/>
+			<DCCReference Include="Source\D2X.Processors.pas"/>
+			<DCCReference Include="Source\D2X.Xml.pas"/>
 			<None Include="Config\Test.prm"/>
 			<None Include="Config\Delphi2Xml.skip"/>
 			<BuildConfiguration Include="Release">

@@ -1,4 +1,4 @@
-unit D2XParser;
+unit D2X.Parser;
 
 interface
 

@@ -1,4 +1,4 @@
-unit D2XHandler;
+unit D2X.Handler;
 
 interface
 

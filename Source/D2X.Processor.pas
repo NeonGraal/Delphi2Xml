@@ -1,4 +1,4 @@
-unit D2XProcessor;
+unit D2X.Processor;
 
 interface
 
@@ -8,10 +8,10 @@ uses
   System.Diagnostics,
   System.Generics.Collections,
   System.Rtti,
-  D2XParam,
-  D2XOptions,
-  D2XHandlers,
-  D2XParser,
+  D2X.Param,
+  D2X.Options,
+  D2X.Handlers,
+  D2X.Parser,
   D2X;
 
 type

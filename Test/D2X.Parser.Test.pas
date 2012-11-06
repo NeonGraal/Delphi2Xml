@@ -1,9 +1,9 @@
-unit D2XParserTest;
+unit D2X.Parser.Test;
 
 interface
 
 uses
-  D2XParser,
+  D2X.Parser,
   TestFramework;
 
 type

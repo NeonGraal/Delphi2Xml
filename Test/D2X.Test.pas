@@ -1,4 +1,4 @@
-unit D2XTest;
+unit D2X.Test;
 
 interface
 
@@ -42,8 +42,8 @@ type
 implementation
 
 uses
-  D2XUtils,
-  D2XOptions,
+  D2X.Utils,
+  D2X.Options,
   System.Rtti,
   System.StrUtils;
 

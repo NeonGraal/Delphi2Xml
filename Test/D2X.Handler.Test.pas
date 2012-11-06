@@ -1,10 +1,10 @@
-unit D2XHandlerTest;
+unit D2X.Handler.Test;
 
 interface
 
 uses
   CastaliaPasLexTypes,
-  D2XHandler;
+  D2X.Handler;
 
 type
   TD2XHandlerTester = class(TD2XHandler)

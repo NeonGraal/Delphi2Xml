@@ -1,4 +1,4 @@
-unit D2XProcessorsTest;
+unit D2X.Processors.Test;
 
 interface
 
@@ -7,13 +7,13 @@ implementation
 uses
   TestFramework,
   CastaliaPasLexTypes,
-  D2XTest,
-  D2XHandler,
-  D2XHandlerTest,
-  D2XParam,
-  D2XParser,
-  D2XProcessors,
-  D2XProcessorTest,
+  D2X.Test,
+  D2X.Handler,
+  D2X.Handler.Test,
+  D2X.Param,
+  D2X.Parser,
+  D2X.Processors,
+  D2X.Processor.Test,
   System.SysUtils;
 
 type

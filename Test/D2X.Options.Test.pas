@@ -1,4 +1,4 @@
-unit D2XOptionsTest;
+unit D2X.Options.Test;
 
 interface
 
@@ -6,9 +6,9 @@ implementation
 
 uses
   D2X,
-  D2XUtils,
-  D2XParam,
-  D2XOptions,
+  D2X.Utils,
+  D2X.Param,
+  D2X.Options,
   System.Classes,
   System.StrUtils,
   System.SysUtils,
