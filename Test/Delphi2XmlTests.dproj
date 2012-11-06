@@ -109,6 +109,7 @@
 			<DCCReference Include="D2XHandlersTest.pas"/>
 			<DCCReference Include="..\Source\D2XProcessors.pas"/>
 			<DCCReference Include="D2XProcessorsTest.pas"/>
+			<DCCReference Include="..\Source\D2XParamProcessor.pas"/>
 			<None Include="Profiling\Delphi2XmlTest.aqt"/>
 			<None Include="Config\Test.def"/>
 			<None Include="Config\Test.prm"/>

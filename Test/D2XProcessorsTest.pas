@@ -11,11 +11,29 @@ uses
   D2XHandler,
   D2XHandlerTest,
   D2XParam,
+  D2XParser,
   D2XProcessors,
   D2XProcessorTest,
-  System.Rtti;
+  System.SysUtils;
 
 type
+  TestTD2XLogProcessor = class(TLoggerTestCase)
+  strict private
+    FD2XProcessor: TD2XLogProcessor;
+
+    fActive: IParamFlag;
+  public
+    procedure SetUp; override;
+    procedure TearDown; override;
+  published
+    procedure TestSetLexer;
+    procedure TestUseProxy;
+    procedure TestBeginMethod;
+    procedure TestEndMethod;
+    procedure TestLexerInclude;
+    procedure TestParserMessage;
+  end;
+
   TestTD2XHandlerProcessor = class(TStringTestCase)
   strict private
     FHandler: TD2XHandlerTester;
@@ -329,8 +347,102 @@ begin
   CheckTrue(lCalled, 'Called Results Output');
 end;
 
+{ TestTD2XLogProcessor }
+
+procedure TestTD2XLogProcessor.SetUp;
+begin
+  inherited;
+
+  fActive := TTestBoolFlag.Create;
+
+  FD2XProcessor := TD2XLogProcessor.Create(fActive);
+end;
+
+procedure TestTD2XLogProcessor.TearDown;
+begin
+  FreeAndNil(FD2XProcessor);
+
+  inherited;
+end;
+
+procedure TestTD2XLogProcessor.TestBeginMethod;
+begin
+  FD2XProcessor.JoinLog(fID2XLogger);
+
+  FD2XProcessor.BeginMethod('Method');
+  CheckLog('', 'Ignored Begin Method');
+
+  fActive.Flag := True;
+  FD2XProcessor.BeginMethod('Method');
+  CheckLog('BEFORE Method', 'Begin Method');
+end;
+
+procedure TestTD2XLogProcessor.TestEndMethod;
+begin
+  FD2XProcessor.JoinLog(fID2XLogger);
+
+  FD2XProcessor.EndMethod('Method');
+  CheckLog('', 'Ignored End Method');
+
+  fActive.Flag := True;
+  FD2XProcessor.EndMethod('Method');
+  CheckLog('AFTER Method', 'End Method');
+end;
+
+procedure TestTD2XLogProcessor.TestLexerInclude;
+begin
+  FD2XProcessor.JoinLog(fID2XLogger);
+
+  FD2XProcessor.LexerInclude('Test', 1, 2);
+  CheckLog('', 'Ignored Lexer Include');
+
+  fActive.Flag := True;
+  FD2XProcessor.LexerInclude('Test', 1, 2);
+  CheckLog('INCLUDE @ 1,2: Test', 'Lexer Include');
+end;
+
+procedure TestTD2XLogProcessor.TestParserMessage;
+begin
+  FD2XProcessor.JoinLog(fID2XLogger);
+
+  FD2XProcessor.ParserMessage(meNotSupported, 'Test', 1, 2);
+  CheckLog('', 'Ignored Parser Message');
+
+  fActive.Flag := True;
+  FD2XProcessor.ParserMessage(meNotSupported, 'Test', 1, 2);
+  CheckLog('NOT SUPPORTED @ 1,2: Test', 'Not Supported Parser Message');
+
+  FD2XProcessor.ParserMessage(meError, 'Test', 1, 2);
+  CheckLog('ERROR @ 1,2: Test', 'Error Parser Message');
+end;
+
+procedure TestTD2XLogProcessor.TestSetLexer;
+var
+  lLexer: TD2XLexer;
+begin
+  FD2XProcessor.JoinLog(fID2XLogger);
+  fActive.Flag := True;
+
+  lLexer := TD2XLexer.Create;
+  try
+    FD2XProcessor.SetLexer(lLexer);
+    FD2XProcessor.BeginMethod('Method');
+    CheckLog('BEFORE Method @', 'Begin Method');
+  finally
+    lLexer.Free;
+  end;
+end;
+
+procedure TestTD2XLogProcessor.TestUseProxy;
+begin
+  CheckFalse(FD2XProcessor.UseProxy, 'Ignored Use Proxy');
+
+  fActive.Flag := True;
+  CheckTrue(FD2XProcessor.UseProxy, 'Allowed Use Proxy');
+end;
+
 initialization
 
-RegisterTests('Processor', [TestTD2XHandlerProcessor.Suite]);
+RegisterTests('Processor', [TestTD2XLogProcessor.Suite, TestTD2XHandlerProcessor.Suite]);
 
 end.

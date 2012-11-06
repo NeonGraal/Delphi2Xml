@@ -12,34 +12,6 @@ uses
   System.Generics.Collections;
 
 type
-  TD2XLogHandler = class(TD2XHandler, ID2XLogger)
-  private
-    fLogger: ID2XLogger;
-
-  protected
-    fLexer: TD2XLexer;
-
-  public
-    constructor Create;
-    destructor Destroy; override;
-
-    procedure Init(pLexer: TD2XLexer);
-
-    function Description: string; override;
-    function UseProxy: Boolean; override;
-
-    procedure Copy(pFrom: TD2XHandler); override;
-
-    procedure BeginMethod(pMethod: string); override;
-    procedure EndMethod(pMethod: string); override;
-
-    procedure ParserMessage(const pTyp: TMessageEventType; const pMsg: string;
-      pX, pY: Integer); override;
-    procedure LexerInclude(const pFile: string; pX, pY: Integer); override;
-
-    property L: ID2XLogger read fLogger implements ID2XLogger;
-  end;
-
   TMethodCount = record
     Method: string;
     Children: Integer;
@@ -137,78 +109,6 @@ implementation
 uses
   System.SysUtils,
   Xml.XMLIntf;
-
-{ TD2XLogHandler }
-
-procedure TD2XLogHandler.BeginMethod(pMethod: string);
-begin
-  if Assigned(fLexer) then
-    L.Log('BEFORE %s @ %s', [pMethod, fLexer.Token])
-  else
-    L.Log('BEFORE %s ', [pMethod]);
-end;
-
-procedure TD2XLogHandler.Copy(pFrom: TD2XHandler);
-var
-  lFrom: TD2XLogHandler;
-begin
-  if Assigned(pFrom) then
-  begin
-    lFrom := TD2XLogHandler(pFrom);
-    fLogger := lFrom.fLogger;
-    fLexer := lFrom.fLexer;
-  end;
-end;
-
-constructor TD2XLogHandler.Create;
-begin
-  fLogger := TD2XLogger.Create;
-end;
-
-function TD2XLogHandler.Description: string;
-begin
-  Result := 'Verbose Logging';
-end;
-
-destructor TD2XLogHandler.Destroy;
-begin
-  fLogger := nil;
-
-  inherited;
-end;
-
-procedure TD2XLogHandler.EndMethod(pMethod: string);
-begin
-  L.Log('AFTER  %s', [pMethod]);
-end;
-
-procedure TD2XLogHandler.Init(pLexer: TD2XLexer);
-begin
-  fLexer := pLexer;
-end;
-
-procedure TD2XLogHandler.LexerInclude(const pFile: string; pX, pY: Integer);
-begin
-  L.Log('INCLUDE @ %d,%d: %s', [pX, pY, pFile]);
-end;
-
-procedure TD2XLogHandler.ParserMessage(const pTyp: TMessageEventType;
-  const pMsg: string; pX, pY: Integer);
-begin
-  case pTyp of
-    meError:
-      L.Log('ERROR @ %d,%d: %s', [pX, pY, pMsg]);
-    meNotSupported:
-      L.Log('NOT SUPPORTED @ %d,%d: %s', [pX, pY, pMsg]);
-  else
-    L.Log('???? @ %d,%d: %s', [pX, pY, pMsg]);
-  end;
-end;
-
-function TD2XLogHandler.UseProxy: Boolean;
-begin
-  Result := True;
-end;
 
 { TD2XCountHandler }
 

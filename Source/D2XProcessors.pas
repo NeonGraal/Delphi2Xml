@@ -6,10 +6,44 @@ uses
   CastaliaPasLexTypes,
   D2X,
   D2XParam,
+  D2XParser,
   D2XHandler,
   D2XProcessor;
 
 type
+  TD2XLexerProcessor = class(TD2XProcessor)
+  protected
+    fLexer: TD2XLexer;
+  end;
+
+  TD2XLogProcessor = class(TD2XLexerProcessor)
+  public
+    procedure SetLexer(pLexer: TD2XLexer);
+
+    function UseProxy: Boolean; override;
+
+    procedure BeginMethod(pMethod: string); override;
+    procedure EndMethod(pMethod: string); override;
+
+    procedure ParserMessage(const pTyp: TMessageEventType; const pMsg: string;
+      pX, pY: Integer); override;
+    procedure LexerInclude(const pFile: string; pX, pY: Integer); override;
+
+  end;
+
+  TD2XErrorProcessor = class(TD2XLexerProcessor)
+  public
+    procedure SetFilename(pLexer: TD2XLexer; pFilename: string);
+    procedure SetErrorFile(pFilename: TD2XStringRef);
+
+    procedure LogMessage(pType, pMsg: string); overload;
+    procedure LogMessage(pType, pMsg: string; pX, pY: Integer); overload;
+
+  private
+    fFilename: string;
+    fErrorFile: TD2XStringRef;
+  end;
+
   TD2XHandlerProcessor = class(TD2XProcessor)
   public
     constructor CreateHandler(pActive: IParamFlag; pHandler: TD2XHandler);
@@ -52,11 +86,11 @@ type
 
   end;
 
-
 implementation
 
 uses
   System.Classes,
+  System.IOUtils,
   System.SysUtils;
 
 { TD2XHandlerProcessor  }
@@ -70,7 +104,7 @@ begin
     if Assigned(fFileInput) then
       try
         fHandler.BeginFile(
-          function: TStream
+            function: TStream
           var
             lFile: string;
           begin
@@ -264,6 +298,111 @@ end;
 function TD2XHandlerProcessor.UseProxy: Boolean;
 begin
   Result := fActive.Flag and fHandler.UseProxy;
+end;
+
+{ TD2XLogProcessor }
+
+procedure TD2XLogProcessor.BeginMethod(pMethod: string);
+begin
+  if fActive.Flag then
+  begin
+    if Assigned(fLexer) then
+      Log('BEFORE %s @ %s', [pMethod, fLexer.Token])
+    else
+      Log('BEFORE %s ', [pMethod]);
+  end;
+end;
+
+procedure TD2XLogProcessor.EndMethod(pMethod: string);
+begin
+  if fActive.Flag then
+    Log('AFTER  %s', [pMethod]);
+end;
+
+procedure TD2XLogProcessor.LexerInclude(const pFile: string; pX, pY: Integer);
+begin
+  if fActive.Flag then
+    Log('INCLUDE @ %d,%d: %s', [pX, pY, pFile]);
+end;
+
+procedure TD2XLogProcessor.ParserMessage(const pTyp: TMessageEventType;
+  const pMsg: string; pX, pY: Integer);
+begin
+  if fActive.Flag then
+    case pTyp of
+      meError:
+        Log('ERROR @ %d,%d: %s', [pX, pY, pMsg]);
+      meNotSupported:
+        Log('NOT SUPPORTED @ %d,%d: %s', [pX, pY, pMsg]);
+    else
+      Log('???? @ %d,%d: %s', [pX, pY, pMsg]);
+    end;
+end;
+
+procedure TD2XLogProcessor.SetLexer(pLexer: TD2XLexer);
+begin
+  fLexer := pLexer;
+end;
+
+function TD2XLogProcessor.UseProxy: Boolean;
+begin
+  Result := fActive.Flag;
+end;
+
+{ TD2XErrorProcessor }
+
+procedure TD2XErrorProcessor.LogMessage(pType, pMsg: string; pX, pY: Integer);
+var
+  lErrFile: string;
+  lExists: Boolean;
+begin
+  if Assigned(fErrorFile) then
+  begin
+    lErrFile := fErrorFile;
+    if lErrFile > '' then
+    begin
+      lExists := TFile.Exists(lErrFile);
+      with TFile.AppendText(lErrFile) do
+        try
+          if not lExists then
+            WriteLine('Filename,Timestamp,Line,Char,Method,Type,Message');
+          write(fFilename);
+          write(',');
+          write(FormatDateTime('yyyy-mmm-dd HH:nn:ss.zzz', Now));
+          write(',');
+          write(pY);
+          write(',');
+          write(pX);
+          write(',');
+          write(''{fCurrent.Method});
+          write(',');
+          write(pType);
+          write(',');
+          WriteLine(pMsg);
+        finally
+          Free;
+        end;
+    end;
+  end;
+end;
+
+procedure TD2XErrorProcessor.LogMessage(pType, pMsg: string);
+begin
+  if Assigned(fLexer) then
+    LogMessage(pType, pMsg, fLexer.PosXY.X, fLexer.PosXY.y)
+  else
+    LogMessage(pType, pMsg, -1, -1);
+end;
+
+procedure TD2XErrorProcessor.SetErrorFile(pFilename: TD2XStringRef);
+begin
+
+end;
+
+procedure TD2XErrorProcessor.SetFilename(pLexer: TD2XLexer; pFilename: string);
+begin
+  fLexer := pLexer;
+  fFilename := pFilename;
 end;
 
 end.

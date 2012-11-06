@@ -19,29 +19,6 @@ uses
   TestFramework;
 
 type
-  TTestLogHandler = class(TD2XLogHandler)
-  public
-    property Lexer: TD2XLexer read fLexer;
-
-  end;
-
-  TestTD2XLogHandler = class(TLoggerTestCase)
-  strict private
-    FD2XLogHandler: TTestLogHandler;
-  public
-    procedure SetUp; override;
-    procedure TearDown; override;
-  published
-    procedure TestDescription;
-    procedure TestUseProxy;
-    procedure TestInit;
-    procedure TestCopy;
-    procedure TestBeginMethod;
-    procedure TestEndMethod;
-    procedure TestLexerInclude;
-    procedure TestParserMessage;
-  end;
-
   TestTD2XCountHandler = class(TStringTestCase)
   strict private
     FD2XCountHandler: TD2XCountHandler;
@@ -111,118 +88,7 @@ type
     procedure TestProcessing;
   end;
 
-  { TestTD2XLogHandler }
-
-procedure TestTD2XLogHandler.SetUp;
-begin
-  inherited;
-
-  FD2XLogHandler := TTestLogHandler.Create;
-end;
-
-procedure TestTD2XLogHandler.TearDown;
-begin
-  FD2XLogHandler.Free;
-  FD2XLogHandler := nil;
-
-  inherited;
-end;
-
-procedure TestTD2XLogHandler.TestInit;
-var
-  pLexer: TD2XLexer;
-begin
-  pLexer := TD2XLexer.Create;
-  try
-    FD2XLogHandler.Init(pLexer);
-
-    Check(pLexer = FD2XLogHandler.Lexer, 'Lexer set');
-  finally
-    pLexer.Free;
-  end;
-end;
-
-procedure TestTD2XLogHandler.TestLexerInclude;
-begin
-  FD2XLogHandler.L.JoinLog(fID2XLogger);
-
-  FD2XLogHandler.LexerInclude('Test', 1, 2);
-
-  CheckLog('INCLUDE @ 1,2: Test', 'Lexer Include');
-end;
-
-procedure TestTD2XLogHandler.TestParserMessage;
-begin
-  FD2XLogHandler.L.JoinLog(fID2XLogger);
-
-  FD2XLogHandler.ParserMessage(meNotSupported, 'Test', 1, 2);
-
-  CheckLog('NOT SUPPORTED @ 1,2: Test', 'Begin Method');
-
-  FD2XLogHandler.ParserMessage(meError, 'Test', 1, 2);
-
-  CheckLog('ERROR @ 1,2: Test', 'Begin Method');
-end;
-
-procedure TestTD2XLogHandler.TestUseProxy;
-begin
-  CheckTrue(FD2XLogHandler.UseProxy, 'Uses proxy');
-end;
-
-procedure TestTD2XLogHandler.TestCopy;
-var
-  pFrom: TD2XLogHandler;
-  pLexer: TD2XLexer;
-begin
-  pFrom := nil;
-  pLexer := nil;
-
-  FD2XLogHandler.Copy(pFrom);
-  try
-    pFrom := TD2XLogHandler.Create;
-    pLexer := TD2XLexer.Create;
-    pFrom.Init(pLexer);
-    pFrom.L.JoinLog(fID2XLogger);
-
-    CheckFalse(Assigned(FD2XLogHandler.Lexer), 'Lexer not set');
-    FD2XLogHandler.L.Log('Log Simple 1', []);
-    CheckLog('', 'Log Simple 1');
-
-    FD2XLogHandler.Copy(pFrom);
-    Check(pLexer = FD2XLogHandler.Lexer, 'Lexer set');
-
-    FD2XLogHandler.L.Log('Log Simple 2', []);
-    CheckLog('Log Simple 2', 'Log Simple 2');
-  finally
-    pLexer.Free;
-    pFrom.Free;
-  end;
-end;
-
-procedure TestTD2XLogHandler.TestDescription;
-begin
-  CheckEqualsString('Verbose Logging', FD2XLogHandler.Description, 'Description');
-end;
-
-procedure TestTD2XLogHandler.TestBeginMethod;
-begin
-  FD2XLogHandler.L.JoinLog(fID2XLogger);
-
-  FD2XLogHandler.BeginMethod('Method');
-
-  CheckLog('BEFORE Method', 'Begin Method');
-end;
-
-procedure TestTD2XLogHandler.TestEndMethod;
-begin
-  FD2XLogHandler.L.JoinLog(fID2XLogger);
-
-  FD2XLogHandler.EndMethod('Method');
-
-  CheckLog('AFTER Method', 'End Method');
-end;
-
-{ TestTD2XCountHandler }
+  { TestTD2XCountHandler }
 
 procedure TestTD2XCountHandler.SetUp;
 begin
@@ -597,7 +463,9 @@ begin
     begin
       Result := fSS;
     end);
-  CheckStream('<?xml version="1.0"?> <Test> <IncludeFile filename="Test" msgAt="1,2" /> </Test>', 'End Results');
+  CheckStream
+    ('<?xml version="1.0"?> <Test> <IncludeFile filename="Test" msgAt="1,2" /> </Test>',
+    'End Results');
 end;
 
 procedure TestTD2XXmlHandler.TestParserMessage;
@@ -613,7 +481,9 @@ begin
     begin
       Result := fSS;
     end);
-  CheckStream('<?xml version="1.0"?> <Test> <D2X_notSuppMsg msgAt="1,2">Test</D2X_notSuppMsg> </Test>', 'End Results');
+  CheckStream
+    ('<?xml version="1.0"?> <Test> <D2X_notSuppMsg msgAt="1,2">Test</D2X_notSuppMsg> </Test>',
+    'End Results');
 
   FD2XXmlHandler.BeginResults;
   FD2XXmlHandler.HasFiles := True;
@@ -624,7 +494,9 @@ begin
     begin
       Result := fSS;
     end);
-  CheckStream('<?xml version="1.0"?> <Test> <D2X_errorMsg msgAt="1,2">Test</D2X_errorMsg> </Test>', 'End Results');
+  CheckStream
+    ('<?xml version="1.0"?> <Test> <D2X_errorMsg msgAt="1,2">Test</D2X_errorMsg> </Test>',
+    'End Results');
 end;
 
 procedure TestTD2XXmlHandler.TestProcessing;
@@ -646,7 +518,9 @@ begin
     begin
       Result := fSS;
     end);
-  CheckStream('<?xml version="1.0"?> <Test> <Test1 Test="Test"> <Test2>Test</Test2> <Test3 Test="Test" /> <Test4 /> </Test1> </Test>', 'End Results');
+  CheckStream
+    ('<?xml version="1.0"?> <Test> <Test1 Test="Test"> <Test2>Test</Test2> <Test3 Test="Test" /> <Test4 /> </Test1> </Test>',
+    'End Results');
 end;
 
 procedure TestTD2XXmlHandler.TestRollbackTo;
@@ -664,7 +538,9 @@ begin
     begin
       Result := fSS;
     end);
-  CheckStream('<?xml version="1.0"?> <Test> <Test1> <Test2> <Test3 /> </Test2> <Test4 /> </Test1> </Test>', 'End Results');
+  CheckStream
+    ('<?xml version="1.0"?> <Test> <Test1> <Test2> <Test3 /> </Test2> <Test4 /> </Test1> </Test>',
+    'End Results');
 end;
 
 procedure TestTD2XXmlHandler.TestUseProxy;
@@ -675,7 +551,7 @@ end;
 initialization
 
 // Register any test cases with the test runner
-RegisterTests('Handlers', [TestTD2XLogHandler.Suite, TestTD2XCountHandler.Suite,
-  TestTD2XSkipHandler.Suite, TestTD2XXmlHandler.Suite]);
+RegisterTests('Handlers', [TestTD2XCountHandler.Suite, TestTD2XSkipHandler.Suite,
+  TestTD2XXmlHandler.Suite]);
 
 end.

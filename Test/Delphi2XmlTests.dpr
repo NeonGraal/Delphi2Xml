@@ -37,7 +37,8 @@ uses
   D2XHandlers in '..\Source\D2XHandlers.pas',
   D2XHandlersTest in 'D2XHandlersTest.pas',
   D2XProcessors in '..\Source\D2XProcessors.pas',
-  D2XProcessorsTest in 'D2XProcessorsTest.pas';
+  D2XProcessorsTest in 'D2XProcessorsTest.pas',
+  D2XParamProcessor in '..\Source\D2XParamProcessor.pas';
 
 {$R *.RES}
 

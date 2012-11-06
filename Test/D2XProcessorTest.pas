@@ -25,7 +25,7 @@ uses
   D2XHandlerTest,
   D2XOptions,
   D2XParser,
-  D2XProcessor,
+  D2XParamProcessor,
   System.Classes,
   System.Diagnostics,
   System.Generics.Collections,
