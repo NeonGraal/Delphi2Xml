@@ -225,7 +225,7 @@ procedure TD2XParamProcessor.EndProcessing;
           if lP.Value > 0 then
             Values[lP.Key] := pFunc(lP);
         Sort;
-        SaveToFile(fOpts.OutputFileOrExtn(pExtn));
+        SaveToFile(fOpts.FileOpts.OutputFileOrExtn(pExtn));
       finally
         Free;
       end;
@@ -278,7 +278,7 @@ var
   lErrFile: string;
   lExists: Boolean;
 begin
-  lErrFile := fOpts.OutputFileOrExtn('.err');
+  lErrFile := fOpts.FileOpts.OutputFileOrExtn('.err');
   lExists := TFile.Exists(lErrFile);
   with TFile.AppendText(lErrFile) do
     try
@@ -605,12 +605,12 @@ begin
   lHProc.SetFileInput(
     function: string
     begin
-      Result := fOpts.InputFileOrExtn(fOpts.SkipMethodsFoE);
+      Result := fOpts.FileOpts.InputFileOrExtn(fOpts.SkipMethodsFoE);
     end);
   lHProc.SetProcessingOutput(
     function: string
     begin
-      Result := fOpts.OutputFileOrExtn(fOpts.SkipMethodsFoE + '.log');
+      Result := fOpts.FileOpts.OutputFileOrExtn(fOpts.SkipMethodsFoE + '.log');
     end);
   fProcs.Add(lHProc);
 
@@ -629,7 +629,7 @@ begin
   lHProc.SetProcessingOutput(
     function: string
     begin
-      Result := fOpts.OutputFileOrExtn(fOpts.SkipMethodsFoE + '.log');
+      Result := fOpts.FileOpts.OutputFileOrExtn(fOpts.SkipMethodsFoE + '.log');
     end);
   fProcs.Add(lHProc);
 
@@ -645,7 +645,7 @@ var
 begin
   Result := True;
   lSL := TStringList.Create;
-  lFile := fOpts.InputFileOrExtn(pFileOrExtn);
+  lFile := fOpts.FileOpts.InputFileOrExtn(pFileOrExtn);
   try
     lSL.LoadFromFile(lFile);
     for i := 0 to lSL.Count - 1 do

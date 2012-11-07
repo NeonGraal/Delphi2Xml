@@ -129,9 +129,9 @@ var
   pStr: string;
 const
   EXPECTED_REPORT = 'Current option settings: Verbose - Log Errors + Log Not Supp - ' +
-    'Timestamp - Final Token + Recurse - Global name Delphi2XmlTests ' +
-    'Parse mode Full Results per File Show elapsed Quiet Base dir - ' +
-    'Input dir :Config\ Output dir :Log\ Generate XML :Xml\ ' +
+    'Final Token + Recurse - Timestamp - Global name Delphi2XmlTests ' +
+    'Input dir :Config\ Output dir :Log\ Parse mode Full Results per File ' +
+    'Show elapsed Quiet Base dir - Generate XML :Xml\ ' +
     'Write Defines -(Defines\) Defines Used :.used ' +
     'Count Children :.cnt Skipped Methods :.skip ' +
     'Use these Defines: CONDITIONALEXPRESSIONS, CPU386, MSWINDOWS, UNICODE, VER230, WIN32';

@@ -212,9 +212,9 @@ begin
   pExtn := '.Extn';
   fOpts.ParseOption('-i:In');
 
-  ReturnValue := fOpts.InputFileOrExtn(pExtn);
+  ReturnValue := fOpts.FileOpts.InputFileOrExtn(pExtn);
 
-  CheckEqualsString('In\' + fOpts.GlobalName + '.Extn', ReturnValue, 'ReturnValue');
+  CheckEqualsString('In\' + fOpts.FileOpts.GlobalName + '.Extn', ReturnValue, 'ReturnValue');
 end;
 
 procedure TestTD2XOptionFilenames.TestInputDirFile;
@@ -225,7 +225,7 @@ begin
   pFile := 'File.Extn';
   fOpts.ParseOption('-i:In');
 
-  ReturnValue := fOpts.InputFileOrExtn(pFile);
+  ReturnValue := fOpts.FileOpts.InputFileOrExtn(pFile);
 
   CheckEqualsString('In\File.Extn', ReturnValue, 'ReturnValue');
 end;
@@ -238,9 +238,9 @@ begin
   pExtn := '.Extn';
   fOpts.ParseOption('-i-');
 
-  ReturnValue := fOpts.InputFileOrExtn(pExtn);
+  ReturnValue := fOpts.FileOpts.InputFileOrExtn(pExtn);
 
-  CheckEqualsString(fOpts.GlobalName + '.Extn', ReturnValue, 'ReturnValue');
+  CheckEqualsString(fOpts.FileOpts.GlobalName + '.Extn', ReturnValue, 'ReturnValue');
 end;
 
 procedure TestTD2XOptionFilenames.TestInputOffFile;
@@ -251,7 +251,7 @@ begin
   pFile := 'File.Extn';
   fOpts.ParseOption('-i-');
 
-  ReturnValue := fOpts.InputFileOrExtn(pFile);
+  ReturnValue := fOpts.FileOpts.InputFileOrExtn(pFile);
 
   CheckEqualsString('File.Extn', ReturnValue, 'ReturnValue');
 end;
@@ -264,9 +264,9 @@ begin
   pExtn := '.Extn';
   fOpts.ParseOption('-i+');
 
-  ReturnValue := fOpts.InputFileOrExtn(pExtn);
+  ReturnValue := fOpts.FileOpts.InputFileOrExtn(pExtn);
 
-  CheckEqualsString('Config\' + fOpts.GlobalName + '.Extn', ReturnValue, 'ReturnValue');
+  CheckEqualsString('Config\' + fOpts.FileOpts.GlobalName + '.Extn', ReturnValue, 'ReturnValue');
 end;
 
 procedure TestTD2XOptionFilenames.TestInputOnFile;
@@ -277,7 +277,7 @@ begin
   pFile := 'File.Extn';
   fOpts.ParseOption('-i+');
 
-  ReturnValue := fOpts.InputFileOrExtn(pFile);
+  ReturnValue := fOpts.FileOpts.InputFileOrExtn(pFile);
 
   CheckEqualsString('Config\File.Extn', ReturnValue, 'ReturnValue');
 end;
@@ -289,9 +289,9 @@ var
 begin
   pExtn := '.Extn';
 
-  ReturnValue := fOpts.InputFileOrExtn(pExtn);
+  ReturnValue := fOpts.FileOpts.InputFileOrExtn(pExtn);
 
-  CheckEqualsString('Config\' + fOpts.GlobalName + '.Extn', ReturnValue, 'ReturnValue');
+  CheckEqualsString('Config\' + fOpts.FileOpts.GlobalName + '.Extn', ReturnValue, 'ReturnValue');
 end;
 
 procedure TestTD2XOptionFilenames.TestInputFile;
@@ -301,7 +301,7 @@ var
 begin
   pFile := 'File.Extn';
 
-  ReturnValue := fOpts.InputFileOrExtn(pFile);
+  ReturnValue := fOpts.FileOpts.InputFileOrExtn(pFile);
 
   CheckEqualsString('Config\File.Extn', ReturnValue, 'ReturnValue');
 end;
@@ -314,9 +314,9 @@ begin
   pExtn := '.Extn';
   fOpts.ParseOption('-o:Out');
 
-  ReturnValue := fOpts.OutputFileOrExtn(pExtn);
+  ReturnValue := fOpts.FileOpts.OutputFileOrExtn(pExtn);
 
-  CheckEqualsString('Out\' + fOpts.GlobalName + '.Extn', ReturnValue, 'ReturnValue');
+  CheckEqualsString('Out\' + fOpts.FileOpts.GlobalName + '.Extn', ReturnValue, 'ReturnValue');
 end;
 
 procedure TestTD2XOptionFilenames.TestOutputDirFile;
@@ -327,7 +327,7 @@ begin
   pFile := 'File.Extn';
   fOpts.ParseOption('-o:Out');
 
-  ReturnValue := fOpts.OutputFileOrExtn(pFile);
+  ReturnValue := fOpts.FileOpts.OutputFileOrExtn(pFile);
 
   CheckEqualsString('Out\File.Extn', ReturnValue, 'ReturnValue');
 end;
@@ -339,9 +339,9 @@ var
 begin
   pExtn := '.Extn';
 
-  ReturnValue := fOpts.OutputFileOrExtn(pExtn);
+  ReturnValue := fOpts.FileOpts.OutputFileOrExtn(pExtn);
 
-  CheckEqualsString('Log\' + fOpts.GlobalName + '.Extn', ReturnValue, 'ReturnValue');
+  CheckEqualsString('Log\' + fOpts.FileOpts.GlobalName + '.Extn', ReturnValue, 'ReturnValue');
 end;
 
 procedure TestTD2XOptionFilenames.TestOutputFile;
@@ -351,7 +351,7 @@ var
 begin
   pFile := 'File.Extn';
 
-  ReturnValue := fOpts.OutputFileOrExtn(pFile);
+  ReturnValue := fOpts.FileOpts.OutputFileOrExtn(pFile);
 
   CheckEqualsString('Log\File.Extn', ReturnValue, 'ReturnValue');
 end;
@@ -364,9 +364,9 @@ begin
   pExtn := '.Extn';
   fOpts.ParseOption('-t-');
 
-  ReturnValue := fOpts.OutputFileOrExtn(pExtn);
+  ReturnValue := fOpts.FileOpts.OutputFileOrExtn(pExtn);
 
-  CheckEqualsString('Log\' + fOpts.GlobalName + '.Extn', ReturnValue, 'ReturnValue');
+  CheckEqualsString('Log\' + fOpts.FileOpts.GlobalName + '.Extn', ReturnValue, 'ReturnValue');
 end;
 
 procedure TestTD2XOptionFilenames.TestOutputNoTimestampFile;
@@ -377,7 +377,7 @@ begin
   pFile := 'File.Extn';
   fOpts.ParseOption('-t-');
 
-  ReturnValue := fOpts.OutputFileOrExtn(pFile);
+  ReturnValue := fOpts.FileOpts.OutputFileOrExtn(pFile);
 
   CheckEqualsString('Log\File.Extn', ReturnValue, 'ReturnValue');
 end;
@@ -390,9 +390,9 @@ begin
   pExtn := '.Extn';
   fOpts.ParseOption('-o-');
 
-  ReturnValue := fOpts.OutputFileOrExtn(pExtn);
+  ReturnValue := fOpts.FileOpts.OutputFileOrExtn(pExtn);
 
-  CheckEqualsString(fOpts.GlobalName + '.Extn', ReturnValue, 'ReturnValue');
+  CheckEqualsString(fOpts.FileOpts.GlobalName + '.Extn', ReturnValue, 'ReturnValue');
 end;
 
 procedure TestTD2XOptionFilenames.TestOutputOffFile;
@@ -403,7 +403,7 @@ begin
   pFile := 'File.Extn';
   fOpts.ParseOption('-o-');
 
-  ReturnValue := fOpts.OutputFileOrExtn(pFile);
+  ReturnValue := fOpts.FileOpts.OutputFileOrExtn(pFile);
 
   CheckEqualsString('File.Extn', ReturnValue, 'ReturnValue');
 end;
@@ -416,9 +416,9 @@ begin
   pExtn := '.Extn';
   fOpts.ParseOption('-o+');
 
-  ReturnValue := fOpts.OutputFileOrExtn(pExtn);
+  ReturnValue := fOpts.FileOpts.OutputFileOrExtn(pExtn);
 
-  CheckEqualsString('Log\' + fOpts.GlobalName + '.Extn', ReturnValue, 'ReturnValue');
+  CheckEqualsString('Log\' + fOpts.FileOpts.GlobalName + '.Extn', ReturnValue, 'ReturnValue');
 end;
 
 procedure TestTD2XOptionFilenames.TestOutputOnFile;
@@ -429,7 +429,7 @@ begin
   pFile := 'File.Extn';
   fOpts.ParseOption('-o+');
 
-  ReturnValue := fOpts.OutputFileOrExtn(pFile);
+  ReturnValue := fOpts.FileOpts.OutputFileOrExtn(pFile);
 
   CheckEqualsString('Log\File.Extn', ReturnValue, 'ReturnValue');
 end;
@@ -442,9 +442,9 @@ begin
   pExtn := '.Extn';
   fOpts.ParseOption('-t');
 
-  ReturnValue := fOpts.OutputFileOrExtn(pExtn);
+  ReturnValue := fOpts.FileOpts.OutputFileOrExtn(pExtn);
 
-  CheckEqualsString('Log\' + fOpts.GlobalName + fOpts.OutputTimestamp + '.Extn', ReturnValue,
+  CheckEqualsString('Log\' + fOpts.FileOpts.GlobalName + fOpts.FileOpts.OutputTimestamp + '.Extn', ReturnValue,
     'ReturnValue');
 end;
 
@@ -456,9 +456,9 @@ begin
   pFile := 'File.Extn';
   fOpts.ParseOption('-t');
 
-  ReturnValue := fOpts.OutputFileOrExtn(pFile);
+  ReturnValue := fOpts.FileOpts.OutputFileOrExtn(pFile);
 
-  CheckEqualsString('Log\File' + fOpts.OutputTimestamp + '.Extn', ReturnValue, 'ReturnValue');
+  CheckEqualsString('Log\File' + fOpts.FileOpts.OutputTimestamp + '.Extn', ReturnValue, 'ReturnValue');
 end;
 
 { TestTD2XOptions }
@@ -792,7 +792,7 @@ begin
   pOpt := '-G';
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
-  CheckEqualsString(ChangeFileExt(ExtractFileName(ParamStr(0)), ''), fOpts.GlobalName,
+  CheckEqualsString(ChangeFileExt(ExtractFileName(ParamStr(0)), ''), fOpts.FileOpts.GlobalName,
     'GlobalName');
   CheckLog('');
 end;
@@ -805,7 +805,7 @@ begin
   pOpt := '-GGlobal';
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
-  CheckEqualsString('Global', fOpts.GlobalName, 'GlobalName');
+  CheckEqualsString('Global', fOpts.FileOpts.GlobalName, 'GlobalName');
 
   CheckEqualsString('Global\', fOpts.XmlDirectory, 'XmlDirectory');
   CheckEqualsString('Global\', fOpts.DefinesDirectory, 'DefinesDirectory');
@@ -832,7 +832,7 @@ begin
   pOpt := '-I';
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
-  CheckEqualsString('Config\Input.File', fOpts.InputFileOrExtn('Input.File'),
+  CheckEqualsString('Config\Input.File', fOpts.FileOpts.InputFileOrExtn('Input.File'),
     'InputFileOrExtn');
   CheckLog('');
 end;
@@ -845,7 +845,7 @@ begin
   pOpt := '-I:';
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
-  CheckEqualsString('Input.File', fOpts.InputFileOrExtn('Input.File'), 'InputFileOrExtn');
+  CheckEqualsString('Input.File', fOpts.FileOpts.InputFileOrExtn('Input.File'), 'InputFileOrExtn');
   CheckLog('');
 end;
 
@@ -857,7 +857,7 @@ begin
   pOpt := '-I-';
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
-  CheckEqualsString('Input.File', fOpts.InputFileOrExtn('Input.File'), 'InputFileOrExtn');
+  CheckEqualsString('Input.File', fOpts.FileOpts.InputFileOrExtn('Input.File'), 'InputFileOrExtn');
   CheckLog('');
 end;
 
@@ -869,7 +869,7 @@ begin
   pOpt := '-I+';
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
-  CheckEqualsString('Config\Input.File', fOpts.InputFileOrExtn('Input.File'),
+  CheckEqualsString('Config\Input.File', fOpts.FileOpts.InputFileOrExtn('Input.File'),
     'InputFileOrExtn');
   CheckLog('');
 end;
@@ -882,7 +882,7 @@ begin
   pOpt := '-I:Input';
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
-  CheckEqualsString('Input\Input.File', fOpts.InputFileOrExtn('Input.File'),
+  CheckEqualsString('Input\Input.File', fOpts.FileOpts.InputFileOrExtn('Input.File'),
     'InputFileOrExtn');
   CheckLog('');
 end;
@@ -965,7 +965,7 @@ begin
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
   Check(fOpts.ParseMode = pmUses, 'ParseMode');
-  CheckEqualsString('Uses', fOpts.GlobalName, 'GlobalName');
+  CheckEqualsString('Uses', fOpts.FileOpts.GlobalName, 'GlobalName');
   CheckLog('');
 end;
 
@@ -1013,7 +1013,7 @@ begin
   pOpt := '-O';
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
-  CheckEqualsString('Log\Output.File', fOpts.OutputFileOrExtn('Output.File'),
+  CheckEqualsString('Log\Output.File', fOpts.FileOpts.OutputFileOrExtn('Output.File'),
     'OutputFileOrExtn');
   CheckLog('');
 end;
@@ -1026,7 +1026,7 @@ begin
   pOpt := '-O:';
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
-  CheckEqualsString('Output.File', fOpts.OutputFileOrExtn('Output.File'), 'OutputFileOrExtn');
+  CheckEqualsString('Output.File', fOpts.FileOpts.OutputFileOrExtn('Output.File'), 'OutputFileOrExtn');
   CheckLog('');
 end;
 
@@ -1038,7 +1038,7 @@ begin
   pOpt := '-O-';
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
-  CheckEqualsString('Output.File', fOpts.OutputFileOrExtn('Output.File'), 'OutputFileOrExtn');
+  CheckEqualsString('Output.File', fOpts.FileOpts.OutputFileOrExtn('Output.File'), 'OutputFileOrExtn');
   CheckLog('');
 end;
 
@@ -1050,7 +1050,7 @@ begin
   pOpt := '-O+';
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
-  CheckEqualsString('Log\Output.File', fOpts.OutputFileOrExtn('Output.File'),
+  CheckEqualsString('Log\Output.File', fOpts.FileOpts.OutputFileOrExtn('Output.File'),
     'OutputFileOrExtn');
   CheckLog('');
 end;
@@ -1063,7 +1063,7 @@ begin
   pOpt := '-O:Output';
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
-  CheckEqualsString('Output\Output.File', fOpts.OutputFileOrExtn('Output.File'),
+  CheckEqualsString('Output\Output.File', fOpts.FileOpts.OutputFileOrExtn('Output.File'),
     'OutputFileOrExtn');
   CheckLog('');
 end;
@@ -1238,8 +1238,8 @@ begin
   pOpt := '-T';
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
-  Check(fOpts.TimestampFiles, 'TimestampFiles');
-  CheckEqualsString(FormatDateTime('-HH-mm', Now), fOpts.OutputTimestamp, 'OutputTimestamp');
+  Check(fOpts.FileOpts.TimestampFiles, 'TimestampFiles');
+  CheckEqualsString(FormatDateTime('-HH-mm', Now), fOpts.FileOpts.OutputTimestamp, 'OutputTimestamp');
   CheckLog('');
 end;
 
@@ -1251,8 +1251,8 @@ begin
   pOpt := '-T-';
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
-  CheckFalse(fOpts.TimestampFiles, 'TimestampFiles');
-  CheckEqualsString(FormatDateTime('-HH-mm', Now), fOpts.OutputTimestamp, 'OutputTimestamp');
+  CheckFalse(fOpts.FileOpts.TimestampFiles, 'TimestampFiles');
+  CheckEqualsString(FormatDateTime('-HH-mm', Now), fOpts.FileOpts.OutputTimestamp, 'OutputTimestamp');
   CheckLog('');
 end;
 
@@ -1264,8 +1264,8 @@ begin
   pOpt := '-T+';
   ReturnValue := fOpts.ParseOption(pOpt);
   Check(ReturnValue, 'ReturnValue');
-  Check(fOpts.TimestampFiles, 'TimestampFiles');
-  CheckEqualsString(FormatDateTime('-HH-mm', Now), fOpts.OutputTimestamp, 'OutputTimestamp');
+  Check(fOpts.FileOpts.TimestampFiles, 'TimestampFiles');
+  CheckEqualsString(FormatDateTime('-HH-mm', Now), fOpts.FileOpts.OutputTimestamp, 'OutputTimestamp');
   CheckLog('');
 end;
 
@@ -1549,22 +1549,22 @@ end;
 
 const
   ALTERED_REPORT_OPTIONS =
-    'Current option settings: Verbose + Log Errors + Log Not Supp + Timestamp - ' +
-    'Final Token + Recurse + Global name :Test Parse mode Full Results per File ' +
-    'Show elapsed Quiet Base dir :Test\ Input dir :Test\ Output dir :Test\ ' +
+    'Current option settings: Verbose + Log Errors + Log Not Supp + Final Token + ' +
+    'Recurse + Timestamp - Global name :Test Input dir :Test\ Output dir :Test\ ' +
+    'Parse mode Full Results per File Show elapsed Quiet Base dir :Test\ ' +
     'Generate XML :Test\ Write Defines :Test\ Defines Used :.Test Count Children :.Test ' +
     'Skipped Methods :Test.skip Use these Defines: Tango, Uniform';
   ZERO_REPORT_OPTIONS =
-    'Current option settings: Verbose - Log Errors - Log Not Supp - Timestamp - ' +
-    'Final Token - Recurse - Global name Parse mode Full Results per File ' +
-    'Show elapsed None Base dir - Input dir - Output dir - Generate XML - ' +
+    'Current option settings: Verbose - Log Errors - Log Not Supp - Final Token - ' +
+    'Recurse - Timestamp - Global name Input dir - Output dir - Parse mode Full ' +
+    'Results per File Show elapsed None Base dir - Generate XML - ' +
     'Write Defines - Defines Used - Count Children - Skipped Methods - Use NO Defines';
   BASE_REPORT_OPTIONS =
-    'Current option settings: Verbose - Log Errors + Log Not Supp - Timestamp - ' +
-    'Final Token + Recurse - Global name Delphi2XmlTests Parse mode Full Results per File ' +
-    'Show elapsed Quiet Base dir - Input dir :Config\ Output dir :Log\ Generate XML :Xml\ ' +
-    'Write Defines -(Defines\) Defines Used :.used Count Children :.cnt ' +
-    'Skipped Methods :.skip ';
+    'Current option settings: Verbose - Log Errors + Log Not Supp - Final Token + ' +
+    'Recurse - Timestamp - Global name Delphi2XmlTests Input dir :Config\ ' +
+    'Output dir :Log\ Parse mode Full Results per File Show elapsed Quiet ' +
+    'Base dir - Generate XML :Xml\ Write Defines -(Defines\) Defines Used :.used ' +
+    'Count Children :.cnt Skipped Methods :.skip ';
   DEFAULT_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Use default Defines';
   EMPTY_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Use NO Defines';
   DEFINED_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Use these Defines: CPU32';
@@ -1586,11 +1586,11 @@ procedure TestTD2XOptionGeneral.TestDefaultOptions;
 begin
   Check(fOpts.LogErrors, 'LogErrors');
   CheckFalse(fOpts.LogNotSupported, 'LogNotSupported');
-  CheckFalse(fOpts.TimestampFiles, 'TimestampFiles');
+  CheckFalse(fOpts.FileOpts.TimestampFiles, 'TimestampFiles');
   CheckFalse(fOpts.Verbose, 'Verbose');
   CheckFalse(fOpts.Recurse, 'Recurse');
   CheckFalse(fOpts.UseBase, 'UseBase');
-  CheckEqualsString(ChangeFileExt(ExtractFileName(ParamStr(0)), ''), fOpts.GlobalName,
+  CheckEqualsString(ChangeFileExt(ExtractFileName(ParamStr(0)), ''), fOpts.FileOpts.GlobalName,
     'SkipFileOrExtn');
   CheckEqualsString('', fOpts.BaseDirectory, 'BaseDirectory');
   CheckFalse(fOpts.WriteDefines, 'WriteDefines');
@@ -1733,15 +1733,15 @@ const
     'Options: Default Description ? Show valid options ' +
     '! Reset all options to defaults @<file> Report/Output Current options ' +
     'V[+|-] - Log all Parser methods called L[+|-] + Log Error messages ' +
-    'N[+|-] - Log Not Supported messages T[+|-] - Timestamp global output files ' +
-    'F[+|-] + Record Final Token R[+|-] - Recurse into subdirectories ' +
+    'N[+|-] - Log Not Supported messages F[+|-] + Record Final Token ' +
+    'R[+|-] - Recurse into subdirectories T[+|-] - Timestamp global output files ' +
     'G<str> Delphi2XmlTests Sets global name ' +
+    'I[+-]:<dir> :Config\ Use <dir> as a base for all file input ' +
+    'O[+-]:<dir> :Log\ Use <dir> as a base for all file output ' +
     'M<mode> Full Set Parsing mode (F[ull], U[ses]) ' +
     'P<per> File Set Result per (F[ile], S[ubdir], D[ir], W[ildcard], P[aram], R[un]) ' +
     'E<mode> Quiet Set Elapsed time display to be (N[one], Q[uiet], T[otal], P[rocessing]) ' +
     'B[+-]:<dir> - Use <dir> as a base for all file lookups ' +
-    'I[+-]:<dir> :Config\ Use <dir> as a base for all file input ' +
-    'O[+-]:<dir> :Log\ Use <dir> as a base for all file output ' +
     'X[+-]:<dir> :Xml\ Generate XML files into current or given <dir> ' +
     'W[+-]:<dir> -(Defines\) Generate Final Defines files into current or given <dir> ' +
     'U[+-]:<f/e> :.used Report Defines Used into <f/e> ' +

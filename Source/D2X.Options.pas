@@ -18,33 +18,57 @@ type
 
   TD2XResultPer = (rpFile, rpWildcard, rpSubDir, rpDir, rpParam, rpRun);
 
+  TD2XFileOptions = class
+  public
+    constructor Create(pGlobalValidator: TD2XSingleParam<string>.TspValidator);
+
+    function InputFileOrExtn(pFileOrExtn: string): string;
+    function OutputFileOrExtn(pFileOrExtn: string): string;
+
+    procedure RegisterParams(pParams: TD2XParams);
+
+  private
+    fUseOutput: TD2XFlaggedStringParam;
+    fUseInput: TD2XFlaggedStringParam;
+    fGlobalName: TD2XStringParam;
+    fTimestampFiles: TD2XBooleanParam;
+    fOutputTimestamp: string;
+
+    function ConvertDir(pStr: string; pDflt: string; out pVal: string): boolean;
+    function GetGlobalName: string;
+    function GetTimestampFiles: Boolean;
+    procedure SetGlobalName(const Value: string);
+
+  public
+    property OutputTimestamp: string read fOutputTimestamp;
+    property GlobalName: string read GetGlobalName write SetGlobalName;
+    property TimestampFiles: Boolean read GetTimestampFiles;
+  end;
+
   TD2XOptions = class(TD2XLogger)
   private
     fVerbose: TD2XBooleanParam;
     fRecurse: TD2XBooleanParam;
     fLogErrors: TD2XBooleanParam;
     fLogNotSupported: TD2XBooleanParam;
-    fTimestampFiles: TD2XBooleanParam;
     fFinalToken: TD2XBooleanParam;
-    fGlobalName: TD2XStringParam;
     fParseMode: TD2XSingleParam<TD2XParseMode>;
     fResultPer: TD2XSingleParam<TD2XResultPer>;
     fElapsedMode: TD2XSingleParam<TD2XElapsedMode>;
     fWriteXml: TD2XFlaggedStringParam;
     fWriteDefines: TD2XFlaggedStringParam;
     fUseBase: TD2XFlaggedStringParam;
-    fUseOutput: TD2XFlaggedStringParam;
-    fUseInput: TD2XFlaggedStringParam;
     fCountChildren: TD2XFlaggedStringParam;
     fSkipMethods: TD2XFlaggedStringParam;
     fDefinesUsed: TD2XFlaggedStringParam;
 
     fLoadDefines: boolean;
-    fOutputTimestamp: string;
 
     fDefines: TStringList;
 
     fParams: TD2XParams;
+
+    fFileOpts: TD2XFileOptions;
 
     function ConvertDir(pStr: string; pDflt: string; out pVal: string): boolean;
     function ConvertFile(pStr: string; pDflt: string; out pVal: string): boolean;
@@ -70,9 +94,7 @@ type
     function GetLogErrors: boolean;
     function GetLogNotSupported: boolean;
     function GetRecurse: boolean;
-    function GetTimestampFiles: boolean;
     function GetFinalToken: boolean;
-    function GetGlobalName: string;
     function GetParseMode: TD2XParseMode;
     function GetResultPer: TD2XResultPer;
     function GetXmlDirectory: string;
@@ -96,12 +118,10 @@ type
   public
     property LogErrors: boolean read GetLogErrors;
     property LogNotSupported: boolean read GetLogNotSupported;
-    property TimestampFiles: boolean read GetTimestampFiles;
     property Verbose: boolean read GetVerbose;
     property VerboseFlag: IParamFlag read GetVerboseFlag;
     property Recurse: boolean read GetRecurse;
     property FinalToken: boolean read GetFinalToken;
-    property GlobalName: string read GetGlobalName;
 
     property ParseMode: TD2XParseMode read GetParseMode;
     property ResultPer: TD2XResultPer read GetResultPer;
@@ -109,10 +129,6 @@ type
 
     property UseBase: boolean read GetUseBase;
     property BaseDirectory: string read GetBaseDirectory;
-    // property UseInput: boolean read fUseInput;
-    // property InputDirectory: string read fInputDirectory;
-    // property UseOutput: boolean read fUseOutput;
-    // property OutputDirectory: string read fOutputDirectory;
     property WriteDefines: boolean read GetWriteDefines;
     property DefinesDirectory: string read GetDefinesDirectory;
     property WriteXml: boolean read GetWriteXml;
@@ -129,13 +145,11 @@ type
 
     property LoadDefines: boolean read fLoadDefines;
     property Defines: TStringList read fDefines;
-    property OutputTimestamp: string read fOutputTimestamp;
+
+    property FileOpts: TD2XFileOptions read fFileOpts;
 
     constructor Create; override;
     destructor Destroy; override;
-
-    function InputFileOrExtn(pFileOrExtn: string): string;
-    function OutputFileOrExtn(pFileOrExtn: string): string;
 
     function ParseOption(pOpt: string): boolean;
   end;
@@ -214,7 +228,7 @@ begin
       'U', 'u':
         begin
           pVal := pmUses;
-          fGlobalName.Value := 'Uses';
+          fFileOpts.GlobalName := 'Uses';
         end;
       '!', 'D', 'd':
         pVal := pDflt;
@@ -276,26 +290,13 @@ begin
     'Log Not Supported messages');
   fParams.Add(fLogNotSupported);
 
-  fTimestampFiles := TD2XBooleanParam.CreateBool('T', 'Timestamp',
-    'Timestamp global output files');
-  fParams.Add(fTimestampFiles);
-
   fFinalToken := TD2XBooleanParam.CreateBool('F', 'Final Token', 'Record Final Token', True);
   fParams.Add(fFinalToken);
 
   fRecurse := TD2XBooleanParam.CreateBool('R', 'Recurse', 'Recurse into subdirectories');
   fParams.Add(fRecurse);
 
-  fGlobalName := TD2XStringParam.CreateStr('G', 'Global name', '<str>', 'Sets global name',
-    ChangeFileExt(ExtractFileName(ParamStr(0)), ''),
-    function(pStr: string; pDflt: string; out pVal: string): boolean
-    begin
-      Result := True;
-      if pStr = '' then
-        pVal := ChangeFileExt(ExtractFileName(ParamStr(0)), '')
-      else
-        pVal := pStr;
-    end,
+  fFileOpts := TD2XFileOptions.Create(
     function(pVal: string): boolean
     begin
       if Assigned(fWriteXml) then
@@ -304,7 +305,7 @@ begin
         fWriteDefines.Value := IncludeTrailingPathDelimiter(pVal);
       Result := True;
     end);
-  fParams.Add(fGlobalName);
+  fFileOpts.RegisterParams(fParams);
 
   fParseMode := TD2XSingleParam<TD2XParseMode>.CreateParam('M', 'Parse mode', '<mode>',
     'Set Parsing mode (F[ull], U[ses])', pmFull, ConvertParsingMode,
@@ -322,14 +323,6 @@ begin
   fUseBase := TD2XFlaggedStringParam.CreateFlagStr('B', 'Base dir', '<dir>',
     'Use <dir> as a base for all file lookups', '', False, ConvertDir, nil, nil);
   fParams.Add(fUseBase);
-
-  fUseInput := TD2XFlaggedStringParam.CreateFlagStr('I', 'Input dir', '<dir>',
-    'Use <dir> as a base for all file input', 'Config\', True, ConvertDir, nil, nil);
-  fParams.Add(fUseInput);
-
-  fUseOutput := TD2XFlaggedStringParam.CreateFlagStr('O', 'Output dir', '<dir>',
-    'Use <dir> as a base for all file output', 'Log\', True, ConvertDir, nil, nil);
-  fParams.Add(fUseOutput);
 
   fWriteXml := TD2XFlaggedStringParam.CreateFlagStr('X', 'Generate XML', '<dir>',
     'Generate XML files into current or given <dir>', 'Xml\', True, ConvertDir, nil, nil);
@@ -366,8 +359,6 @@ begin
     end));
 
   // Available option letters: AHJKLQYZ
-
-  fOutputTimestamp := FormatDateTime('-HH-mm', Now);
 
   fLoadDefines := True;
   fDefines := TStringList.Create;
@@ -417,11 +408,6 @@ begin
   Result := fFinalToken.Value;
 end;
 
-function TD2XOptions.GetGlobalName: string;
-begin
-  Result := fGlobalName.Value;
-end;
-
 function TD2XOptions.GetLogErrors: boolean;
 begin
   Result := fLogErrors.Value;
@@ -460,11 +446,6 @@ end;
 function TD2XOptions.GetSkipMethodsFlag: IParamFlag;
 begin
   Result := fSkipMethods;
-end;
-
-function TD2XOptions.GetTimestampFiles: boolean;
-begin
-  Result := fTimestampFiles.Value;
 end;
 
 function TD2XOptions.GetUseBase: boolean;
@@ -512,58 +493,9 @@ begin
   Result := fWriteXml;
 end;
 
-function TD2XOptions.InputFileOrExtn(pFileOrExtn: string): string;
-  function GlobalFileOrExtn(pFileOrExtn: string): string;
-  begin
-    if StartsText('.', pFileOrExtn) then
-      Result := ChangeFileExt(GlobalName, pFileOrExtn)
-    else
-      Result := pFileOrExtn;
-  end;
-
-begin
-  if IParamFlag(fUseInput).Flag then
-    Result := fUseInput.Value + GlobalFileOrExtn(pFileOrExtn)
-  else
-    Result := GlobalFileOrExtn(pFileOrExtn);
-end;
-
 procedure TD2XOptions.LogOptionError(pLabel, pOpt: string);
 begin
   Log('%s option: %s', [pLabel, pOpt]);
-end;
-
-function TD2XOptions.OutputFileOrExtn(pFileOrExtn: string): string;
-  function GlobalFileOrExtn(pFileOrExtn: string): string;
-  var
-    lExtn: string;
-  begin
-    if StartsText('.', pFileOrExtn) then
-      if TimestampFiles then
-        Result := ChangeFileExt(GlobalName, fOutputTimestamp + pFileOrExtn)
-      else
-        Result := ChangeFileExt(GlobalName, pFileOrExtn)
-    else
-      if TimestampFiles then
-      begin
-        lExtn := ExtractFileExt(pFileOrExtn);
-        Result := ChangeFileExt(pFileOrExtn, fOutputTimestamp + lExtn);
-      end
-      else
-        Result := pFileOrExtn;
-  end;
-
-var
-  lPath: string;
-
-begin
-  if IParamFlag(fUseOutput).Flag then
-    Result := fUseOutput.Value + GlobalFileOrExtn(pFileOrExtn)
-  else
-    Result := GlobalFileOrExtn(pFileOrExtn);
-
-  lPath := ExtractFilePath(ParamStr(0)) + ExtractFilePath(Result);
-  ForceDirectories(lPath);
 end;
 
 function TD2XOptions.ParseDefines(pStr: string): boolean;
@@ -605,46 +537,13 @@ begin
             Result := True;
             fLoadDefines := True;
             ConvertFile(Copy(pStr, 2, Length(pStr)), '.def', lStr);
-            fDefines.LoadFromFile(InputFileOrExtn(lStr));
+            fDefines.LoadFromFile(fFileOpts.InputFileOrExtn(lStr));
           end;
       end;
     end;
 end;
 
 function TD2XOptions.ParseOption(pOpt: string): boolean;
-
-  function ErrorUnlessSet(out pFlag: boolean): boolean;
-  begin
-    Result := False;
-    if (Length(pOpt) = 2) or (pOpt[3] = '+') then
-      pFlag := True
-    else
-      if pOpt[3] = '-' then
-        pFlag := False
-      else
-        Result := True;
-  end;
-  function ErrorUnlessValue(out pVal: string): boolean;
-  begin
-    Result := False;
-    if (Length(pOpt) > 2) and (pOpt[3] = ':') then
-      pVal := Copy(pOpt, 4, 99)
-    else
-      Result := True;
-  end;
-  function ErrorUnlessSetValue(out pFlag: boolean; out pVal: string): boolean;
-  begin
-    Result := False;
-    if ErrorUnlessSet(pFlag) then
-      if pOpt[3] = ':' then
-      begin
-        pFlag := True;
-        pVal := Copy(pOpt, 4, 99)
-      end
-      else
-        Result := True;
-  end;
-
 var
   lPrm: TD2XParam;
 begin
@@ -683,7 +582,7 @@ begin
   begin
     Result := True;
     ConvertFile(pStr, '.prm', lFile);
-    lFile := OutputFileOrExtn(lFile);
+    lFile := fFileOpts.OutputFileOrExtn(lFile);
     lSL := TStringList.Create;
     try
       for lP in fParams do
@@ -749,6 +648,114 @@ begin
   fParams.DescribeAll;
   Log('  Definitions:', []);
   Log('    <f/e> If value begins with "." is appended to global name to give file name', []);
+end;
+
+{ TD2XFileOptions }
+
+function TD2XFileOptions.ConvertDir(pStr, pDflt: string;
+out pVal: string): boolean;
+begin
+  Result := True;
+  if pStr > '' then
+    pVal := IncludeTrailingPathDelimiter(pStr)
+  else
+    pVal := '';
+end;
+
+constructor TD2XFileOptions.Create(pGlobalValidator: TD2XSingleParam<string>.TspValidator);
+begin
+  inherited Create;
+
+  fUseInput := TD2XFlaggedStringParam.CreateFlagStr('I', 'Input dir', '<dir>',
+    'Use <dir> as a base for all file input', 'Config\', True, ConvertDir, nil, nil);
+  fUseOutput := TD2XFlaggedStringParam.CreateFlagStr('O', 'Output dir', '<dir>',
+    'Use <dir> as a base for all file output', 'Log\', True, ConvertDir, nil, nil);
+  fGlobalName := TD2XStringParam.CreateStr('G', 'Global name', '<str>', 'Sets global name',
+    ChangeFileExt(ExtractFileName(ParamStr(0)), ''),
+    function(pStr: string; pDflt: string; out pVal: string): boolean
+    begin
+      Result := True;
+      if pStr = '' then
+        pVal := ChangeFileExt(ExtractFileName(ParamStr(0)), '')
+      else
+        pVal := pStr;
+    end, pGlobalValidator);
+  fTimestampFiles := TD2XBooleanParam.CreateBool('T', 'Timestamp',
+    'Timestamp global output files');
+
+  fOutputTimestamp := FormatDateTime('-HH-mm', Now);
+end;
+
+function TD2XFileOptions.GetGlobalName: string;
+begin
+  Result := fGlobalName.Value;
+end;
+
+function TD2XFileOptions.GetTimestampFiles: Boolean;
+begin
+  Result := fTimestampFiles.Value;
+end;
+
+function TD2XFileOptions.InputFileOrExtn(pFileOrExtn: string): string;
+  function GlobalFileOrExtn(pFileOrExtn: string): string;
+  begin
+    if StartsText('.', pFileOrExtn) then
+      Result := ChangeFileExt(fGlobalName.Value, pFileOrExtn)
+    else
+      Result := pFileOrExtn;
+  end;
+
+begin
+  if IParamFlag(fUseInput).Flag then
+    Result := fUseInput.Value + GlobalFileOrExtn(pFileOrExtn)
+  else
+    Result := GlobalFileOrExtn(pFileOrExtn);
+end;
+
+function TD2XFileOptions.OutputFileOrExtn(pFileOrExtn: string): string;
+  function GlobalFileOrExtn(pFileOrExtn: string): string;
+  var
+    lExtn: string;
+  begin
+    if StartsText('.', pFileOrExtn) then
+      if fTimestampFiles.Value then
+        Result := ChangeFileExt(fGlobalName.Value, fOutputTimestamp + pFileOrExtn)
+      else
+        Result := ChangeFileExt(fGlobalName.Value, pFileOrExtn)
+    else
+      if fTimestampFiles.Value then
+      begin
+        lExtn := ExtractFileExt(pFileOrExtn);
+        Result := ChangeFileExt(pFileOrExtn, fOutputTimestamp + lExtn);
+      end
+      else
+        Result := pFileOrExtn;
+  end;
+
+var
+  lPath: string;
+
+begin
+  if IParamFlag(fUseOutput).Flag then
+    Result := fUseOutput.Value + GlobalFileOrExtn(pFileOrExtn)
+  else
+    Result := GlobalFileOrExtn(pFileOrExtn);
+
+  lPath := ExtractFilePath(ParamStr(0)) + ExtractFilePath(Result);
+  ForceDirectories(lPath);
+end;
+
+procedure TD2XFileOptions.RegisterParams(pParams: TD2XParams);
+begin
+  pParams.Add(fTimestampFiles);
+  pParams.Add(fGlobalName);
+  pParams.Add(fUseInput);
+  pParams.Add(fUseOutput);
+end;
+
+procedure TD2XFileOptions.SetGlobalName(const Value: string);
+begin
+  fGlobalName.Value := Value;
 end;
 
 end.

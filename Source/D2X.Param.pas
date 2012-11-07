@@ -20,11 +20,8 @@ type
   end;
 
   TD2XParam = class(TInterfacedObject)
-  public type
-    TpParser = reference to function(pVal: string): Boolean;
-
   public
-    constructor Create(pCode, pLabel, pSample, pDescr: string; pParser: TpParser); virtual;
+    constructor Create(pCode, pLabel, pSample, pDescr: string; pParser: TD2XStringCheckRef); virtual;
 
     function IsCode(pStr: string): Boolean;
     function Parse(pStr: string): Boolean;
@@ -37,7 +34,7 @@ type
 
   protected
     fCode, fLabel, fSample, fDescr: string;
-    fParser: TpParser;
+    fParser: TD2XStringCheckRef;
 
     function GetSample: string; virtual;
     function GetFormatted(pDefault: Boolean): string; virtual;
@@ -69,9 +66,9 @@ type
     TspSetter = reference to procedure;
   public
     constructor Create(pCode, pLabel, pSample, pDescr: string;
-      pParser: TD2XParam.TpParser); override;
+      pParser: TD2XStringCheckRef); override;
     constructor CreateReset(pCode, pLabel, pSample, pDescr: string;
-      pParser: TD2XParam.TpParser; pResetter, pZeroer: TspSetter);
+      pParser: TD2XStringCheckRef; pResetter, pZeroer: TspSetter);
 
     procedure Reset; override;
     procedure Zero; override;
@@ -87,7 +84,7 @@ type
 
   public
     constructor Create(pCode, pLabel, pSample, pDescr: string;
-      pParser: TD2XParam.TpParser); override;
+      pParser: TD2XStringCheckRef); override;
     constructor CreateParam(pCode, pLabel, pSample, pDescr: string; pDefault: T;
       pConverter: TspConverter; pFormatter: TspFormatter; pValidator: TspValidator); virtual;
 
@@ -209,7 +206,7 @@ begin
 end;
 
 constructor TD2XSingleParam<T>.Create(pCode, pLabel, pSample, pDescr: string;
-  pParser: TD2XParam.TpParser);
+  pParser: TD2XStringCheckRef);
 begin
   raise EInvalidParam.Create('Need to use correct constructor');
 end;
@@ -360,7 +357,7 @@ end;
 
 { TD2XParam }
 
-constructor TD2XParam.Create(pCode, pLabel, pSample, pDescr: string; pParser: TpParser);
+constructor TD2XParam.Create(pCode, pLabel, pSample, pDescr: string; pParser: TD2XStringCheckRef);
 begin
   if pCode = '' then
     raise EInvalidParam.Create('Need a Code');
@@ -601,13 +598,13 @@ end;
 { TD2XResettableParam }
 
 constructor TD2XResettableParam.Create(pCode, pLabel, pSample, pDescr: string;
-  pParser: TD2XParam.TpParser);
+  pParser: TD2XStringCheckRef);
 begin
   raise EInvalidParam.Create('Need to use correct constructor');
 end;
 
 constructor TD2XResettableParam.CreateReset(pCode, pLabel, pSample, pDescr: string;
-  pParser: TD2XParam.TpParser; pResetter, pZeroer: TspSetter);
+  pParser: TD2XStringCheckRef; pResetter, pZeroer: TspSetter);
 begin
   inherited Create(pCode, pLabel, pSample, pDescr, pParser);
 
