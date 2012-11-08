@@ -7,6 +7,7 @@ implementation
 uses
   D2X,
   D2X.Param,
+  D2X.Test,
   D2X.Utils,
   System.Classes,
   System.Rtti,
@@ -39,13 +40,11 @@ type
     procedure TestIsDefault;
   end;
 
-  TestTD2XParams = class(TTestCase)
+  TestTD2XParams = class(TStringTestCase)
   strict private
     fPs: TD2XParams;
-    fSB: TStringBuilder;
 
     function TstParser(pStr: string): Boolean;
-    procedure CheckLog(pExpected, pLabel: string);
 
   public
     procedure SetUp; override;
@@ -54,6 +53,7 @@ type
   published
     procedure TestForCode;
     procedure TestDescribeAll;
+    procedure TestOutputAll;
     procedure TestReportAll;
     procedure TestResetAll;
     procedure TestZeroAll;
@@ -827,12 +827,6 @@ end;
 const
   REPORT_HEADING = 'Current option settings:';
 
-procedure TestTD2XParams.CheckLog(pExpected, pLabel: string);
-begin
-  CheckEqualsString(pExpected, ReduceString(fSB.ToString), pLabel);
-  fSB.Clear;
-end;
-
 procedure TestTD2XParams.SetUp;
 begin
   inherited;
@@ -858,16 +852,16 @@ const
     '<f/e> If value begins with "." is appended to global name to give file name';
 begin
   fPs.DescribeAll;
-  CheckLog(DESCRIPTION_PREFIX + DESCRIPTION_SUFFIX, 'Describe No Params');
+  CheckBuilder(DESCRIPTION_PREFIX + DESCRIPTION_SUFFIX, 'Describe No Params');
 
   fPs.Add(TD2XParam.Create('T', 'Test', '<tst>', 'Test param', TstParser));
   fPs.DescribeAll;
-  CheckLog(DESCRIPTION_PREFIX + ' T<tst> Test param' + DESCRIPTION_SUFFIX,
+  CheckBuilder(DESCRIPTION_PREFIX + ' T<tst> Test param' + DESCRIPTION_SUFFIX,
     'Describe One Param');
 
   fPs.Add(TD2XBooleanParam.CreateBool('B', 'Boolean', 'Boolean param'));
   fPs.DescribeAll;
-  CheckLog(DESCRIPTION_PREFIX + ' T<tst> Test param B[+|-] - Boolean param' +
+  CheckBuilder(DESCRIPTION_PREFIX + ' T<tst> Test param B[+|-] - Boolean param' +
     DESCRIPTION_SUFFIX, 'Describe Two Params');
 end;
 
@@ -885,18 +879,39 @@ begin
   Check(Assigned(fPs.ForCode('T')), 'Code found with Two Params');
 end;
 
+procedure TestTD2XParams.TestOutputAll;
+var
+  lBP:TD2XBooleanParam;
+begin
+  fPs.OutputAll(fSL);
+  CheckList('', 'Output No Params');
+
+  fPs.Add(TD2XParam.Create('T', 'Test', '<tst>', 'Testing', TstParser));
+  fPs.OutputAll(fSL);
+  CheckList('', 'Output One Param');
+
+  lBP := TD2XBooleanParam.CreateBool('B', 'Boolean', 'Boolean param');
+  fPs.Add(lBP);
+  fPs.OutputAll(fSL);
+  CheckList('', 'Output Two Default Params');
+
+  lBP.Value := True;
+  fPs.OutputAll(fSL);
+  CheckList('-B+', 'Output Two Changed Params');
+end;
+
 procedure TestTD2XParams.TestReportAll;
 begin
   fPs.ReportAll;
-  CheckLog(REPORT_HEADING , 'Report No Params');
+  CheckBuilder(REPORT_HEADING , 'Report No Params');
 
   fPs.Add(TD2XParam.Create('T', 'Test', '<tst>', 'Testing', TstParser));
   fPs.ReportAll;
-  CheckLog(REPORT_HEADING , 'Report One Param');
+  CheckBuilder(REPORT_HEADING , 'Report One Param');
 
   fPs.Add(TD2XBooleanParam.CreateBool('B', 'Boolean', 'Boolean param'));
   fPs.ReportAll;
-  CheckLog(REPORT_HEADING + ' Boolean -', 'Report Two Params');
+  CheckBuilder(REPORT_HEADING + ' Boolean -', 'Report Two Params');
 end;
 
 procedure TestTD2XParams.TestResetAll;
@@ -915,19 +930,19 @@ begin
   fPs.Add(lFP);
 
   fPs.ReportAll;
-  CheckLog(REPORT_HEADING + ' Boolean - String Str Flagged :Flg', 'All Params Default');
+  CheckBuilder(REPORT_HEADING + ' Boolean - String Str Flagged :Flg', 'All Params Default');
 
   lBP.Value := True;
   lSP.Value := 'Value';
   lFP.Value := 'Value';
   IParamFlag(lFP).Flag := False;
   fPs.ReportAll;
-  CheckLog(REPORT_HEADING + ' Boolean + String Value Flagged -(Value)', 'All Params Changed');
+  CheckBuilder(REPORT_HEADING + ' Boolean + String Value Flagged -(Value)', 'All Params Changed');
 
   fPs.ResetAll;
 
   fPs.ReportAll;
-  CheckLog(REPORT_HEADING + ' Boolean - String Str Flagged :Flg', 'All Params Reset');
+  CheckBuilder(REPORT_HEADING + ' Boolean - String Str Flagged :Flg', 'All Params Reset');
 end;
 
 procedure TestTD2XParams.TestZeroAll;
@@ -946,19 +961,19 @@ begin
   fPs.Add(lFP);
 
   fPs.ReportAll;
-  CheckLog(REPORT_HEADING + ' Boolean - String Str Flagged -(Flg)', 'All Params Default');
+  CheckBuilder(REPORT_HEADING + ' Boolean - String Str Flagged -(Flg)', 'All Params Default');
 
   lBP.Value := True;
   lSP.Value := 'Value';
   lFP.Value := 'Value';
   IParamFlag(lFP).Flag := True;
   fPs.ReportAll;
-  CheckLog(REPORT_HEADING + ' Boolean + String Value Flagged :Value', 'All Params Changed');
+  CheckBuilder(REPORT_HEADING + ' Boolean + String Value Flagged :Value', 'All Params Changed');
 
   fPs.ZeroAll;
 
   fPs.ReportAll;
-  CheckLog(REPORT_HEADING + ' Boolean - String Flagged -', 'All Params Zeroed');
+  CheckBuilder(REPORT_HEADING + ' Boolean - String Flagged -', 'All Params Zeroed');
 end;
 
 function TestTD2XParams.TstParser(pStr: string): Boolean;

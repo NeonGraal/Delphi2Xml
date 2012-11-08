@@ -14,12 +14,15 @@ type
     fSB: TStringBuilder;
     fSS: TStringStream;
     fSW: TStringWriter;
+    fSL: TStringList;
 
     procedure CheckBuilder(pExp, pLabel: string; pSB: TStringBuilder = nil);
+    procedure CheckList(pExp, pLabel: string; pSL: TStringList = nil);
     procedure CheckStream(pExp, pLabel: string; pSS: TStringStream = nil);
     procedure CheckWriter(pExp, pLabel: string; pSW: TStringWriter = nil);
 
     procedure CheckString(pSB: TStringBuilder; pExp, pLabel: string); overload;
+    procedure CheckString(pSL: TStringList; pExp, pLabel: string); overload;
     procedure CheckString(pSS: TStringStream; pExp, pLabel: string); overload;
     procedure CheckString(pSW: TStringWriter; pExp, pLabel: string); overload;
   public
@@ -603,6 +606,14 @@ begin
   pSB.Clear;
 end;
 
+procedure TStringTestCase.CheckList(pExp, pLabel: string; pSL: TStringList);
+begin
+  if not Assigned(pSL) then
+    pSL := fSL;
+  CheckEqualsString(pExp, ReduceString(pSL.Text), pLabel);
+  pSL.Clear;
+end;
+
 procedure TStringTestCase.CheckStream(pExp, pLabel: string; pSS: TStringStream);
 begin
   if not Assigned(pSS) then
@@ -626,6 +637,11 @@ begin
   CheckWriter(pExp, pLabel, pSW);
 end;
 
+procedure TStringTestCase.CheckString(pSL: TStringList; pExp, pLabel: string);
+begin
+  CheckList(pExp, pLabel, pSL);
+end;
+
 procedure TStringTestCase.CheckWriter(pExp, pLabel: string; pSW: TStringWriter);
 begin
   if Assigned(pSW) then
@@ -642,6 +658,7 @@ begin
   inherited;
 
   fSB := TStringBuilder.Create;
+  fSL := TStringList.Create;
   fSS := TStringStream.Create;
   fSW := TStringWriter.Create(fSB);
 end;
@@ -650,6 +667,7 @@ procedure TStringTestCase.TearDown;
 begin
   FreeAndNil(fSW);
   FreeAndNil(fSS);
+  FreeAndNil(fSL);
   FreeAndNil(fSB);
 
   inherited;

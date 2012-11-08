@@ -471,9 +471,10 @@ procedure TD2XParams.OutputAll(pSL: TStringList);
 var
   lP: TD2XParam;
 begin
-  for lP in Self do
-    if not lP.IsDefault then
-      pSL.Add('-' + lP.ToString);
+  if Assigned(pSL) then
+    for lP in Self do
+      if not lP.IsDefault then
+        pSL.Add('-' + lP.ToString);
 end;
 
 procedure TD2XParams.ReportAll;

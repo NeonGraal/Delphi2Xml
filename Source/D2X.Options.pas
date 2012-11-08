@@ -274,19 +274,17 @@ begin
 end;
 
 procedure TD2XOptions.RegisterDefineParams(pParams: TD2XParams);
+var
+  lClearDefines: TD2XResettableParam.TspSetter;
 begin
-  pParams.Add(TD2XResettableParam.CreateReset('D', 'Defines', '[+-!:]<def>',
-    'Add(+), Remove(-), Clear(!) or Load(:) Defines', ParseDefines,
-    procedure
+  lClearDefines := procedure
     begin
       fLoadDefines := False;
       fDefines.Clear;
-    end,
-    procedure
-    begin
-      fLoadDefines := True;
-      fDefines.Clear;
-    end));
+    end;
+  pParams.Add(TD2XResettableParam.CreateReset('D', 'Defines', '[+-!:]<def>',
+    'Add(+), Remove(-), Clear(!) or Load(:) Defines', ParseDefines, lClearDefines,
+    lClearDefines));
 end;
 
 procedure TD2XOptions.RegisterOptionParams(pParams: TD2XParams; pFileOpts: TD2XFileOptions);

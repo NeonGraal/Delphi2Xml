@@ -77,13 +77,34 @@ type
 
 const
   EXPECTED_PROCESSING = 'Processing Test.pas ... done';
+  EXPECTED_SHOW_OPTIONS =
+    'Usage: Delphi2XmlTests [ Option | @Params | mFilename | Wildcard ] ... ' +
+    'Options: Default Description ? Show valid options ' +
+    '! Reset all options to defaults @<file> Report/Output Current options ' +
+    'V[+|-] - Log all Parser methods called L[+|-] + Log Error messages ' +
+    'N[+|-] - Log Not Supported messages F[+|-] + Record Final Token ' +
+    'R[+|-] - Recurse into subdirectories T[+|-] - Timestamp global output files ' +
+    'G<str> Delphi2XmlTests Sets global name ' +
+    'I[+-]:<dir> :Config\ Use <dir> as a base for all file input ' +
+    'O[+-]:<dir> :Log\ Use <dir> as a base for all file output ' +
+    'M<mode> Full Set Parsing mode (F[ull], U[ses]) ' +
+    'P<per> File Set Result per (F[ile], S[ubdir], D[ir], W[ildcard], P[aram], R[un]) ' +
+    'E<mode> Quiet Set Elapsed time display to be (N[one], Q[uiet], T[otal], P[rocessing]) ' +
+    'B[+-]:<dir> - Use <dir> as a base for all file lookups ' +
+    'X[+-]:<dir> :Xml\ Generate XML files into current or given <dir> ' +
+    'W[+-]:<dir> -(Defines\) Generate Final Defines files into current or given <dir> ' +
+    'U[+-]:<f/e> :.used Report Defines Used into <f/e> ' +
+    'C[+-]:<f/e> :.cnt Report Min/Max Children into <f/e> ' +
+    'S[+-]:<f/e> :.skip Load Skipped Methods from <f/e> ' +
+    'D[+-!:]<def> Add(+), Remove(-), Clear(!) or Load(:) Defines ' +
+    'Definitions: <f/e> If value begins with "." is appended to global name to give file name';
 
   { TestTD2XProcessor }
 
 procedure TestTD2XParamProcessor.TestEndProcessing;
 begin
   fPP.EndProcessing;
-  CheckString(fSB, '', 'Nothing');
+  CheckBuilder('', 'Nothing');
 end;
 
 procedure TestTD2XParamProcessor.TestProcessCountChildren;
@@ -112,7 +133,7 @@ begin
   ReturnValue := fPP.ProcessParam(pStr, pFrom, pIdx);
 
   Check(ReturnValue, 'Return Value');
-  CheckString(fSB, '', 'Empty Log');
+  CheckBuilder('', 'Empty Log');
 end;
 
 procedure TestTD2XParamProcessor.TestProcessParam;
@@ -122,14 +143,14 @@ var
   pFrom: string;
   pStr: string;
 begin
-  pStr := '';
+  pStr := '-?';
   pFrom := 'Test';
   pIdx := 0;
 
   ReturnValue := fPP.ProcessParam(pStr, pFrom, pIdx);
 
-  CheckFalse(ReturnValue, 'Return Value');
-  CheckString(fSB, '', 'Nothing');
+  CheckTrue(ReturnValue, 'Return Value');
+  CheckBuilder(EXPECTED_SHOW_OPTIONS, 'Nothing');
 end;
 
 procedure TestTD2XParamProcessor.TestProcessParamParamFile;
@@ -154,7 +175,7 @@ begin
   ReturnValue := fPP.ProcessParam(pStr, pFrom, pIdx);
 
   Check(ReturnValue, 'Return Value');
-  CheckString(fSB, EXPECTED_REPORT, 'Nothing');
+  CheckBuilder(EXPECTED_REPORT, 'Nothing');
 end;
 
 procedure TestTD2XParamProcessor.TestProcessParamPasFiles;
@@ -171,7 +192,7 @@ begin
   ReturnValue := fPP.ProcessParam(pStr, pFrom, pIdx);
 
   Check(ReturnValue, 'Return Value');
-  CheckString(fSB, EXPECTED_PROCESSING, 'Nothing');
+  CheckBuilder(EXPECTED_PROCESSING, 'Nothing');
 end;
 
 procedure TestTD2XParamProcessor.TestProcessVerbose;
@@ -389,29 +410,6 @@ end;
 procedure TestTD2XParamProcessorGeneral.TestShowOptions;
 var
   ReturnValue: boolean;
-
-const
-  EXPECTED_SHOW_OPTIONS =
-    'Usage: Delphi2XmlTests [ Option | @Params | mFilename | Wildcard ] ... ' +
-    'Options: Default Description ? Show valid options ' +
-    '! Reset all options to defaults @<file> Report/Output Current options ' +
-    'V[+|-] - Log all Parser methods called L[+|-] + Log Error messages ' +
-    'N[+|-] - Log Not Supported messages F[+|-] + Record Final Token ' +
-    'R[+|-] - Recurse into subdirectories T[+|-] - Timestamp global output files ' +
-    'G<str> Delphi2XmlTests Sets global name ' +
-    'I[+-]:<dir> :Config\ Use <dir> as a base for all file input ' +
-    'O[+-]:<dir> :Log\ Use <dir> as a base for all file output ' +
-    'M<mode> Full Set Parsing mode (F[ull], U[ses]) ' +
-    'P<per> File Set Result per (F[ile], S[ubdir], D[ir], W[ildcard], P[aram], R[un]) ' +
-    'E<mode> Quiet Set Elapsed time display to be (N[one], Q[uiet], T[otal], P[rocessing]) ' +
-    'B[+-]:<dir> - Use <dir> as a base for all file lookups ' +
-    'X[+-]:<dir> :Xml\ Generate XML files into current or given <dir> ' +
-    'W[+-]:<dir> -(Defines\) Generate Final Defines files into current or given <dir> ' +
-    'U[+-]:<f/e> :.used Report Defines Used into <f/e> ' +
-    'C[+-]:<f/e> :.cnt Report Min/Max Children into <f/e> ' +
-    'S[+-]:<f/e> :.skip Load Skipped Methods from <f/e> ' +
-    'D[+-!:]<def> Add(+), Remove(-), Clear(!) or Load(:) Defines ' +
-    'Definitions: <f/e> If value begins with "." is appended to global name to give file name';
 begin
   ReturnValue := fPP.ProcessParam('-?', '', 0);
 

@@ -2,17 +2,28 @@ unit D2X.Options.Test;
 
 interface
 
+uses
+  D2X.Param,
+  TestFramework;
+
+type
+  TParamsTestCase = class(TTestCase)
+  protected
+    fParams: TD2XParams;
+  public
+    procedure SetUp; override;
+    procedure TearDown; override;
+  end;
+
 implementation
 
 uses
   D2X,
   D2X.Utils,
-  D2X.Param,
   D2X.Options,
   System.Classes,
   System.StrUtils,
-  System.SysUtils,
-  TestFramework;
+  System.SysUtils;
 
 type
   TestTD2XOptionEnums = class(TTestCase)
@@ -26,14 +37,23 @@ type
     procedure TestResultPerParam;
   end;
 
-  TestTD2XOptionFilenames = class(TTestCase)
+  TestTD2XOptionGeneral = class(TTestCase)
+  published
+    procedure TestConvertDir;
+    procedure TestConvertExtn;
+    procedure TestConvertFile;
+  end;
+
+  TestTD2XFileOptions = class(TParamsTestCase)
   private
     fFileOpts: TD2XFileOptions;
-    fParams: TD2XParams;
   public
     procedure SetUp; override;
     procedure TearDown; override;
   published
+    procedure TestGobalName;
+    procedure TestTimestampFiles;
+
     procedure TestInputFile;
     procedure TestInputExtn;
     procedure TestInputDirFile;
@@ -58,27 +78,46 @@ type
     procedure TestOutputNoTimestampExtn;
   end;
 
-{ TestTD2XOptionFilenames }
+  TestTD2XOptions = class(TParamsTestCase)
+  private
+    fOpts: TD2XOptions;
+  public
+    procedure SetUp; override;
+    procedure TearDown; override;
+  published
+    procedure TestWriteDefines;
+    procedure TestWriteXml;
+    procedure TestDefinesUsed;
+    procedure TestDefines;
+  end;
 
-procedure TestTD2XOptionFilenames.SetUp;
+  { TestTD2XFileOptions }
+
+procedure TestTD2XFileOptions.SetUp;
 begin
   inherited;
 
   fFileOpts := TD2XFileOptions.Create(nil);
-
-  fParams := TD2XParams.Create;
   fFileOpts.RegisterParams(fParams);
 end;
 
-procedure TestTD2XOptionFilenames.TearDown;
+procedure TestTD2XFileOptions.TearDown;
 begin
   FreeAndNil(fFileOpts);
-  FreeAndNil(fParams);
 
   inherited;
 end;
 
-procedure TestTD2XOptionFilenames.TestInputDirExtn;
+procedure TestTD2XFileOptions.TestGobalName;
+begin
+  fParams.ForCode('G').Parse('GGlobal');
+  CheckEqualsString('Global', fFileOpts.GlobalName, 'GlobalName');
+
+  fFileOpts.GlobalName := 'Test';
+  CheckEqualsString('Test', fFileOpts.GlobalName, 'GlobalName');
+end;
+
+procedure TestTD2XFileOptions.TestInputDirExtn;
 var
   ReturnValue: string;
   pExtn: string;
@@ -94,7 +133,7 @@ begin
   CheckEqualsString('In\Global.Extn', ReturnValue, 'ReturnValue');
 end;
 
-procedure TestTD2XOptionFilenames.TestInputDirFile;
+procedure TestTD2XFileOptions.TestInputDirFile;
 var
   ReturnValue: string;
   pFile: string;
@@ -107,7 +146,7 @@ begin
   CheckEqualsString('In\File.Extn', ReturnValue, 'ReturnValue');
 end;
 
-procedure TestTD2XOptionFilenames.TestInputOffExtn;
+procedure TestTD2XFileOptions.TestInputOffExtn;
 var
   ReturnValue: string;
   pExtn: string;
@@ -123,7 +162,7 @@ begin
   CheckEqualsString('Global.Extn', ReturnValue, 'ReturnValue');
 end;
 
-procedure TestTD2XOptionFilenames.TestInputOffFile;
+procedure TestTD2XFileOptions.TestInputOffFile;
 var
   ReturnValue: string;
   pFile: string;
@@ -136,7 +175,7 @@ begin
   CheckEqualsString('File.Extn', ReturnValue, 'ReturnValue');
 end;
 
-procedure TestTD2XOptionFilenames.TestInputOnExtn;
+procedure TestTD2XFileOptions.TestInputOnExtn;
 var
   ReturnValue: string;
   pExtn: string;
@@ -152,7 +191,7 @@ begin
   CheckEqualsString('Config\Global.Extn', ReturnValue, 'ReturnValue');
 end;
 
-procedure TestTD2XOptionFilenames.TestInputOnFile;
+procedure TestTD2XFileOptions.TestInputOnFile;
 var
   ReturnValue: string;
   pFile: string;
@@ -165,7 +204,7 @@ begin
   CheckEqualsString('Config\File.Extn', ReturnValue, 'ReturnValue');
 end;
 
-procedure TestTD2XOptionFilenames.TestInputExtn;
+procedure TestTD2XFileOptions.TestInputExtn;
 var
   ReturnValue: string;
   pExtn: string;
@@ -180,7 +219,7 @@ begin
   CheckEqualsString('Config\Global.Extn', ReturnValue, 'ReturnValue');
 end;
 
-procedure TestTD2XOptionFilenames.TestInputFile;
+procedure TestTD2XFileOptions.TestInputFile;
 var
   ReturnValue: string;
   pFile: string;
@@ -192,7 +231,7 @@ begin
   CheckEqualsString('Config\File.Extn', ReturnValue, 'ReturnValue');
 end;
 
-procedure TestTD2XOptionFilenames.TestOutputDirExtn;
+procedure TestTD2XFileOptions.TestOutputDirExtn;
 var
   ReturnValue: string;
   pExtn: string;
@@ -208,7 +247,7 @@ begin
   CheckEqualsString('Out\Global.Extn', ReturnValue, 'ReturnValue');
 end;
 
-procedure TestTD2XOptionFilenames.TestOutputDirFile;
+procedure TestTD2XFileOptions.TestOutputDirFile;
 var
   ReturnValue: string;
   pFile: string;
@@ -221,7 +260,7 @@ begin
   CheckEqualsString('Out\File.Extn', ReturnValue, 'ReturnValue');
 end;
 
-procedure TestTD2XOptionFilenames.TestOutputExtn;
+procedure TestTD2XFileOptions.TestOutputExtn;
 var
   ReturnValue: string;
   pExtn: string;
@@ -236,7 +275,7 @@ begin
   CheckEqualsString('Log\Global.Extn', ReturnValue, 'ReturnValue');
 end;
 
-procedure TestTD2XOptionFilenames.TestOutputFile;
+procedure TestTD2XFileOptions.TestOutputFile;
 var
   ReturnValue: string;
   pFile: string;
@@ -248,7 +287,7 @@ begin
   CheckEqualsString('Log\File.Extn', ReturnValue, 'ReturnValue');
 end;
 
-procedure TestTD2XOptionFilenames.TestOutputNoTimestampExtn;
+procedure TestTD2XFileOptions.TestOutputNoTimestampExtn;
 var
   ReturnValue: string;
   pExtn: string;
@@ -264,7 +303,7 @@ begin
   CheckEqualsString('Log\Global.Extn', ReturnValue, 'ReturnValue');
 end;
 
-procedure TestTD2XOptionFilenames.TestOutputNoTimestampFile;
+procedure TestTD2XFileOptions.TestOutputNoTimestampFile;
 var
   ReturnValue: string;
   pFile: string;
@@ -277,7 +316,7 @@ begin
   CheckEqualsString('Log\File.Extn', ReturnValue, 'ReturnValue');
 end;
 
-procedure TestTD2XOptionFilenames.TestOutputOffExtn;
+procedure TestTD2XFileOptions.TestOutputOffExtn;
 var
   ReturnValue: string;
   pExtn: string;
@@ -293,7 +332,7 @@ begin
   CheckEqualsString('Global.Extn', ReturnValue, 'ReturnValue');
 end;
 
-procedure TestTD2XOptionFilenames.TestOutputOffFile;
+procedure TestTD2XFileOptions.TestOutputOffFile;
 var
   ReturnValue: string;
   pFile: string;
@@ -306,7 +345,7 @@ begin
   CheckEqualsString('File.Extn', ReturnValue, 'ReturnValue');
 end;
 
-procedure TestTD2XOptionFilenames.TestOutputOnExtn;
+procedure TestTD2XFileOptions.TestOutputOnExtn;
 var
   ReturnValue: string;
   pExtn: string;
@@ -322,7 +361,7 @@ begin
   CheckEqualsString('Log\Global.Extn', ReturnValue, 'ReturnValue');
 end;
 
-procedure TestTD2XOptionFilenames.TestOutputOnFile;
+procedure TestTD2XFileOptions.TestOutputOnFile;
 var
   ReturnValue: string;
   pFile: string;
@@ -335,7 +374,7 @@ begin
   CheckEqualsString('Log\File.Extn', ReturnValue, 'ReturnValue');
 end;
 
-procedure TestTD2XOptionFilenames.TestOutputTimestampExtn;
+procedure TestTD2XFileOptions.TestOutputTimestampExtn;
 var
   ReturnValue: string;
   pExtn: string;
@@ -353,7 +392,7 @@ begin
     'ReturnValue');
 end;
 
-procedure TestTD2XOptionFilenames.TestOutputTimestampFile;
+procedure TestTD2XFileOptions.TestOutputTimestampFile;
 var
   ReturnValue: string;
   pFile: string;
@@ -365,6 +404,14 @@ begin
 
   CheckEqualsString('Log\File' + fFileOpts.OutputTimestamp + '.Extn', ReturnValue,
     'ReturnValue');
+end;
+
+procedure TestTD2XFileOptions.TestTimestampFiles;
+begin
+  CheckFalse(fFileOpts.TimestampFiles, 'GlobalName');
+
+  fParams.ForCode('T').Parse('T');
+  CheckTrue(fFileOpts.TimestampFiles, 'GlobalName');
 end;
 
 { TestTD2XOptionEnums }
@@ -487,9 +534,185 @@ begin
   end;
 end;
 
+{ TestTD2XOptionGeneral }
+
+procedure TestTD2XOptionGeneral.TestConvertDir;
+var
+  lResult: string;
+begin
+  ConvertDir('', '', lResult);
+  CheckEqualsString('', lResult, 'Empty All, No change');
+
+  ConvertDir('', 'Default', lResult);
+  CheckEqualsString('', lResult, 'Default only, No change');
+
+  ConvertDir('Test', '', lResult);
+  CheckEqualsString('Test\', lResult, 'Dir only, Path Char added');
+
+  ConvertDir('Test', 'Default', lResult);
+  CheckEqualsString('Test\', lResult, 'Both, Path Char added');
+end;
+
+procedure TestTD2XOptionGeneral.TestConvertExtn;
+var
+  lResult: string;
+begin
+  ConvertExtn('', '', lResult);
+  CheckEqualsString('', lResult, 'Empty All, No change');
+
+  ConvertExtn('', 'Default', lResult);
+  CheckEqualsString('Default', lResult, 'Default only, Just Default');
+
+  ConvertExtn('Test', '', lResult);
+  CheckEqualsString('.Test', lResult, 'Extn, Extn Char added');
+
+  ConvertExtn('Test', 'Default', lResult);
+  CheckEqualsString('.Test', lResult, 'Both, Extn Char added');
+
+  ConvertExtn('Test.Test', 'Default', lResult);
+  CheckEqualsString('Test.Test', lResult, 'File, File returned');
+end;
+
+procedure TestTD2XOptionGeneral.TestConvertFile;
+var
+  lResult: string;
+begin
+  ConvertFile('', '', lResult);
+  CheckEqualsString('', lResult, 'Empty All, No change');
+
+  ConvertFile('', '.Def', lResult);
+  CheckEqualsString('.Def', lResult, 'Default only, Just Default');
+
+  ConvertFile('Test', '', lResult);
+  CheckEqualsString('Test', lResult, 'File only, No Change');
+
+  ConvertFile('Test', '.Def', lResult);
+  CheckEqualsString('Test.Def', lResult, 'Both, Extn added');
+
+  ConvertFile('Test.Test', '.Def', lResult);
+  CheckEqualsString('Test.Test', lResult, 'File, No Change');
+end;
+
+{ TestTD2XOptions }
+
+procedure TestTD2XOptions.SetUp;
+begin
+  inherited;
+
+  fOpts := TD2XOptions.Create;
+
+  fOpts.RegisterOptionParams(fParams, fOpts.FileOpts);
+  fOpts.RegisterOtherParams(fParams);
+  fOpts.RegisterDefineParams(fParams);
+end;
+
+procedure TestTD2XOptions.TearDown;
+begin
+  FreeAndNil(fOpts);
+
+  inherited;
+end;
+
+procedure TestTD2XOptions.TestDefines;
+begin
+  CheckTrue(fOpts.LoadDefines, 'Default Load Defines');
+  CheckEqualsString('', fOpts.Defines.CommaText, 'Default Defines');
+
+  CheckFalse(fParams.ForCode('D').Parse('D'), 'Failed Parse Define');
+
+  CheckTrue(fParams.ForCode('D').Parse('D+Test1'), 'Parse Add Define');
+  CheckTrue(fOpts.LoadDefines, 'Add Load Defines');
+  CheckEqualsString('Test1', fOpts.Defines.CommaText, 'Add Define');
+
+  CheckTrue(fParams.ForCode('D').Parse('D+Test2'), 'Parse Add Define');
+  CheckTrue(fOpts.LoadDefines, 'Add Load Defines');
+  CheckEqualsString('Test1,Test2', fOpts.Defines.CommaText, 'Add Defines');
+
+  CheckTrue(fParams.ForCode('D').Parse('D-Test1'), 'Parse Remove Define');
+  CheckTrue(fOpts.LoadDefines, 'Removed Load Defines');
+  CheckEqualsString('Test2', fOpts.Defines.CommaText, 'Removed Define');
+
+  CheckTrue(fParams.ForCode('D').Parse('D!'), 'Parse Clear Define');
+  CheckFalse(fOpts.LoadDefines, 'Cleared Load Defines');
+  CheckEqualsString('', fOpts.Defines.CommaText, 'Cleared Defines');
+end;
+
+procedure TestTD2XOptions.TestDefinesUsed;
+begin
+  CheckTrue(fOpts.DefinesUsed, 'Default Defines Used');
+  CheckEqualsString('.used', fOpts.DefinesUsedFoE, 'Default Defines Used FoE');
+
+  CheckTrue(fParams.ForCode('U').Parse('U-'), 'Parse Defines Used');
+  CheckFalse(fOpts.DefinesUsed, 'Unset Defines Used');
+  CheckEqualsString('.used', fOpts.DefinesUsedFoE, 'Unset Defines Used FoE');
+
+  CheckTrue(fParams.ForCode('U').Parse('U:Test'), 'Parse Defines Used');
+  CheckTrue(fOpts.DefinesUsed, 'Set Defines Used');
+  CheckEqualsString('.Test', fOpts.DefinesUsedFoE, 'Test Defines Used FoE');
+end;
+
+procedure TestTD2XOptions.TestWriteDefines;
+begin
+  Check(Assigned(fOpts.WriteDefinesFlag), 'Write Defines Flag Assigned');
+
+  CheckFalse(fOpts.WriteDefines, 'Default Write Defines');
+  CheckFalse(fOpts.WriteDefinesFlag.Flag, 'Default Write Defines Flag');
+  CheckEqualsString('Defines\', fOpts.DefinesDirectory, 'Default Defines Directory');
+
+  CheckTrue(fParams.ForCode('W').Parse('W'), 'Parse Write Defines');
+  CheckTrue(fOpts.WriteDefines, 'Set Write Defines');
+  CheckTrue(fOpts.WriteDefinesFlag.Flag, 'Set Write Defines Flag');
+  CheckEqualsString('Defines\', fOpts.DefinesDirectory, 'Set Default Defines Directory');
+
+  CheckTrue(fParams.ForCode('W').Parse('W:Test'), 'Parse Write Defines');
+  CheckTrue(fOpts.WriteDefines, 'Set Write Defines');
+  CheckTrue(fOpts.WriteDefinesFlag.Flag, 'Set Write Defines Flag');
+  CheckEqualsString('Test\', fOpts.DefinesDirectory, 'Test Defines Directory');
+
+  CheckTrue(fParams.ForCode('W').Parse('W-'), 'Parse Write Defines');
+  CheckFalse(fOpts.WriteDefines, 'Unset Write Defines');
+  CheckFalse(fOpts.WriteDefinesFlag.Flag, 'Unset Write Defines Flag');
+  CheckEqualsString('Test\', fOpts.DefinesDirectory, 'Unset Defines Directory');
+end;
+
+procedure TestTD2XOptions.TestWriteXml;
+begin
+  Check(Assigned(fOpts.WriteXmlFlag), 'Write Xml Flag Assigned');
+
+  CheckTrue(fOpts.WriteXml, 'Default Write Xml');
+  CheckTrue(fOpts.WriteXmlFlag.Flag, 'Default Write Xml Flag');
+  CheckEqualsString('Xml\', fOpts.XmlDirectory, 'Default Xml Directory');
+
+  CheckTrue(fParams.ForCode('X').Parse('X-'), 'Parse Write Xml');
+  CheckFalse(fOpts.WriteXml, 'Unset Write Xml');
+  CheckFalse(fOpts.WriteXmlFlag.Flag, 'Unset Write Xml Flag');
+  CheckEqualsString('Xml\', fOpts.XmlDirectory, 'Unset Xml Directory');
+
+  CheckTrue(fParams.ForCode('X').Parse('X:Test'), 'Parse Write Xml');
+  CheckTrue(fOpts.WriteXml, 'Set Write Xml');
+  CheckTrue(fOpts.WriteXmlFlag.Flag, 'Set Write Xml Flag');
+  CheckEqualsString('Test\', fOpts.XmlDirectory, 'Test Xml Directory');
+end;
+
+{ TParamsTestCase }
+
+procedure TParamsTestCase.SetUp;
+begin
+  inherited;
+
+  fParams := TD2XParams.Create;
+end;
+
+procedure TParamsTestCase.TearDown;
+begin
+  fParams := nil;
+
+  inherited;
+end;
+
 initialization
 
-RegisterTests('Options', [TestTD2XOptionEnums.Suite, TestTD2XOptionFilenames.Suite{,
-     TestTD2XOptionGeneral.Suite, TestTD2XOptions.Suite}]);
+RegisterTests('Options', [TestTD2XOptionEnums.Suite, TestTD2XOptionGeneral.Suite,
+    TestTD2XFileOptions.Suite, TestTD2XOptions.Suite]);
 
 end.
