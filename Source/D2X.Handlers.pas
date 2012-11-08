@@ -43,6 +43,40 @@ type
     procedure EndMethod(pMethod: string); override;
   end;
 
+  TD2XSkipHandler = class(TD2XHandler)
+  private
+    fSkippedMethods: TStrIntDict;
+
+  public
+    constructor Create;
+    destructor Destroy; override;
+
+    function Description: string; override;
+    function UseProxy: Boolean; override;
+
+    function CheckBeforeMethod(pMethod: string): Boolean; override;
+    function CheckAfterMethod(pMethod: string): Boolean; override;
+
+    procedure BeginFile(pInput: TD2XHandler.ThStreamCreator); override;
+
+    procedure EndProcessing(pOutput: TD2XHandler.ThStreamCreator); override;
+  end;
+
+  TD2XWriteDefinesHandler = class(TD2XHandler)
+  protected
+    fParser: TD2XDefinesParser;
+
+  public
+    procedure Init(pParser: TD2XDefinesParser);
+
+    function Description: string; override;
+    function UseProxy: Boolean; override;
+
+    procedure Copy(pFrom: TD2XHandler); override;
+
+    procedure EndResults(pOutput: TD2XHandler.ThStreamCreator); override;
+  end;
+
   TD2XXmlHandler = class(TD2XHandler)
   private
     fHasFiles: Boolean;
@@ -83,25 +117,6 @@ type
     procedure RollbackTo(pNodeName: string);
 
     property HasFiles: Boolean read fHasFiles write fHasFiles;
-  end;
-
-  TD2XSkipHandler = class(TD2XHandler)
-  private
-    fSkippedMethods: TStrIntDict;
-
-  public
-    constructor Create;
-    destructor Destroy; override;
-
-    function Description: string; override;
-    function UseProxy: Boolean; override;
-
-    function CheckBeforeMethod(pMethod: string): Boolean; override;
-    function CheckAfterMethod(pMethod: string): Boolean; override;
-
-    procedure BeginFile(pInput: TD2XHandler.ThStreamCreator); override;
-
-    procedure EndProcessing(pOutput: TD2XHandler.ThStreamCreator); override;
   end;
 
 implementation
@@ -458,6 +473,68 @@ end;
 function TD2XXmlHandler.UseProxy: Boolean;
 begin
   Result := True;
+end;
+
+{ TD2XWriteDefinesHandler }
+
+procedure TD2XWriteDefinesHandler.Copy(pFrom: TD2XHandler);
+var
+  lFrom: TD2XWriteDefinesHandler;
+begin
+  if Assigned(pFrom) then
+  begin
+    lFrom := TD2XWriteDefinesHandler(pFrom);
+    fParser := lFrom.fParser;
+  end;
+end;
+
+function TD2XWriteDefinesHandler.Description: string;
+begin
+  Result := 'Write Defines';
+end;
+
+procedure TD2XWriteDefinesHandler.EndResults(pOutput: TD2XHandler.ThStreamCreator);
+var
+  lSL: TStringList;
+  i: Integer;
+  lFS: TStream;
+const
+  DEF_BREAK: array [0 .. 9] of Byte = (13, 10, 42, 42, 42, 42, 13, 10, 13, 10);
+begin
+  lSL := TStringList.Create;
+  try
+    fParser.GetLexerDefines(lSL);
+    fParser.StartDefines.Sort;
+    lSL.Sort;
+    for i := lSL.Count - 1 downto 1 do
+      if lSL[i] = lSL[i - 1] then
+        lSL.Delete(i);
+    if lSL.Text <> fParser.StartDefines.Text then
+    begin
+      //        lFile := fProgramDir + fOpts.DefinesDirectory + ExtractFilePath(pFilename);
+      //        ForceDirectories(lFile);
+      //        lFS := TFileStream.Create(fOpts.DefinesDirectory + pFilename + '.def', fmCreate);
+      lFS := pOutput;
+      if Assigned(lFS) then
+        begin
+          fParser.StartDefines.SaveToStream(lFS);
+          lFS.Write(DEF_BREAK, 10);
+          lSL.SaveToStream(lFS);
+        end;
+    end;
+  finally
+    FreeAndNil(lSL);
+  end;
+end;
+
+procedure TD2XWriteDefinesHandler.Init(pParser: TD2XDefinesParser);
+begin
+  fParser := pParser;
+end;
+
+function TD2XWriteDefinesHandler.UseProxy: Boolean;
+begin
+  Result := False;
 end;
 
 end.

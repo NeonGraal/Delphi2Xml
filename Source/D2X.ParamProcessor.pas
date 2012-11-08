@@ -25,6 +25,8 @@ type
   TD2XParamProcessor = class(TD2XLogger)
   private
     fOpts: TD2XOptions;
+
+    fParams: TD2XParams;
     fProcs: TObjectList<TD2XProcessor>;
 
     fProgramDir: string;
@@ -34,12 +36,26 @@ type
     fParser: TD2XDefinesParser;
     fVMI: TVirtualMethodInterceptor;
 
-    fDefinesUsed: TStrIntDict;
+    fDefinesDict: TStrIntDict;
 
     fFilename: string;
 
     fLogProcessor: TD2XLogProcessor;
     fXmlHandler: TD2XXmlHandler;
+    fWriteDefinesHandler : TD2XWriteDefinesHandler;
+
+    fVerbose: TD2XBooleanParam;
+    fLogErrors: TD2XBooleanParam;
+    fLogNotSupported: TD2XBooleanParam;
+    fFinalToken: TD2XBooleanParam;
+    fRecurse: TD2XBooleanParam;
+    fParseMode: TD2XSingleParam<TD2XParseMode>;
+    fResultPer: TD2XSingleParam<TD2XResultPer>;
+    fElapsedMode: TD2XSingleParam<TD2XElapsedMode>;
+    fUseBase: TD2XFlaggedStringParam;
+
+    function ConvertParsingMode(pStr: string; pDflt: TD2XParseMode;
+      out pVal: TD2XParseMode): Boolean;
 
     procedure RemoveProxy;
     procedure SetProxy;
@@ -69,16 +85,16 @@ type
     // procedure LexerOnEndIf(pLex: TD2XLexer);
     // procedure LexerOnIfEnd(pLex: TD2XLexer);
 
+    function ProcessParamOption(pOpt: string): Boolean;
     function ProcessParamsFile(pFileOrExtn: string): Boolean;
 
     procedure InitProcessors;
+
     procedure InitParser;
 
     function TidyFilename(pFilename: string): string;
     procedure BeginResults(pNodename: string; pPer: TD2XResultPer);
     procedure EndResults(pFilename: string; pPer: TD2XResultPer);
-
-    procedure DoEndResults(pFilename: string);
 
     function ProcessStream(pStream: TStringStream): Boolean;
     function ProcessInput: Boolean;
@@ -109,18 +125,80 @@ uses
   Xml.XMLIntf,
   Winapi.Windows;
 
+function ConvertResultPer(pStr: string; pDflt: TD2XResultPer;
+  out pVal: TD2XResultPer): Boolean;
+begin
+  Result := pStr > '';
+  if Result then
+    case pStr[1] of
+      'R', 'r':
+        pVal := rpRun;
+      'P', 'p':
+        pVal := rpParam;
+      'W', 'w':
+        pVal := rpWildcard;
+      'S', 's':
+        pVal := rpSubDir;
+      'D', 'd':
+        pVal := rpDir;
+      '!':
+        pVal := pDflt;
+    else
+      pVal := rpFile;
+    end;
+end;
+
+function ConvertElapsedMode(pStr: string; pDflt: TD2XElapsedMode;
+  out pVal: TD2XElapsedMode): Boolean;
+begin
+  Result := pStr > '';
+  if Result then
+    case pStr[1] of
+      'N', 'n':
+        pVal := emNone;
+      'Q', 'q':
+        pVal := emQuiet;
+      'T', 't':
+        pVal := emTotal;
+      'P', 'p':
+        pVal := emProcessing;
+      '!':
+        pVal := pDflt;
+    else
+      pVal := emQuiet;
+    end;
+end;
+
 { TD2XParamProcessor }
 
 procedure TD2XParamProcessor.BeginResults(pNodename: string; pPer: TD2XResultPer);
 var
   lP: TD2XProcessor;
 begin
-  if fOpts.ResultPer = pPer then
+  if fResultPer.Value = pPer then
     for lP in fProcs do
       lP.BeginResults;
 
-  if fOpts.ResultPer >= pPer then
+  if fResultPer.Value >= pPer then
     fXmlHandler.BeginMethod(pNodename);
+end;
+
+function TD2XParamProcessor.ConvertParsingMode(pStr: string;
+  pDflt: TD2XParseMode; out pVal: TD2XParseMode): Boolean;
+begin
+  Result := pStr > '';
+  if Result then
+    case pStr[1] of
+      'U', 'u':
+        begin
+          pVal := pmUses;
+          fOpts.FileOpts.GlobalName := 'Uses';
+        end;
+      '!', 'D', 'd':
+        pVal := pDflt;
+    else
+      pVal := pmFull;
+    end;
 end;
 
 constructor TD2XParamProcessor.Create;
@@ -131,10 +209,14 @@ begin
   fDuration := TStopwatch.StartNew;
 
   fOpts := TD2XOptions.Create(Self);
+
+  fParams := TD2XParams.Create;
+  fParams.L.JoinLog(Self);
+
   fProcs := TObjectList<TD2XProcessor>.Create;
   InitProcessors;
 
-  fDefinesUsed := TStrIntDict.Create;
+  fDefinesDict := TStrIntDict.Create;
 
   InitParser;
 
@@ -146,16 +228,16 @@ procedure TD2XParamProcessor.DefineUsed(pDef: string);
 var
   lVal: Integer;
 begin
-  if fDefinesUsed.TryGetValue(pDef, lVal) then
-    fDefinesUsed[pDef] := lVal + 1
+  if fDefinesDict.TryGetValue(pDef, lVal) then
+    fDefinesDict[pDef] := lVal + 1
   else
-    fDefinesUsed.Add(pDef, 1)
+    fDefinesDict.Add(pDef, 1)
 end;
 
 destructor TD2XParamProcessor.Destroy;
 begin
   fDuration.Stop;
-  case fOpts.ElapsedMode of
+  case fElapsedMode.Value of
     emNone:
       ;
     emQuiet:
@@ -168,50 +250,12 @@ begin
 
   FreeAndNil(fParser);
 
-  FreeAndNil(fDefinesUsed);
+  FreeAndNil(fDefinesDict);
 
   FreeAndNil(fProcs);
   FreeAndNil(fOpts);
 
   inherited;
-end;
-
-procedure TD2XParamProcessor.DoEndResults(pFilename: string);
-var
-  lFile: string;
-  lSL: TStringList;
-  lFS: TFileStream;
-  i: Integer;
-const
-  DEF_BREAK: array [0 .. 9] of Byte = (13, 10, 42, 42, 42, 42, 13, 10, 13, 10);
-begin
-  if fOpts.WriteDefines then
-  begin
-    lSL := TStringList.Create;
-    try
-      fParser.GetLexerDefines(lSL);
-      fParser.StartDefines.Sort;
-      lSL.Sort;
-      for i := lSL.Count - 1 downto 1 do
-        if lSL[i] = lSL[i - 1] then
-          lSL.Delete(i);
-      if lSL.Text <> fParser.StartDefines.Text then
-      begin
-        lFile := fProgramDir + fOpts.DefinesDirectory + ExtractFilePath(pFilename);
-        ForceDirectories(lFile);
-        lFS := TFileStream.Create(fOpts.DefinesDirectory + pFilename + '.def', fmCreate);
-        try
-          fParser.StartDefines.SaveToStream(lFS);
-          lFS.Write(DEF_BREAK, 10);
-          lSL.SaveToStream(lFS);
-        finally
-          FreeAndNil(lFS);
-        end;
-      end;
-    finally
-      FreeAndNil(lSL);
-    end;
-  end;
 end;
 
 procedure TD2XParamProcessor.EndProcessing;
@@ -237,7 +281,7 @@ begin
   EndResults('', rpRun);
 
   if fOpts.DefinesUsed then
-    OutputStrIntDict(fDefinesUsed, fOpts.DefinesUsedFoE, SimplePairLog);
+    OutputStrIntDict(fDefinesDict, fOpts.DefinesUsedFoE, SimplePairLog);
 
   for lP in fProcs do
     lP.EndProcessing;
@@ -247,19 +291,18 @@ procedure TD2XParamProcessor.EndResults(pFilename: string; pPer: TD2XResultPer);
 var
   lP: TD2XProcessor;
 begin
-  if fOpts.ResultPer >= pPer then
+  if fResultPer.Value >= pPer then
   begin
     fXmlHandler.AddAttr('fileName', pFilename);
     fXmlHandler.EndMethod('');
   end;
 
-  if fOpts.ResultPer = pPer then
+  if fResultPer.Value = pPer then
   begin
     if pFilename = '' then
       pFilename := '(' + TD2X.ToLabel(pPer) + ')';
     for lP in fProcs do
       lP.EndResults(pFilename);
-    DoEndResults(pFilename);
   end;
 end;
 
@@ -309,10 +352,10 @@ var
 begin
   case pTyp of
     meError:
-      if fOpts.LogErrors then
+      if fLogErrors.Value then
         LogMessage('Error', pMsg, pX, pY);
     meNotSupported:
-      if fOpts.LogNotSupported then
+      if fLogNotSupported.Value then
         LogMessage('Not Supported', pMsg, pX, pY);
   else
     LogMessage('????', pMsg, pX, pY);
@@ -330,8 +373,8 @@ var
 begin
   Result := False;
 
-  if fOpts.UseBase then
-    lPath := fOpts.BaseDirectory + pDir
+  if fUseBase.FlagValue then
+    lPath := fUseBase.Value + pDir
   else
     lPath := pDir;
 
@@ -356,8 +399,8 @@ begin
   Result := False;
   fFilename := pFilename;
   lFile := fFilename;
-  if fOpts.UseBase then
-    lFile := fOpts.BaseDirectory + lFile;
+  if fUseBase.FlagValue then
+    lFile := fUseBase.Value + lFile;
   if FileExists(lFile) then
   begin
     lSS := TStringStream.Create;
@@ -379,7 +422,7 @@ begin
   end
   else
     { TODO -oStruan -cTodo : Is thi sthe correct flag to check? }
-    if fOpts.Verbose then
+    if fVerbose.Value then
       Log('Cannot find "%s"', [lFile]);
 end;
 
@@ -479,7 +522,6 @@ end;
 function TD2XParamProcessor.ProcessParam(pStr, pFrom: string; pIdx: Integer): Boolean;
 var
   lPath, lFile: string;
-  lPrevPer: TD2XResultPer;
 begin
   Result := False;
   try
@@ -488,14 +530,7 @@ begin
       case pStr[1] of
         '-', '/':
           begin
-            lPrevPer := fOpts.ResultPer;
-            Result := Options.ParseOption(pStr);
-            if lPrevPer <> fOpts.ResultPer then
-            begin
-              if lPrevPer = rpRun then
-                EndResults('', fOpts.ResultPer);
-              BeginResults('D2X_Run', rpRun);
-            end;
+            Result := ProcessParamOption(Copy(pStr, 2));
             Exit;
           end;
         '@':
@@ -524,7 +559,7 @@ begin
         BeginResults('D2X_Dir', rpDir);
         Result := ProcessDirectory(lPath, lFile);
         EndResults(ExcludeTrailingPathDelimiter(lPath), rpDir);
-        if fOpts.Recurse then
+        if fRecurse.Value then
           Result := RecurseDirectory(lPath, lFile, True) or Result;
       end;
     end;
@@ -535,12 +570,42 @@ begin
   end;
 end;
 
+function TD2XParamProcessor.ProcessParamOption(pOpt: string): Boolean;
+var
+  lPrevPer: TD2XResultPer;
+  lPrm: TD2XParam;
+
+begin
+  lPrevPer := fResultPer.Value ;
+  Result := False;
+  if Length(pOpt) < 1 then
+    raise ED2XOptionsException.Create('Invalid option: ' + pOpt)
+  else
+  begin
+    lPrm := fParams.ForCode(Copy(pOpt, 1, 1));
+    if Assigned(lPrm) then
+      if lPrm.Parse(pOpt) then
+        Result := True
+      else
+        Log('%s option: %s', ['Invalid ' + lPrm.ParamLabel, pOpt])
+    else
+      Log('%s option: %s', ['Unknown', pOpt]);
+  end;
+  if lPrevPer <> fResultPer.Value  then
+  begin
+    if lPrevPer = rpRun then
+      EndResults('', fResultPer.Value );
+    BeginResults('D2X_Run', rpRun);
+  end;
+
+end;
+
 procedure TD2XParamProcessor.InitParser;
 begin
   if Assigned(fParser) then
   begin
     RemoveProxy;
-    case fOpts.ParseMode of
+    case fParseMode.Value of
       pmUses:
         begin
           if not(fParser is TD2XUsesParser) then
@@ -556,7 +621,7 @@ begin
 
   if not Assigned(fParser) then
   begin
-    case fOpts.ParseMode of
+    case fParseMode.Value of
       pmUses:
         fParser := TD2XUsesParser.Create
     else
@@ -583,38 +648,63 @@ begin
     fXmlHandler.Init(fParser,
         function: Boolean
       begin
-        Result := fOpts.FinalToken;
+        Result := fFinalToken.Value;
       end,
       function: string
       begin
-        Result := TD2X.ToLabel(fOpts.ParseMode);
+        Result := TD2X.ToLabel(fParseMode.Value);
       end);
+    fWriteDefinesHandler.Init(fParser);
   end;
 end;
 
 procedure TD2XParamProcessor.InitProcessors;
 var
   lHProc: TD2XHandlerProcessor;
+  lSkipMethods: TD2XFlaggedStringParam;
+  lCountChildren: TD2XFlaggedStringParam;
 begin
-  fLogProcessor := TD2XLogProcessor.Create(fOpts.VerboseFlag);
-  fLogProcessor.JoinLog(Self);
+  fOpts.RegisterOptionParams(fParams, fOpts.FileOpts);
 
+  fVerbose := TD2XBooleanParam.CreateBool('V', 'Verbose', 'Log all Parser methods called');
+  fParams.Add(fVerbose);
+
+  fLogProcessor := TD2XLogProcessor.Create(fVerbose);
+  fLogProcessor.JoinLog(Self);
   fProcs.Add(fLogProcessor);
 
-  lHProc := TD2XHandlerProcessor.CreateHandler(fOpts.SkipMethodsFlag, TD2XSkipHandler.Create);
+  fLogErrors := TD2XBooleanParam.CreateBool('L', 'Log Errors', 'Log Error messages', True);
+  fParams.Add(fLogErrors);
+
+  fLogNotSupported := TD2XBooleanParam.CreateBool('N', 'Log Not Supp',
+    'Log Not Supported messages');
+  fParams.Add(fLogNotSupported);
+
+  fFinalToken := TD2XBooleanParam.CreateBool('F', 'Final Token', 'Record Final Token', True);
+  fParams.Add(fFinalToken);
+
+  fRecurse := TD2XBooleanParam.CreateBool('R', 'Recurse', 'Recurse into subdirectories');
+  fParams.Add(fRecurse);
+
+  lSkipMethods := TD2XFlaggedStringParam.CreateFlagStr('S', 'Skipped Methods', '<f/e>',
+    'Load Skipped Methods from <f/e>', '.skip', True, ConvertFile, nil, nil);
+
+  lHProc := TD2XHandlerProcessor.CreateHandler(lSkipMethods, TD2XSkipHandler.Create);
   lHProc.SetFileInput(
     function: string
     begin
-      Result := fOpts.FileOpts.InputFileOrExtn(fOpts.SkipMethodsFoE);
+      Result := fOpts.FileOpts.InputFileOrExtn(lSkipMethods.Value);
     end);
   lHProc.SetProcessingOutput(
     function: string
     begin
-      Result := fOpts.FileOpts.OutputFileOrExtn(fOpts.SkipMethodsFoE + '.log');
+      Result := fOpts.FileOpts.OutputFileOrExtn(lSkipMethods.Value + '.log');
     end);
   fProcs.Add(lHProc);
 
-  lHProc := TD2XHandlerProcessor.CreateHandler(fOpts.CountChildrenFlag,
+  lCountChildren := TD2XFlaggedStringParam.CreateFlagStr('C', 'Count Children', '<f/e>',
+    'Report Min/Max Children into <f/e>', '.cnt', True, ConvertExtn, nil, nil);
+  lHProc := TD2XHandlerProcessor.CreateHandler(lCountChildren,
     TD2XCountHandler.Create);
   lHProc.SetFileInput(
     function: string
@@ -629,12 +719,63 @@ begin
   lHProc.SetProcessingOutput(
     function: string
     begin
-      Result := fOpts.FileOpts.OutputFileOrExtn(fOpts.SkipMethodsFoE + '.log');
+      Result := fOpts.FileOpts.OutputFileOrExtn(lCountChildren.Value);
     end);
   fProcs.Add(lHProc);
 
   fXmlHandler := TD2XXmlHandler.Create;
-  fProcs.Add(TD2XHandlerProcessor.CreateHandler(fOpts.WriteXmlFlag, fXmlHandler));
+  lHProc := TD2XHandlerProcessor.CreateHandler(fOpts.WriteXmlFlag, fXmlHandler);
+  lHProc.SetResultsOutput(
+    function(pFilename: String): string
+    var
+      lFile: String;
+    begin
+      lFile := fProgramDir + fOpts.XmlDirectory + ExtractFilePath(pFilename);
+      ForceDirectories(lFile);
+      Result := fOpts.XmlDirectory + pFilename + '.xml';
+    end);
+  fProcs.Add(lHProc);
+
+  fWriteDefinesHandler := TD2XWriteDefinesHandler.Create;
+  lHProc := TD2XHandlerProcessor.CreateHandler(fOpts.WriteDefinesFlag, fWriteDefinesHandler);
+  lHProc.SetResultsOutput(
+    function(pFilename: String): string
+    var
+      lFile: String;
+    begin
+      lFile := fProgramDir + fOpts.DefinesDirectory + ExtractFilePath(pFilename);
+      ForceDirectories(lFile);
+      Result := fOpts.DefinesDirectory + pFilename + '.def';
+    end);
+  fProcs.Add(lHProc);
+
+  fOpts.FileOpts.RegisterParams(fParams);
+
+  fParseMode := TD2XSingleParam<TD2XParseMode>.CreateParam('M', 'Parse mode', '<mode>',
+    'Set Parsing mode (F[ull], U[ses])', pmFull, ConvertParsingMode,
+    TD2X.ToLabel<TD2XParseMode>, nil);
+  fParams.Add(fParseMode);
+
+  fResultPer := TD2XSingleParam<TD2XResultPer>.CreateParam('P', 'Results per', '<per>',
+    'Set Result per (F[ile], S[ubdir], D[ir], W[ildcard], P[aram], R[un])', rpFile,
+    ConvertResultPer, TD2X.ToLabel<TD2XResultPer>, nil);
+  fParams.Add(fResultPer );
+
+  fElapsedMode := TD2XSingleParam<TD2XElapsedMode>.CreateParam('E', 'Show elapsed', '<mode>',
+    'Set Elapsed time display to be (N[one], Q[uiet], T[otal], P[rocessing])', emQuiet,
+    ConvertElapsedMode, TD2X.ToLabel<TD2XElapsedMode>, nil);
+  fParams.Add(fElapsedMode);
+
+  fUseBase := TD2XFlaggedStringParam.CreateFlagStr('B', 'Base dir', '<dir>',
+    'Use <dir> as a base for all file lookups', '', False, ConvertDir, nil, nil);
+  fParams.Add(fUseBase);
+
+  fOpts.RegisterOtherParams(fParams);
+
+  fParams.Add(lCountChildren);
+  fParams.Add(lSkipMethods);
+
+  fOpts.RegisterDefineParams(fParams);
 end;
 
 function TD2XParamProcessor.ProcessParamsFile(pFileOrExtn: string): Boolean;
@@ -661,7 +802,7 @@ var
   lFile: string;
   lP: TD2XProcessor;
 begin
-  if fOpts.ElapsedMode <> emNone then
+  if fElapsedMode.Value <> emNone then
     Log('Processing %s ... ', [fFilename], False);
   lTimer := TStopwatch.StartNew;
   try
@@ -699,7 +840,7 @@ begin
     EndResults(fFilename, rpFile);
   finally
     lTimer.Stop;
-    case fOpts.ElapsedMode of
+    case fElapsedMode.Value of
       emNone:
         ;
       emQuiet:
@@ -722,8 +863,8 @@ var
 begin
   Result := False;
 
-  if fOpts.UseBase then
-    lPath := fOpts.BaseDirectory + pDir
+  if fUseBase.FlagValue then
+    lPath := fUseBase.Value + pDir
   else
     lPath := pDir;
 

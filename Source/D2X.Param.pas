@@ -21,7 +21,8 @@ type
 
   TD2XParam = class(TInterfacedObject)
   public
-    constructor Create(pCode, pLabel, pSample, pDescr: string; pParser: TD2XStringCheckRef); virtual;
+    constructor Create(pCode, pLabel, pSample, pDescr: string;
+      pParser: TD2XStringCheckRef); virtual;
 
     function IsCode(pStr: string): Boolean;
     function Parse(pStr: string): Boolean;
@@ -57,6 +58,7 @@ type
     procedure ReportAll;
     procedure ResetAll;
     procedure ZeroAll;
+    procedure OutputAll(pSL: TStringList);
 
     property L: ID2XLogger read fLogger implements ID2XLogger;
   end;
@@ -300,7 +302,7 @@ begin
 end;
 
 constructor TD2XBooleanParam.CreateParam(pCode, pLabel, pSample, pDescr: string;
-  pDefault: Boolean;pConverter: TD2XSingleParam<Boolean>.TspConverter;
+  pDefault: Boolean; pConverter: TD2XSingleParam<Boolean>.TspConverter;
   pFormatter: TD2XSingleParam<Boolean>.TspFormatter;
   pValidator: TD2XSingleParam<Boolean>.TspValidator);
 begin
@@ -343,8 +345,8 @@ constructor TD2XStringParam.CreateStr(pCode, pLabel, pSample, pDescr, pDefault: 
   pValidator: TD2XSingleParam<string>.TspValidator);
 begin
   if Assigned(pConverter) then
-    inherited CreateParam(pCode, pLabel, pSample, pDescr, pDefault, pConverter,
-      FormatString, pValidator)
+    inherited CreateParam(pCode, pLabel, pSample, pDescr, pDefault, pConverter, FormatString,
+      pValidator)
   else
     inherited CreateParam(pCode, pLabel, pSample, pDescr, pDefault, ConvertString,
       FormatString, pValidator);
@@ -357,7 +359,8 @@ end;
 
 { TD2XParam }
 
-constructor TD2XParam.Create(pCode, pLabel, pSample, pDescr: string; pParser: TD2XStringCheckRef);
+constructor TD2XParam.Create(pCode, pLabel, pSample, pDescr: string;
+  pParser: TD2XStringCheckRef);
 begin
   if pCode = '' then
     raise EInvalidParam.Create('Need a Code');
@@ -435,9 +438,16 @@ end;
 procedure TD2XParams.DescribeAll;
 var
   lP: TD2XParam;
+  lBase: string;
 begin
+  lBase := ChangeFileExt(ExtractFileName(ParamStr(0)), '');
+
+  L.Log('Usage: %s [ Option | @Params | mFilename | Wildcard ] ... ', [lBase]);
+  L.Log('Options:        %-15s Description', ['Default']);
   for lP in Self do
-    fLogger.Log('%s', [lP.Describe]);
+    L.Log('%s', [lP.Describe]);
+  L.Log('  Definitions:', []);
+  L.Log('    <f/e> If value begins with "." is appended to global name to give file name', []);
 end;
 
 destructor TD2XParams.Destroy;
@@ -457,13 +467,23 @@ begin
       Result := lP;
 end;
 
-procedure TD2XParams.ReportAll;
+procedure TD2XParams.OutputAll(pSL: TStringList);
 var
   lP: TD2XParam;
 begin
   for lP in Self do
+    if not lP.IsDefault then
+      pSL.Add('-' + lP.ToString);
+end;
+
+procedure TD2XParams.ReportAll;
+var
+  lP: TD2XParam;
+begin
+  L.Log('Current option settings:', []);
+  for lP in Self do
     if lP.Report > '' then
-      fLogger.Log('%s', [lP.Report]);
+      L.Log('%s', [lP.Report]);
 end;
 
 procedure TD2XParams.ResetAll;

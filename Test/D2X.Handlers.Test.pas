@@ -45,12 +45,33 @@ type
     procedure TearDown; override;
   published
     procedure TestDescription;
+    procedure TestUseProxy;
     procedure TestEndProcessing;
     procedure TestBeginFile;
     procedure TestCheckBeforeMethod;
     procedure TestCheckAfterMethod;
 
     procedure TestProcessing;
+  end;
+
+  TTestWriteDefinesHandler = class(TD2XWriteDefinesHandler)
+  public
+    property Parser: TD2XDefinesParser read fParser;
+
+  end;
+
+  TestTD2XWriteDefinesHandler = class(TStringTestCase)
+  strict private
+    FD2XWriteDefinesHandler: TTestWriteDefinesHandler;
+  public
+    procedure SetUp; override;
+    procedure TearDown; override;
+  published
+    procedure TestDescription;
+    procedure TestUseProxy;
+    procedure TestInit;
+    procedure TestCopy;
+    procedure TestEndResults;
   end;
 
   TTestXmlHandler = class(TD2XXmlHandler)
@@ -263,6 +284,11 @@ begin
   CheckStream('Alpha=1 Gamma=1', 'End Processing');
 end;
 
+procedure TestTD2XSkipHandler.TestUseProxy;
+begin
+  CheckFalse(FD2XSkipHandler.UseProxy, 'Uses proxy');
+end;
+
 { TestTD2XXmlHandler }
 
 procedure TestTD2XXmlHandler.SetUp;
@@ -274,8 +300,7 @@ end;
 
 procedure TestTD2XXmlHandler.TearDown;
 begin
-  FD2XXmlHandler.Free;
-  FD2XXmlHandler := nil;
+  FreeAndNil(FD2XXmlHandler);
 
   inherited;
 end;
@@ -442,7 +467,7 @@ begin
     CheckTrue(Assigned(FD2XXmlHandler.FinalToken), 'Final Token set');
     CheckTrue(FD2XXmlHandler.FinalToken(), 'Final Token correct');
     CheckTrue(lCalledFinalToken, 'Final Token called');
-    CheckTrue(Assigned(FD2XXmlHandler.Parser), 'Parse Mode set');
+    CheckTrue(Assigned(FD2XXmlHandler.ParseMode), 'Parse Mode set');
     CheckEqualsString('ParseMode', FD2XXmlHandler.ParseMode(), 'Parse Mode correct');
     CheckTrue(lCalledParseMode, 'Parse Mode called');
   finally
@@ -548,10 +573,96 @@ begin
   CheckTrue(FD2XXmlHandler.UseProxy, 'Uses proxy');
 end;
 
+{ TestTD2XWriteDefinesHandler }
+
+procedure TestTD2XWriteDefinesHandler.SetUp;
+begin
+  inherited;
+
+  FD2XWriteDefinesHandler := TTestWriteDefinesHandler.Create;
+end;
+
+procedure TestTD2XWriteDefinesHandler.TearDown;
+begin
+  FreeAndNil(FD2XWriteDefinesHandler);
+
+  inherited;
+end;
+
+procedure TestTD2XWriteDefinesHandler.TestCopy;
+var
+  pFrom: TD2XWriteDefinesHandler;
+  pParser: TD2XDefinesParser;
+begin
+  pFrom := nil;
+  pParser := nil;
+
+  FD2XWriteDefinesHandler.Copy(pFrom);
+  try
+    pFrom := TD2XWriteDefinesHandler.Create;
+    pParser := TD2XDefinesParser.Create;
+
+    pFrom.Init(pParser);
+
+    CheckFalse(Assigned(FD2XWriteDefinesHandler.Parser), 'Parser not set');
+
+    FD2XWriteDefinesHandler.Copy(pFrom);
+
+    Check(pParser = FD2XWriteDefinesHandler.Parser, 'Parser set');
+  finally
+    pParser.Free;
+    pFrom.Free;
+  end;
+end;
+
+procedure TestTD2XWriteDefinesHandler.TestDescription;
+begin
+  CheckEqualsString('Write Defines', FD2XWriteDefinesHandler.Description, 'Description');
+end;
+
+procedure TestTD2XWriteDefinesHandler.TestEndResults;
+var
+  lParser: TD2XDefinesParser;
+begin
+  lParser := TD2XDefinesParser.Create;
+  try
+    FD2XWriteDefinesHandler.Init(lParser);
+
+    FD2XWriteDefinesHandler.EndResults(
+      function: TStream
+      begin
+        Result := fSS;
+      end);
+    CheckStream('**** CONDITIONALEXPRESSIONS CPU386 MSWINDOWS UNICODE VER230 WIN32', 'End Results');
+  finally
+    lParser.Free;
+  end;
+end;
+
+procedure TestTD2XWriteDefinesHandler.TestInit;
+var
+  lParser: TD2XDefinesParser;
+begin
+  lParser := TD2XDefinesParser.Create;
+  try
+    FD2XWriteDefinesHandler.Init(lParser);
+
+    Check(lParser = FD2XWriteDefinesHandler.Parser, 'Parser set');
+    CheckTrue(Assigned(FD2XWriteDefinesHandler.Parser), 'Parse Mode set');
+  finally
+    lParser.Free;
+  end;
+end;
+
+procedure TestTD2XWriteDefinesHandler.TestUseProxy;
+begin
+  CheckFalse(FD2XWriteDefinesHandler.UseProxy, 'Uses proxy');
+end;
+
 initialization
 
 // Register any test cases with the test runner
 RegisterTests('Handlers', [TestTD2XCountHandler.Suite, TestTD2XSkipHandler.Suite,
-  TestTD2XXmlHandler.Suite]);
+  TestTD2XWriteDefinesHandler.Suite, TestTD2XXmlHandler.Suite]);
 
 end.

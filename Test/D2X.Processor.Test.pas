@@ -3,7 +3,9 @@ unit D2X.Processor.Test;
 interface
 
 uses
-  D2X.Param;
+  CastaliaPasLexTypes,
+  D2X.Param,
+  D2X.Processor;
 
 type
   TTestBoolFlag = class(TInterfacedObject, IParamFlag)
@@ -14,18 +16,50 @@ type
     procedure SetFlag(pVal: Boolean);
   end;
 
+  TTestProcessor = class(TD2XProcessor)
+  public
+    CalledUseProxy: Boolean;
+    CalledBeginProcessing: Boolean;
+    CalledEndProcessing: Boolean;
+    CalledBeginFile: Boolean;
+    CalledEndFile: Boolean;
+    CalledBeginResults: Boolean;
+    CalledEndResults: Boolean;
+    CalledCheckBeforeMethod: Boolean;
+    CalledCheckAfterMethod: Boolean;
+    CalledBeginMethod: Boolean;
+    CalledEndMethod: Boolean;
+    CalledParserMessage: Boolean;
+    CalledLexerInclude: Boolean;
+
+    function UseProxy: Boolean; override;
+    procedure BeginProcessing; override;
+    procedure EndProcessing; override;
+    procedure BeginFile; override;
+    procedure EndFile; override;
+    procedure BeginResults; override;
+    procedure EndResults(pFile: string); override;
+    function CheckBeforeMethod(pMethod: string): Boolean; override;
+    function CheckAfterMethod(pMethod: string): Boolean; override;
+    procedure BeginMethod(pMethod: string); override;
+    procedure EndMethod(pMethod: string); override;
+    procedure ParserMessage(const pTyp: TMessageEventType; const pMsg: string;
+      pX, pY: Integer); override;
+    procedure LexerInclude(const pFile: string; pX, pY: Integer); override;
+
+  end;
+
+
 implementation
 
 uses
   TestFramework,
-  CastaliaPasLexTypes,
   D2X.Xml,
   D2X.Test,
   D2X.Handler,
   D2X.Handler.Test,
   D2X.Options,
   D2X.Parser,
-  D2X.ParamProcessor,
   System.Classes,
   System.Diagnostics,
   System.Generics.Collections,
@@ -33,158 +67,136 @@ uses
   System.Rtti;
 
 type
-  TestTD2XParamProcessor = class(TStringTestCase)
+  TestTD2XProcessor = class(TStringTestCase)
   strict private
-    FD2XParamProcessor: TD2XParamProcessor;
+    FD2XProcessor: TTestProcessor;
+    fFlag: TTestBoolFlag;
   public
     procedure SetUp; override;
     procedure TearDown; override;
   published
+    procedure TestUseProxy;
+    procedure TestBeginProcessing;
     procedure TestEndProcessing;
-
-    procedure TestProcessParam;
-    procedure TestProcessParamPasFiles;
-    procedure TestProcessParamParamFile;
-
-    procedure TestProcessCountChildren;
-    procedure TestProcessVerbose;
+    procedure TestBeginFile;
+    procedure TestEndFile;
+    procedure TestBeginResults;
+    procedure TestEndResults;
+    procedure TestCheckBeforeMethod;
+    procedure TestCheckAfterMethod;
+    procedure TestBeginMethod;
+    procedure TestEndMethod;
+    procedure TestParserMessage;
+    procedure TestLexerInclude;
   end;
-
-const
-  EXPECTED_PROCESSING = 'Processing Test.pas ... done';
 
   { TestTD2XProcessor }
 
-procedure TestTD2XParamProcessor.SetUp;
+procedure TestTD2XProcessor.SetUp;
 begin
   inherited;
 
-  FD2XParamProcessor := TD2XParamProcessor.Create(fSB);
+  fFlag := TTestBoolFlag.Create;
+  FD2XProcessor := TTestProcessor.Create(fFlag);
 end;
 
-procedure TestTD2XParamProcessor.TearDown;
+procedure TestTD2XProcessor.TearDown;
 begin
-  FD2XParamProcessor := nil;
+  FD2XProcessor := nil;
+  fFlag := nil;
 
   inherited;
 end;
 
-procedure TestTD2XParamProcessor.TestEndProcessing;
+procedure TestTD2XProcessor.TestBeginFile;
 begin
-  FD2XParamProcessor.EndProcessing;
-  CheckString(fSB, '', 'Nothing');
+  FD2XProcessor.BeginFile;
+
+  CheckTrue(FD2XProcessor.CalledBeginFile, 'Called Begin File');
 end;
 
-procedure TestTD2XParamProcessor.TestProcessCountChildren;
-var
-  ReturnValue: Boolean;
-  pIdx: Integer;
-  pFrom: string;
-  pStr: string;
+procedure TestTD2XProcessor.TestBeginMethod;
 begin
-  pStr := '-!!';
-  pFrom := 'Test';
-  pIdx := 0;
+  FD2XProcessor.BeginMethod('Test');
 
-  ReturnValue := FD2XParamProcessor.ProcessParam(pStr, pFrom, pIdx);
-  Check(ReturnValue, 'Return Value 1');
-
-  pStr := '-C+';
-  pIdx := 1;
-
-  ReturnValue := FD2XParamProcessor.ProcessParam(pStr, pFrom, pIdx);
-  Check(ReturnValue, 'Return Value 2');
-
-  pStr := 'Test.pas';
-  pIdx := 2;
-
-  ReturnValue := FD2XParamProcessor.ProcessParam(pStr, pFrom, pIdx);
-
-  Check(ReturnValue, 'Return Value');
-  CheckString(fSB, '', 'Empty Log');
+  CheckTrue(FD2XProcessor.CalledBeginMethod, 'Called Begin Method');
 end;
 
-procedure TestTD2XParamProcessor.TestProcessParam;
-var
-  ReturnValue: Boolean;
-  pIdx: Integer;
-  pFrom: string;
-  pStr: string;
+procedure TestTD2XProcessor.TestBeginProcessing;
 begin
-  pStr := '';
-  pFrom := 'Test';
-  pIdx := 0;
+  FD2XProcessor.BeginProcessing;
 
-  ReturnValue := FD2XParamProcessor.ProcessParam(pStr, pFrom, pIdx);
-
-  CheckFalse(ReturnValue, 'Return Value');
-  CheckString(fSB, '', 'Nothing');
+  CheckTrue(FD2XProcessor.CalledBeginProcessing, 'Called Begin Processing');
 end;
 
-procedure TestTD2XParamProcessor.TestProcessParamParamFile;
-var
-  ReturnValue: Boolean;
-  pIdx: Integer;
-  pFrom: string;
-  pStr: string;
-const
-  EXPECTED_REPORT = 'Current option settings: Verbose - Log Errors + Log Not Supp - ' +
-    'Final Token + Recurse - Timestamp - Global name Delphi2XmlTests ' +
-    'Input dir :Config\ Output dir :Log\ Parse mode Full Results per File ' +
-    'Show elapsed Quiet Base dir - Generate XML :Xml\ ' +
-    'Write Defines -(Defines\) Defines Used :.used ' +
-    'Count Children :.cnt Skipped Methods :.skip ' +
-    'Use these Defines: CONDITIONALEXPRESSIONS, CPU386, MSWINDOWS, UNICODE, VER230, WIN32';
+procedure TestTD2XProcessor.TestBeginResults;
 begin
-  pStr := '@Test.prm';
-  pFrom := 'Test';
-  pIdx := 0;
+  FD2XProcessor.BeginResults;
 
-  ReturnValue := FD2XParamProcessor.ProcessParam(pStr, pFrom, pIdx);
-
-  Check(ReturnValue, 'Return Value');
-  CheckString(fSB, EXPECTED_REPORT, 'Nothing');
+  CheckTrue(FD2XProcessor.CalledBeginResults, 'Called Begin Results');
 end;
 
-procedure TestTD2XParamProcessor.TestProcessParamPasFiles;
-var
-  ReturnValue: Boolean;
-  pIdx: Integer;
-  pFrom: string;
-  pStr: string;
+procedure TestTD2XProcessor.TestCheckAfterMethod;
 begin
-  pStr := 'Test.pas';
-  pFrom := 'Test';
-  pIdx := 0;
+  CheckTrue(FD2XProcessor.CheckAfterMethod('Test'), 'Call Check After Method');
 
-  ReturnValue := FD2XParamProcessor.ProcessParam(pStr, pFrom, pIdx);
-
-  Check(ReturnValue, 'Return Value');
-  CheckString(fSB, EXPECTED_PROCESSING, 'Nothing');
+  CheckTrue(FD2XProcessor.CalledCheckAfterMethod, 'Called Check After Method');
 end;
 
-procedure TestTD2XParamProcessor.TestProcessVerbose;
-var
-  ReturnValue: Boolean;
-  pIdx: Integer;
-  pFrom: string;
-  pStr: string;
+procedure TestTD2XProcessor.TestCheckBeforeMethod;
 begin
-  pStr := '-!!';
-  pFrom := 'Test';
-  pIdx := 0;
-  FD2XParamProcessor.ProcessParam(pStr, pFrom, pIdx);
+  CheckTrue(FD2XProcessor.CheckBeforeMethod('Test'), 'Call Check Before Method');
 
-  pStr := '-V+';
-  pIdx := 1;
-  FD2XParamProcessor.ProcessParam(pStr, pFrom, pIdx);
+  CheckTrue(FD2XProcessor.CalledCheckBeforeMethod, 'Called Check Before Method');
+end;
 
-  pStr := 'Test.pas';
-  pIdx := 2;
-  ReturnValue := FD2XParamProcessor.ProcessParam(pStr, pFrom, pIdx);
+procedure TestTD2XProcessor.TestEndFile;
+begin
+  FD2XProcessor.EndFile;
 
-  Check(ReturnValue, 'Return Value');
-  CheckNotEquals('', fSB.ToString, 'Log');
+  CheckTrue(FD2XProcessor.CalledEndFile, 'Called End File');
+end;
+
+procedure TestTD2XProcessor.TestEndMethod;
+begin
+  FD2XProcessor.EndMethod('Test');
+
+  CheckTrue(FD2XProcessor.CalledEndMethod, 'Called End Method');
+end;
+
+procedure TestTD2XProcessor.TestEndProcessing;
+begin
+  FD2XProcessor.EndProcessing;
+
+  CheckTrue(FD2XProcessor.CalledEndProcessing, 'Called End Processing');
+end;
+
+procedure TestTD2XProcessor.TestEndResults;
+begin
+  FD2XProcessor.EndResults('Test');
+
+  CheckTrue(FD2XProcessor.CalledEndResults, 'Called End Results');
+end;
+
+procedure TestTD2XProcessor.TestLexerInclude;
+begin
+  FD2XProcessor.LexerInclude('Test', 0, 0);
+
+  CheckTrue(FD2XProcessor.CalledLexerInclude, 'Called Lexer Include');
+end;
+
+procedure TestTD2XProcessor.TestParserMessage;
+begin
+  FD2XProcessor.ParserMessage(meNotSupported, 'Test', 0, 0);
+
+  CheckTrue(FD2XProcessor.CalledParserMessage, 'Called Parser Message');
+end;
+
+procedure TestTD2XProcessor.TestUseProxy;
+begin
+  CheckTrue(FD2XProcessor.UseProxy, 'Call Use Proxy');
+
+  CheckTrue(FD2XProcessor.CalledUseProxy, 'Called Use Proxy');
 end;
 
 { TTestBoolFlag }
@@ -199,9 +211,80 @@ begin
   fFlag := pVal;
 end;
 
+{ TTestProcessor }
+
+procedure TTestProcessor.BeginFile;
+begin
+  CalledBeginFile := True;
+end;
+
+procedure TTestProcessor.BeginMethod(pMethod: string);
+begin
+  CalledBeginMethod := True;
+end;
+
+procedure TTestProcessor.BeginProcessing;
+begin
+  CalledBeginProcessing := True;
+end;
+
+procedure TTestProcessor.BeginResults;
+begin
+  CalledBeginResults := True;
+end;
+
+function TTestProcessor.CheckAfterMethod(pMethod: string): Boolean;
+begin
+  Result := True;
+  CalledCheckAfterMethod := True;
+end;
+
+function TTestProcessor.CheckBeforeMethod(pMethod: string): Boolean;
+begin
+  Result := True;
+  CalledCheckBeforeMethod := True;
+end;
+
+procedure TTestProcessor.EndFile;
+begin
+  CalledEndFile := True;
+end;
+
+procedure TTestProcessor.EndMethod(pMethod: string);
+begin
+  CalledEndMethod := True;
+end;
+
+procedure TTestProcessor.EndProcessing;
+begin
+  CalledEndProcessing := True;
+end;
+
+procedure TTestProcessor.EndResults(pFile: string);
+begin
+  CalledEndResults := True;
+end;
+
+procedure TTestProcessor.LexerInclude(const pFile: string; pX, pY: Integer);
+begin
+  CalledLexerInclude := True;
+end;
+
+procedure TTestProcessor.ParserMessage(const pTyp: TMessageEventType;
+  const pMsg: string; pX, pY: Integer);
+begin
+  CalledParserMessage := True;
+end;
+
+function TTestProcessor.UseProxy: Boolean;
+begin
+  CalledUseProxy := True;
+  Result := True;
+end;
+
 initialization
 
 // Register any test cases with the test runner
-RegisterTests('Processor', [TestTD2XParamProcessor.Suite]);
+RegisterTests('Processors', [TestTD2XProcessor.Suite]);
 
 end.

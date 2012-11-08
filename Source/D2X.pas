@@ -9,6 +9,12 @@ uses
   System.SysUtils;
 
 type
+  TD2XParseMode = (pmFull, pmUses);
+
+  TD2XElapsedMode = (emNone, emQuiet, emTotal, emProcessing);
+
+  TD2XResultPer = (rpFile, rpWildcard, rpSubDir, rpDir, rpParam, rpRun);
+
   TD2X = class
     class function Zero<T>: T;
     class function ToLabel<T>(pVal: T): string;

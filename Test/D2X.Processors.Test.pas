@@ -443,6 +443,6 @@ end;
 
 initialization
 
-RegisterTests('Processor', [TestTD2XLogProcessor.Suite, TestTD2XHandlerProcessor.Suite]);
+RegisterTests('Processors', [TestTD2XLogProcessor.Suite, TestTD2XHandlerProcessor.Suite]);
 
 end.
