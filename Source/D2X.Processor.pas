@@ -22,6 +22,8 @@ type
 
     function UseProxy: Boolean; virtual;
 
+    procedure SetParser(pParser: TD2XDefinesParser); virtual;
+
     procedure BeginProcessing; virtual;
     procedure EndProcessing; virtual;
 
@@ -121,6 +123,11 @@ end;
 
 procedure TD2XProcessor.ParserMessage(const pTyp: TMessageEventType;
   const pMsg: string; pX, pY: Integer);
+begin
+
+end;
+
+procedure TD2XProcessor.SetParser(pParser: TD2XDefinesParser);
 begin
 
 end;

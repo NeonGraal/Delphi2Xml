@@ -85,8 +85,6 @@ type
     procedure SetUp; override;
     procedure TearDown; override;
   published
-    procedure TestWriteDefines;
-    procedure TestWriteXml;
   end;
 
   { TestTD2XFileOptions }
@@ -599,7 +597,6 @@ begin
 
   fOpts := TD2XOptions.Create;
 
-  fOpts.RegisterOtherParams(fParams);
 end;
 
 procedure TestTD2XOptions.TearDown;
@@ -607,73 +604,6 @@ begin
   FreeAndNil(fOpts);
 
   inherited;
-end;
-(*
-procedure TestTD2XOptions.TestDefines;
-begin
-  CheckTrue(fOpts.LoadDefines, 'Default Load Defines');
-  CheckEqualsString('', fOpts.Defines.CommaText, 'Default Defines');
-
-  CheckFalse(fParams.ForCode('D').Parse('D'), 'Failed Parse Define');
-
-  CheckTrue(fParams.ForCode('D').Parse('D+Test1'), 'Parse Add Define');
-  CheckTrue(fOpts.LoadDefines, 'Add Load Defines');
-  CheckEqualsString('Test1', fOpts.Defines.CommaText, 'Add Define');
-
-  CheckTrue(fParams.ForCode('D').Parse('D+Test2'), 'Parse Add Define');
-  CheckTrue(fOpts.LoadDefines, 'Add Load Defines');
-  CheckEqualsString('Test1,Test2', fOpts.Defines.CommaText, 'Add Defines');
-
-  CheckTrue(fParams.ForCode('D').Parse('D-Test1'), 'Parse Remove Define');
-  CheckTrue(fOpts.LoadDefines, 'Removed Load Defines');
-  CheckEqualsString('Test2', fOpts.Defines.CommaText, 'Removed Define');
-
-  CheckTrue(fParams.ForCode('D').Parse('D!'), 'Parse Clear Define');
-  CheckFalse(fOpts.LoadDefines, 'Cleared Load Defines');
-  CheckEqualsString('', fOpts.Defines.CommaText, 'Cleared Defines');
-end;
-*)
-procedure TestTD2XOptions.TestWriteDefines;
-begin
-  Check(Assigned(fOpts.WriteDefinesFlag), 'Write Defines Flag Assigned');
-
-  CheckFalse(fOpts.WriteDefines, 'Default Write Defines');
-  CheckFalse(fOpts.WriteDefinesFlag.Flag, 'Default Write Defines Flag');
-  CheckEqualsString('Defines\', fOpts.DefinesDirectory, 'Default Defines Directory');
-
-  CheckTrue(fParams.ForCode('W').Parse('W'), 'Parse Write Defines');
-  CheckTrue(fOpts.WriteDefines, 'Set Write Defines');
-  CheckTrue(fOpts.WriteDefinesFlag.Flag, 'Set Write Defines Flag');
-  CheckEqualsString('Defines\', fOpts.DefinesDirectory, 'Set Default Defines Directory');
-
-  CheckTrue(fParams.ForCode('W').Parse('W:Test'), 'Parse Write Defines');
-  CheckTrue(fOpts.WriteDefines, 'Set Write Defines');
-  CheckTrue(fOpts.WriteDefinesFlag.Flag, 'Set Write Defines Flag');
-  CheckEqualsString('Test\', fOpts.DefinesDirectory, 'Test Defines Directory');
-
-  CheckTrue(fParams.ForCode('W').Parse('W-'), 'Parse Write Defines');
-  CheckFalse(fOpts.WriteDefines, 'Unset Write Defines');
-  CheckFalse(fOpts.WriteDefinesFlag.Flag, 'Unset Write Defines Flag');
-  CheckEqualsString('Test\', fOpts.DefinesDirectory, 'Unset Defines Directory');
-end;
-
-procedure TestTD2XOptions.TestWriteXml;
-begin
-  Check(Assigned(fOpts.WriteXmlFlag), 'Write Xml Flag Assigned');
-
-  CheckTrue(fOpts.WriteXml, 'Default Write Xml');
-  CheckTrue(fOpts.WriteXmlFlag.Flag, 'Default Write Xml Flag');
-  CheckEqualsString('Xml\', fOpts.XmlDirectory, 'Default Xml Directory');
-
-  CheckTrue(fParams.ForCode('X').Parse('X-'), 'Parse Write Xml');
-  CheckFalse(fOpts.WriteXml, 'Unset Write Xml');
-  CheckFalse(fOpts.WriteXmlFlag.Flag, 'Unset Write Xml Flag');
-  CheckEqualsString('Xml\', fOpts.XmlDirectory, 'Unset Xml Directory');
-
-  CheckTrue(fParams.ForCode('X').Parse('X:Test'), 'Parse Write Xml');
-  CheckTrue(fOpts.WriteXml, 'Set Write Xml');
-  CheckTrue(fOpts.WriteXmlFlag.Flag, 'Set Write Xml Flag');
-  CheckEqualsString('Test\', fOpts.XmlDirectory, 'Test Xml Directory');
 end;
 
 { TParamsTestCase }

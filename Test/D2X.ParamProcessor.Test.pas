@@ -270,17 +270,17 @@ procedure TestTD2XParamProcessorGeneral.TestDefaultOptions;
 begin
 //  Check(fPP.Options.LogErrors, 'LogErrors');
 //  CheckFalse(fPP.Options.LogNotSupported, 'LogNotSupported');
-  CheckFalse(fPP.Options.FileOpts.TimestampFiles, 'TimestampFiles');
+//  CheckFalse(fPP.Options.FileOpts.TimestampFiles, 'TimestampFiles');
 //  CheckFalse(fPP.Verbose, 'Verbose');
 //  CheckFalse(fPP.Options.Recurse, 'Recurse');
-  CheckEqualsString(ChangeFileExt(ExtractFileName(ParamStr(0)), ''), fPP.Options.FileOpts.GlobalName,
-    'SkipFileOrExtn');
+//  CheckEqualsString(ChangeFileExt(ExtractFileName(ParamStr(0)), ''), fPP.Options.FileOpts.GlobalName,
+//    'SkipFileOrExtn');
 //  CheckFalse(fPP.Options.UseBase, 'UseBase');
 //  CheckEqualsString('', fPP.Options.BaseDirectory, 'BaseDirectory');
-  CheckFalse(fPP.Options.WriteDefines, 'WriteDefines');
-  CheckEqualsString('Defines\', fPP.Options.DefinesDirectory, 'DefinesDirectory');
-  Check(fPP.Options.WriteXml, 'Xml');
-  CheckEqualsString('Xml\', fPP.Options.XmlDirectory, 'XmlDirectory');
+//  CheckFalse(fPP.Options.WriteDefines, 'WriteDefines');
+//  CheckEqualsString('Defines\', fPP.Options.DefinesDirectory, 'DefinesDirectory');
+//  Check(fPP.Options.WriteXml, 'Xml');
+//  CheckEqualsString('Xml\', fPP.Options.XmlDirectory, 'XmlDirectory');
 //  Check(fPP.Options.DefinesUsed, 'DefinesUsed');
 //  CheckEqualsString('.used', fPP.Options.DefinesUsedFoE, 'UsedFileOrExtn');
 //  Check(fPP.Options.LoadDefines, 'LoadDefines');

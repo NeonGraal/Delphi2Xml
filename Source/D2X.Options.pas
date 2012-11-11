@@ -42,32 +42,12 @@ type
 
   TD2XOptions = class(TD2XLogger)
   private
-    fWriteXml: TD2XFlaggedStringParam;
-    fWriteDefines: TD2XFlaggedStringParam;
-
-    fFileOpts: TD2XFileOptions;
-
-    function GetXmlDirectory: string;
-    function GetWriteXml: Boolean;
-    function GetDefinesDirectory: string;
-    function GetWriteDefines: Boolean;
-    function GetWriteXmlFlag: IParamFlag;
-    function GetWriteDefinesFlag: IParamFlag;
 
   public
-    property WriteDefines: Boolean read GetWriteDefines;
-    property WriteDefinesFlag: IParamFlag read GetWriteDefinesFlag;
-    property DefinesDirectory: string read GetDefinesDirectory;
-    property WriteXml: Boolean read GetWriteXml;
-    property WriteXmlFlag: IParamFlag read GetWriteXmlFlag;
-    property XmlDirectory: string read GetXmlDirectory;
-
-    property FileOpts: TD2XFileOptions read fFileOpts;
 
     constructor Create; override;
     destructor Destroy; override;
 
-    procedure RegisterOtherParams(pParams: TD2XParams);
   end;
 
 function ConvertDir(pStr, pDflt: string; out pVal: string): Boolean;
@@ -129,22 +109,6 @@ constructor TD2XOptions.Create;
 begin
   inherited;
 
-  fFileOpts := TD2XFileOptions.Create(
-      function(pVal: string): Boolean
-    begin
-      if Assigned(fWriteXml) then
-        fWriteXml.Value := IncludeTrailingPathDelimiter(pVal);
-      if Assigned(fWriteDefines) then
-        fWriteDefines.Value := IncludeTrailingPathDelimiter(pVal);
-      Result := True;
-    end);
-
-  fWriteXml := TD2XFlaggedStringParam.CreateFlagStr('X', 'Generate XML', '<dir>',
-    'Generate XML files into current or given <dir>', 'Xml\', True, ConvertDir, nil, nil);
-  fWriteDefines := TD2XFlaggedStringParam.CreateFlagStr('W', 'Write Defines', '<dir>',
-    'Generate Final Defines files into current or given <dir>', 'Defines\', False, ConvertDir,
-    nil, nil);
-
   // Available option letters: AHJKLQYZ
 
 end;
@@ -155,41 +119,6 @@ begin
   inherited;
 end;
 
-function TD2XOptions.GetDefinesDirectory: string;
-begin
-  Result := fWriteDefines.Value
-end;
-
-function TD2XOptions.GetWriteDefines: Boolean;
-begin
-  Result := IParamFlag(fWriteDefines).Flag;
-end;
-
-function TD2XOptions.GetWriteDefinesFlag: IParamFlag;
-begin
-  Result := fWriteDefines;
-end;
-
-function TD2XOptions.GetXmlDirectory: string;
-begin
-  Result := fWriteXml.Value;
-end;
-
-function TD2XOptions.GetWriteXml: Boolean;
-begin
-  Result := IParamFlag(fWriteXml).Flag;
-end;
-
-function TD2XOptions.GetWriteXmlFlag: IParamFlag;
-begin
-  Result := fWriteXml;
-end;
-
-procedure TD2XOptions.RegisterOtherParams(pParams: TD2XParams);
-begin
-  pParams.Add(fWriteXml);
-  pParams.Add(fWriteDefines);
-end;
 
 { TD2XFileOptions }
 

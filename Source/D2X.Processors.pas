@@ -14,12 +14,12 @@ type
   TD2XLexerProcessor = class(TD2XProcessor)
   protected
     fLexer: TD2XLexer;
+  public
+    procedure SetParser(pParser: TD2XDefinesParser); override;
   end;
 
   TD2XLogProcessor = class(TD2XLexerProcessor)
   public
-    procedure SetLexer(pLexer: TD2XLexer);
-
     function UseProxy: Boolean; override;
 
     procedure BeginMethod(pMethod: string); override;
@@ -49,6 +49,8 @@ type
     constructor CreateHandler(pActive: IParamFlag; pHandler: TD2XHandler);
 
     function UseProxy: Boolean; override;
+
+    procedure SetParser(pParser: TD2XDefinesParser); override;
 
     procedure BeginProcessing; override;
     procedure EndProcessing; override;
@@ -89,6 +91,7 @@ type
 implementation
 
 uses
+  D2X.Handlers,
   System.Classes,
   System.IOUtils,
   System.SysUtils;
@@ -280,6 +283,14 @@ begin
   fFileOutput := pFilename;
 end;
 
+procedure TD2XHandlerProcessor.SetParser(pParser: TD2XDefinesParser);
+begin
+  inherited;
+
+  if fHandler is TD2XParserHandler then
+    TD2XParserHandler(fHandler).InitParser(pParser);
+end;
+
 procedure TD2XHandlerProcessor.SetProcessingInput(pFilename: TD2XStringRef);
 begin
   fProcessingInput := pFilename;
@@ -337,11 +348,6 @@ begin
     else
       Log('???? @ %d,%d: %s', [pX, pY, pMsg]);
     end;
-end;
-
-procedure TD2XLogProcessor.SetLexer(pLexer: TD2XLexer);
-begin
-  fLexer := pLexer;
 end;
 
 function TD2XLogProcessor.UseProxy: Boolean;
@@ -403,6 +409,15 @@ procedure TD2XErrorProcessor.SetFilename(pLexer: TD2XLexer; pFilename: string);
 begin
   fLexer := pLexer;
   fFilename := pFilename;
+end;
+
+{ TD2XLexerProcessor }
+
+procedure TD2XLexerProcessor.SetParser(pParser: TD2XDefinesParser);
+begin
+  inherited;
+
+  fLexer := pParser.Lexer;
 end;
 
 end.

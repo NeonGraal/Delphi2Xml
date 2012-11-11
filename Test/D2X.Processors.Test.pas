@@ -10,14 +10,16 @@ uses
   D2X.Test,
   D2X.Handler,
   D2X.Handler.Test,
+  D2X.Handlers.Test,
   D2X.Param,
   D2X.Parser,
+  D2X.Parser.Test,
   D2X.Processors,
   D2X.Processor.Test,
   System.SysUtils;
 
 type
-  TestTD2XLogProcessor = class(TLoggerTestCase)
+  TestTD2XLogProcessor = class(TParserTestCase)
   strict private
     FD2XProcessor: TD2XLogProcessor;
 
@@ -417,20 +419,13 @@ begin
 end;
 
 procedure TestTD2XLogProcessor.TestSetLexer;
-var
-  lLexer: TD2XLexer;
 begin
   FD2XProcessor.JoinLog(fLog);
   fActive.Flag := True;
 
-  lLexer := TD2XLexer.Create;
-  try
-    FD2XProcessor.SetLexer(lLexer);
-    FD2XProcessor.BeginMethod('Method');
-    CheckLog('BEFORE Method @', 'Begin Method');
-  finally
-    lLexer.Free;
-  end;
+  FD2XProcessor.SetParser(fParser);
+  FD2XProcessor.BeginMethod('Method');
+  CheckLog('BEFORE Method @', 'Begin Method');
 end;
 
 procedure TestTD2XLogProcessor.TestUseProxy;
