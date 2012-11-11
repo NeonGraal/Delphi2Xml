@@ -28,8 +28,6 @@ uses
   D2X.Options.Test in 'D2X.Options.Test.pas',
   D2X.Param in '..\Source\D2X.Param.pas',
   D2X.Param.Test in 'D2X.Param.Test.pas',
-  D2X.ParamProcessor in '..\Source\D2X.ParamProcessor.pas',
-  D2X.ParamProcessor.Test in 'D2X.ParamProcessor.Test.pas',
   D2X.Parser in '..\Source\D2X.Parser.pas',
   D2X.Parser.Test in 'D2X.Parser.Test.pas',
   D2X.Processor in '..\Source\D2X.Processor.pas',

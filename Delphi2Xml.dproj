@@ -97,7 +97,6 @@
 			<DCCReference Include="Source\D2X.Handlers.pas"/>
 			<DCCReference Include="Source\D2X.Options.pas"/>
 			<DCCReference Include="Source\D2X.Param.pas"/>
-			<DCCReference Include="Source\D2X.ParamProcessor.pas"/>
 			<DCCReference Include="Source\D2X.Parser.pas"/>
 			<DCCReference Include="Source\D2X.Processor.pas"/>
 			<DCCReference Include="Source\D2X.Processors.pas"/>

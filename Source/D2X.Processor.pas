@@ -9,7 +9,6 @@ uses
   System.Generics.Collections,
   System.Rtti,
   D2X.Param,
-  D2X.Options,
   D2X.Handlers,
   D2X.Parser,
   D2X;

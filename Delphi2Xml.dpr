@@ -13,14 +13,13 @@ uses
   D2X.Handlers in 'Source\D2X.Handlers.pas',
   D2X.Options in 'Source\D2X.Options.pas',
   D2X.Param in 'Source\D2X.Param.pas',
-  D2X.ParamProcessor in 'Source\D2X.ParamProcessor.pas',
   D2X.Parser in 'Source\D2X.Parser.pas',
   D2X.Processor in 'Source\D2X.Processor.pas',
   D2X.Processors in 'Source\D2X.Processors.pas',
   D2X.Xml in 'Source\D2X.Xml.pas';
 
 var
-  prc: TD2XParamProcessor;
+  opts: TD2XOptions;
   i: Integer;
   bOk : Boolean;
   sOut: THandleStream;
@@ -28,16 +27,16 @@ var
 begin
 //  CoInitializeEx(nil, 0);
   sOut := nil;
-  prc := nil;
+  opts := nil;
 
   try
     sOut := THandleStream.Create(GetStdHandle(STD_OUTPUT_HANDLE));
-    prc := TD2XParamProcessor.Create;
-    prc.JoinLog(TD2XLogger.Create(sOut));
+    opts := TD2XOptions.Create;
+    opts.JoinLog(TD2XLogger.Create(sOut));
     bOk := True;
     for i := 1 to ParamCount do
-      bOk := prc.ProcessParam(ParamStr(i), 'Param', i) and bOk;
-    prc.EndProcessing;
+      bOk := opts.ProcessParam(ParamStr(i), 'Param', i) and bOk;
+    opts.EndProcessing;
     if not bOk then
       with TStreamWriter.Create(sOut) do
       try
@@ -46,7 +45,7 @@ begin
         Free;
       end;
   finally
-    FreeAndNil(prc);
+    FreeAndNil(opts);
     FreeAndNil(sOut);
   end;
 

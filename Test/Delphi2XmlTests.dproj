@@ -99,8 +99,6 @@
 			<DCCReference Include="D2X.Options.Test.pas"/>
 			<DCCReference Include="..\Source\D2X.Param.pas"/>
 			<DCCReference Include="D2X.Param.Test.pas"/>
-			<DCCReference Include="..\Source\D2X.ParamProcessor.pas"/>
-			<DCCReference Include="D2X.ParamProcessor.Test.pas"/>
 			<DCCReference Include="..\Source\D2X.Parser.pas"/>
 			<DCCReference Include="D2X.Parser.Test.pas"/>
 			<DCCReference Include="..\Source\D2X.Processor.pas"/>
