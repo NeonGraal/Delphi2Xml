@@ -367,7 +367,7 @@ end;
 
 procedure TestTD2XLogProcessor.TestBeginMethod;
 begin
-  FD2XProcessor.JoinLog(fID2XLogger);
+  FD2XProcessor.JoinLog(fLog);
 
   FD2XProcessor.BeginMethod('Method');
   CheckLog('', 'Ignored Begin Method');
@@ -379,7 +379,7 @@ end;
 
 procedure TestTD2XLogProcessor.TestEndMethod;
 begin
-  FD2XProcessor.JoinLog(fID2XLogger);
+  FD2XProcessor.JoinLog(fLog);
 
   FD2XProcessor.EndMethod('Method');
   CheckLog('', 'Ignored End Method');
@@ -391,7 +391,7 @@ end;
 
 procedure TestTD2XLogProcessor.TestLexerInclude;
 begin
-  FD2XProcessor.JoinLog(fID2XLogger);
+  FD2XProcessor.JoinLog(fLog);
 
   FD2XProcessor.LexerInclude('Test', 1, 2);
   CheckLog('', 'Ignored Lexer Include');
@@ -403,7 +403,7 @@ end;
 
 procedure TestTD2XLogProcessor.TestParserMessage;
 begin
-  FD2XProcessor.JoinLog(fID2XLogger);
+  FD2XProcessor.JoinLog(fLog);
 
   FD2XProcessor.ParserMessage(meNotSupported, 'Test', 1, 2);
   CheckLog('', 'Ignored Parser Message');
@@ -420,7 +420,7 @@ procedure TestTD2XLogProcessor.TestSetLexer;
 var
   lLexer: TD2XLexer;
 begin
-  FD2XProcessor.JoinLog(fID2XLogger);
+  FD2XProcessor.JoinLog(fLog);
   fActive.Flag := True;
 
   lLexer := TD2XLexer.Create;

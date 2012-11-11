@@ -2,16 +2,28 @@ unit D2X.Handlers.Test;
 
 interface
 
+uses
+  D2X.Parser,
+  D2X.Test;
+
+type
+  TParserTestCase = class(TLoggerTestCase)
+  protected
+    fParser: TD2XDefinesParser;
+  public
+    procedure SetUp; override;
+    procedure TearDown; override;
+  end;
+
+
 implementation
 
 uses
   CastaliaPasLexTypes,
   D2X,
-  D2X.Parser,
   D2X.Handlers,
   D2X.Handler,
   D2X.Xml,
-  D2X.Test,
   System.Classes,
   System.Generics.Collections,
   System.StrUtils,
@@ -21,7 +33,7 @@ uses
 type
   TestTD2XCountHandler = class(TStringTestCase)
   strict private
-    FD2XCountHandler: TD2XCountHandler;
+    fHndlr: TD2XCountHandler;
   public
     procedure SetUp; override;
     procedure TearDown; override;
@@ -37,9 +49,41 @@ type
     procedure TestProcessing;
   end;
 
+  TestTD2XDefinesUsedHandler = class(TStringTestCase)
+  strict private
+    fHndlr: TD2XDefinesUsedHandler;
+  public
+    procedure SetUp; override;
+    procedure TearDown; override;
+  published
+    procedure TestDescription;
+    procedure TestUseProxy;
+    procedure TestEndProcessing;
+    procedure TestDefineUsed;
+
+    procedure TestProcessing;
+  end;
+
+  TestTD2XParserDefinesHandler = class(TParserTestCase)
+  strict private
+    fHndlr: TD2XParserDefinesHandler;
+  public
+    procedure SetUp; override;
+    procedure TearDown; override;
+  published
+    procedure TestDescription;
+    procedure TestUseProxy;
+    procedure TestInit;
+    procedure TestCopy;
+    procedure TestBeginFile;
+    procedure TestParseDefines;
+    procedure TestClearDefines;
+    procedure TestReportDefines;
+  end;
+
   TestTD2XSkipHandler = class(TStringTestCase)
   strict private
-    FD2XSkipHandler: TD2XSkipHandler;
+    fHndlr: TD2XSkipHandler;
   public
     procedure SetUp; override;
     procedure TearDown; override;
@@ -54,15 +98,9 @@ type
     procedure TestProcessing;
   end;
 
-  TTestWriteDefinesHandler = class(TD2XWriteDefinesHandler)
-  public
-    property Parser: TD2XDefinesParser read fParser;
-
-  end;
-
-  TestTD2XWriteDefinesHandler = class(TStringTestCase)
+  TestTD2XWriteDefinesHandler = class(TParserTestCase)
   strict private
-    FD2XWriteDefinesHandler: TTestWriteDefinesHandler;
+    fHndlr: TD2XWriteDefinesHandler;
   public
     procedure SetUp; override;
     procedure TearDown; override;
@@ -85,9 +123,9 @@ type
 
   end;
 
-  TestTD2XXmlHandler = class(TStringTestCase)
+  TestTD2XXmlHandler = class(TParserTestCase)
   strict private
-    FD2XXmlHandler: TTestXmlHandler;
+    fHndlr: TTestXmlHandler;
   public
     procedure SetUp; override;
     procedure TearDown; override;
@@ -115,41 +153,40 @@ procedure TestTD2XCountHandler.SetUp;
 begin
   inherited;
 
-  FD2XCountHandler := TD2XCountHandler.Create;
+  fHndlr := TD2XCountHandler.Create;
 end;
 
 procedure TestTD2XCountHandler.TearDown;
 begin
-  FD2XCountHandler.Free;
-  FD2XCountHandler := nil;
+  FreeAndNil(fHndlr);
 
   inherited;
 end;
 
 procedure TestTD2XCountHandler.TestProcessing;
 begin
-  FD2XCountHandler.BeginFile(nil);
-  FD2XCountHandler.BeginMethod('Alpha');
-  FD2XCountHandler.BeginMethod('Beta');
-  FD2XCountHandler.EndMethod('Beta');
-  FD2XCountHandler.BeginMethod('Gamma');
-  FD2XCountHandler.EndMethod('Gamma');
-  FD2XCountHandler.EndMethod('Alpha');
-  FD2XCountHandler.EndFile(nil);
+  fHndlr.BeginFile(nil);
+  fHndlr.BeginMethod('Alpha');
+  fHndlr.BeginMethod('Beta');
+  fHndlr.EndMethod('Beta');
+  fHndlr.BeginMethod('Gamma');
+  fHndlr.EndMethod('Gamma');
+  fHndlr.EndMethod('Alpha');
+  fHndlr.EndFile(nil);
 
-  FD2XCountHandler.EndProcessing(MakeStream(fSS));
+  fHndlr.EndProcessing(MakeStream(fSS));
 
   CheckStream('Alpha=2,2', 'Processing');
 end;
 
 procedure TestTD2XCountHandler.TestUseProxy;
 begin
-  CheckTrue(FD2XCountHandler.UseProxy, 'Uses proxy');
+  CheckTrue(fHndlr.UseProxy, 'Uses proxy');
 end;
 
 procedure TestTD2XCountHandler.TestBeginFile;
 begin
-  FD2XCountHandler.BeginFile(nil);
+  fHndlr.BeginFile(nil);
 
   CheckStream('', 'Begin File');
 end;
@@ -160,7 +197,7 @@ var
 begin
   lCalled := False;
 
-  FD2XCountHandler.EndFile(
+  fHndlr.EndFile(
       function: TStream
     begin
       Result := nil;
@@ -175,25 +212,25 @@ procedure TestTD2XCountHandler.TestBeginMethod;
 var
   pMethod: string;
 begin
-  FD2XCountHandler.BeginFile(nil);
+  fHndlr.BeginFile(nil);
 
-  FD2XCountHandler.BeginMethod(pMethod);
+  fHndlr.BeginMethod(pMethod);
 
   CheckStream('', 'Begin Method');
 end;
 
 procedure TestTD2XCountHandler.TestDescription;
 begin
-  CheckEqualsString('Count Children', FD2XCountHandler.Description, 'Description');
+  CheckEqualsString('Count Children', fHndlr.Description, 'Description');
 end;
 
 procedure TestTD2XCountHandler.TestEndMethod;
 var
   pMethod: string;
 begin
-  FD2XCountHandler.BeginFile(nil);
+  fHndlr.BeginFile(nil);
 
-  FD2XCountHandler.EndMethod(pMethod);
+  fHndlr.EndMethod(pMethod);
 
   CheckStream('', 'End Method');
 end;
@@ -205,7 +242,7 @@ begin
   lCalled := False;
   StartExpectingException(EAssertionFailed);
   try
-    FD2XCountHandler.EndProcessing(
+    fHndlr.EndProcessing(
       function: TStream
       begin
         Result := nil;
@@ -227,13 +264,12 @@ procedure TestTD2XSkipHandler.SetUp;
 begin
   inherited;
 
-  FD2XSkipHandler := TD2XSkipHandler.Create;
+  fHndlr := TD2XSkipHandler.Create;
 end;
 
 procedure TestTD2XSkipHandler.TearDown;
 begin
-  FD2XSkipHandler.Free;
-  FD2XSkipHandler := nil;
+  FreeAndNil(fHndlr);
 
   inherited;
 end;
@@ -241,52 +277,52 @@ end;
 procedure TestTD2XSkipHandler.TestBeginFile;
 begin
   fSS.WriteString('Alpha=1'#13#10'Gamma');
-  FD2XSkipHandler.BeginFile(MakeStream(fSS));
+  fHndlr.BeginFile(MakeStream(fSS));
   CheckStream('Alpha=1 Gamma', 'Stream');
 end;
 
 procedure TestTD2XSkipHandler.TestCheckBeforeMethod;
 begin
-  CheckFalse(FD2XSkipHandler.CheckBeforeMethod('Alpha'), 'Check Before Method');
+  CheckFalse(fHndlr.CheckBeforeMethod('Alpha'), 'Check Before Method');
 end;
 
 procedure TestTD2XSkipHandler.TestDescription;
 begin
-  CheckEqualsString('Skip Methods', FD2XSkipHandler.Description, 'Description');
+  CheckEqualsString('Skip Methods', fHndlr.Description, 'Description');
 end;
 
 procedure TestTD2XSkipHandler.TestCheckAfterMethod;
 begin
-  CheckFalse(FD2XSkipHandler.CheckAfterMethod('Alpha'), 'Check After Method');
+  CheckFalse(fHndlr.CheckAfterMethod('Alpha'), 'Check After Method');
 end;
 
 procedure TestTD2XSkipHandler.TestEndProcessing;
 begin
-  FD2XSkipHandler.EndProcessing(MakeStream(fSS));
+  fHndlr.EndProcessing(MakeStream(fSS));
   CheckStream('', 'End Processing');
 end;
 
 procedure TestTD2XSkipHandler.TestProcessing;
 begin
   fSS.WriteString('Alpha=1'#13#10'Gamma');
-  FD2XSkipHandler.BeginFile(MakeStream(fSS));
+  fHndlr.BeginFile(MakeStream(fSS));
   CheckStream('Alpha=1 Gamma', 'Stream');
 
-  CheckTrue(FD2XSkipHandler.CheckBeforeMethod('Alpha'), 'Check Before Alpha');
-  CheckFalse(FD2XSkipHandler.CheckBeforeMethod('Beta'), 'Check Before Beta');
-  CheckTrue(FD2XSkipHandler.CheckBeforeMethod('Gamma'), 'Check Before Gamma');
+  CheckTrue(fHndlr.CheckBeforeMethod('Alpha'), 'Check Before Alpha');
+  CheckFalse(fHndlr.CheckBeforeMethod('Beta'), 'Check Before Beta');
+  CheckTrue(fHndlr.CheckBeforeMethod('Gamma'), 'Check Before Gamma');
 
-  CheckTrue(FD2XSkipHandler.CheckAfterMethod('Alpha'), 'Check After Alpha');
-  CheckFalse(FD2XSkipHandler.CheckAfterMethod('Beta'), 'Check After Beta');
-  CheckTrue(FD2XSkipHandler.CheckAfterMethod('Gamma'), 'Check After Gamma');
+  CheckTrue(fHndlr.CheckAfterMethod('Alpha'), 'Check After Alpha');
+  CheckFalse(fHndlr.CheckAfterMethod('Beta'), 'Check After Beta');
+  CheckTrue(fHndlr.CheckAfterMethod('Gamma'), 'Check After Gamma');
 
-  FD2XSkipHandler.EndProcessing(MakeStream(fSS));
+  fHndlr.EndProcessing(MakeStream(fSS));
   CheckStream('Alpha=1 Gamma=1', 'End Processing');
 end;
 
 procedure TestTD2XSkipHandler.TestUseProxy;
 begin
-  CheckFalse(FD2XSkipHandler.UseProxy, 'Uses proxy');
+  CheckFalse(fHndlr.UseProxy, 'Uses proxy');
 end;
 
 { TestTD2XXmlHandler }
@@ -295,84 +331,70 @@ procedure TestTD2XXmlHandler.SetUp;
 begin
   inherited;
 
-  FD2XXmlHandler := TTestXmlHandler.Create;
+  fHndlr := TTestXmlHandler.Create;
 end;
 
 procedure TestTD2XXmlHandler.TearDown;
 begin
-  FreeAndNil(FD2XXmlHandler);
+  FreeAndNil(fHndlr);
 
   inherited;
 end;
 
 procedure TestTD2XXmlHandler.TestAddAttr;
 begin
-  FD2XXmlHandler.BeginResults;
-  FD2XXmlHandler.HasFiles := True;
-  FD2XXmlHandler.BeginMethod('Test');
-  FD2XXmlHandler.AddAttr('Test', 'Test');
-  FD2XXmlHandler.EndResults(
-    function: TStream
-    begin
-      Result := fSS;
-    end);
+  fHndlr.BeginResults;
+  fHndlr.HasFiles := True;
+  fHndlr.BeginMethod('Test');
+  fHndlr.AddAttr('Test', 'Test');
+  fHndlr.EndResults(MakeStream(fSS));
   CheckStream('<?xml version="1.0"?> <Test Test="Test" />', 'End Results');
 end;
 
 procedure TestTD2XXmlHandler.TestAddText;
 begin
-  FD2XXmlHandler.BeginResults;
-  FD2XXmlHandler.HasFiles := True;
-  FD2XXmlHandler.BeginMethod('Test');
-  FD2XXmlHandler.AddText('Test');
-  FD2XXmlHandler.EndResults(
-    function: TStream
-    begin
-      Result := fSS;
-    end);
+  fHndlr.BeginResults;
+  fHndlr.HasFiles := True;
+  fHndlr.BeginMethod('Test');
+  fHndlr.AddText('Test');
+  fHndlr.EndResults(MakeStream(fSS));
   CheckStream('<?xml version="1.0"?> <Test>Test</Test>', 'End Results');
 end;
 
 procedure TestTD2XXmlHandler.TestBeginMethod;
 begin
-  FD2XXmlHandler.BeginResults;
-  FD2XXmlHandler.HasFiles := True;
-  FD2XXmlHandler.BeginMethod('Test');
-  FD2XXmlHandler.EndResults(
-    function: TStream
-    begin
-      Result := fSS;
-    end);
+  fHndlr.BeginResults;
+  fHndlr.HasFiles := True;
+  fHndlr.BeginMethod('Test');
+  fHndlr.EndResults(MakeStream(fSS));
   CheckStream('<?xml version="1.0"?> <Test />', 'End Results');
 end;
 
 procedure TestTD2XXmlHandler.TestBeginResults;
 begin
-  FD2XXmlHandler.HasFiles := True;
+  fHndlr.HasFiles := True;
 
-  CheckTrue(FD2XXmlHandler.HasFiles, 'Has files set');
+  CheckTrue(fHndlr.HasFiles, 'Has files set');
 
-  FD2XXmlHandler.BeginResults;
-  CheckFalse(FD2XXmlHandler.HasFiles, 'Has files reset');
+  fHndlr.BeginResults;
+  CheckFalse(fHndlr.HasFiles, 'Has files reset');
 end;
 
 procedure TestTD2XXmlHandler.TestCopy;
 var
   pFrom: TD2XXmlHandler;
-  pParser: TD2XDefinesParser;
   lCalledFinalToken, lCalledParseMode: Boolean;
 begin
   pFrom := nil;
-  pParser := nil;
   lCalledFinalToken := False;
   lCalledParseMode := False;
 
-  FD2XXmlHandler.Copy(pFrom);
+  fHndlr.Copy(pFrom);
   try
     pFrom := TD2XXmlHandler.Create;
-    pParser := TD2XDefinesParser.Create;
 
-    pFrom.Init(pParser,
+    pFrom.InitParser(fParser);
+    pFrom.Init(
       function: Boolean
       begin
         lCalledFinalToken := True;
@@ -384,110 +406,89 @@ begin
         Result := 'ParseMode';
       end);
 
-    CheckFalse(Assigned(FD2XXmlHandler.Parser), 'Parser not set');
-    CheckFalse(Assigned(FD2XXmlHandler.FinalToken), 'Final Token not set');
-    CheckFalse(Assigned(FD2XXmlHandler.ParseMode), 'Parse Mode not set');
+    CheckFalse(Assigned(fHndlr.Parser), 'Parser not set');
+    CheckFalse(Assigned(fHndlr.FinalToken), 'Final Token not set');
+    CheckFalse(Assigned(fHndlr.ParseMode), 'Parse Mode not set');
 
-    FD2XXmlHandler.Copy(pFrom);
+    fHndlr.Copy(pFrom);
 
-    Check(pParser = FD2XXmlHandler.Parser, 'Parser set');
-    CheckTrue(Assigned(FD2XXmlHandler.FinalToken), 'Final Token set');
-    CheckTrue(FD2XXmlHandler.FinalToken(), 'Final Token correct');
+    Check(fParser = fHndlr.Parser, 'Parser set');
+    CheckTrue(Assigned(fHndlr.FinalToken), 'Final Token set');
+    CheckTrue(fHndlr.FinalToken(), 'Final Token correct');
     CheckTrue(lCalledFinalToken, 'Final Token called');
-    CheckTrue(Assigned(FD2XXmlHandler.ParseMode), 'Parse Mode set');
-    CheckEqualsString('ParseMode', FD2XXmlHandler.ParseMode(), 'Parse Mode correct');
+    CheckTrue(Assigned(fHndlr.ParseMode), 'Parse Mode set');
+    CheckEqualsString('ParseMode', fHndlr.ParseMode(), 'Parse Mode correct');
     CheckTrue(lCalledParseMode, 'Parse Mode called');
   finally
-    pParser.Free;
     pFrom.Free;
   end;
 end;
 
 procedure TestTD2XXmlHandler.TestDescription;
 begin
-  CheckEqualsString('Xml', FD2XXmlHandler.Description, 'Description');
+  CheckEqualsString('Xml', fHndlr.Description, 'Description');
 end;
 
 procedure TestTD2XXmlHandler.TestEndMethod;
 begin
-  FD2XXmlHandler.BeginResults;
-  FD2XXmlHandler.HasFiles := True;
-  FD2XXmlHandler.BeginMethod('Test');
-  FD2XXmlHandler.EndMethod('Test');
-  FD2XXmlHandler.EndResults(
-    function: TStream
-    begin
-      Result := fSS;
-    end);
+  fHndlr.BeginResults;
+  fHndlr.HasFiles := True;
+  fHndlr.BeginMethod('Test');
+  fHndlr.EndMethod('Test');
+  fHndlr.EndResults(MakeStream(fSS));
   CheckStream('<?xml version="1.0"?> <Test />', 'End Results');
 end;
 
 procedure TestTD2XXmlHandler.TestEndResults;
 begin
-  FD2XXmlHandler.BeginResults;
-  FD2XXmlHandler.EndResults(
-    function: TStream
-    begin
-      Result := fSS;
-    end);
+  fHndlr.BeginResults;
+  fHndlr.EndResults(MakeStream(fSS));
   CheckStream('', 'End Results');
 
-  FD2XXmlHandler.BeginResults;
-  FD2XXmlHandler.HasFiles := True;
-  FD2XXmlHandler.EndResults(
-    function: TStream
-    begin
-      Result := fSS;
-    end);
+  fHndlr.BeginResults;
+  fHndlr.HasFiles := True;
+  fHndlr.EndResults(MakeStream(fSS));
   CheckStream('<?xml version="1.0"?>', 'End Results');
 end;
 
 procedure TestTD2XXmlHandler.TestInit;
 var
-  lParser: TD2XDefinesParser;
   lCalledFinalToken, lCalledParseMode: Boolean;
 begin
   lCalledFinalToken := False;
   lCalledParseMode := False;
-  lParser := TD2XDefinesParser.Create;
-  try
-    FD2XXmlHandler.Init(lParser,
-      function: Boolean
-      begin
-        lCalledFinalToken := True;
-        Result := True;
-      end,
-      function: string
-      begin
-        lCalledParseMode := True;
-        Result := 'ParseMode';
-      end);
 
-    Check(lParser = FD2XXmlHandler.Parser, 'Parser set');
-    CheckTrue(Assigned(FD2XXmlHandler.FinalToken), 'Final Token set');
-    CheckTrue(FD2XXmlHandler.FinalToken(), 'Final Token correct');
-    CheckTrue(lCalledFinalToken, 'Final Token called');
-    CheckTrue(Assigned(FD2XXmlHandler.ParseMode), 'Parse Mode set');
-    CheckEqualsString('ParseMode', FD2XXmlHandler.ParseMode(), 'Parse Mode correct');
-    CheckTrue(lCalledParseMode, 'Parse Mode called');
-  finally
-    lParser.Free;
-  end;
+  fHndlr.InitParser(fParser);
+  fHndlr.Init(
+    function: Boolean
+    begin
+      lCalledFinalToken := True;
+      Result := True;
+    end,
+    function: string
+    begin
+      lCalledParseMode := True;
+      Result := 'ParseMode';
+    end);
+
+  Check(fParser = fHndlr.Parser, 'Parser set');
+  CheckTrue(Assigned(fHndlr.FinalToken), 'Final Token set');
+  CheckTrue(fHndlr.FinalToken(), 'Final Token correct');
+  CheckTrue(lCalledFinalToken, 'Final Token called');
+  CheckTrue(Assigned(fHndlr.ParseMode), 'Parse Mode set');
+  CheckEqualsString('ParseMode', fHndlr.ParseMode(), 'Parse Mode correct');
+  CheckTrue(lCalledParseMode, 'Parse Mode called');
 end;
 
 procedure TestTD2XXmlHandler.TestLexerInclude;
 begin
-  FD2XXmlHandler.BeginResults;
-  FD2XXmlHandler.HasFiles := True;
-  FD2XXmlHandler.BeginMethod('Test');
+  fHndlr.BeginResults;
+  fHndlr.HasFiles := True;
+  fHndlr.BeginMethod('Test');
 
-  FD2XXmlHandler.LexerInclude('Test', 1, 2);
+  fHndlr.LexerInclude('Test', 1, 2);
 
-  FD2XXmlHandler.EndResults(
-    function: TStream
-    begin
-      Result := fSS;
-    end);
+  fHndlr.EndResults(MakeStream(fSS));
   CheckStream
     ('<?xml version="1.0"?> <Test> <IncludeFile filename="Test" msgAt="1,2" /> </Test>',
     'End Results');
@@ -495,30 +496,22 @@ end;
 
 procedure TestTD2XXmlHandler.TestParserMessage;
 begin
-  FD2XXmlHandler.BeginResults;
-  FD2XXmlHandler.HasFiles := True;
-  FD2XXmlHandler.BeginMethod('Test');
+  fHndlr.BeginResults;
+  fHndlr.HasFiles := True;
+  fHndlr.BeginMethod('Test');
 
-  FD2XXmlHandler.ParserMessage(meNotSupported, 'Test', 1, 2);
+  fHndlr.ParserMessage(meNotSupported, 'Test', 1, 2);
 
-  FD2XXmlHandler.EndResults(
-    function: TStream
-    begin
-      Result := fSS;
-    end);
+  fHndlr.EndResults(MakeStream(fSS));
   CheckStream
     ('<?xml version="1.0"?> <Test> <D2X_notSuppMsg msgAt="1,2">Test</D2X_notSuppMsg> </Test>',
     'End Results');
 
-  FD2XXmlHandler.BeginResults;
-  FD2XXmlHandler.HasFiles := True;
-  FD2XXmlHandler.BeginMethod('Test');
-  FD2XXmlHandler.ParserMessage(meError, 'Test', 1, 2);
-  FD2XXmlHandler.EndResults(
-    function: TStream
-    begin
-      Result := fSS;
-    end);
+  fHndlr.BeginResults;
+  fHndlr.HasFiles := True;
+  fHndlr.BeginMethod('Test');
+  fHndlr.ParserMessage(meError, 'Test', 1, 2);
+  fHndlr.EndResults(MakeStream(fSS));
   CheckStream
     ('<?xml version="1.0"?> <Test> <D2X_errorMsg msgAt="1,2">Test</D2X_errorMsg> </Test>',
     'End Results');
@@ -526,23 +519,19 @@ end;
 
 procedure TestTD2XXmlHandler.TestProcessing;
 begin
-  FD2XXmlHandler.BeginResults;
-  FD2XXmlHandler.HasFiles := True;
-  FD2XXmlHandler.BeginMethod('Test');
-  FD2XXmlHandler.BeginMethod('Test1');
-  FD2XXmlHandler.AddAttr('Test', 'Test');
-  FD2XXmlHandler.BeginMethod('Test2');
-  FD2XXmlHandler.AddText('Test');
-  FD2XXmlHandler.EndMethod('Test2');
-  FD2XXmlHandler.BeginMethod('Test3');
-  FD2XXmlHandler.AddAttr('Test', 'Test');
-  FD2XXmlHandler.RollbackTo('Test1');
-  FD2XXmlHandler.BeginMethod('Test4');
-  FD2XXmlHandler.EndResults(
-    function: TStream
-    begin
-      Result := fSS;
-    end);
+  fHndlr.BeginResults;
+  fHndlr.HasFiles := True;
+  fHndlr.BeginMethod('Test');
+  fHndlr.BeginMethod('Test1');
+  fHndlr.AddAttr('Test', 'Test');
+  fHndlr.BeginMethod('Test2');
+  fHndlr.AddText('Test');
+  fHndlr.EndMethod('Test2');
+  fHndlr.BeginMethod('Test3');
+  fHndlr.AddAttr('Test', 'Test');
+  fHndlr.RollbackTo('Test1');
+  fHndlr.BeginMethod('Test4');
+  fHndlr.EndResults(MakeStream(fSS));
   CheckStream
     ('<?xml version="1.0"?> <Test> <Test1 Test="Test"> <Test2>Test</Test2> <Test3 Test="Test" /> <Test4 /> </Test1> </Test>',
     'End Results');
@@ -550,19 +539,15 @@ end;
 
 procedure TestTD2XXmlHandler.TestRollbackTo;
 begin
-  FD2XXmlHandler.BeginResults;
-  FD2XXmlHandler.HasFiles := True;
-  FD2XXmlHandler.BeginMethod('Test');
-  FD2XXmlHandler.BeginMethod('Test1');
-  FD2XXmlHandler.BeginMethod('Test2');
-  FD2XXmlHandler.BeginMethod('Test3');
-  FD2XXmlHandler.RollbackTo('Test1');
-  FD2XXmlHandler.BeginMethod('Test4');
-  FD2XXmlHandler.EndResults(
-    function: TStream
-    begin
-      Result := fSS;
-    end);
+  fHndlr.BeginResults;
+  fHndlr.HasFiles := True;
+  fHndlr.BeginMethod('Test');
+  fHndlr.BeginMethod('Test1');
+  fHndlr.BeginMethod('Test2');
+  fHndlr.BeginMethod('Test3');
+  fHndlr.RollbackTo('Test1');
+  fHndlr.BeginMethod('Test4');
+  fHndlr.EndResults(MakeStream(fSS));
   CheckStream
     ('<?xml version="1.0"?> <Test> <Test1> <Test2> <Test3 /> </Test2> <Test4 /> </Test1> </Test>',
     'End Results');
@@ -570,7 +555,7 @@ end;
 
 procedure TestTD2XXmlHandler.TestUseProxy;
 begin
-  CheckTrue(FD2XXmlHandler.UseProxy, 'Uses proxy');
+  CheckTrue(fHndlr.UseProxy, 'Uses proxy');
 end;
 
 { TestTD2XWriteDefinesHandler }
@@ -579,12 +564,12 @@ procedure TestTD2XWriteDefinesHandler.SetUp;
 begin
   inherited;
 
-  FD2XWriteDefinesHandler := TTestWriteDefinesHandler.Create;
+  fHndlr := TD2XWriteDefinesHandler.Create;
 end;
 
 procedure TestTD2XWriteDefinesHandler.TearDown;
 begin
-  FreeAndNil(FD2XWriteDefinesHandler);
+  FreeAndNil(fHndlr);
 
   inherited;
 end;
@@ -592,77 +577,268 @@ end;
 procedure TestTD2XWriteDefinesHandler.TestCopy;
 var
   pFrom: TD2XWriteDefinesHandler;
-  pParser: TD2XDefinesParser;
 begin
   pFrom := nil;
-  pParser := nil;
 
-  FD2XWriteDefinesHandler.Copy(pFrom);
+  fHndlr.Copy(pFrom);
   try
     pFrom := TD2XWriteDefinesHandler.Create;
-    pParser := TD2XDefinesParser.Create;
 
-    pFrom.Init(pParser);
+    pFrom.InitParser(fParser);
 
-    CheckFalse(Assigned(FD2XWriteDefinesHandler.Parser), 'Parser not set');
+    CheckFalse(Assigned(fHndlr.Parser), 'Parser not set');
 
-    FD2XWriteDefinesHandler.Copy(pFrom);
+    fHndlr.Copy(pFrom);
 
-    Check(pParser = FD2XWriteDefinesHandler.Parser, 'Parser set');
+    Check(fParser = fHndlr.Parser, 'Parser set');
   finally
-    pParser.Free;
     pFrom.Free;
   end;
 end;
 
 procedure TestTD2XWriteDefinesHandler.TestDescription;
 begin
-  CheckEqualsString('Write Defines', FD2XWriteDefinesHandler.Description, 'Description');
+  CheckEqualsString('Write Defines', fHndlr.Description, 'Description');
 end;
 
 procedure TestTD2XWriteDefinesHandler.TestEndResults;
-var
-  lParser: TD2XDefinesParser;
 begin
-  lParser := TD2XDefinesParser.Create;
-  try
-    FD2XWriteDefinesHandler.Init(lParser);
+  fHndlr.InitParser(fParser);
 
-    FD2XWriteDefinesHandler.EndResults(
-      function: TStream
-      begin
-        Result := fSS;
-      end);
-    CheckStream('**** CONDITIONALEXPRESSIONS CPU386 MSWINDOWS UNICODE VER230 WIN32', 'End Results');
-  finally
-    lParser.Free;
-  end;
+  fHndlr.EndResults(MakeStream(fSS));
+  CheckStream('**** CONDITIONALEXPRESSIONS CPU386 MSWINDOWS UNICODE VER230 WIN32',
+    'End Results');
 end;
 
 procedure TestTD2XWriteDefinesHandler.TestInit;
-var
-  lParser: TD2XDefinesParser;
 begin
-  lParser := TD2XDefinesParser.Create;
-  try
-    FD2XWriteDefinesHandler.Init(lParser);
+  fHndlr.InitParser(fParser);
 
-    Check(lParser = FD2XWriteDefinesHandler.Parser, 'Parser set');
-    CheckTrue(Assigned(FD2XWriteDefinesHandler.Parser), 'Parse Mode set');
-  finally
-    lParser.Free;
-  end;
+  Check(fParser = fHndlr.Parser, 'Parser set');
+  CheckTrue(Assigned(fHndlr.Parser), 'Parse Mode set');
 end;
 
 procedure TestTD2XWriteDefinesHandler.TestUseProxy;
 begin
-  CheckFalse(FD2XWriteDefinesHandler.UseProxy, 'Uses proxy');
+  CheckFalse(fHndlr.UseProxy, 'Uses proxy');
+end;
+
+{ TestTD2XDefinesUsedHandler }
+
+procedure TestTD2XDefinesUsedHandler.SetUp;
+begin
+  inherited;
+
+  fHndlr := TD2XDefinesUsedHandler.Create;
+end;
+
+procedure TestTD2XDefinesUsedHandler.TearDown;
+begin
+  FreeAndNil(fHndlr);
+
+  inherited;
+end;
+
+procedure TestTD2XDefinesUsedHandler.TestDefineUsed;
+begin
+  fHndlr.DefineUsed('Test');
+
+  fHndlr.EndProcessing(MakeStream(fSS));
+  CheckStream('Test=1', 'Define Used');
+end;
+
+procedure TestTD2XDefinesUsedHandler.TestDescription;
+begin
+  CheckEqualsString('Defines Used', fHndlr.Description, 'Description');
+end;
+
+procedure TestTD2XDefinesUsedHandler.TestEndProcessing;
+var
+  lCalled: Boolean;
+begin
+  lCalled := False;
+  StartExpectingException(EAssertionFailed);
+  try
+    fHndlr.EndProcessing(
+      function: TStream
+      begin
+        Result := nil;
+        lCalled := True;
+      end);
+  except
+    on E: EAssertionFailed do
+    begin
+      CheckTrue(lCalled, 'Stream Creator called');
+      CheckTrue(StartsText('Need a Stream', E.Message), 'Exception message');
+      raise;
+    end;
+  end;
+end;
+
+procedure TestTD2XDefinesUsedHandler.TestProcessing;
+begin
+  fHndlr.DefineUsed('Alpha');
+  fHndlr.DefineUsed('Beta');
+  fHndlr.DefineUsed('Alpha');
+  fHndlr.DefineUsed('Gamma');
+  fHndlr.DefineUsed('Alpha');
+  fHndlr.DefineUsed('Beta');
+
+  fHndlr.EndProcessing(MakeStream(fSS));
+  CheckStream('Alpha=3 Beta=2 Gamma=1', 'Define Used');
+end;
+
+procedure TestTD2XDefinesUsedHandler.TestUseProxy;
+begin
+  CheckFalse(fHndlr.UseProxy, 'Uses proxy');
+end;
+
+{ TestTD2XParserDefinesHandler }
+
+procedure TestTD2XParserDefinesHandler.SetUp;
+begin
+  inherited;
+
+  fHndlr := TD2XParserDefinesHandler.Create;
+end;
+
+procedure TestTD2XParserDefinesHandler.TearDown;
+begin
+  FreeAndNil(fHndlr);
+
+  inherited;
+end;
+
+procedure TestTD2XParserDefinesHandler.TestBeginFile;
+begin
+  fHndlr.InitParser(fParser);
+
+  fHndlr.BeginFile(nil);
+  CheckList('CONDITIONALEXPRESSIONS CPU386 MSWINDOWS UNICODE VER230 WIN32', 'Begin File', fParser.StartDefines);
+
+  fHndlr.ParseDefines(':');
+  fHndlr.BeginFile(nil);
+  CheckList('', 'Cleared Defines', fParser.StartDefines);
+
+  fHndlr.ParseDefines('+Test');
+  fHndlr.BeginFile(nil);
+  CheckList('Test', 'Test Define', fParser.StartDefines);
+end;
+
+procedure TestTD2XParserDefinesHandler.TestClearDefines;
+begin
+  fHndlr.ClearDefines;
+  fHndlr.OutputDefines(fSL);
+  CheckList('', 'Clear Defines');
+end;
+
+procedure TestTD2XParserDefinesHandler.TestCopy;
+var
+  pFrom: TD2XParserDefinesHandler;
+begin
+  pFrom := nil;
+
+  fHndlr.Copy(pFrom);
+  try
+    pFrom := TD2XParserDefinesHandler.Create;
+
+    pFrom.InitParser(fParser);
+
+    CheckFalse(Assigned(fHndlr.Parser), 'Parser not set');
+
+    fHndlr.Copy(pFrom);
+
+    Check(fParser = fHndlr.Parser, 'Parser set');
+  finally
+    pFrom.Free;
+  end;
+end;
+
+procedure TestTD2XParserDefinesHandler.TestDescription;
+begin
+  CheckEqualsString('Parser Defines', fHndlr.Description, 'Description');
+end;
+
+procedure TestTD2XParserDefinesHandler.TestInit;
+begin
+  fHndlr.InitParser(fParser);
+
+  Check(fParser = fHndlr.Parser, 'Parser set');
+  CheckTrue(Assigned(fHndlr.Parser), 'Parse Mode set');
+end;
+
+procedure TestTD2XParserDefinesHandler.TestParseDefines;
+begin
+  fHndlr.ParseDefines('!');
+  fHndlr.OutputDefines(fSL);
+  CheckList('', 'Parse Defines - !');
+
+  fHndlr.ParseDefines(':');
+  fHndlr.OutputDefines(fSL);
+  CheckList('-D:', 'Parse Defines - :');
+
+  fHndlr.ParseDefines('+Test1');
+  fHndlr.OutputDefines(fSL);
+  CheckList('-D: -D+Test1', 'Parse Defines - Add Test1');
+
+  fHndlr.ParseDefines('+Test2');
+  fHndlr.OutputDefines(fSL);
+  CheckList('-D: -D+Test1 -D+Test2', 'Parse Defines - Add Test2');
+
+  fHndlr.ParseDefines('-Test1');
+  fHndlr.OutputDefines(fSL);
+  CheckList('-D: -D+Test2', 'Parse Defines - Remove Test1');
+end;
+
+procedure TestTD2XParserDefinesHandler.TestReportDefines;
+begin
+  fHndlr.ParseDefines('!');
+  fHndlr.ReportDefines(fLog);
+  CheckLog('Use default Defines', 'Parse Defines - !');
+
+  fHndlr.ParseDefines(':');
+  fHndlr.ReportDefines(fLog);
+  CheckLog('Use NO Defines', 'Parse Defines - :');
+
+  fHndlr.ParseDefines('+Test1');
+  fHndlr.ReportDefines(fLog);
+  CheckLog('Use these Defines: Test1', 'Parse Defines - Add Test1');
+
+  fHndlr.ParseDefines('+Test2');
+  fHndlr.ReportDefines(fLog);
+  CheckLog('Use these Defines: Test1, Test2', 'Parse Defines - Add Test2');
+
+  fHndlr.ParseDefines('-Test1');
+  fHndlr.ReportDefines(fLog);
+  CheckLog('Use these Defines: Test2', 'Parse Defines - Remove Test1');
+end;
+
+procedure TestTD2XParserDefinesHandler.TestUseProxy;
+begin
+  CheckFalse(fHndlr.UseProxy, 'Uses proxy');
+end;
+
+{ TParserTestCase }
+
+procedure TParserTestCase.SetUp;
+begin
+  inherited;
+
+  fParser := TD2XDefinesParser.Create;
+end;
+
+procedure TParserTestCase.TearDown;
+begin
+  FreeAndNil(fParser);
+
+  inherited;
 end;
 
 initialization
 
 // Register any test cases with the test runner
-RegisterTests('Handlers', [TestTD2XCountHandler.Suite, TestTD2XSkipHandler.Suite,
+RegisterTests('Handlers', [TestTD2XCountHandler.Suite, TestTD2XDefinesUsedHandler.Suite,
+  TestTD2XParserDefinesHandler.Suite, TestTD2XSkipHandler.Suite,
   TestTD2XWriteDefinesHandler.Suite, TestTD2XXmlHandler.Suite]);
 
 end.

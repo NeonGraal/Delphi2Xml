@@ -87,8 +87,6 @@ type
   published
     procedure TestWriteDefines;
     procedure TestWriteXml;
-    procedure TestDefinesUsed;
-    procedure TestDefines;
   end;
 
   { TestTD2XFileOptions }
@@ -601,9 +599,7 @@ begin
 
   fOpts := TD2XOptions.Create;
 
-  fOpts.RegisterOptionParams(fParams, fOpts.FileOpts);
   fOpts.RegisterOtherParams(fParams);
-  fOpts.RegisterDefineParams(fParams);
 end;
 
 procedure TestTD2XOptions.TearDown;
@@ -612,7 +608,7 @@ begin
 
   inherited;
 end;
-
+(*
 procedure TestTD2XOptions.TestDefines;
 begin
   CheckTrue(fOpts.LoadDefines, 'Default Load Defines');
@@ -636,21 +632,7 @@ begin
   CheckFalse(fOpts.LoadDefines, 'Cleared Load Defines');
   CheckEqualsString('', fOpts.Defines.CommaText, 'Cleared Defines');
 end;
-
-procedure TestTD2XOptions.TestDefinesUsed;
-begin
-  CheckTrue(fOpts.DefinesUsed, 'Default Defines Used');
-  CheckEqualsString('.used', fOpts.DefinesUsedFoE, 'Default Defines Used FoE');
-
-  CheckTrue(fParams.ForCode('U').Parse('U-'), 'Parse Defines Used');
-  CheckFalse(fOpts.DefinesUsed, 'Unset Defines Used');
-  CheckEqualsString('.used', fOpts.DefinesUsedFoE, 'Unset Defines Used FoE');
-
-  CheckTrue(fParams.ForCode('U').Parse('U:Test'), 'Parse Defines Used');
-  CheckTrue(fOpts.DefinesUsed, 'Set Defines Used');
-  CheckEqualsString('.Test', fOpts.DefinesUsedFoE, 'Test Defines Used FoE');
-end;
-
+*)
 procedure TestTD2XOptions.TestWriteDefines;
 begin
   Check(Assigned(fOpts.WriteDefinesFlag), 'Write Defines Flag Assigned');

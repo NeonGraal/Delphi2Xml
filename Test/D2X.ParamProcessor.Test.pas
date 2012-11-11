@@ -166,7 +166,7 @@ const
     'Show elapsed Quiet Base dir - Generate XML :Xml\ ' +
     'Write Defines -(Defines\) Defines Used :.used ' +
     'Count Children :.cnt Skipped Methods :.skip ' +
-    'Use these Defines: CONDITIONALEXPRESSIONS, CPU386, MSWINDOWS, UNICODE, VER230, WIN32';
+    'Use default Defines';
 begin
   pStr := '@Test.prm';
   pFrom := 'Test';
@@ -281,10 +281,10 @@ begin
   CheckEqualsString('Defines\', fPP.Options.DefinesDirectory, 'DefinesDirectory');
   Check(fPP.Options.WriteXml, 'Xml');
   CheckEqualsString('Xml\', fPP.Options.XmlDirectory, 'XmlDirectory');
-  Check(fPP.Options.DefinesUsed, 'DefinesUsed');
-  CheckEqualsString('.used', fPP.Options.DefinesUsedFoE, 'UsedFileOrExtn');
-  Check(fPP.Options.LoadDefines, 'LoadDefines');
-  CheckEqualsString('', fPP.Options.Defines.CommaText, 'Defines');
+//  Check(fPP.Options.DefinesUsed, 'DefinesUsed');
+//  CheckEqualsString('.used', fPP.Options.DefinesUsedFoE, 'UsedFileOrExtn');
+//  Check(fPP.Options.LoadDefines, 'LoadDefines');
+//  CheckEqualsString('', fPP.Options.Defines.CommaText, 'Defines');
 //  Check(fPP.Options.CountChildren, 'CountChildren');
 //  CheckEqualsString('.cnt', fPP.Options.CountChildrenFoE, 'CountFileOrExtn');
 //  Check(fPP.Options.SkipMethods, 'SkipMethods');

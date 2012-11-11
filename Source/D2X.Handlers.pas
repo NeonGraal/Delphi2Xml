@@ -43,6 +43,65 @@ type
     procedure EndMethod(pMethod: string); override;
   end;
 
+  TD2XDefinesUsedHandler = class(TD2XHandler)
+  private
+    fDefinesDict: TStrIntDict;
+
+  public
+    constructor Create;
+    destructor Destroy; override;
+
+    function Description: string; override;
+    function UseProxy: Boolean; override;
+
+    procedure EndProcessing(pOutput: TD2XHandler.ThStreamCreator); override;
+
+    procedure DefineUsed(pDef: string);
+
+  end;
+
+  TD2XParserHandler = class(TD2XHandler)
+  protected
+    fParser: TD2XDefinesParser;
+
+  public
+    procedure InitParser(pParser: TD2XDefinesParser); virtual;
+
+    procedure Copy(pFrom: TD2XHandler); override;
+
+    property Parser: TD2XDefinesParser read fParser;
+  end;
+
+  TD2XParserDefinesHandler = class(TD2XParserHandler)
+  private
+    fDefines: TStringList;
+    fLoadDefines: Boolean;
+    fDefinesFileName: TD2XNamedStringRef;
+
+    procedure InitDefines;
+
+  public
+    constructor Create;
+    destructor Destroy; override;
+
+    procedure SetDefinesFileName(pDefinesFileName: TD2XNamedStringRef);
+
+    procedure InitParser(pParser: TD2XDefinesParser); override;
+
+    function Description: string; override;
+    function UseProxy: Boolean; override;
+
+    procedure Copy(pFrom: TD2XHandler); override;
+
+    procedure BeginFile(pInput: TD2XHandler.ThStreamCreator); override;
+
+    function ParseDefines(pStr: string): Boolean;
+    procedure ClearDefines;
+
+    procedure OutputDefines(pSL: TStringList);
+    procedure ReportDefines(pL: ID2XLogger);
+  end;
+
   TD2XSkipHandler = class(TD2XHandler)
   private
     fSkippedMethods: TStrIntDict;
@@ -62,22 +121,15 @@ type
     procedure EndProcessing(pOutput: TD2XHandler.ThStreamCreator); override;
   end;
 
-  TD2XWriteDefinesHandler = class(TD2XHandler)
-  protected
-    fParser: TD2XDefinesParser;
-
+  TD2XWriteDefinesHandler = class(TD2XParserHandler)
   public
-    procedure Init(pParser: TD2XDefinesParser);
-
     function Description: string; override;
     function UseProxy: Boolean; override;
-
-    procedure Copy(pFrom: TD2XHandler); override;
 
     procedure EndResults(pOutput: TD2XHandler.ThStreamCreator); override;
   end;
 
-  TD2XXmlHandler = class(TD2XHandler)
+  TD2XXmlHandler = class(TD2XParserHandler)
   private
     fHasFiles: Boolean;
 
@@ -85,7 +137,6 @@ type
     fXmlDoc: TD2XmlDoc;
     fXmlNode: TD2XmlNode;
 
-    fParser: TD2XDefinesParser;
     fFinalToken: TD2XCheckRef;
     fParseMode: TD2XStringRef;
 
@@ -93,8 +144,7 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    procedure Init(pParser: TD2XDefinesParser; pFinalToken: TD2XCheckRef;
-      pParseMode: TD2XStringRef);
+    procedure Init(pFinalToken: TD2XCheckRef; pParseMode: TD2XStringRef);
 
     function Description: string; override;
     function UseProxy: Boolean; override;
@@ -122,6 +172,7 @@ type
 implementation
 
 uses
+  D2X.Options,
   System.SysUtils,
   Xml.XMLIntf;
 
@@ -365,8 +416,9 @@ var
 begin
   if Assigned(pFrom) then
   begin
+    inherited;
+
     lFrom := TD2XXmlHandler(pFrom);
-    fParser := lFrom.fParser;
     fFinalToken := lFrom.fFinalToken;
     fParseMode := lFrom.fParseMode;
   end;
@@ -426,10 +478,9 @@ begin
   FreeAndNil(fXmlDoc);
 end;
 
-procedure TD2XXmlHandler.Init(pParser: TD2XDefinesParser; pFinalToken: TD2XCheckRef;
+procedure TD2XXmlHandler.Init(pFinalToken: TD2XCheckRef;
   pParseMode: TD2XStringRef);
 begin
-  fParser := pParser;
   fFinalToken := pFinalToken;
   fParseMode := pParseMode;
 end;
@@ -477,17 +528,6 @@ end;
 
 { TD2XWriteDefinesHandler }
 
-procedure TD2XWriteDefinesHandler.Copy(pFrom: TD2XHandler);
-var
-  lFrom: TD2XWriteDefinesHandler;
-begin
-  if Assigned(pFrom) then
-  begin
-    lFrom := TD2XWriteDefinesHandler(pFrom);
-    fParser := lFrom.fParser;
-  end;
-end;
-
 function TD2XWriteDefinesHandler.Description: string;
 begin
   Result := 'Write Defines';
@@ -516,25 +556,242 @@ begin
       //        lFS := TFileStream.Create(fOpts.DefinesDirectory + pFilename + '.def', fmCreate);
       lFS := pOutput;
       if Assigned(lFS) then
-        begin
-          fParser.StartDefines.SaveToStream(lFS);
-          lFS.Write(DEF_BREAK, 10);
-          lSL.SaveToStream(lFS);
-        end;
+      begin
+        fParser.StartDefines.SaveToStream(lFS);
+        lFS.Write(DEF_BREAK, 10);
+        lSL.SaveToStream(lFS);
+      end;
     end;
   finally
     FreeAndNil(lSL);
   end;
 end;
 
-procedure TD2XWriteDefinesHandler.Init(pParser: TD2XDefinesParser);
-begin
-  fParser := pParser;
-end;
-
 function TD2XWriteDefinesHandler.UseProxy: Boolean;
 begin
   Result := False;
+end;
+
+{ TD2XDefinesUsedHandler }
+
+constructor TD2XDefinesUsedHandler.Create;
+begin
+  inherited;
+
+  fDefinesDict := TStrIntDict.Create;
+end;
+
+procedure TD2XDefinesUsedHandler.DefineUsed(pDef: string);
+var
+  lVal: Integer;
+begin
+  if fDefinesDict.TryGetValue(pDef, lVal) then
+    fDefinesDict[pDef] := lVal + 1
+  else
+    fDefinesDict.Add(pDef, 1)
+end;
+
+function TD2XDefinesUsedHandler.Description: string;
+begin
+  Result := 'Defines Used'
+end;
+
+destructor TD2XDefinesUsedHandler.Destroy;
+begin
+  FreeAndNil(fDefinesDict);
+
+  inherited;
+end;
+
+procedure TD2XDefinesUsedHandler.EndProcessing(pOutput: TD2XHandler.ThStreamCreator);
+begin
+  OutputStrIntDict(fDefinesDict, pOutput,
+    function(pPair: TStrIntPair): string
+    begin
+      Result := IntToStr(pPair.Value);
+    end);
+end;
+
+function TD2XDefinesUsedHandler.UseProxy: Boolean;
+begin
+  Result := False;
+end;
+
+{ TD2XParserDefinesHandler }
+
+procedure TD2XParserDefinesHandler.BeginFile(pInput: TD2XHandler.ThStreamCreator);
+begin
+  fParser.StartDefines.Assign(fDefines);
+end;
+
+procedure TD2XParserDefinesHandler.ClearDefines;
+begin
+  fLoadDefines := False;
+  fDefines.Clear;
+end;
+
+procedure TD2XParserDefinesHandler.Copy(pFrom: TD2XHandler);
+begin
+  inherited;
+  if Assigned(pFrom) then
+    InitDefines;
+end;
+
+constructor TD2XParserDefinesHandler.Create;
+begin
+  inherited;
+
+  fDefines := TStringList.Create;
+  fDefines.Sorted := True;
+end;
+
+function TD2XParserDefinesHandler.Description: string;
+begin
+  Result := 'Parser Defines';
+end;
+
+destructor TD2XParserDefinesHandler.Destroy;
+begin
+  FreeAndNil(fDefines);
+
+  inherited;
+end;
+
+procedure TD2XParserDefinesHandler.InitDefines;
+begin
+  fParser.Lexer.InitDefines;
+  fParser.Lexer.GetDefines(fDefines);
+end;
+
+procedure TD2XParserDefinesHandler.InitParser(pParser: TD2XDefinesParser);
+begin
+  inherited;
+
+  InitDefines;
+end;
+
+procedure TD2XParserDefinesHandler.OutputDefines(pSL: TStringList);
+var
+  lS: string;
+begin
+  if fLoadDefines then
+  begin
+    pSL.Add('-D:');
+    for lS in fDefines do
+      pSL.Add('-D+' + lS);
+  end;
+end;
+
+function TD2XParserDefinesHandler.ParseDefines(pStr: string): Boolean;
+var
+  lStr: string;
+  lIdx: Integer;
+begin
+  Result := False;
+  if (pStr = '!') or (pStr = ':') then
+  begin
+    Result := True;
+    fDefines.Clear;
+    fLoadDefines := pStr = ':';
+  end
+  else
+    if Length(pStr) > 1 then
+    begin
+      lStr := System.Copy(pStr, 2, Length(pStr));
+      case pStr[1] of
+        '+':
+          begin
+            Result := True;
+            fLoadDefines := True;
+            if fDefines.IndexOf(lStr) < 0 then
+              fDefines.Add(lStr);
+          end;
+        '-':
+          begin
+            Result := True;
+            lIdx := fDefines.IndexOf(lStr);
+            if lIdx >= 0 then
+            begin
+              fDefines.Delete(lIdx);
+              fLoadDefines := True;
+            end;
+          end;
+        ':':
+          begin
+            Result := True;
+            fLoadDefines := True;
+            fDefines.LoadFromFile(fDefinesFileName(MakeFileName(lStr, '.def')));
+          end;
+      end;
+    end;
+end;
+
+procedure TD2XParserDefinesHandler.ReportDefines(pL: ID2XLogger);
+var
+  lS: string;
+  w: Integer;
+
+  procedure WriteWidth(pStr: string);
+  begin
+    pL.Log('%s', [pStr], False);
+    Inc(w, Length(pStr));
+  end;
+
+begin
+  if fLoadDefines then
+    if fDefines.Count < 1 then
+      pL.Log('Use NO Defines', [])
+    else
+    begin
+      pL.Log('Use these Defines:', []);
+      w := 0;
+      for lS in fDefines do
+      begin
+        if w = 0 then
+          WriteWidth('    ')
+        else
+          if (w + Length(lS)) > 78 then
+          begin
+            pL.Log('', []);
+            w := 0;
+            WriteWidth('    ');
+          end
+          else
+            WriteWidth(', ');
+        WriteWidth(lS);
+      end;
+      pL.Log('', []);
+    end
+  else
+    pL.Log('Use default Defines', []);
+end;
+
+procedure TD2XParserDefinesHandler.SetDefinesFileName(pDefinesFileName: TD2XNamedStringRef);
+begin
+  fDefinesFileName := pDefinesFileName;
+end;
+
+function TD2XParserDefinesHandler.UseProxy: Boolean;
+begin
+  Result := False;
+end;
+
+{ TD2XParserHandler }
+
+procedure TD2XParserHandler.Copy(pFrom: TD2XHandler);
+var
+  lFrom: TD2XParserHandler;
+begin
+  if Assigned(pFrom) then
+  begin
+    lFrom := TD2XParserHandler(pFrom);
+    fParser := lFrom.fParser;
+  end;
+end;
+
+procedure TD2XParserHandler.InitParser(pParser: TD2XDefinesParser);
+begin
+  fParser := pParser;
 end;
 
 end.

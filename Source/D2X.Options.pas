@@ -36,31 +36,21 @@ type
     property OutputTimestamp: string read fOutputTimestamp;
     property GlobalName: string read GetGlobalName write SetGlobalName;
     property TimestampFiles: Boolean read GetTimestampFiles;
+
+    function ForcePath(pFilename: string): String;
   end;
 
   TD2XOptions = class(TD2XLogger)
   private
     fWriteXml: TD2XFlaggedStringParam;
     fWriteDefines: TD2XFlaggedStringParam;
-    fDefinesUsed: TD2XFlaggedStringParam;
-
-    fLoadDefines: Boolean;
-
-    fDefines: TStringList;
 
     fFileOpts: TD2XFileOptions;
-
-    procedure OutputDefines(pSL: TStringList);
-    procedure ReportDefines;
-
-    function ParseDefines(pStr: string): Boolean;
 
     function GetXmlDirectory: string;
     function GetWriteXml: Boolean;
     function GetDefinesDirectory: string;
     function GetWriteDefines: Boolean;
-    function GetDefinesUsed: Boolean;
-    function GetDefinesUsedFileOrExtn: string;
     function GetWriteXmlFlag: IParamFlag;
     function GetWriteDefinesFlag: IParamFlag;
 
@@ -71,25 +61,20 @@ type
     property WriteXml: Boolean read GetWriteXml;
     property WriteXmlFlag: IParamFlag read GetWriteXmlFlag;
     property XmlDirectory: string read GetXmlDirectory;
-    property DefinesUsed: Boolean read GetDefinesUsed;
-    property DefinesUsedFoE: string read GetDefinesUsedFileOrExtn;
-
-    property LoadDefines: Boolean read fLoadDefines;
-    property Defines: TStringList read fDefines;
 
     property FileOpts: TD2XFileOptions read fFileOpts;
 
     constructor Create; override;
     destructor Destroy; override;
 
-    procedure RegisterOptionParams(pParams: TD2XParams; pFileOpts: TD2XFileOptions);
     procedure RegisterOtherParams(pParams: TD2XParams);
-    procedure RegisterDefineParams(pParams: TD2XParams);
   end;
 
 function ConvertDir(pStr, pDflt: string; out pVal: string): Boolean;
 function ConvertExtn(pStr, pDflt: string; out pVal: string): Boolean;
 function ConvertFile(pStr, pDflt: string; out pVal: string): Boolean;
+
+function MakeFileName(pStr, pDflt: string): string;
 
 implementation
 
@@ -159,19 +144,13 @@ begin
   fWriteDefines := TD2XFlaggedStringParam.CreateFlagStr('W', 'Write Defines', '<dir>',
     'Generate Final Defines files into current or given <dir>', 'Defines\', False, ConvertDir,
     nil, nil);
-  fDefinesUsed := TD2XFlaggedStringParam.CreateFlagStr('U', 'Defines Used', '<f/e>',
-    'Report Defines Used into <f/e>', '.used', True, ConvertExtn, nil, nil);
 
   // Available option letters: AHJKLQYZ
 
-  fLoadDefines := True;
-  fDefines := TStringList.Create;
-  fDefines.Sorted := True;
 end;
 
 destructor TD2XOptions.Destroy;
 begin
-  FreeAndNil(fDefines);
 
   inherited;
 end;
@@ -179,16 +158,6 @@ end;
 function TD2XOptions.GetDefinesDirectory: string;
 begin
   Result := fWriteDefines.Value
-end;
-
-function TD2XOptions.GetDefinesUsed: Boolean;
-begin
-  Result := IParamFlag(fDefinesUsed).Flag
-end;
-
-function TD2XOptions.GetDefinesUsedFileOrExtn: string;
-begin
-  Result := fDefinesUsed.Value
 end;
 
 function TD2XOptions.GetWriteDefines: Boolean;
@@ -216,167 +185,10 @@ begin
   Result := fWriteXml;
 end;
 
-procedure TD2XOptions.OutputDefines(pSL: TStringList);
-var
-  lS: string;
-begin
-  if fLoadDefines then
-  begin
-    pSL.Add('-D:');
-    for lS in fDefines do
-      pSL.Add('-D+' + lS);
-  end;
-end;
-
-function TD2XOptions.ParseDefines(pStr: string): Boolean;
-var
-  lStr: string;
-  lIdx: Integer;
-begin
-  Result := False;
-  if (pStr = '!') or (pStr = ':') then
-  begin
-    Result := True;
-    fDefines.Clear;
-    fLoadDefines := pStr = ':';
-  end
-  else
-    if Length(pStr) > 1 then
-    begin
-      lStr := Copy(pStr, 2, Length(pStr));
-      case pStr[1] of
-        '+':
-          begin
-            Result := True;
-            fLoadDefines := True;
-            if fDefines.IndexOf(lStr) < 0 then
-              fDefines.Add(lStr);
-          end;
-        '-':
-          begin
-            Result := True;
-            lIdx := fDefines.IndexOf(lStr);
-            if lIdx >= 0 then
-            begin
-              fDefines.Delete(lIdx);
-              fLoadDefines := True;
-            end;
-          end;
-        ':':
-          begin
-            Result := True;
-            fLoadDefines := True;
-            fDefines.LoadFromFile(fFileOpts.InputFileOrExtn(MakeFileName(Copy(pStr, 2,
-                  Length(pStr)), '.def')));
-          end;
-      end;
-    end;
-end;
-
-procedure TD2XOptions.RegisterDefineParams(pParams: TD2XParams);
-var
-  lClearDefines: TD2XResettableParam.TspSetter;
-begin
-  lClearDefines := procedure
-    begin
-      fLoadDefines := False;
-      fDefines.Clear;
-    end;
-  pParams.Add(TD2XResettableParam.CreateReset('D', 'Defines', '[+-!:]<def>',
-    'Add(+), Remove(-), Clear(!) or Load(:) Defines', ParseDefines, lClearDefines,
-    lClearDefines));
-end;
-
-procedure TD2XOptions.RegisterOptionParams(pParams: TD2XParams; pFileOpts: TD2XFileOptions);
-begin
-  pParams.Add(TD2XParam.Create('?', 'Options', '', 'Show valid options',
-      function(pStr: string): Boolean
-    begin
-      Result := True;
-      pParams.DescribeAll;
-    end));
-  pParams.Add(TD2XParam.Create('!', 'Reset', '', 'Reset all options to defaults',
-    function(pStr: string): Boolean
-    begin
-      Result := True;
-      if StartsText('!', pStr) then
-        pParams.ZeroAll
-      else
-        pParams.ResetAll;
-    end));
-  pParams.Add(TD2XParam.Create('@', 'Report', '<file>', 'Report/Output Current options',
-    function(pStr: string): Boolean
-    var
-      lSL: TStringList;
-      lFile: string;
-    begin
-      Result := True;
-      if pStr > '' then
-      begin
-        lFile := pFileOpts.OutputFileOrExtn(MakeFileName(pStr, '.prm'));
-        lSL := TStringList.Create;
-        try
-          pParams.OutputAll(lSL);
-          OutputDefines(lSL);
-          if lSL.Count > 0 then
-            lSL.SaveToFile(lFile);
-        finally
-          FreeAndNil(lSL);
-        end;
-      end
-      else
-      begin
-        pParams.ReportAll;
-        ReportDefines;
-      end;
-    end));
-end;
-
 procedure TD2XOptions.RegisterOtherParams(pParams: TD2XParams);
 begin
   pParams.Add(fWriteXml);
   pParams.Add(fWriteDefines);
-  pParams.Add(fDefinesUsed);
-end;
-
-procedure TD2XOptions.ReportDefines;
-var
-  lS: string;
-  w: Integer;
-
-  procedure WriteWidth(pStr: string);
-  begin
-    Log('%s', [pStr], False);
-    Inc(w, Length(pStr));
-  end;
-
-begin
-  if fLoadDefines then
-    if fDefines.Count < 1 then
-      Log('Use NO Defines', [])
-    else
-    begin
-      Log('Use these Defines:', []);
-      w := 0;
-      for lS in fDefines do
-      begin
-        if w = 0 then
-          WriteWidth('    ')
-        else
-          if (w + Length(lS)) > 78 then
-          begin
-            Log('', []);
-            w := 0;
-            WriteWidth('    ');
-          end
-          else
-            WriteWidth(', ');
-        WriteWidth(lS);
-      end;
-      Log('', []);
-    end
-  else
-    Log('Use default Defines', []);
 end;
 
 { TD2XFileOptions }
@@ -403,6 +215,12 @@ begin
     'Timestamp global output files');
 
   fOutputTimestamp := FormatDateTime('-HH-mm', Now);
+end;
+
+function TD2XFileOptions.ForcePath(pFilename: string): String;
+begin
+  Result := pFilename;
+  ForceDirectories(ExtractFilePath(ParamStr(0)) + ExtractFilePath(pFilename));
 end;
 
 function TD2XFileOptions.GetGlobalName: string;
@@ -451,17 +269,11 @@ function TD2XFileOptions.OutputFileOrExtn(pFileOrExtn: string): string;
         Result := pFileOrExtn;
   end;
 
-var
-  lPath: string;
-
 begin
   if IParamFlag(fUseOutput).Flag then
-    Result := fUseOutput.Value + GlobalFileOrExtn(pFileOrExtn)
+    Result := ForcePath(fUseOutput.Value + GlobalFileOrExtn(pFileOrExtn))
   else
-    Result := GlobalFileOrExtn(pFileOrExtn);
-
-  lPath := ExtractFilePath(ParamStr(0)) + ExtractFilePath(Result);
-  ForceDirectories(lPath);
+    Result := ForcePath(GlobalFileOrExtn(pFileOrExtn));
 end;
 
 procedure TD2XFileOptions.RegisterParams(pParams: TD2XParams);

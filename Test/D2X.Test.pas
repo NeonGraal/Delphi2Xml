@@ -33,7 +33,7 @@ type
 
   TLoggerTestCase = class(TStringTestCase)
   protected
-    fID2XLogger: ID2XLogger;
+    fLog: ID2XLogger;
 
     procedure CheckLog(pExp, pLabel: string);
   public
@@ -141,7 +141,7 @@ var
   pLogger: ID2XLogger;
   lSB: TStringBuilder;
 begin
-  fID2XLogger.Log('Log String', [], False);
+  fLog.Log('Log String', [], False);
   CheckBuilder('Log String', 'Check Logging');
 
   lSB := TStringBuilder.Create;
@@ -151,15 +151,15 @@ begin
     CheckString(lSB, 'Log String1', 'Check Logging 1');
     CheckLog('', 'Check Not Logging 1');
 
-    fID2XLogger.JoinLog(pLogger);
+    fLog.JoinLog(pLogger);
 
-    fID2XLogger.Log('Log String2', [], False);
+    fLog.Log('Log String2', [], False);
     CheckString(lSB, 'Log String2', 'Check Logging 2');
     CheckLog('', 'Check Not Logging 2');
 
-    fID2XLogger.JoinLog(nil);
+    fLog.JoinLog(nil);
 
-    fID2XLogger.Log('Log String3', [], False);
+    fLog.Log('Log String3', [], False);
     CheckLog('Log String3', 'Check Logging 3');
     CheckString(lSB, '', 'Check Not Logging 3');
   finally
@@ -169,20 +169,20 @@ end;
 
 procedure TestID2XLogger.TestLog;
 begin
-  fID2XLogger.Log('Log', [], False);
-  fID2XLogger.Log('String', [], False);
+  fLog.Log('Log', [], False);
+  fLog.Log('String', [], False);
   CheckLog('LogString', 'No Arguments');
 
-  fID2XLogger.Log('Log', []);
-  fID2XLogger.Log('String', []);
+  fLog.Log('Log', []);
+  fLog.Log('String', []);
   CheckLog('Log String', 'No Arguments Line');
 
-  fID2XLogger.Log('Log %s %s', ['Arg1', 'Arg2'], False);
-  fID2XLogger.Log('String', []);
+  fLog.Log('Log %s %s', ['Arg1', 'Arg2'], False);
+  fLog.Log('String', []);
   CheckLog('Log Arg1 Arg2String', 'Arguments');
 
-  fID2XLogger.Log('Log %s %s', ['Arg1', 'Arg2']);
-  fID2XLogger.Log('String', []);
+  fLog.Log('Log %s %s', ['Arg1', 'Arg2']);
+  fLog.Log('String', []);
   CheckLog('Log Arg1 Arg2 String', 'Arguments Line');
 end;
 
@@ -684,12 +684,12 @@ procedure TLoggerTestCase.SetUp;
 begin
   inherited;
 
-  fID2XLogger := TD2XLogger.Create(fSB);
+  fLog := TD2XLogger.Create(fSB);
 end;
 
 procedure TLoggerTestCase.TearDown;
 begin
-  fID2XLogger := nil;
+  fLog := nil;
 
   inherited;
 end;
