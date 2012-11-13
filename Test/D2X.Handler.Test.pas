@@ -29,8 +29,8 @@ type
     function UseProxy: Boolean; override;
     procedure BeginProcessing(pInput: TD2XHandler.ThStreamCreator); override;
     procedure EndProcessing(pOutput: TD2XHandler.ThStreamCreator); override;
-    procedure BeginFile(pInput: TD2XHandler.ThStreamCreator); override;
-    procedure EndFile(pOutput: TD2XHandler.ThStreamCreator); override;
+    procedure BeginFile(pFile: string; pInput: TD2XHandler.ThStreamCreator); override;
+    procedure EndFile(pFile: string; pOutput: TD2XHandler.ThStreamCreator); override;
     procedure BeginResults; override;
     procedure EndResults(pOutput: TD2XHandler.ThStreamCreator); override;
     function CheckBeforeMethod(pMethod: String): Boolean; override;
@@ -151,14 +151,14 @@ end;
 
 procedure TestTD2XHandler.TestBeginFile;
 begin
-  FD2XHandler.BeginFile(nil);
+  FD2XHandler.BeginFile('', nil);
 
   CheckTrue(FD2XTester.CalledBeginFile, 'Called Begin File');
 end;
 
 procedure TestTD2XHandler.TestEndFile;
 begin
-  FD2XHandler.EndFile(nil);
+  FD2XHandler.EndFile('', nil);
 
   CheckTrue(FD2XTester.CalledEndFile, 'Called End File');
 end;
@@ -170,7 +170,7 @@ begin
   CalledBeginMethod := true;
 end;
 
-procedure TD2XHandlerTester.BeginFile(pInput: TD2XHandler.ThStreamCreator);
+procedure TD2XHandlerTester.BeginFile(pFile: string; pInput: TD2XHandler.ThStreamCreator);
 begin
   CalledBeginFile := true;
   if CreateStreams then
@@ -218,7 +218,7 @@ begin
   CalledEndMethod := true;
 end;
 
-procedure TD2XHandlerTester.EndFile(pOutput: TD2XHandler.ThStreamCreator);
+procedure TD2XHandlerTester.EndFile(pFile: string; pOutput: TD2XHandler.ThStreamCreator);
 begin
   CalledEndFile := true;
   if CreateStreams then

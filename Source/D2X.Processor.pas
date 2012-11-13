@@ -26,8 +26,8 @@ type
     procedure BeginProcessing; virtual;
     procedure EndProcessing; virtual;
 
-    procedure BeginFile; virtual;
-    procedure EndFile; virtual;
+    procedure BeginFile(pFile: string); virtual;
+    procedure EndFile(pFile: string); virtual;
 
     procedure BeginResults; virtual;
     procedure EndResults(pFile: string); virtual;
@@ -51,7 +51,7 @@ implementation
 
 { TD2XProcessor }
 
-procedure TD2XProcessor.BeginFile;
+procedure TD2XProcessor.BeginFile(pFile: string);
 begin
 
 end;
@@ -95,7 +95,7 @@ begin
   inherited;
 end;
 
-procedure TD2XProcessor.EndFile;
+procedure TD2XProcessor.EndFile(pFile: string);
 begin
 
 end;

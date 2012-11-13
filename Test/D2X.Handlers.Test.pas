@@ -15,7 +15,6 @@ type
     procedure TearDown; override;
   end;
 
-
 implementation
 
 uses
@@ -126,13 +125,16 @@ type
   TestTD2XXmlHandler = class(TParserTestCase)
   strict private
     fHndlr: TTestXmlHandler;
+    fCalledFinalToken: Boolean;
+    fCalledParseMode: Boolean;
+
   public
     procedure SetUp; override;
     procedure TearDown; override;
   published
     procedure TestDescription;
     procedure TestUseProxy;
-    procedure TestInit;
+    procedure TestInitParser;
     procedure TestCopy;
     procedure TestBeginResults;
     procedure TestEndResults;
@@ -165,14 +167,14 @@ end;
 
 procedure TestTD2XCountHandler.TestProcessing;
 begin
-  fHndlr.BeginFile(nil);
+  fHndlr.BeginFile('', nil);
   fHndlr.BeginMethod('Alpha');
   fHndlr.BeginMethod('Beta');
   fHndlr.EndMethod('Beta');
   fHndlr.BeginMethod('Gamma');
   fHndlr.EndMethod('Gamma');
   fHndlr.EndMethod('Alpha');
-  fHndlr.EndFile(nil);
+  fHndlr.EndFile('', nil);
 
   fHndlr.EndProcessing(MakeStream(fSS));
 
@@ -186,7 +188,7 @@ end;
 
 procedure TestTD2XCountHandler.TestBeginFile;
 begin
-  fHndlr.BeginFile(nil);
+  fHndlr.BeginFile('', nil);
 
   CheckStream('', 'Begin File');
 end;
@@ -197,7 +199,7 @@ var
 begin
   lCalled := False;
 
-  fHndlr.EndFile(
+  fHndlr.EndFile('',
       function: TStream
     begin
       Result := nil;
@@ -212,7 +214,7 @@ procedure TestTD2XCountHandler.TestBeginMethod;
 var
   pMethod: string;
 begin
-  fHndlr.BeginFile(nil);
+  fHndlr.BeginFile('', nil);
 
   fHndlr.BeginMethod(pMethod);
 
@@ -228,7 +230,7 @@ procedure TestTD2XCountHandler.TestEndMethod;
 var
   pMethod: string;
 begin
-  fHndlr.BeginFile(nil);
+  fHndlr.BeginFile('', nil);
 
   fHndlr.EndMethod(pMethod);
 
@@ -277,7 +279,7 @@ end;
 procedure TestTD2XSkipHandler.TestBeginFile;
 begin
   fSS.WriteString('Alpha=1'#13#10'Gamma');
-  fHndlr.BeginFile(MakeStream(fSS));
+  fHndlr.BeginFile('', MakeStream(fSS));
   CheckStream('Alpha=1 Gamma', 'Stream');
 end;
 
@@ -305,7 +307,7 @@ end;
 procedure TestTD2XSkipHandler.TestProcessing;
 begin
   fSS.WriteString('Alpha=1'#13#10'Gamma');
-  fHndlr.BeginFile(MakeStream(fSS));
+  fHndlr.BeginFile('', MakeStream(fSS));
   CheckStream('Alpha=1 Gamma', 'Stream');
 
   CheckTrue(fHndlr.CheckBeforeMethod('Alpha'), 'Check Before Alpha');
@@ -331,7 +333,17 @@ procedure TestTD2XXmlHandler.SetUp;
 begin
   inherited;
 
-  fHndlr := TTestXmlHandler.Create;
+  fHndlr := TTestXmlHandler.CreateXml(
+    function: Boolean
+    begin
+      fCalledFinalToken := True;
+      Result := True;
+    end,
+    function: string
+    begin
+      fCalledParseMode := True;
+      Result := 'ParseMode';
+    end);
 end;
 
 procedure TestTD2XXmlHandler.TearDown;
@@ -348,7 +360,7 @@ begin
   fHndlr.BeginMethod('Test');
   fHndlr.AddAttr('Test', 'Test');
   fHndlr.EndResults(MakeStream(fSS));
-  CheckStream('<?xml version="1.0"?> <Test Test="Test" />', 'End Results');
+  CheckStream('<?xml version="1.0"?> <Test parseMode="ParseMode" Test="Test" />', 'End Results');
 end;
 
 procedure TestTD2XXmlHandler.TestAddText;
@@ -358,7 +370,7 @@ begin
   fHndlr.BeginMethod('Test');
   fHndlr.AddText('Test');
   fHndlr.EndResults(MakeStream(fSS));
-  CheckStream('<?xml version="1.0"?> <Test>Test</Test>', 'End Results');
+  CheckStream('<?xml version="1.0"?> <Test parseMode="ParseMode">Test</Test>', 'End Results');
 end;
 
 procedure TestTD2XXmlHandler.TestBeginMethod;
@@ -367,7 +379,7 @@ begin
   fHndlr.HasFiles := True;
   fHndlr.BeginMethod('Test');
   fHndlr.EndResults(MakeStream(fSS));
-  CheckStream('<?xml version="1.0"?> <Test />', 'End Results');
+  CheckStream('<?xml version="1.0"?> <Test parseMode="ParseMode" />', 'End Results');
 end;
 
 procedure TestTD2XXmlHandler.TestBeginResults;
@@ -383,42 +395,22 @@ end;
 procedure TestTD2XXmlHandler.TestCopy;
 var
   pFrom: TD2XXmlHandler;
-  lCalledFinalToken, lCalledParseMode: Boolean;
 begin
   pFrom := nil;
-  lCalledFinalToken := False;
-  lCalledParseMode := False;
+  fCalledFinalToken := False;
+  fCalledParseMode := False;
 
   fHndlr.Copy(pFrom);
   try
-    pFrom := TD2XXmlHandler.Create;
+    pFrom := TD2XXmlHandler.CreateXml(nil, nil);
 
     pFrom.InitParser(fParser);
-    pFrom.Init(
-      function: Boolean
-      begin
-        lCalledFinalToken := True;
-        Result := True;
-      end,
-      function: string
-      begin
-        lCalledParseMode := True;
-        Result := 'ParseMode';
-      end);
 
     CheckFalse(Assigned(fHndlr.Parser), 'Parser not set');
-    CheckFalse(Assigned(fHndlr.FinalToken), 'Final Token not set');
-    CheckFalse(Assigned(fHndlr.ParseMode), 'Parse Mode not set');
 
     fHndlr.Copy(pFrom);
 
     Check(fParser = fHndlr.Parser, 'Parser set');
-    CheckTrue(Assigned(fHndlr.FinalToken), 'Final Token set');
-    CheckTrue(fHndlr.FinalToken(), 'Final Token correct');
-    CheckTrue(lCalledFinalToken, 'Final Token called');
-    CheckTrue(Assigned(fHndlr.ParseMode), 'Parse Mode set');
-    CheckEqualsString('ParseMode', fHndlr.ParseMode(), 'Parse Mode correct');
-    CheckTrue(lCalledParseMode, 'Parse Mode called');
   finally
     pFrom.Free;
   end;
@@ -436,7 +428,7 @@ begin
   fHndlr.BeginMethod('Test');
   fHndlr.EndMethod('Test');
   fHndlr.EndResults(MakeStream(fSS));
-  CheckStream('<?xml version="1.0"?> <Test />', 'End Results');
+  CheckStream('<?xml version="1.0"?> <Test parseMode="ParseMode" />', 'End Results');
 end;
 
 procedure TestTD2XXmlHandler.TestEndResults;
@@ -451,33 +443,20 @@ begin
   CheckStream('<?xml version="1.0"?>', 'End Results');
 end;
 
-procedure TestTD2XXmlHandler.TestInit;
-var
-  lCalledFinalToken, lCalledParseMode: Boolean;
+procedure TestTD2XXmlHandler.TestInitParser;
 begin
-  lCalledFinalToken := False;
-  lCalledParseMode := False;
+  fCalledFinalToken := False;
+  fCalledParseMode := False;
 
   fHndlr.InitParser(fParser);
-  fHndlr.Init(
-    function: Boolean
-    begin
-      lCalledFinalToken := True;
-      Result := True;
-    end,
-    function: string
-    begin
-      lCalledParseMode := True;
-      Result := 'ParseMode';
-    end);
 
   Check(fParser = fHndlr.Parser, 'Parser set');
   CheckTrue(Assigned(fHndlr.FinalToken), 'Final Token set');
   CheckTrue(fHndlr.FinalToken(), 'Final Token correct');
-  CheckTrue(lCalledFinalToken, 'Final Token called');
+  CheckTrue(fCalledFinalToken, 'Final Token called');
   CheckTrue(Assigned(fHndlr.ParseMode), 'Parse Mode set');
   CheckEqualsString('ParseMode', fHndlr.ParseMode(), 'Parse Mode correct');
-  CheckTrue(lCalledParseMode, 'Parse Mode called');
+  CheckTrue(fCalledParseMode, 'Parse Mode called');
 end;
 
 procedure TestTD2XXmlHandler.TestLexerInclude;
@@ -490,7 +469,7 @@ begin
 
   fHndlr.EndResults(MakeStream(fSS));
   CheckStream
-    ('<?xml version="1.0"?> <Test> <IncludeFile filename="Test" msgAt="1,2" /> </Test>',
+    ('<?xml version="1.0"?> <Test parseMode="ParseMode"> <IncludeFile filename="Test" msgAt="1,2" /> </Test>',
     'End Results');
 end;
 
@@ -504,7 +483,7 @@ begin
 
   fHndlr.EndResults(MakeStream(fSS));
   CheckStream
-    ('<?xml version="1.0"?> <Test> <D2X_notSuppMsg msgAt="1,2">Test</D2X_notSuppMsg> </Test>',
+    ('<?xml version="1.0"?> <Test parseMode="ParseMode"> <D2X_notSuppMsg msgAt="1,2">Test</D2X_notSuppMsg> </Test>',
     'End Results');
 
   fHndlr.BeginResults;
@@ -513,7 +492,7 @@ begin
   fHndlr.ParserMessage(meError, 'Test', 1, 2);
   fHndlr.EndResults(MakeStream(fSS));
   CheckStream
-    ('<?xml version="1.0"?> <Test> <D2X_errorMsg msgAt="1,2">Test</D2X_errorMsg> </Test>',
+    ('<?xml version="1.0"?> <Test parseMode="ParseMode"> <D2X_errorMsg msgAt="1,2">Test</D2X_errorMsg> </Test>',
     'End Results');
 end;
 
@@ -533,7 +512,7 @@ begin
   fHndlr.BeginMethod('Test4');
   fHndlr.EndResults(MakeStream(fSS));
   CheckStream
-    ('<?xml version="1.0"?> <Test> <Test1 Test="Test"> <Test2>Test</Test2> <Test3 Test="Test" /> <Test4 /> </Test1> </Test>',
+    ('<?xml version="1.0"?> <Test parseMode="ParseMode"> <Test1 Test="Test"> <Test2>Test</Test2> <Test3 Test="Test" /> <Test4 /> </Test1> </Test>',
     'End Results');
 end;
 
@@ -549,7 +528,7 @@ begin
   fHndlr.BeginMethod('Test4');
   fHndlr.EndResults(MakeStream(fSS));
   CheckStream
-    ('<?xml version="1.0"?> <Test> <Test1> <Test2> <Test3 /> </Test2> <Test4 /> </Test1> </Test>',
+    ('<?xml version="1.0"?> <Test parseMode="ParseMode"> <Test1> <Test2> <Test3 /> </Test2> <Test4 /> </Test1> </Test>',
     'End Results');
 end;
 
@@ -713,15 +692,16 @@ procedure TestTD2XParserDefinesHandler.TestBeginFile;
 begin
   fHndlr.InitParser(fParser);
 
-  fHndlr.BeginFile(nil);
-  CheckList('CONDITIONALEXPRESSIONS CPU386 MSWINDOWS UNICODE VER230 WIN32', 'Begin File', fParser.StartDefines);
+  fHndlr.BeginFile('', nil);
+  CheckList('CONDITIONALEXPRESSIONS CPU386 MSWINDOWS UNICODE VER230 WIN32', 'Begin File',
+    fParser.StartDefines);
 
   fHndlr.ParseDefines(':');
-  fHndlr.BeginFile(nil);
+  fHndlr.BeginFile('', nil);
   CheckList('', 'Cleared Defines', fParser.StartDefines);
 
   fHndlr.ParseDefines('+Test');
-  fHndlr.BeginFile(nil);
+  fHndlr.BeginFile('', nil);
   CheckList('Test', 'Test Define', fParser.StartDefines);
 end;
 

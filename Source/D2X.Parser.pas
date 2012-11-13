@@ -59,6 +59,8 @@ type
     property AddText: TD2XAddTextEvent read FAddText write FAddText;
   end;
 
+  TD2XDefinesParserClass = class of TD2XDefinesParser;
+
   TD2XUsesParser = class(TD2XDefinesParser)
   private
     fCurrentSection: string;

@@ -8,14 +8,6 @@ uses
   D2X.Processor;
 
 type
-  TTestBoolFlag = class(TInterfacedObject, IParamFlag)
-  private
-    fFlag: Boolean;
-
-    function GetFlag: Boolean;
-    procedure SetFlag(pVal: Boolean);
-  end;
-
   TTestProcessor = class(TD2XProcessor)
   public
     CalledUseProxy: Boolean;
@@ -35,8 +27,8 @@ type
     function UseProxy: Boolean; override;
     procedure BeginProcessing; override;
     procedure EndProcessing; override;
-    procedure BeginFile; override;
-    procedure EndFile; override;
+    procedure BeginFile(pFile: string); override;
+    procedure EndFile(pFile: string); override;
     procedure BeginResults; override;
     procedure EndResults(pFile: string); override;
     function CheckBeforeMethod(pMethod: string): Boolean; override;
@@ -70,7 +62,7 @@ type
   TestTD2XProcessor = class(TStringTestCase)
   strict private
     FD2XProcessor: TTestProcessor;
-    fFlag: TTestBoolFlag;
+    fFlag: TD2XBoolFlag;
   public
     procedure SetUp; override;
     procedure TearDown; override;
@@ -96,7 +88,7 @@ procedure TestTD2XProcessor.SetUp;
 begin
   inherited;
 
-  fFlag := TTestBoolFlag.Create;
+  fFlag := TD2XBoolFlag.Create;
   FD2XProcessor := TTestProcessor.Create(fFlag);
 end;
 
@@ -110,7 +102,7 @@ end;
 
 procedure TestTD2XProcessor.TestBeginFile;
 begin
-  FD2XProcessor.BeginFile;
+  FD2XProcessor.BeginFile('');
 
   CheckTrue(FD2XProcessor.CalledBeginFile, 'Called Begin File');
 end;
@@ -152,7 +144,7 @@ end;
 
 procedure TestTD2XProcessor.TestEndFile;
 begin
-  FD2XProcessor.EndFile;
+  FD2XProcessor.EndFile('');
 
   CheckTrue(FD2XProcessor.CalledEndFile, 'Called End File');
 end;
@@ -200,20 +192,9 @@ begin
 end;
 
 { TTestBoolFlag }
-
-function TTestBoolFlag.GetFlag: Boolean;
-begin
-  Result := fFlag;
-end;
-
-procedure TTestBoolFlag.SetFlag(pVal: Boolean);
-begin
-  fFlag := pVal;
-end;
-
 { TTestProcessor }
 
-procedure TTestProcessor.BeginFile;
+procedure TTestProcessor.BeginFile(pFile: string);
 begin
   CalledBeginFile := True;
 end;
@@ -245,7 +226,7 @@ begin
   CalledCheckBeforeMethod := True;
 end;
 
-procedure TTestProcessor.EndFile;
+procedure TTestProcessor.EndFile(pFile: string);
 begin
   CalledEndFile := True;
 end;

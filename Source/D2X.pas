@@ -57,6 +57,7 @@ type
   TD2XStringRef = reference to function: string;
   TD2XNamedStringRef = reference to function(pFile: String): string;
   TD2XStringCheckRef = reference to function(pStr: string): Boolean;
+  TD2XLogMessage = reference to procedure(pType, pMsg: string; pX, pY: Integer);
 
   TStrIntPair = TPair<string, Integer>;
   TStrIntDict = TDictionary<string, Integer>;

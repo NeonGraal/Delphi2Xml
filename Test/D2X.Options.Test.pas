@@ -89,7 +89,7 @@ type
 
   TOptionsTestCase = class(TStringTestCase)
   protected
-    fPP: TD2XOptions;
+    fRO: TD2XRunOptions;
 
     procedure CheckLog(pMsg: string);
   public
@@ -113,7 +113,6 @@ type
   private
     procedure SetAllOptions;
   published
-    procedure TestDefaultOptions;
     procedure TestReportOptions;
     procedure TestReportOptionsDefault;
     procedure TestReportOptionsFileDefault;
@@ -673,7 +672,7 @@ end;
 
 procedure TestTD2XOptions.TestEndProcessing;
 begin
-  fPP.EndProcessing;
+  fRO.EndProcessing;
   CheckBuilder('', 'Nothing');
 end;
 
@@ -688,19 +687,19 @@ begin
   pFrom := 'Test';
   pIdx := 0;
 
-  ReturnValue := fPP.ProcessParam(pStr, pFrom, pIdx);
+  ReturnValue := fRO.ProcessParam(pStr, pFrom, pIdx);
   Check(ReturnValue, 'Return Value 1');
 
   pStr := '-C+';
   pIdx := 1;
 
-  ReturnValue := fPP.ProcessParam(pStr, pFrom, pIdx);
+  ReturnValue := fRO.ProcessParam(pStr, pFrom, pIdx);
   Check(ReturnValue, 'Return Value 2');
 
   pStr := 'Test.pas';
   pIdx := 2;
 
-  ReturnValue := fPP.ProcessParam(pStr, pFrom, pIdx);
+  ReturnValue := fRO.ProcessParam(pStr, pFrom, pIdx);
 
   Check(ReturnValue, 'Return Value');
   CheckBuilder('', 'Empty Log');
@@ -717,7 +716,7 @@ begin
   pFrom := 'Test';
   pIdx := 0;
 
-  ReturnValue := fPP.ProcessParam(pStr, pFrom, pIdx);
+  ReturnValue := fRO.ProcessParam(pStr, pFrom, pIdx);
 
   CheckTrue(ReturnValue, 'Return Value');
   CheckBuilder(EXPECTED_SHOW_OPTIONS, 'Nothing');
@@ -741,7 +740,7 @@ begin
   pFrom := 'Test';
   pIdx := 0;
 
-  ReturnValue := fPP.ProcessParam(pStr, pFrom, pIdx);
+  ReturnValue := fRO.ProcessParam(pStr, pFrom, pIdx);
 
   Check(ReturnValue, 'Return Value');
   CheckBuilder(EXPECTED_REPORT, 'Nothing');
@@ -758,7 +757,7 @@ begin
   pFrom := 'Test';
   pIdx := 0;
 
-  ReturnValue := fPP.ProcessParam(pStr, pFrom, pIdx);
+  ReturnValue := fRO.ProcessParam(pStr, pFrom, pIdx);
 
   Check(ReturnValue, 'Return Value');
   CheckBuilder(EXPECTED_PROCESSING, 'Nothing');
@@ -774,15 +773,15 @@ begin
   pStr := '-!!';
   pFrom := 'Test';
   pIdx := 0;
-  fPP.ProcessParam(pStr, pFrom, pIdx);
+  fRO.ProcessParam(pStr, pFrom, pIdx);
 
   pStr := '-V+';
   pIdx := 1;
-  fPP.ProcessParam(pStr, pFrom, pIdx);
+  fRO.ProcessParam(pStr, pFrom, pIdx);
 
   pStr := 'Test.pas';
   pIdx := 2;
-  ReturnValue := fPP.ProcessParam(pStr, pFrom, pIdx);
+  ReturnValue := fRO.ProcessParam(pStr, pFrom, pIdx);
 
   Check(ReturnValue, 'Return Value');
   CheckNotEquals('', fSB.ToString, 'Log');
@@ -811,7 +810,7 @@ const
     'Current option settings: Verbose - Log Errors - Log Not Supp - Final Token - ' +
     'Recurse - Timestamp - Global name Input dir - Output dir - Parse mode Full ' +
     'Results per File Show elapsed None Base dir - Generate XML - ' +
-    'Write Defines - Defines Used - Count Children - Skipped Methods - Use NO Defines';
+    'Write Defines - Defines Used - Count Children - Skipped Methods - Use default Defines';
   BASE_REPORT_OPTIONS =
     'Current option settings: Verbose - Log Errors + Log Not Supp - Final Token + ' +
     'Recurse - Timestamp - Global name Delphi2XmlTests Input dir :Config\ ' +
@@ -820,7 +819,8 @@ const
     'Count Children :.cnt Skipped Methods :.skip ';
   DEFAULT_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Use default Defines';
   EMPTY_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Use NO Defines';
-  DEFINED_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Use these Defines: CPU32';
+  DEFINED_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Use these Defines: ' +
+    'CONDITIONALEXPRESSIONS, CPU32, CPU386, MSWINDOWS, UNICODE, VER230, WIN32';
 
   { TestTD2XOptionsGeneral }
 
@@ -829,39 +829,10 @@ var
   C: Char;
 begin
   for C := 'A' to 'Z' do
-    if not fPP.ProcessParam('-' + C + ':Test', '', 0) then
-      fPP.ProcessParam('-' + C + '+', '', 0);
-  fPP.ProcessParam('-T-', '', 0);
+    if not fRO.ProcessParam('-' + C + ':Test', '', 0) then
+      fRO.ProcessParam('-' + C + '+', '', 0);
+  fRO.ProcessParam('-T-', '', 0);
   fSB.Clear;
-end;
-
-procedure TestTD2XOptionsGeneral.TestDefaultOptions;
-begin
-  //  Check(fPP.Options.LogErrors, 'LogErrors');
-  //  CheckFalse(fPP.Options.LogNotSupported, 'LogNotSupported');
-  //  CheckFalse(fPP.Options.FileOpts.TimestampFiles, 'TimestampFiles');
-  //  CheckFalse(fPP.Verbose, 'Verbose');
-  //  CheckFalse(fPP.Options.Recurse, 'Recurse');
-  //  CheckEqualsString(ChangeFileExt(ExtractFileName(ParamStr(0)), ''), fPP.Options.FileOpts.GlobalName,
-  //    'SkipFileOrExtn');
-  //  CheckFalse(fPP.Options.UseBase, 'UseBase');
-  //  CheckEqualsString('', fPP.Options.BaseDirectory, 'BaseDirectory');
-  //  CheckFalse(fPP.Options.WriteDefines, 'WriteDefines');
-  //  CheckEqualsString('Defines\', fPP.Options.DefinesDirectory, 'DefinesDirectory');
-  //  Check(fPP.Options.WriteXml, 'Xml');
-  //  CheckEqualsString('Xml\', fPP.Options.XmlDirectory, 'XmlDirectory');
-  //  Check(fPP.Options.DefinesUsed, 'DefinesUsed');
-  //  CheckEqualsString('.used', fPP.Options.DefinesUsedFoE, 'UsedFileOrExtn');
-  //  Check(fPP.Options.LoadDefines, 'LoadDefines');
-  //  CheckEqualsString('', fPP.Options.Defines.CommaText, 'Defines');
-  //  Check(fPP.Options.CountChildren, 'CountChildren');
-  //  CheckEqualsString('.cnt', fPP.Options.CountChildrenFoE, 'CountFileOrExtn');
-  //  Check(fPP.Options.SkipMethods, 'SkipMethods');
-  //  CheckEqualsString('.skip', fPP.Options.SkipMethodsFoE, 'SkipFileOrExtn');
-  //  Check(fPP.Options.ParseMode = pmFull, 'ParseMode');
-  //  Check(fPP.Options.ResultPer = rpFile, 'ResultPer');
-  //  Check(fPP.Options.ElapsedMode = emQuiet, 'ElapsedMode');
-  //  Check(fPP.Options.FinalToken, 'FinalToken');
 end;
 
 procedure TestTD2XOptionsGeneral.TestReportOptions;
@@ -870,7 +841,7 @@ var
 begin
   SetAllOptions;
 
-  ReturnValue := fPP.ProcessParam('-@', '', 0);
+  ReturnValue := fRO.ProcessParam('-@', '', 0);
 
   Check(ReturnValue, 'ReturnValue');
   CheckLog(ALTERED_REPORT_OPTIONS);
@@ -880,20 +851,20 @@ procedure TestTD2XOptionsGeneral.TestReportOptionsDefault;
 var
   ReturnValue: Boolean;
 begin
-  ReturnValue := fPP.ProcessParam('-@', '', 0);
+  ReturnValue := fRO.ProcessParam('-@', '', 0);
 
   Check(ReturnValue, 'ReturnValue');
-  CheckLog(EMPTY_REPORT_OPTIONS);
+  CheckLog(DEFAULT_REPORT_OPTIONS);
 end;
 
 procedure TestTD2XOptionsGeneral.TestReportOptionsDefines;
 var
   ReturnValue: Boolean;
 begin
-  ReturnValue := fPP.ProcessParam('-D+CPU32', '', 0);
+  ReturnValue := fRO.ProcessParam('-D+CPU32', '', 0);
   Check(ReturnValue, 'ReturnValue');
 
-  ReturnValue := fPP.ProcessParam('-@', '', 0);
+  ReturnValue := fRO.ProcessParam('-@', '', 0);
   Check(ReturnValue, 'ReturnValue');
   CheckLog(DEFINED_REPORT_OPTIONS);
 end;
@@ -902,10 +873,10 @@ procedure TestTD2XOptionsGeneral.TestReportOptionsEmpty;
 var
   ReturnValue: Boolean;
 begin
-  ReturnValue := fPP.ProcessParam('-D:', '', 0);
+  ReturnValue := fRO.ProcessParam('-D:', '', 0);
   Check(ReturnValue, 'ReturnValue');
 
-  ReturnValue := fPP.ProcessParam('-@', '', 0);
+  ReturnValue := fRO.ProcessParam('-@', '', 0);
   Check(ReturnValue, 'ReturnValue');
   CheckLog(EMPTY_REPORT_OPTIONS);
 end;
@@ -916,7 +887,7 @@ var
 begin
   SetAllOptions;
 
-  ReturnValue := fPP.ProcessParam('-@Test.tst', '', 0);
+  ReturnValue := fRO.ProcessParam('-@Test.tst', '', 0);
 
   Check(ReturnValue, 'ReturnValue');
   CheckLog('');
@@ -928,7 +899,7 @@ var
 begin
   SetAllOptions;
 
-  ReturnValue := fPP.ProcessParam('-@Test', '', 0);
+  ReturnValue := fRO.ProcessParam('-@Test', '', 0);
 
   Check(ReturnValue, 'ReturnValue');
   CheckLog('');
@@ -938,7 +909,7 @@ procedure TestTD2XOptionsGeneral.TestReportOptionsFileDefault;
 var
   ReturnValue: Boolean;
 begin
-  ReturnValue := fPP.ProcessParam('-@Test', '', 0);
+  ReturnValue := fRO.ProcessParam('-@Test', '', 0);
 
   Check(ReturnValue, 'ReturnValue');
   CheckLog('');
@@ -948,10 +919,10 @@ procedure TestTD2XOptionsGeneral.TestReportOptionsReset;
 var
   ReturnValue: Boolean;
 begin
-  ReturnValue := fPP.ProcessParam('-D!', '', 0);
+  ReturnValue := fRO.ProcessParam('-D!', '', 0);
   Check(ReturnValue, 'ReturnValue');
 
-  ReturnValue := fPP.ProcessParam('-@', '', 0);
+  ReturnValue := fRO.ProcessParam('-@', '', 0);
   Check(ReturnValue, 'ReturnValue');
   CheckLog(DEFAULT_REPORT_OPTIONS);
 end;
@@ -963,15 +934,15 @@ var
 begin
   SetAllOptions;
 
-  ReturnValue := fPP.ProcessParam('-@', '', 0);
+  ReturnValue := fRO.ProcessParam('-@', '', 0);
   Check(ReturnValue, 'ReturnValue');
   CheckLog(ALTERED_REPORT_OPTIONS);
 
-  ReturnValue := fPP.ProcessParam('-!', '', 0);
+  ReturnValue := fRO.ProcessParam('-!', '', 0);
   Check(ReturnValue, 'ReturnValue');
 
   fSB.Clear;
-  ReturnValue := fPP.ProcessParam('-@', '', 0);
+  ReturnValue := fRO.ProcessParam('-@', '', 0);
   Check(ReturnValue, 'ReturnValue');
   CheckLog(DEFAULT_REPORT_OPTIONS);
 end;
@@ -980,7 +951,7 @@ procedure TestTD2XOptionsGeneral.TestShowOptions;
 var
   ReturnValue: Boolean;
 begin
-  ReturnValue := fPP.ProcessParam('-?', '', 0);
+  ReturnValue := fRO.ProcessParam('-?', '', 0);
 
   Check(ReturnValue, 'ReturnValue');
   CheckLog(EXPECTED_SHOW_OPTIONS);
@@ -993,15 +964,15 @@ var
 begin
   SetAllOptions;
 
-  ReturnValue := fPP.ProcessParam('-@', '', 0);
+  ReturnValue := fRO.ProcessParam('-@', '', 0);
   Check(ReturnValue, 'ReturnValue');
   CheckLog(ALTERED_REPORT_OPTIONS);
 
-  ReturnValue := fPP.ProcessParam('-!!', '', 0);
+  ReturnValue := fRO.ProcessParam('-!!', '', 0);
   Check(ReturnValue, 'ReturnValue');
 
   fSB.Clear;
-  ReturnValue := fPP.ProcessParam('-@', '', 0);
+  ReturnValue := fRO.ProcessParam('-@', '', 0);
   Check(ReturnValue, 'ReturnValue');
   CheckLog(ZERO_REPORT_OPTIONS);
 end;
@@ -1017,12 +988,13 @@ procedure TOptionsTestCase.SetUp;
 begin
   inherited;
 
-  fPP := TD2XOptions.Create(fSB);
+  fRO := TD2XRunOptions.Create;
+  fRO.L.StartLog(fSB);
 end;
 
 procedure TOptionsTestCase.TearDown;
 begin
-  fPP := nil;
+  fRO := nil;
 
   inherited;
 end;

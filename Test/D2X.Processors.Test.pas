@@ -78,7 +78,7 @@ begin
   inherited;
 
   FHandler := TD2XHandlerTester.Create;
-  fActive := TTestBoolFlag.Create;
+  fActive := TD2XBoolFlag.Create;
   FD2XProcessor := TD2XHandlerProcessor.CreateHandler(fActive, FHandler);
 end;
 
@@ -95,16 +95,16 @@ end;
 procedure TestTD2XHandlerProcessor.TestBeginFile;
 begin
   FD2XProcessor.SetFileInput(
-      function: string
+      function(pFile: string): string
     begin
       Result := '';
     end);
 
-  FD2XProcessor.BeginFile;
+  FD2XProcessor.BeginFile('');
   CheckFalse(FHandler.CalledBeginFile, 'Ignored Begin File');
 
   fActive.Flag := True;
-  FD2XProcessor.BeginFile;
+  FD2XProcessor.BeginFile('');
   CheckTrue(FHandler.CalledBeginFile, 'Called Begin File');
 end;
 
@@ -167,16 +167,16 @@ end;
 procedure TestTD2XHandlerProcessor.TestEndFile;
 begin
   FD2XProcessor.SetFileOutput(
-    function: string
+    function(pFile: string): string
     begin
       Result := '';
     end);
 
-  FD2XProcessor.EndFile;
+  FD2XProcessor.EndFile('');
   CheckFalse(FHandler.CalledEndFile, 'Ignored End File');
 
   fActive.Flag := True;
-  FD2XProcessor.EndFile;
+  FD2XProcessor.EndFile('');
   CheckTrue(FHandler.CalledEndFile, 'Called End File');
 end;
 
@@ -250,17 +250,17 @@ begin
   lCalled := False;
 
   FD2XProcessor.SetFileInput(
-    function: string
+    function(pFile: string): string
     begin
       lCalled := True;
       Result := '';
     end);
 
-  FD2XProcessor.BeginFile;
+  FD2XProcessor.BeginFile('');
   CheckFalse(lCalled, 'Ignored File Input');
 
   fActive.Flag := True;
-  FD2XProcessor.BeginFile;
+  FD2XProcessor.BeginFile('');
   CheckTrue(lCalled, 'Called File Input');
 end;
 
@@ -272,17 +272,17 @@ begin
   lCalled := False;
 
   FD2XProcessor.SetFileOutput(
-    function: string
+    function(pFile: string): string
     begin
       lCalled := True;
       Result := '';
     end);
 
-  FD2XProcessor.EndFile;
+  FD2XProcessor.EndFile('');
   CheckFalse(lCalled, 'Ignored File Output');
 
   fActive.Flag := True;
-  FD2XProcessor.EndFile;
+  FD2XProcessor.EndFile('');
   CheckTrue(lCalled, 'Called File Output');
 end;
 
@@ -355,7 +355,7 @@ procedure TestTD2XLogProcessor.SetUp;
 begin
   inherited;
 
-  fActive := TTestBoolFlag.Create;
+  fActive := TD2XBoolFlag.Create;
 
   FD2XProcessor := TD2XLogProcessor.Create(fActive);
 end;

@@ -13,6 +13,8 @@ type
     ThStreamCreator = reference to function: TStream;
 
   public
+    constructor Create; virtual;
+
     function Description: String; virtual; abstract;
     function UseProxy: Boolean; virtual; abstract;
 
@@ -21,8 +23,8 @@ type
     procedure BeginProcessing(pInput: ThStreamCreator); virtual;
     procedure EndProcessing(pOutput: ThStreamCreator); virtual;
 
-    procedure BeginFile(pInput: ThStreamCreator); virtual;
-    procedure EndFile(pOutput: ThStreamCreator); virtual;
+    procedure BeginFile(pFile: string; pInput: ThStreamCreator); virtual;
+    procedure EndFile(pFile: string; pOutput: ThStreamCreator); virtual;
 
     procedure BeginResults; virtual;
     procedure EndResults(pOutput: ThStreamCreator); virtual;
@@ -37,6 +39,8 @@ type
     procedure LexerInclude(const pFile: string; pX, pY: Integer); virtual;
   end;
 
+  TD2XHandlerClass = class of TD2XHandler;
+
 function MakeStream(pS: TStream): TD2XHandler.ThStreamCreator;
 
 implementation
@@ -50,7 +54,7 @@ begin
 end;
 { TD2XHandler }
 
-procedure TD2XHandler.BeginFile(pInput: ThStreamCreator);
+procedure TD2XHandler.BeginFile(pFile: string; pInput: ThStreamCreator);
 begin
 
 end;
@@ -85,7 +89,12 @@ begin
 
 end;
 
-procedure TD2XHandler.EndFile(pOutput: ThStreamCreator);
+constructor TD2XHandler.Create;
+begin
+
+end;
+
+procedure TD2XHandler.EndFile(pFile: string; pOutput: ThStreamCreator);
 begin
 
 end;

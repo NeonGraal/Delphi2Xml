@@ -16,7 +16,6 @@ uses
   TestFramework;
 
 type
-
   TestTD2XParam = class(TTestCase)
   strict private
     fPrm: TD2XParam;

@@ -182,6 +182,13 @@ type
     property FlagValue: Boolean read fFlag write fFlag;
   end;
 
+  TD2XBoolFlag = class(TInterfacedObject, IParamFlag)
+  private
+    fFlag: Boolean;
+    function GetFlag: Boolean;
+    procedure SetFlag(pVal: Boolean);
+  end;
+
 implementation
 
 uses
@@ -646,6 +653,16 @@ end;
 procedure TD2XResettableParam.Zero;
 begin
   fZeroer;
+end;
+
+function TD2XBoolFlag.GetFlag: Boolean;
+begin
+  Result := fFlag;
+end;
+
+procedure TD2XBoolFlag.SetFlag(pVal: Boolean);
+begin
+  fFlag := pVal;
 end;
 
 end.

@@ -5,6 +5,7 @@ interface
 uses
   CastaliaPasLexTypes,
   D2X,
+  D2X.Param,
   D2X.Parser,
   D2X.Handler,
   D2X.Xml,
@@ -28,7 +29,7 @@ type
     function MinMaxPairLog(pPair: TStrIntPair): string;
 
   public
-    constructor Create;
+    constructor Create; override;
     destructor Destroy; override;
 
     function Description: string; override;
@@ -36,8 +37,8 @@ type
 
     procedure EndProcessing(pOutput: TD2XHandler.ThStreamCreator); override;
 
-    procedure BeginFile(pInput: TD2XHandler.ThStreamCreator); override;
-    procedure EndFile(pOutput: TD2XHandler.ThStreamCreator); override;
+    procedure BeginFile(pFile: string; pInput: TD2XHandler.ThStreamCreator); override;
+    procedure EndFile(pFile: string; pOutput: TD2XHandler.ThStreamCreator); override;
 
     procedure BeginMethod(pMethod: string); override;
     procedure EndMethod(pMethod: string); override;
@@ -48,7 +49,7 @@ type
     fDefinesDict: TStrIntDict;
 
   public
-    constructor Create;
+    constructor Create; override;
     destructor Destroy; override;
 
     function Description: string; override;
@@ -72,16 +73,33 @@ type
     property Parser: TD2XDefinesParser read fParser;
   end;
 
-  TD2XParserDefinesHandler = class(TD2XParserHandler)
+  TD2XErrorHandler = class(TD2XParserHandler)
+  public
+    constructor Create; override;
+    constructor CreateError(pTyp: TMessageEventType; pLogMessage: TD2XLogMessage);
+
+    function Description: string; override;
+    function UseProxy: Boolean; override;
+
+    procedure ParserMessage(const pTyp: TMessageEventType; const pMsg: string;
+      pX, pY: Integer); override;
+
+  private
+    fTyp: TMessageEventType;
+    fLogMessage: TD2XLogMessage;
+
+  end;
+
+  TD2XParserDefinesHandler = class(TD2XParserHandler, IParamFlag)
   private
     fDefines: TStringList;
-    fLoadDefines: Boolean;
+    fLoadDefines: IParamFlag;
     fDefinesFileName: TD2XNamedStringRef;
 
     procedure InitDefines;
 
   public
-    constructor Create;
+    constructor Create; override;
     destructor Destroy; override;
 
     procedure SetDefinesFileName(pDefinesFileName: TD2XNamedStringRef);
@@ -93,13 +111,15 @@ type
 
     procedure Copy(pFrom: TD2XHandler); override;
 
-    procedure BeginFile(pInput: TD2XHandler.ThStreamCreator); override;
+    procedure BeginFile(pFile: string; pInput: TD2XHandler.ThStreamCreator); override;
 
     function ParseDefines(pStr: string): Boolean;
     procedure ClearDefines;
 
     procedure OutputDefines(pSL: TStringList);
     procedure ReportDefines(pL: ID2XLogger);
+
+    property F: IParamFlag read fLoadDefines implements IParamFlag;
   end;
 
   TD2XSkipHandler = class(TD2XHandler)
@@ -107,7 +127,7 @@ type
     fSkippedMethods: TStrIntDict;
 
   public
-    constructor Create;
+    constructor Create; override;
     destructor Destroy; override;
 
     function Description: string; override;
@@ -116,7 +136,7 @@ type
     function CheckBeforeMethod(pMethod: string): Boolean; override;
     function CheckAfterMethod(pMethod: string): Boolean; override;
 
-    procedure BeginFile(pInput: TD2XHandler.ThStreamCreator); override;
+    procedure BeginFile(pFile: string; pInput: TD2XHandler.ThStreamCreator); override;
 
     procedure EndProcessing(pOutput: TD2XHandler.ThStreamCreator); override;
   end;
@@ -141,10 +161,9 @@ type
     fParseMode: TD2XStringRef;
 
   public
-    constructor Create;
+    constructor Create; override;
+    constructor CreateXml(pFinalToken: TD2XCheckRef; pParseMode: TD2XStringRef);
     destructor Destroy; override;
-
-    procedure Init(pFinalToken: TD2XCheckRef; pParseMode: TD2XStringRef);
 
     function Description: string; override;
     function UseProxy: Boolean; override;
@@ -173,12 +192,13 @@ implementation
 
 uses
   D2X.Options,
+  System.IOUtils,
   System.SysUtils,
   Xml.XMLIntf;
 
 { TD2XCountHandler }
 
-procedure TD2XCountHandler.BeginFile(pInput: TD2XHandler.ThStreamCreator);
+procedure TD2XCountHandler.BeginFile(pFile: string; pInput: TD2XHandler.ThStreamCreator);
 begin
   fCurrent.Method := '';
   fCurrent.Children := 0;
@@ -252,7 +272,7 @@ begin
   end;
 end;
 
-procedure TD2XCountHandler.EndFile(pOutput: TD2XHandler.ThStreamCreator);
+procedure TD2XCountHandler.EndFile(pFile: string; pOutput: TD2XHandler.ThStreamCreator);
 begin
   FreeAndNil(fStack);
 end;
@@ -279,7 +299,7 @@ end;
 
 { TD2XSkipHandler }
 
-procedure TD2XSkipHandler.BeginFile(pInput: TD2XHandler.ThStreamCreator);
+procedure TD2XSkipHandler.BeginFile(pFile: string; pInput: TD2XHandler.ThStreamCreator);
 var
   i: Integer;
   lS: TStream;
@@ -426,15 +446,21 @@ end;
 
 constructor TD2XXmlHandler.Create;
 begin
-  inherited;
+  raise EInvalidOperation.Create('Invalid constructor called');
+end;
+
+constructor TD2XXmlHandler.CreateXml(pFinalToken: TD2XCheckRef; pParseMode: TD2XStringRef);
+begin
+  inherited Create;
 
   fXmlDoc := nil;
   fXmlNode := nil;
 
   fParser := nil;
-  fFinalToken := nil;
-  fParseMode := nil;
   fHasFiles := False;
+
+  fFinalToken := pFinalToken;
+  fParseMode := pParseMode;
 end;
 
 function TD2XXmlHandler.Description: string;
@@ -476,13 +502,6 @@ begin
 
   fXmlNode := nil;
   FreeAndNil(fXmlDoc);
-end;
-
-procedure TD2XXmlHandler.Init(pFinalToken: TD2XCheckRef;
-  pParseMode: TD2XStringRef);
-begin
-  fFinalToken := pFinalToken;
-  fParseMode := pParseMode;
 end;
 
 procedure TD2XXmlHandler.LexerInclude(const pFile: string; pX, pY: Integer);
@@ -619,14 +638,15 @@ end;
 
 { TD2XParserDefinesHandler }
 
-procedure TD2XParserDefinesHandler.BeginFile(pInput: TD2XHandler.ThStreamCreator);
+procedure TD2XParserDefinesHandler.BeginFile(pFile: string;
+  pInput: TD2XHandler.ThStreamCreator);
 begin
   fParser.StartDefines.Assign(fDefines);
 end;
 
 procedure TD2XParserDefinesHandler.ClearDefines;
 begin
-  fLoadDefines := False;
+  fLoadDefines.Flag := False;
   fDefines.Clear;
 end;
 
@@ -643,6 +663,8 @@ begin
 
   fDefines := TStringList.Create;
   fDefines.Sorted := True;
+
+  fLoadDefines := TD2XBoolFlag.Create;
 end;
 
 function TD2XParserDefinesHandler.Description: string;
@@ -652,6 +674,7 @@ end;
 
 destructor TD2XParserDefinesHandler.Destroy;
 begin
+  fLoadDefines := nil;
   FreeAndNil(fDefines);
 
   inherited;
@@ -674,9 +697,10 @@ procedure TD2XParserDefinesHandler.OutputDefines(pSL: TStringList);
 var
   lS: string;
 begin
-  if fLoadDefines then
+  if fLoadDefines.Flag then
   begin
     pSL.Add('-D:');
+    fDefines.Sort;
     for lS in fDefines do
       pSL.Add('-D+' + lS);
   end;
@@ -692,7 +716,7 @@ begin
   begin
     Result := True;
     fDefines.Clear;
-    fLoadDefines := pStr = ':';
+    fLoadDefines.Flag := pStr = ':';
   end
   else
     if Length(pStr) > 1 then
@@ -702,7 +726,7 @@ begin
         '+':
           begin
             Result := True;
-            fLoadDefines := True;
+            fLoadDefines.Flag := True;
             if fDefines.IndexOf(lStr) < 0 then
               fDefines.Add(lStr);
           end;
@@ -713,13 +737,13 @@ begin
             if lIdx >= 0 then
             begin
               fDefines.Delete(lIdx);
-              fLoadDefines := True;
+              fLoadDefines.Flag := True;
             end;
           end;
         ':':
           begin
             Result := True;
-            fLoadDefines := True;
+            fLoadDefines.Flag := True;
             fDefines.LoadFromFile(fDefinesFileName(MakeFileName(lStr, '.def')));
           end;
       end;
@@ -738,13 +762,14 @@ var
   end;
 
 begin
-  if fLoadDefines then
+  if fLoadDefines.Flag then
     if fDefines.Count < 1 then
       pL.Log('Use NO Defines', [])
     else
     begin
       pL.Log('Use these Defines:', []);
       w := 0;
+      fDefines.Sort;
       for lS in fDefines do
       begin
         if w = 0 then
@@ -792,6 +817,48 @@ end;
 procedure TD2XParserHandler.InitParser(pParser: TD2XDefinesParser);
 begin
   fParser := pParser;
+end;
+
+{ TD2XErrorHandler }
+
+constructor TD2XErrorHandler.Create;
+begin
+  raise EInvalidOperation.Create('Invalid constructor called');
+end;
+
+constructor TD2XErrorHandler.CreateError(pTyp: TMessageEventType;
+  pLogMessage: TD2XLogMessage);
+begin
+  inherited Create;
+
+  fTyp := pTyp;
+  fLogMessage := pLogMessage;
+end;
+
+function TD2XErrorHandler.Description: string;
+begin
+  Result := 'Error Logging';
+end;
+
+procedure TD2XErrorHandler.ParserMessage(const pTyp: TMessageEventType;
+  const pMsg: string; pX, pY: Integer);
+begin
+  inherited;
+
+  if pTyp = fTyp then
+    case pTyp of
+      meError:
+        fLogMessage('Error', pMsg, pX, pY);
+      meNotSupported:
+        fLogMessage('Not Supported', pMsg, pX, pY);
+    else
+      fLogMessage('????', pMsg, pX, pY);
+    end;
+end;
+
+function TD2XErrorHandler.UseProxy: Boolean;
+begin
+  Result := False;
 end;
 
 end.
