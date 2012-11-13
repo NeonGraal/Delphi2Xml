@@ -19,7 +19,7 @@ uses
   D2X.Xml in 'Source\D2X.Xml.pas';
 
 var
-  opts: TD2XOptions;
+  opts: TD2XRunOptions;
   i: Integer;
   bOk : Boolean;
   sOut: THandleStream;
@@ -31,8 +31,8 @@ begin
 
   try
     sOut := THandleStream.Create(GetStdHandle(STD_OUTPUT_HANDLE));
-    opts := TD2XOptions.Create;
-    opts.JoinLog(TD2XLogger.Create(sOut));
+    opts := TD2XRunOptions.Create;
+    opts.L.JoinLog(TD2XLogger.Create(sOut));
     bOk := True;
     for i := 1 to ParamCount do
       bOk := opts.ProcessParam(ParamStr(i), 'Param', i) and bOk;

@@ -16,7 +16,7 @@ uses
   TestFramework;
 
 type
-  TestTD2XParam = class(TTestCase)
+  TestTD2XParam = class(TLoggerTestCase)
   strict private
     fPrm: TD2XParam;
 
@@ -76,7 +76,7 @@ type
     procedure TestZero;
   end;
 
-  TestTD2XSingleParam = class(TTestCase)
+  TestTD2XSingleParam = class(TLoggerTestCase)
   private
     function FmtStrProp(pVal: string): string;
     function InvStrProp(pVal: string): Boolean;
@@ -99,7 +99,7 @@ type
     procedure TestBooleanDfltParam;
   end;
 
-  TFlagParamTestCase = class(TTestCase)
+  TFlagParamTestCase = class(TLoggerTestCase)
   protected
     fFlag: IParamFlag;
 
@@ -135,7 +135,7 @@ type
     procedure TestSetFlag; override;
   end;
 
-  TestTD2XStringParam = class(TTestCase)
+  TestTD2XStringParam = class(TLoggerTestCase)
   strict private
     fStrP: TD2XStringParam;
 
@@ -243,7 +243,8 @@ begin
 
   try
     CheckEqualsString('T +', ReduceString(lBoolP.Describe), 'Describe Param');
-    CheckEqualsString('Test +', ReduceString(lBoolP.Report), 'Report Default Value');
+    lBoolP.Report(fLog);
+    CheckLog('Test +', 'Report Default Value');
     Check(lBoolP.IsDefault, 'Check is Default');
 
     CheckFalse(lBoolP.IsCode('A'), 'Check wrong code');
@@ -274,7 +275,8 @@ begin
 
   try
     CheckEqualsString('T -', ReduceString(lBoolP.Describe), 'Describe Param');
-    CheckEqualsString('Test -', ReduceString(lBoolP.Report), 'Report Default Value');
+    lBoolP.Report(fLog);
+    CheckLog('Test -', 'Report Default Value');
     Check(lBoolP.IsDefault, 'Check is Default');
 
     CheckFalse(lBoolP.IsCode('A'), 'Check wrong code');
@@ -382,7 +384,8 @@ begin
 
   try
     CheckEqualsString('T nil', ReduceString(lObjP.Describe), 'Describe Param');
-    CheckEqualsString('Test nil', ReduceString(lObjP.Report), 'Report Default Value');
+    lObjP.Report(fLog);
+    CheckLog('Test nil', 'Report Default Value');
     Check(lObjP.IsDefault, 'Check is Default');
 
     CheckFalse(lObjP.IsCode('A'), 'Check Wrong code');
@@ -407,7 +410,8 @@ begin
 
   try
     CheckEqualsString('T Tst', ReduceString(lStrP.Describe), 'Describe Param');
-    CheckEqualsString('Test Tst', ReduceString(lStrP.Report), 'Report Default Value');
+    lStrP.Report(fLog);
+    CheckLog('Test Tst', 'Report Default Value');
     Check(lStrP.IsDefault, 'Check is Default');
 
     CheckFalse(lStrP.IsCode('A'), 'Check Wrong code');
@@ -436,7 +440,8 @@ begin
 
   try
     CheckEqualsString('T', ReduceString(lStrP.Describe), 'Describe Param');
-    CheckEqualsString('Test', ReduceString(lStrP.Report), 'Report Default Value');
+    lStrP.Report(fLog);
+    CheckLog('Test', 'Report Default Value');
     Check(lStrP.IsDefault, 'Check is Default');
 
     CheckFalse(lStrP.IsCode('A'), 'Check Wrong code');
@@ -534,7 +539,8 @@ end;
 
 procedure TestTD2XBooleanParam.TestReport;
 begin
-  CheckEqualsString('Test -', ReduceString(fBoolP.Report), 'Report Default Value');
+  fBoolP.Report(fLog);
+  CheckLog('Test -', 'Report Default Value');
 end;
 
 procedure TestTD2XBooleanParam.TestReset;
@@ -590,6 +596,8 @@ end;
 
 procedure TestTD2XStringParam.SetUp;
 begin
+  inherited;
+
   fStrP := TD2XStringParam.CreateStr('T', 'Test', '<Example>', 'Test String Param', 'Tst',
     nil, nil);
 end;
@@ -597,6 +605,8 @@ end;
 procedure TestTD2XStringParam.TearDown;
 begin
   FreeAndNil(fStrP);
+
+  inherited;
 end;
 
 procedure TestTD2XStringParam.TestDescribe;
@@ -657,10 +667,12 @@ end;
 
 procedure TestTD2XStringParam.TestReport;
 begin
-  CheckEqualsString('Test Tst', ReduceString(fStrP.Report), 'Report Default Value');
+  fStrP.Report(fLog);
+  CheckLog('Test Tst', 'Report Default Value');
 
   fStrP.Value := 'Simple';
-  CheckEqualsString('Test Simple', ReduceString(fStrP.Report), 'Report Simple Value');
+  fStrP.Report(fLog);
+  CheckLog('Test Simple', 'Report Simple Value');
 end;
 
 procedure TestTD2XStringParam.TestReset;
@@ -806,7 +818,8 @@ procedure TestTD2XParam.TestReport;
 begin
   fPrm := TD2XParam.Create('T', 'Test', '', '', TstParser);
 
-  CheckEqualsString('', fPrm.Report, 'Report');
+  fPrm.Report(fLog);
+  CheckLog('', 'Report');
 end;
 
 procedure TestTD2XParam.TestToString;
@@ -1133,6 +1146,8 @@ end;
 
 procedure TestTD2XFlaggedStringParam.SetUp;
 begin
+  inherited;
+
   fFlagP := TD2XFlaggedStringParam.CreateFlagStr('T', 'Test', '<Example>', 'Test String Param',
     'Tst', False, nil, nil, nil);
   fFlag := fFlagP;
@@ -1232,16 +1247,20 @@ end;
 
 procedure TestTD2XFlaggedStringParam.TestReport;
 begin
-  CheckEqualsString('Test -(Tst)', ReduceString(fFlagP.Report), 'Report Default Value');
+  fFlagP.Report(fLog);
+  CheckLog('Test -(Tst)', 'Report Default Value');
 
   fFlagP.Value := '';
-  CheckEqualsString('Test -', ReduceString(fFlagP.Report), 'Report Blank value off');
+  fFlagP.Report(fLog);
+  CheckLog('Test -', 'Report Blank value off');
 
   IParamFlag(fFlagP).Flag := True;
-  CheckEqualsString('Test +', ReduceString(fFlagP.Report), 'Report Blank value on');
+  fFlagP.Report(fLog);
+  CheckLog('Test +', 'Report Blank value on');
 
   fFlagP.Value := 'Simple';
-  CheckEqualsString('Test :Simple', ReduceString(fFlagP.Report), 'Report Simple Value on');
+  fFlagP.Report(fLog);
+  CheckLog('Test :Simple', 'Report Simple Value on');
 end;
 
 procedure TestTD2XFlaggedStringParam.TestReset;

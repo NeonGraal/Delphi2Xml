@@ -27,7 +27,7 @@ type
     function IsCode(pStr: string): Boolean;
     function Parse(pStr: string): Boolean;
     function Describe: string; virtual;
-    function Report: string; virtual;
+    procedure Report(pL: ID2XLogger); virtual;
     function ToString: string; override;
     function IsDefault: Boolean; virtual;
     procedure Zero; virtual;
@@ -90,7 +90,7 @@ type
     constructor CreateParam(pCode, pLabel, pSample, pDescr: string; pDefault: T;
       pConverter: TspConverter; pFormatter: TspFormatter; pValidator: TspValidator); virtual;
 
-    function Report: string; override;
+    procedure Report(pL: ID2XLogger); override;
     function IsDefault: Boolean; override;
     procedure Reset; override;
     procedure Zero; override;
@@ -255,9 +255,9 @@ begin
   Result := lComparer.Equals(fValue, fDefault);
 end;
 
-function TD2XSingleParam<T>.Report: string;
+procedure TD2XSingleParam<T>.Report(pL: ID2XLogger);
 begin
-  Result := Format(' %-15s %s', [fLabel, GetFormatted(False)]);
+  pL.Log(' %-15s %s', [fLabel, GetFormatted(False)]);
 end;
 
 procedure TD2XSingleParam<T>.Reset;
@@ -413,9 +413,9 @@ begin
   Result := IsCode(pStr) and fParser(Copy(pStr, Length(fCode) + 1, Length(pStr)));
 end;
 
-function TD2XParam.Report: string;
+procedure TD2XParam.Report(pL: ID2XLogger);
 begin
-  Result := '';
+  //
 end;
 
 procedure TD2XParam.Reset;
@@ -490,8 +490,7 @@ var
 begin
   L.Log('Current option settings:', []);
   for lP in Self do
-    if lP.Report > '' then
-      L.Log('%s', [lP.Report]);
+    lP.Report(L);
 end;
 
 procedure TD2XParams.ResetAll;
