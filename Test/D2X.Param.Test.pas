@@ -1497,30 +1497,43 @@ end;
 procedure TestTD2XDefinesParam.TestParse;
 begin
   CheckEquals(False, fDefP.Value, 'Default Value Set');
+  fDefP.Report(fLog);
+  CheckLog('Use default Defines', 'Report Default value');
 
   CheckFalse(fDefP.Parse('T'), 'Parse right code with No value');
   CheckEquals(False, fDefP.Value, 'Blank Flag Set');
+  fDefP.Report(fLog);
+  CheckLog('Use default Defines', 'Report Default value');
 
   CheckFalse(fDefP.Parse('T-'), 'Parse right code with Flag off');
   CheckEquals(False, fDefP.Value, 'Flag Off');
+  fDefP.Report(fLog);
+  CheckLog('Use default Defines', 'Report Default value');
 
   CheckFalse(fDefP.Parse('T+'), 'Parse right code with Flag on');
   CheckEquals(False, fDefP.Value, 'Flag On');
+  fDefP.Report(fLog);
+  CheckLog('Use default Defines', 'Report Default value');
 
   fDefP.Value := True;
   CheckEquals(True, IParamFlag(fDefP).Flag, 'Flag Set');
+  fDefP.Report(fLog);
+  CheckLog('Use these Defines: Alpha, Beta, Gamma', 'Report simple values');
 
-  Check(fDefP.Parse('T:Test'), 'Parse right code with value');
-  //  CheckEqualsString('Simple', fDefP.Value, 'Simple Value');
-  CheckEquals(True, IParamFlag(fDefP).Flag, 'Flag Set');
+  Check(fDefP.Parse('T+Test'), 'Parse right code with value');
+  CheckEquals(True, fDefP.Value, 'Flag Set');
+  fDefP.Report(fLog);
+  CheckLog('Use these Defines: Alpha, Beta, Gamma, Test', 'Report new values');
 
-  Check(fDefP.Parse('T-'), 'Parse right code with Flag off');
-  //  CheckEqualsString('Simple', fDefP.Value, 'Remains previous Value');
-  CheckEquals(False, IParamFlag(fDefP).Flag, 'Flag Off');
+  Check(fDefP.Parse('T-Beta'), 'Parse right code with Flag off');
+  CheckEquals(True, fDefP.Value, 'Flag Set');
+  fDefP.Report(fLog);
+  CheckLog('Use these Defines: Alpha, Gamma, Test', 'Report new values');
 
-  Check(fDefP.Parse('T:'), 'Parse right code with no value');
-  //  CheckEqualsString('', fDefP.Value, 'Blank Value');
-  CheckEquals(True, IParamFlag(fDefP).Flag, 'Flag Set');
+  Check(fDefP.Parse('T:Test'), 'Parse right code with no value');
+  CheckEquals(True, fDefP.Value, 'Flag Set');
+  fDefP.Report(fLog);
+  CheckLog('Use these Defines: Tango, Uniform', 'Report new values');
 end;
 
 procedure TestTD2XDefinesParam.TestReport;

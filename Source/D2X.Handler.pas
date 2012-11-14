@@ -5,9 +5,12 @@ interface
 uses
   CastaliaPasLexTypes,
   System.Classes,
-  System.Generics.Collections;
+  System.Generics.Collections,
+  System.SysUtils;
 
 type
+  EInvalidHandler = class(Exception);
+
   TD2XHandler = class abstract
   public type
     ThStreamCreator = reference to function: TStream;
@@ -45,13 +48,11 @@ function MakeStream(pS: TStream): TD2XHandler.ThStreamCreator;
 
 implementation
 
-uses
-  System.SysUtils;
-
 function MakeStream(pS: TStream): TD2XHandler.ThStreamCreator;
 begin
   Result := function: TStream begin pS.Position := 0; Result := pS; end;
 end;
+
 { TD2XHandler }
 
 procedure TD2XHandler.BeginFile(pFile: string; pInput: ThStreamCreator);

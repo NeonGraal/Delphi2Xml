@@ -63,6 +63,21 @@ type
     procedure TestProcessing;
   end;
 
+  TestTD2XErrorHandler = class(TStringTestCase)
+  strict private
+    fHndlr: TD2XErrorHandler;
+
+    procedure LogMessage(pType, pMsg: string; pX, pY: Integer);
+
+  public
+    procedure SetUp; override;
+    procedure TearDown; override;
+  published
+    procedure TestInvalidCreate;
+    procedure TestDescription;
+    procedure TestParserMessage;
+  end;
+
   TestTD2XParserDefinesHandler = class(TParserTestCase)
   strict private
     fHndlr: TD2XParserDefinesHandler;
@@ -130,6 +145,7 @@ type
     procedure SetUp; override;
     procedure TearDown; override;
   published
+    procedure TestInvalidCreate;
     procedure TestDescription;
     procedure TestUseProxy;
     procedure TestInitParser;
@@ -457,6 +473,20 @@ begin
   CheckTrue(fCalledParseMode, 'Parse Mode called');
 end;
 
+procedure TestTD2XXmlHandler.TestInvalidCreate;
+begin
+  StartExpectingException(EInvalidHandler);
+  try
+    TD2XXmlHandler.Create;
+  except
+    on E: EInvalidHandler do
+    begin
+      CheckEqualsString('Invalid constructor called', E.Message, 'Exception message');
+      raise;
+    end;
+  end;
+end;
+
 procedure TestTD2XXmlHandler.TestLexerInclude;
 begin
   fHndlr.BeginResults;
@@ -764,11 +794,57 @@ begin
   inherited;
 end;
 
+{ TestTD2XErrorHandler }
+
+procedure TestTD2XErrorHandler.LogMessage(pType, pMsg: string; pX, pY: Integer);
+begin
+  fSB.AppendFormat('%s: %s (%d,%d)', [pType, pMsg, pX, pY]);
+end;
+
+procedure TestTD2XErrorHandler.SetUp;
+begin
+  inherited;
+
+  fHndlr := TD2XErrorHandler.CreateError(meError, Self.LogMessage);
+end;
+
+procedure TestTD2XErrorHandler.TearDown;
+begin
+  FreeAndNil(fHndlr);
+
+  inherited;
+end;
+
+procedure TestTD2XErrorHandler.TestDescription;
+begin
+  CheckEqualsString('Error Logging', fHndlr.Description, 'Description');
+end;
+
+procedure TestTD2XErrorHandler.TestInvalidCreate;
+begin
+  StartExpectingException(EInvalidHandler);
+  try
+    TD2XErrorHandler.Create;
+  except
+    on E: EInvalidHandler do
+    begin
+      CheckEqualsString('Invalid constructor called', E.Message, 'Exception message');
+      raise;
+    end;
+  end;
+end;
+
+procedure TestTD2XErrorHandler.TestParserMessage;
+begin
+  fHndlr.ParserMessage(meError, 'Test', 1, 2);
+  CheckBuilder('Error: Test (1,2)', 'Correct Parser Message');
+end;
+
 initialization
 
 // Register any test cases with the test runner
 RegisterTests('Handlers', [TestTD2XCountHandler.Suite, TestTD2XDefinesUsedHandler.Suite,
-  TestTD2XParserDefinesHandler.Suite, TestTD2XSkipHandler.Suite,
+  TestTD2XParserDefinesHandler.Suite, TestTD2XErrorHandler.Suite, TestTD2XSkipHandler.Suite,
   TestTD2XWriteDefinesHandler.Suite, TestTD2XXmlHandler.Suite]);
 
 end.

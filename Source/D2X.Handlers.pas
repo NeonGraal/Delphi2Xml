@@ -433,7 +433,7 @@ end;
 
 constructor TD2XXmlHandler.Create;
 begin
-  raise EInvalidOperation.Create('Invalid constructor called');
+  raise EInvalidHandler.Create('Invalid constructor called');
 end;
 
 constructor TD2XXmlHandler.CreateXml(pFinalToken: TD2XCheckRef; pParseMode: TD2XStringRef);
@@ -691,7 +691,7 @@ end;
 
 constructor TD2XErrorHandler.Create;
 begin
-  raise EInvalidOperation.Create('Invalid constructor called');
+  raise EInvalidHandler.Create('Invalid constructor called');
 end;
 
 constructor TD2XErrorHandler.CreateError(pTyp: TMessageEventType;

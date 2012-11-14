@@ -87,9 +87,18 @@ type
     procedure TestOutputNoTimestampExtn;
   end;
 
+  TTestRunOptions = class(TD2XRunOptions)
+  private
+    function GetDefines: TStringList;
+
+  public
+    property Defines: TStringList read GetDefines;
+
+  end;
+
   TRunOptsTestCase = class(TStringTestCase)
   protected
-    fOpts: TD2XRunOptions;
+    fOpts: TTestRunOptions;
 
     procedure CheckLog(pMsg: string);
   public
@@ -1078,7 +1087,7 @@ procedure TRunOptsTestCase.SetUp;
 begin
   inherited;
 
-  fOpts := TD2XRunOptions.Create;
+  fOpts := TTestRunOptions.Create;
   fOpts.L.StartLog(fSB);
 end;
 
@@ -1574,6 +1583,13 @@ end;
 procedure TestTD2XRunOptsAll.TestParseOptionZ;
 begin
   CheckUnknown('Z');
+end;
+
+{ TTestRunOptions }
+
+function TTestRunOptions.GetDefines: TStringList;
+begin
+  Result := fOpts.Defines;
 end;
 
 initialization

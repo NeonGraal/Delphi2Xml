@@ -137,10 +137,10 @@ type
 
   TD2XRunOptions = class(TObject, ID2XLogger)
   private
-    fOpts: TD2XOptions;
-
     function ProcessParamsFile(pFileOrExtn: string): Boolean;
-    function GetDefines: TStringList;
+
+  protected
+    fOpts: TD2XOptions;
 
   public
     constructor Create;
@@ -151,7 +151,6 @@ type
     function ProcessParam(pStr, pFrom: string; pIdx: Integer): Boolean;
 
     property L: TD2XOptions read fOpts implements ID2XLogger;
-    property Defines: TStringList read GetDefines;
   end;
 
 function ConvertDir(pStr, pDflt: string; out pVal: string): Boolean;
@@ -1074,11 +1073,6 @@ end;
 procedure TD2XRunOptions.EndProcessing;
 begin
   fOpts.EndProcessing;
-end;
-
-function TD2XRunOptions.GetDefines: TStringList;
-begin
-  Result := fOpts.Defines;
 end;
 
 function TD2XRunOptions.ProcessParam(pStr, pFrom: string;

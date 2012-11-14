@@ -66,6 +66,9 @@ type
     function PairFormat(pPair: TStrIntPair): string;
   published
     procedure TestReduceString;
+    procedure TestMakeFileName;
+    procedure TestTidyFilename;
+
     procedure TestOutputStrIntDictNoStream;
     procedure TestOutputStrIntDictNoFunc;
     procedure TestOutputStrIntDictNoDict;
@@ -701,6 +704,16 @@ begin
   Result := pPair.Key + ' = ' + IntToStr(pPair.Value);
 end;
 
+procedure TestTD2XUtils.TestMakeFileName;
+begin
+  CheckEqualsString('', MakeFileName('', ''), 'Both Blank');
+  CheckEqualsString('.D', MakeFileName('', '.D'), 'Default');
+  CheckEqualsString('F', MakeFileName('F', ''), 'Filename');
+  CheckEqualsString('F.E', MakeFileName('F.E', ''), 'Extension');
+  CheckEqualsString('F.D', MakeFileName('F', '.D'), 'Filename Default');
+  CheckEqualsString('F.E', MakeFileName('F.E', '.D'), 'Extension Default');
+end;
+
 procedure TestTD2XUtils.TestOutputStrIntDict;
 var
   lDict: TStrIntDict;
@@ -768,6 +781,17 @@ begin
   CheckEqualsString('A', ReduceString(#9'A'#10), 'Leading and Trailing');
   CheckEqualsString('A B', ReduceString('A '#13#10' B'), 'Extended');
   CheckEqualsString('A B C D', ReduceString('A  B'#13#10'C'#9#9'D'), 'Extended');
+end;
+
+procedure TestTD2XUtils.TestTidyFilename;
+begin
+  CheckEqualsString('', TidyFilename(''), 'Blank');
+  CheckEqualsString('A', TidyFilename('A'), 'Simple');
+  CheckEqualsString('A', TidyFilename('A*'), 'Star');
+  CheckEqualsString('A', TidyFilename('A.'), 'Dot');
+  CheckEqualsString('A', TidyFilename('A?'), 'Query');
+  CheckEqualsString('A', TidyFilename('A...'), 'Many');
+  CheckEqualsString('ABCDEF', TidyFilename('A?*B..?C?*?D***.E????*F'), 'Complex');
 end;
 
 initialization

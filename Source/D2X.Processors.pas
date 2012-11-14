@@ -191,7 +191,7 @@ begin
           begin
             lFile := fFileOutput(pFile);
             if lFile > '' then
-              lFS := TFileStream.Create(lFile, fmOpenWrite);
+              lFS := TFileStream.Create(lFile, fmCreate);
             Result := lFS;
           end);
       finally
@@ -222,7 +222,7 @@ begin
           begin
             lFile := fProcessingOutput;
             if lFile > '' then
-              lFS := TFileStream.Create(lFile, fmOpenWrite);
+              lFS := TFileStream.Create(lFile, fmCreate);
             Result := lFS;
           end);
       finally
@@ -247,7 +247,7 @@ begin
           begin
             lFile := fResultsOutput(pFile);
             if lFile > '' then
-              lFS := TFileStream.Create(lFile, fmOpenWrite);
+              lFS := TFileStream.Create(lFile, fmCreate);
             Result := lFS;
           end);
       finally

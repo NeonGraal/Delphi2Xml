@@ -2,7 +2,7 @@
 #f-
 -x:XmlTest
 #p:Dir
--d:DUMMY
--d:CPU32
+-d+DUMMY
+-d+CPU32
 -r
 *.dp?,*.inc,*.pas
