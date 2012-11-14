@@ -115,6 +115,8 @@ type
     procedure CheckUnknown(pOpt: string);
     procedure CheckInvalid(pOpt, pExp: string);
     procedure CheckSimple(pOpt, pExp: string);
+  public
+    procedure SetUp; override;
   published
     procedure TestParseOptionA;
     procedure TestParseOptionB;
@@ -612,8 +614,8 @@ begin
     'Test Elapsed mode', emQuiet, TD2X.CnvDflt<TD2XElapsedMode>,
     TD2X.ToLabel<TD2XElapsedMode>, nil);
   try
-    CheckEqualsString('T<tst> Quiet Test Elapsed mode', ReduceString(lPrm.Describe),
-      'Describe Param');
+    lPrm.Describe(fLog);
+    CheckLog('T<tst> Quiet Test Elapsed mode', 'Describe Param');
     lPrm.Report(fLog);
     CheckLog('Test Quiet', 'Report Default Value');
     Check(lPrm.IsDefault, 'Check is Default');
@@ -652,8 +654,8 @@ begin
   lPrm := TD2XSingleParam<TD2XParseMode>.CreateParam('T', 'Test', '<tst>', 'Test Parse mode',
     pmFull, TD2X.CnvDflt<TD2XParseMode>, TD2X.ToLabel<TD2XParseMode>, nil);
   try
-    CheckEqualsString('T<tst> Full Test Parse mode', ReduceString(lPrm.Describe),
-      'Describe Param');
+    lPrm.Describe(fLog);
+    CheckLog('T<tst> Full Test Parse mode', 'Describe Param');
     lPrm.Report(fLog);
     CheckLog('Test Full', 'Report Default Value');
     Check(lPrm.IsDefault, 'Check is Default');
@@ -692,8 +694,8 @@ begin
   lPrm := TD2XSingleParam<TD2XResultPer>.CreateParam('T', 'Test', '<tst>', 'Test Parse mode',
     rpFile, TD2X.CnvDflt<TD2XResultPer>, TD2X.ToLabel<TD2XResultPer>, nil);
   try
-    CheckEqualsString('T<tst> File Test Parse mode', ReduceString(lPrm.Describe),
-      'Describe Param');
+    lPrm.Describe(fLog);
+    CheckLog('T<tst> File Test Parse mode', 'Describe Param');
     lPrm.Report(fLog);
     CheckLog('Test File', 'Report Default Value');
     Check(lPrm.IsDefault, 'Check is Default');
@@ -1089,12 +1091,12 @@ end;
 
 { TestTD2XRunOptsAll }
 
-//procedure TestTD2XRunOptsAll.SetUp;
-//begin
-//  inherited;
-//
-//  fOpts.Defines.CommaText := 'Alpha,Beta,Gamma';
-//end;
+procedure TestTD2XRunOptsAll.SetUp;
+begin
+  inherited;
+
+  fOpts.Defines.CommaText := 'Alpha,Beta,Gamma';
+end;
 
 procedure TestTD2XRunOptsAll.CheckInvalid(pOpt, pExp: string);
 begin
@@ -1188,27 +1190,27 @@ end;
 
 procedure TestTD2XRunOptsAll.TestParseOptionDAdd;
 begin
-  CheckSimple('D+Value', 'Alpha,Beta,Gamma,Value');
+  CheckSimple('D+Value', 'Use these Defines: Alpha, Beta, Gamma, Value');
 end;
 
 procedure TestTD2XRunOptsAll.TestParseOptionDClear;
 begin
-  CheckSimple('D!', '');
+  CheckSimple('D!', 'Use default Defines');
 end;
 
 procedure TestTD2XRunOptsAll.TestParseOptionDDelete;
 begin
-  CheckSimple('D-Beta', 'Alpha,Gamma');
+  CheckSimple('D-Beta', 'Use these Defines: Alpha, Gamma');
 end;
 
 procedure TestTD2XRunOptsAll.TestParseOptionDEmpty;
 begin
-  CheckSimple('D:', '');
+  CheckSimple('D:', 'Use NO Defines');
 end;
 
 procedure TestTD2XRunOptsAll.TestParseOptionDLoad;
 begin
-  CheckSimple('D:Test', 'Tango,Uniform');
+  CheckSimple('D:Test', 'Use these Defines: Tango, Uniform');
 end;
 
 procedure TestTD2XRunOptsAll.TestParseOptionDMany;
@@ -1219,7 +1221,8 @@ begin
   Check(ReturnValue, 'ReturnValue1');
   ReturnValue := ParseOption('-D+Value2');
   Check(ReturnValue, 'ReturnValue2');
-  CheckLog('Alpha,Beta,Gamma,Value1,Value2');
+  ParseOption('-@-D');
+  CheckLog('Use these Defines: Alpha, Beta, Gamma, Value1, Value2');
 end;
 
 procedure TestTD2XRunOptsAll.TestParseOptionE;

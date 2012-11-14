@@ -65,7 +65,13 @@ type
 
 procedure OutputStrIntDict(pDict: TStrIntDict; pStream: TStream; pFunc: TPairLogMethod);
 
+function MakeFileName(pStr, pDflt: string): string;
+function TidyFilename(pFilename: string): string;
+
 implementation
+
+uses
+  System.StrUtils;
 
 procedure OutputStrIntDict(pDict: TStrIntDict; pStream: TStream; pFunc: TPairLogMethod);
 var
@@ -85,6 +91,22 @@ begin
       finally
         Free;
       end;
+end;
+
+function MakeFileName(pStr, pDflt: string): string;
+begin
+  if pStr = '' then
+    Result := pDflt
+  else
+    if ExtractFileExt(pStr) > '' then
+      Result := pStr
+    else
+      Result := pStr + pDflt;
+end;
+
+function TidyFilename(pFilename: string): string;
+begin
+  Result := ReplaceStr(ReplaceStr(ReplaceStr(pFilename, '*', ''), '.', ''), '?', '');
 end;
 
 { TD2X }

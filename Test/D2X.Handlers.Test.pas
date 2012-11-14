@@ -66,6 +66,7 @@ type
   TestTD2XParserDefinesHandler = class(TParserTestCase)
   strict private
     fHndlr: TD2XParserDefinesHandler;
+    fDefs: TStringList;
   public
     procedure SetUp; override;
     procedure TearDown; override;
@@ -75,9 +76,6 @@ type
     procedure TestInit;
     procedure TestCopy;
     procedure TestBeginFile;
-    procedure TestParseDefines;
-    procedure TestClearDefines;
-    procedure TestReportDefines;
   end;
 
   TestTD2XSkipHandler = class(TStringTestCase)
@@ -678,12 +676,17 @@ procedure TestTD2XParserDefinesHandler.SetUp;
 begin
   inherited;
 
-  fHndlr := TD2XParserDefinesHandler.Create;
+  fDefs:= TStringList.Create;
+  fDefs.CommaText := 'Alpha,Beta,Gamma';
+  fDefs.Sorted := True;
+
+  fHndlr := TD2XParserDefinesHandler.CreateDefines(fDefs);
 end;
 
 procedure TestTD2XParserDefinesHandler.TearDown;
 begin
   FreeAndNil(fHndlr);
+  FreeAndNil(fDefs);
 
   inherited;
 end;
@@ -696,20 +699,13 @@ begin
   CheckList('CONDITIONALEXPRESSIONS CPU386 MSWINDOWS UNICODE VER230 WIN32', 'Begin File',
     fParser.StartDefines);
 
-  fHndlr.ParseDefines(':');
+  fDefs.CommaText := '';
   fHndlr.BeginFile('', nil);
   CheckList('', 'Cleared Defines', fParser.StartDefines);
 
-  fHndlr.ParseDefines('+Test');
+  fDefs.CommaText := 'Test';
   fHndlr.BeginFile('', nil);
   CheckList('Test', 'Test Define', fParser.StartDefines);
-end;
-
-procedure TestTD2XParserDefinesHandler.TestClearDefines;
-begin
-  fHndlr.ClearDefines;
-  fHndlr.OutputDefines(fSL);
-  CheckList('', 'Clear Defines');
 end;
 
 procedure TestTD2XParserDefinesHandler.TestCopy;
@@ -745,52 +741,6 @@ begin
 
   Check(fParser = fHndlr.Parser, 'Parser set');
   CheckTrue(Assigned(fHndlr.Parser), 'Parse Mode set');
-end;
-
-procedure TestTD2XParserDefinesHandler.TestParseDefines;
-begin
-  fHndlr.ParseDefines('!');
-  fHndlr.OutputDefines(fSL);
-  CheckList('', 'Parse Defines - !');
-
-  fHndlr.ParseDefines(':');
-  fHndlr.OutputDefines(fSL);
-  CheckList('-D:', 'Parse Defines - :');
-
-  fHndlr.ParseDefines('+Test1');
-  fHndlr.OutputDefines(fSL);
-  CheckList('-D: -D+Test1', 'Parse Defines - Add Test1');
-
-  fHndlr.ParseDefines('+Test2');
-  fHndlr.OutputDefines(fSL);
-  CheckList('-D: -D+Test1 -D+Test2', 'Parse Defines - Add Test2');
-
-  fHndlr.ParseDefines('-Test1');
-  fHndlr.OutputDefines(fSL);
-  CheckList('-D: -D+Test2', 'Parse Defines - Remove Test1');
-end;
-
-procedure TestTD2XParserDefinesHandler.TestReportDefines;
-begin
-  fHndlr.ParseDefines('!');
-  fHndlr.ReportDefines(fLog);
-  CheckLog('Use default Defines', 'Parse Defines - !');
-
-  fHndlr.ParseDefines(':');
-  fHndlr.ReportDefines(fLog);
-  CheckLog('Use NO Defines', 'Parse Defines - :');
-
-  fHndlr.ParseDefines('+Test1');
-  fHndlr.ReportDefines(fLog);
-  CheckLog('Use these Defines: Test1', 'Parse Defines - Add Test1');
-
-  fHndlr.ParseDefines('+Test2');
-  fHndlr.ReportDefines(fLog);
-  CheckLog('Use these Defines: Test1, Test2', 'Parse Defines - Add Test2');
-
-  fHndlr.ParseDefines('-Test1');
-  fHndlr.ReportDefines(fLog);
-  CheckLog('Use these Defines: Test2', 'Parse Defines - Remove Test1');
 end;
 
 procedure TestTD2XParserDefinesHandler.TestUseProxy;

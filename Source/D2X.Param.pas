@@ -26,8 +26,9 @@ type
 
     function IsCode(pStr: string): Boolean;
     function Parse(pStr: string): Boolean;
-    function Describe: string; virtual;
+    procedure Describe(pL: ID2XLogger); virtual;
     procedure Report(pL: ID2XLogger); virtual;
+    procedure Output(pSL: TStringList); virtual;
     function ToString: string; override;
     function IsDefault: Boolean; virtual;
     procedure Zero; virtual;
@@ -45,22 +46,14 @@ type
 
   end;
 
-  TD2XParams = class(TObjectList<TD2XParam>, ID2XLogger)
-  private
-    fLogger: ID2XLogger;
-
+  TD2XParams = class(TObjectList<TD2XParam>)
   public
-    constructor Create;
-    destructor Destroy; override;
-
     function ForCode(pCode: string): TD2XParam;
-    procedure DescribeAll;
-    procedure ReportAll;
+    procedure DescribeAll(pL: ID2XLogger);
+    procedure ReportAll(pL: ID2XLogger);
+    procedure OutputAll(pSL: TStringList);
     procedure ResetAll;
     procedure ZeroAll;
-    procedure OutputAll(pSL: TStringList);
-
-    property L: ID2XLogger read fLogger implements ID2XLogger;
   end;
 
   TD2XResettableParam = class(TD2XParam)
@@ -91,6 +84,7 @@ type
       pConverter: TspConverter; pFormatter: TspFormatter; pValidator: TspValidator); virtual;
 
     procedure Report(pL: ID2XLogger); override;
+    procedure Output(pSL: TStringList); override;
     function IsDefault: Boolean; override;
     procedure Reset; override;
     procedure Zero; override;
@@ -182,6 +176,33 @@ type
     property FlagValue: Boolean read fFlag write fFlag;
   end;
 
+  TD2XDefinesParam = class(TD2XSingleParam<Boolean>, IParamFlag)
+  public
+    constructor CreateParam(pCode, pLabel, pSample, pDescr: string; pDefault: Boolean;
+      pConverter: TD2XSingleParam<Boolean>.TspConverter;
+      pFormatter: TD2XSingleParam<Boolean>.TspFormatter;
+      pValidator: TD2XSingleParam<Boolean>.TspValidator); override;
+    constructor CreateDefines(pCode, pLabel: string; pDefinesFileName: TD2XNamedStringRef);
+
+    procedure Report(pL: ID2XLogger); override;
+    procedure Output(pSL: TStringList); override;
+    procedure Reset; override;
+    procedure Zero; override;
+
+  private
+    fDefines: TStringList;
+    fDefinesFileName: TD2XNamedStringRef;
+
+    function ConvertDefines(pStr: string; pDflt: Boolean; out pVal: Boolean): Boolean;
+    function FormatDefines(pVal: Boolean): string;
+
+    function GetFlag: Boolean;
+    procedure SetFlag(pVal: Boolean);
+
+  public
+    property Defines: TStringList read fDefines;
+  end;
+
   TD2XBoolFlag = class(TInterfacedObject, IParamFlag)
   private
     fFlag: Boolean;
@@ -253,6 +274,13 @@ var
 begin
   lComparer := TEqualityComparer<T>.Default;
   Result := lComparer.Equals(fValue, fDefault);
+end;
+
+procedure TD2XSingleParam<T>.Output(pSL: TStringList);
+begin
+  if Assigned(pSL) then
+    if not IsDefault then
+      pSL.Add('-' + ToString);
 end;
 
 procedure TD2XSingleParam<T>.Report(pL: ID2XLogger);
@@ -383,9 +411,9 @@ begin
   fParser := pParser;
 end;
 
-function TD2XParam.Describe: string;
+procedure TD2XParam.Describe(pL: ID2XLogger);
 begin
-  Result := Format('  %1s%-12s %-15s %s', [fCode, GetSample, GetFormatted(True), fDescr]);
+  pL.Log('  %1s%-12s %-15s %s', [fCode, GetSample, GetFormatted(True), fDescr]);
 end;
 
 function TD2XParam.GetFormatted(pDefault: Boolean): string;
@@ -406,6 +434,11 @@ end;
 function TD2XParam.IsDefault: Boolean;
 begin
   Result := True;
+end;
+
+procedure TD2XParam.Output(pSL: TStringList);
+begin
+
 end;
 
 function TD2XParam.Parse(pStr: string): Boolean;
@@ -435,33 +468,20 @@ end;
 
 { TD2XParams }
 
-constructor TD2XParams.Create;
-begin
-  inherited Create(True);
-
-  fLogger := TD2XLogger.Create;
-end;
-
-procedure TD2XParams.DescribeAll;
+procedure TD2XParams.DescribeAll(pL: ID2XLogger);
 var
   lP: TD2XParam;
   lBase: string;
 begin
   lBase := ChangeFileExt(ExtractFileName(ParamStr(0)), '');
 
-  L.Log('Usage: %s [ Option | @Params | mFilename | Wildcard ] ... ', [lBase]);
-  L.Log('Options:        %-15s Description', ['Default']);
+  pL.Log('Usage: %s [ Option | @Params | mFilename | Wildcard ] ... ', [lBase]);
+  pL.Log('Options:        %-15s Description', ['Default']);
   for lP in Self do
-    L.Log('%s', [lP.Describe]);
-  L.Log('  Definitions:', []);
-  L.Log('    <f/e> If value begins with "." is appended to global name to give file name', []);
-end;
-
-destructor TD2XParams.Destroy;
-begin
-  fLogger := nil;
-
-  inherited;
+    lP.Describe(pL);
+  pL.Log('  Definitions:', []);
+  pL.Log('    <f/e> If value begins with "." is appended to global name to give file name', []
+    );
 end;
 
 function TD2XParams.ForCode(pCode: string): TD2XParam;
@@ -480,17 +500,16 @@ var
 begin
   if Assigned(pSL) then
     for lP in Self do
-      if not lP.IsDefault then
-        pSL.Add('-' + lP.ToString);
+      lP.Output(pSL);
 end;
 
-procedure TD2XParams.ReportAll;
+procedure TD2XParams.ReportAll(pL: ID2XLogger);
 var
   lP: TD2XParam;
 begin
-  L.Log('Current option settings:', []);
+  pL.Log('Current option settings:', []);
   for lP in Self do
-    lP.Report(L);
+    lP.Report(pL);
 end;
 
 procedure TD2XParams.ResetAll;
@@ -662,6 +681,154 @@ end;
 procedure TD2XBoolFlag.SetFlag(pVal: Boolean);
 begin
   fFlag := pVal;
+end;
+
+{ TD2XDefinesParam }
+
+function TD2XDefinesParam.ConvertDefines(pStr: string; pDflt: Boolean;
+  out pVal: Boolean): Boolean;
+var
+  lStr: string;
+  lIdx: Integer;
+begin
+  Result := False;
+  if (pStr = '!') or (pStr = ':') then
+  begin
+    Result := True;
+    fDefines.Clear;
+    pVal := pStr = ':';
+  end
+  else
+    if Length(pStr) > 1 then
+    begin
+      lStr := System.Copy(pStr, 2, Length(pStr));
+      case pStr[1] of
+        '+':
+          begin
+            Result := True;
+            pVal := True;
+            if fDefines.IndexOf(lStr) < 0 then
+              fDefines.Add(lStr);
+          end;
+        '-':
+          begin
+            Result := True;
+            lIdx := fDefines.IndexOf(lStr);
+            if lIdx >= 0 then
+            begin
+              fDefines.Delete(lIdx);
+              pVal := True;
+            end;
+          end;
+        ':':
+          begin
+            Result := True;
+            pVal := True;
+            fDefines.LoadFromFile(fDefinesFileName(MakeFileName(lStr, '.def')));
+          end;
+      end;
+    end;
+end;
+
+constructor TD2XDefinesParam.CreateDefines(pCode, pLabel: string; pDefinesFileName: TD2XNamedStringRef);
+begin
+  fDefines := TStringList.Create;
+
+  inherited CreateParam(pCode, pLabel, '[+-!:]<def>', 'Add(+), Remove(-), Clear(!) or Load(:) '
+      + pLabel, False, ConvertDefines, FormatDefines, nil);
+
+  fDefinesFileName := pDefinesFileName;
+end;
+
+constructor TD2XDefinesParam.CreateParam(pCode, pLabel, pSample, pDescr: string;
+  pDefault: Boolean; pConverter: TD2XSingleParam<Boolean>.TspConverter;
+  pFormatter: TD2XSingleParam<Boolean>.TspFormatter;
+  pValidator: TD2XSingleParam<Boolean>.TspValidator);
+begin
+  raise EInvalidParam.Create('Need to use correct constructor');
+end;
+
+function TD2XDefinesParam.FormatDefines(pVal: Boolean): string;
+begin
+  Result := '';
+end;
+
+function TD2XDefinesParam.GetFlag: Boolean;
+begin
+  Result := fValue;
+end;
+
+procedure TD2XDefinesParam.Output(pSL: TStringList);
+var
+  lS: string;
+begin
+  if Value then
+  begin
+    pSL.Add('-D:');
+    fDefines.Sort;
+    for lS in fDefines do
+      pSL.Add('-D+' + lS);
+  end;
+end;
+
+procedure TD2XDefinesParam.Report(pL: ID2XLogger);
+var
+  lS: string;
+  w: Integer;
+
+  procedure WriteWidth(pStr: string);
+  begin
+    pL.Log('%s', [pStr], False);
+    Inc(w, Length(pStr));
+  end;
+
+begin
+  if Value then
+    if fDefines.Count < 1 then
+      pL.Log('Use NO Defines', [])
+    else
+    begin
+      pL.Log('Use these Defines:', []);
+      w := 0;
+      fDefines.Sort;
+      for lS in fDefines do
+      begin
+        if w = 0 then
+          WriteWidth('    ')
+        else
+          if (w + Length(lS)) > 78 then
+          begin
+            pL.Log('', []);
+            w := 0;
+            WriteWidth('    ');
+          end
+          else
+            WriteWidth(', ');
+        WriteWidth(lS);
+      end;
+      pL.Log('', []);
+    end
+  else
+    pL.Log('Use default Defines', []);
+end;
+
+procedure TD2XDefinesParam.Reset;
+begin
+  inherited;
+
+  fDefines.Clear;
+end;
+
+procedure TD2XDefinesParam.SetFlag(pVal: Boolean);
+begin
+  SetValue(pVal);
+end;
+
+procedure TD2XDefinesParam.Zero;
+begin
+  inherited;
+
+  fDefines.Clear;
 end;
 
 end.
