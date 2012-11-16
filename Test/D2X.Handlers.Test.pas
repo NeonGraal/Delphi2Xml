@@ -181,14 +181,22 @@ end;
 
 procedure TestTD2XCountHandler.TestProcessing;
 begin
-  fHndlr.BeginFile('', nil);
+  fHndlr.BeginFile('',
+      function: TStream
+    begin
+      Result := nil;
+    end);
   fHndlr.BeginMethod('Alpha');
   fHndlr.BeginMethod('Beta');
   fHndlr.EndMethod('Beta');
   fHndlr.BeginMethod('Gamma');
   fHndlr.EndMethod('Gamma');
   fHndlr.EndMethod('Alpha');
-  fHndlr.EndFile('', nil);
+  fHndlr.EndFile('',
+    function: TStream
+    begin
+      Result := nil;
+    end);
 
   fHndlr.EndProcessing(MakeStream(fSS));
 
@@ -201,9 +209,19 @@ begin
 end;
 
 procedure TestTD2XCountHandler.TestBeginFile;
+var
+  lCalled: Boolean;
 begin
-  fHndlr.BeginFile('', nil);
+  lCalled := False;
 
+  fHndlr.BeginFile('',
+    function: TStream
+    begin
+      Result := nil;
+      lCalled := True;
+    end);
+
+  Check(lCalled, 'Stream Creator called');
   CheckStream('', 'Begin File');
 end;
 
@@ -214,13 +232,13 @@ begin
   lCalled := False;
 
   fHndlr.EndFile('',
-      function: TStream
+    function: TStream
     begin
       Result := nil;
       lCalled := True;
     end);
 
-  CheckFalse(lCalled, 'Stream Creator called');
+  Check(lCalled, 'Stream Creator called');
   CheckStream('', 'End File');
 end;
 
@@ -228,7 +246,11 @@ procedure TestTD2XCountHandler.TestBeginMethod;
 var
   pMethod: string;
 begin
-  fHndlr.BeginFile('', nil);
+  fHndlr.BeginFile('',
+    function: TStream
+    begin
+      Result := nil;
+    end);
 
   fHndlr.BeginMethod(pMethod);
 
@@ -244,7 +266,11 @@ procedure TestTD2XCountHandler.TestEndMethod;
 var
   pMethod: string;
 begin
-  fHndlr.BeginFile('', nil);
+  fHndlr.BeginFile('',
+    function: TStream
+    begin
+      Result := nil;
+    end);
 
   fHndlr.EndMethod(pMethod);
 
@@ -374,7 +400,8 @@ begin
   fHndlr.BeginMethod('Test');
   fHndlr.AddAttr('Test', 'Test');
   fHndlr.EndResults(MakeStream(fSS));
-  CheckStream('<?xml version="1.0"?> <Test parseMode="ParseMode" Test="Test" />', 'End Results');
+  CheckStream('<?xml version="1.0"?> <Test parseMode="ParseMode" Test="Test" />',
+    'End Results');
 end;
 
 procedure TestTD2XXmlHandler.TestAddText;
@@ -706,7 +733,7 @@ procedure TestTD2XParserDefinesHandler.SetUp;
 begin
   inherited;
 
-  fDefs:= TStringList.Create;
+  fDefs := TStringList.Create;
   fDefs.CommaText := 'Alpha,Beta,Gamma';
   fDefs.Sorted := True;
 

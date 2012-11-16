@@ -87,40 +87,34 @@ type
     procedure TestOutputNoTimestampExtn;
   end;
 
-  TTestRunOptions = class(TD2XRunOptions)
+  TOptionsTestCase = class(TLoggerTestCase)
   private
-    function GetDefines: TStringList;
+    fOpts: TD2XOptions;
 
-  public
-    property Defines: TStringList read GetDefines;
-
-  end;
-
-  TRunOptsTestCase = class(TStringTestCase)
-  protected
-    fOpts: TTestRunOptions;
-
-    procedure CheckLog(pMsg: string);
+    function ParseOption(pOpt: string): Boolean;
   public
     procedure SetUp; override;
     procedure TearDown; override;
   end;
 
-  TestTD2XRunOptions = class(TRunOptsTestCase)
+  TestTD2XOptions = class(TOptionsTestCase)
   published
+    procedure TestProcessParamOption;
+    procedure TestConfigFileOrExtn;
+    procedure TestBeginResults;
+    procedure TestEndResults;
+    procedure TestProcessStream;
+    procedure TestProcessInput;
+    procedure TestProcessFile;
+    procedure TestProcessDirectory;
+    procedure TestRecurseDirectory;
     procedure TestEndProcessing;
-
-    procedure TestProcessParam;
-    procedure TestProcessParamPasFiles;
-    procedure TestProcessParamParamFile;
-
-    procedure TestProcessCountChildren;
-    procedure TestProcessVerbose;
+    procedure TestRecurse;
+    procedure TestDefines;
   end;
 
-  TestTD2XRunOptsAll = class(TRunOptsTestCase)
+  TestTD2XOptionsAll = class(TOptionsTestCase)
   private
-    function ParseOption(pOpt: string): Boolean;
     procedure CheckUnknown(pOpt: string);
     procedure CheckInvalid(pOpt, pExp: string);
     procedure CheckSimple(pOpt, pExp: string);
@@ -213,7 +207,7 @@ type
     procedure TestParseOptionZ;
   end;
 
-  TestTD2XRunOptsGeneral = class(TRunOptsTestCase)
+  TestTD2XOptionsGeneral = class(TOptionsTestCase)
   private
     procedure SetAllOptions;
   published
@@ -230,8 +224,48 @@ type
     procedure TestShowOptions;
   end;
 
+  TestTD2XOptionsSpecific = class(TOptionsTestCase)
+  published
+    procedure TestCountChildren;
+    procedure TestNotSupported;
+    procedure TestWriteDefines;
+  end;
+
+  TTestRunOptions = class(TD2XRunOptions)
+  private
+    function GetDefines: TStringList;
+
+  public
+    property Defines: TStringList read GetDefines;
+
+  end;
+
+  TestTD2XRunOptions = class(TLoggerTestCase)
+  private
+    fIdx: Integer;
+
+  protected
+    fOpts: TTestRunOptions;
+
+    function ParseOption(pOpt: string): Boolean;
+  public
+    procedure SetUp; override;
+    procedure TearDown; override;
+  published
+    procedure TestEndProcessing;
+
+    procedure TestProcessParam;
+    procedure TestProcessParamPasFiles;
+    procedure TestProcessParamParamFile;
+    procedure TestProcessParamInput;
+  end;
+
 const
-  EXPECTED_PROCESSING = 'Processing Test.pas ... done';
+  INPUT_PROCESSING = 'Processing (Input) ... done';
+  STREAM_PROCESSING = 'Processing (Stream) ... done';
+  UNIT_PROCESSING = 'Processing TestUnit.pas ... done';
+  PROGRAM_PROCESSING = 'Processing TestProgram.dpr ... done';
+  RECURSE_PROCESSING = 'Processing Config\Test.pas ... done';
   EXPECTED_SHOW_OPTIONS =
     'Usage: Delphi2XmlTests [ Option | @Params | mFilename | Wildcard ] ... ' +
     'Options: Default Description ? Show valid options ' +
@@ -805,108 +839,32 @@ begin
   CheckBuilder('', 'Nothing');
 end;
 
-procedure TestTD2XRunOptions.TestProcessCountChildren;
-var
-  ReturnValue: Boolean;
-  pIdx: Integer;
-  pFrom: string;
-  pStr: string;
+procedure TestTD2XRunOptions.TestProcessParam;
 begin
-  pStr := '-!!';
-  pFrom := 'Test';
-  pIdx := 0;
-
-  ReturnValue := fOpts.ProcessParam(pStr, pFrom, pIdx);
-  Check(ReturnValue, 'Return Value 1');
-
-  pStr := '-C+';
-  pIdx := 1;
-
-  ReturnValue := fOpts.ProcessParam(pStr, pFrom, pIdx);
-  Check(ReturnValue, 'Return Value 2');
-
-  pStr := 'Test.pas';
-  pIdx := 2;
-
-  ReturnValue := fOpts.ProcessParam(pStr, pFrom, pIdx);
-
-  Check(ReturnValue, 'Return Value');
-  CheckBuilder('', 'Empty Log');
+  Check(ParseOption('-?'), 'Return Value');
+  CheckLog(EXPECTED_SHOW_OPTIONS, 'Nothing');
 end;
 
-procedure TestTD2XRunOptions.TestProcessParam;
-var
-  ReturnValue: Boolean;
-  pIdx: Integer;
-  pFrom: string;
-  pStr: string;
+procedure TestTD2XRunOptions.TestProcessParamInput;
 begin
-  pStr := '-?';
-  pFrom := 'Test';
-  pIdx := 0;
-
-  ReturnValue := fOpts.ProcessParam(pStr, pFrom, pIdx);
-
-  CheckTrue(ReturnValue, 'Return Value');
-  CheckBuilder(EXPECTED_SHOW_OPTIONS, 'Nothing');
+  Check(ParseOption('-!!'), 'Return Value 1');
+  Check(ParseOption('-E!'), 'Return Value 2');
+  Check(ParseOption('-'), 'Return Value 3');
+  CheckBuilder(INPUT_PROCESSING, 'Nothing');
 end;
 
 procedure TestTD2XRunOptions.TestProcessParamParamFile;
-var
-  ReturnValue: Boolean;
-  pIdx: Integer;
-  pFrom: string;
-  pStr: string;
 begin
-  pStr := '@Test.prm';
-  pFrom := 'Test';
-  pIdx := 0;
-
-  ReturnValue := fOpts.ProcessParam(pStr, pFrom, pIdx);
-
-  Check(ReturnValue, 'Return Value');
+  Check(ParseOption('@Test.prm'), 'Return Value');
   CheckBuilder(DEFAULT_REPORT_OPTIONS, 'Nothing');
 end;
 
 procedure TestTD2XRunOptions.TestProcessParamPasFiles;
-var
-  ReturnValue: Boolean;
-  pIdx: Integer;
-  pFrom: string;
-  pStr: string;
 begin
-  pStr := 'Test.pas';
-  pFrom := 'Test';
-  pIdx := 0;
-
-  ReturnValue := fOpts.ProcessParam(pStr, pFrom, pIdx);
-
-  Check(ReturnValue, 'Return Value');
-  CheckBuilder(EXPECTED_PROCESSING, 'Nothing');
-end;
-
-procedure TestTD2XRunOptions.TestProcessVerbose;
-var
-  ReturnValue: Boolean;
-  pIdx: Integer;
-  pFrom: string;
-  pStr: string;
-begin
-  pStr := '-!!';
-  pFrom := 'Test';
-  pIdx := 0;
-  fOpts.ProcessParam(pStr, pFrom, pIdx);
-
-  pStr := '-V+';
-  pIdx := 1;
-  fOpts.ProcessParam(pStr, pFrom, pIdx);
-
-  pStr := 'Test.pas';
-  pIdx := 2;
-  ReturnValue := fOpts.ProcessParam(pStr, pFrom, pIdx);
-
-  Check(ReturnValue, 'Return Value');
-  CheckNotEquals('', fSB.ToString, 'Log');
+  Check(ParseOption('-!!'), 'Return Value 1');
+  Check(ParseOption('-E!'), 'Return Value 2');
+  Check(ParseOption('Test*.pas'), 'Return Value 3');
+  CheckBuilder(UNIT_PROCESSING, 'Nothing');
 end;
 
 { TTestBoolFlag }
@@ -923,175 +881,130 @@ end;
 
 { TestTD2XOptionsGeneral }
 
-procedure TestTD2XRunOptsGeneral.SetAllOptions;
+procedure TestTD2XOptionsGeneral.SetAllOptions;
 var
   C: Char;
 begin
   for C := 'A' to 'Z' do
-    if not fOpts.ProcessParam('-' + C + ':Test', '', 0) then
-      fOpts.ProcessParam('-' + C + '+', '', 0);
-  fOpts.ProcessParam('-T-', '', 0);
+    if not ParseOption(C + ':Test') then
+      ParseOption(C + '+');
+  ParseOption('T-');
   fSB.Clear;
 end;
 
-procedure TestTD2XRunOptsGeneral.TestReportOptions;
-var
-  ReturnValue: Boolean;
+procedure TestTD2XOptionsGeneral.TestReportOptions;
 begin
   SetAllOptions;
 
-  ReturnValue := fOpts.ProcessParam('-@', '', 0);
-
-  Check(ReturnValue, 'ReturnValue');
-  CheckLog(ALTERED_REPORT_OPTIONS);
+  Check(ParseOption('@'), 'Return Value');
+  CheckLog(ALTERED_REPORT_OPTIONS, 'Report Options');
 end;
 
-procedure TestTD2XRunOptsGeneral.TestReportOptionsDefault;
-var
-  ReturnValue: Boolean;
+procedure TestTD2XOptionsGeneral.TestReportOptionsDefault;
 begin
-  ReturnValue := fOpts.ProcessParam('-@', '', 0);
-
-  Check(ReturnValue, 'ReturnValue');
-  CheckLog(DEFAULT_REPORT_OPTIONS);
+  Check(ParseOption('@'), 'Return Value');
+  CheckLog(DEFAULT_REPORT_OPTIONS, 'Report Options');
 end;
 
-procedure TestTD2XRunOptsGeneral.TestReportOptionsDefines;
-var
-  ReturnValue: Boolean;
+procedure TestTD2XOptionsGeneral.TestReportOptionsDefines;
 begin
-  ReturnValue := fOpts.ProcessParam('-D+CPU32', '', 0);
-  Check(ReturnValue, 'ReturnValue');
+  Check(ParseOption('D+CPU32'), 'Return Value 1');
 
-  ReturnValue := fOpts.ProcessParam('-@', '', 0);
-  Check(ReturnValue, 'ReturnValue');
-  CheckLog(DEFINED_REPORT_OPTIONS);
+  Check(ParseOption('@'), 'Return Value 2');
+  CheckLog(DEFINED_REPORT_OPTIONS, 'Report Options');
 end;
 
-procedure TestTD2XRunOptsGeneral.TestReportOptionsEmpty;
-var
-  ReturnValue: Boolean;
+procedure TestTD2XOptionsGeneral.TestReportOptionsEmpty;
 begin
-  ReturnValue := fOpts.ProcessParam('-D:', '', 0);
-  Check(ReturnValue, 'ReturnValue');
+  Check(ParseOption('D:'), 'Return Value 1');
 
-  ReturnValue := fOpts.ProcessParam('-@', '', 0);
-  Check(ReturnValue, 'ReturnValue');
-  CheckLog(EMPTY_REPORT_OPTIONS);
+  Check(ParseOption('@'), 'Return Value 2');
+  CheckLog(EMPTY_REPORT_OPTIONS, 'Report Options');
 end;
 
-procedure TestTD2XRunOptsGeneral.TestReportOptionsExtn;
-var
-  ReturnValue: Boolean;
+procedure TestTD2XOptionsGeneral.TestReportOptionsExtn;
 begin
   SetAllOptions;
 
-  ReturnValue := fOpts.ProcessParam('-@Test.tst', '', 0);
-
-  Check(ReturnValue, 'ReturnValue');
-  CheckLog('');
+  Check(ParseOption('@Test.tst'), 'Return Value');
+  CheckLog('', 'Report Options');
 end;
 
-procedure TestTD2XRunOptsGeneral.TestReportOptionsFile;
-var
-  ReturnValue: Boolean;
+procedure TestTD2XOptionsGeneral.TestReportOptionsFile;
 begin
   SetAllOptions;
 
-  ReturnValue := fOpts.ProcessParam('-@Test', '', 0);
-
-  Check(ReturnValue, 'ReturnValue');
-  CheckLog('');
+  Check(ParseOption('@Test'), 'Return Value');
+  CheckLog('', 'Report Options');
 end;
 
-procedure TestTD2XRunOptsGeneral.TestReportOptionsFileDefault;
-var
-  ReturnValue: Boolean;
+procedure TestTD2XOptionsGeneral.TestReportOptionsFileDefault;
 begin
-  ReturnValue := fOpts.ProcessParam('-@Test', '', 0);
-
-  Check(ReturnValue, 'ReturnValue');
-  CheckLog('');
+  Check(ParseOption('@Test'), 'ReturnValue');
+  CheckLog('', 'Report Options');
 end;
 
-procedure TestTD2XRunOptsGeneral.TestReportOptionsReset;
-var
-  ReturnValue: Boolean;
+procedure TestTD2XOptionsGeneral.TestReportOptionsReset;
 begin
-  ReturnValue := fOpts.ProcessParam('-D!', '', 0);
-  Check(ReturnValue, 'ReturnValue');
+  Check(ParseOption('!'), 'Return Value 1');
 
-  ReturnValue := fOpts.ProcessParam('-@', '', 0);
-  Check(ReturnValue, 'ReturnValue');
-  CheckLog(DEFAULT_REPORT_OPTIONS);
+  Check(ParseOption('@'), 'Return Value 2');
+  CheckLog(DEFAULT_REPORT_OPTIONS, 'Report Options');
 end;
 
-procedure TestTD2XRunOptsGeneral.TestResetOptions;
-var
-  ReturnValue: Boolean;
-
+procedure TestTD2XOptionsGeneral.TestResetOptions;
 begin
   SetAllOptions;
 
-  ReturnValue := fOpts.ProcessParam('-@', '', 0);
-  Check(ReturnValue, 'ReturnValue');
-  CheckLog(ALTERED_REPORT_OPTIONS);
+  Check(ParseOption('@'), 'Return Value 1');
+  CheckLog(ALTERED_REPORT_OPTIONS, 'Report Options');
 
-  ReturnValue := fOpts.ProcessParam('-!', '', 0);
-  Check(ReturnValue, 'ReturnValue');
+  Check(ParseOption('!'), 'Return Value 2');
 
   fSB.Clear;
-  ReturnValue := fOpts.ProcessParam('-@', '', 0);
-  Check(ReturnValue, 'ReturnValue');
-  CheckLog(DEFAULT_REPORT_OPTIONS);
+  Check(ParseOption('@'), 'Return Value 3');
+  CheckLog(DEFAULT_REPORT_OPTIONS, 'Report Options');
 end;
 
-procedure TestTD2XRunOptsGeneral.TestShowOptions;
-var
-  ReturnValue: Boolean;
+procedure TestTD2XOptionsGeneral.TestShowOptions;
 begin
-  ReturnValue := fOpts.ProcessParam('-?', '', 0);
-
-  Check(ReturnValue, 'ReturnValue');
-  CheckLog(EXPECTED_SHOW_OPTIONS);
+  Check(ParseOption('?'), 'Return Value');
+  CheckLog(EXPECTED_SHOW_OPTIONS, 'Report Options');
 end;
 
-procedure TestTD2XRunOptsGeneral.TestZeroOptions;
-var
-  ReturnValue: Boolean;
-
+procedure TestTD2XOptionsGeneral.TestZeroOptions;
 begin
   SetAllOptions;
 
-  ReturnValue := fOpts.ProcessParam('-@', '', 0);
-  Check(ReturnValue, 'ReturnValue');
-  CheckLog(ALTERED_REPORT_OPTIONS);
+  Check(ParseOption('@'), 'Return Value 1');
+  CheckLog(ALTERED_REPORT_OPTIONS, 'Report Options');
 
-  ReturnValue := fOpts.ProcessParam('-!!', '', 0);
-  Check(ReturnValue, 'ReturnValue');
+  Check(ParseOption('!!'), 'Return Value 2');
 
   fSB.Clear;
-  ReturnValue := fOpts.ProcessParam('-@', '', 0);
-  Check(ReturnValue, 'ReturnValue');
-  CheckLog(ZERO_REPORT_OPTIONS);
+  Check(ParseOption('@'), 'Return Value 3');
+  CheckLog(ZERO_REPORT_OPTIONS, 'Report Options');
 end;
 
 { TOptionsTestCase }
 
-procedure TRunOptsTestCase.CheckLog(pMsg: string);
+function TestTD2XRunOptions.ParseOption(pOpt: string): Boolean;
 begin
-  CheckEqualsString(pMsg, ReduceString(fSB.ToString), 'Log');
+  Result := fOpts.ProcessParam(pOpt, 'Test', fIdx);
+  Inc(fIdx);
 end;
 
-procedure TRunOptsTestCase.SetUp;
+procedure TestTD2XRunOptions.SetUp;
 begin
   inherited;
 
   fOpts := TTestRunOptions.Create;
-  fOpts.L.StartLog(fSB);
+  fOpts.L.StartLog(fLog);
+
+  fIdx := 0;
 end;
 
-procedure TRunOptsTestCase.TearDown;
+procedure TestTD2XRunOptions.TearDown;
 begin
   fOpts := nil;
 
@@ -1100,487 +1013,478 @@ end;
 
 { TestTD2XRunOptsAll }
 
-procedure TestTD2XRunOptsAll.SetUp;
+procedure TestTD2XOptionsAll.SetUp;
 begin
   inherited;
 
   fOpts.Defines.CommaText := 'Alpha,Beta,Gamma';
 end;
 
-procedure TestTD2XRunOptsAll.CheckInvalid(pOpt, pExp: string);
+procedure TestTD2XOptionsAll.CheckInvalid(pOpt, pExp: string);
 begin
-  CheckFalse(ParseOption('-' + pOpt), pOpt + ' Return Value');
-  CheckLog(pExp);
+  CheckFalse(ParseOption(pOpt), pOpt + ' Return Value');
+  CheckLog(pExp, 'Report Options');
 end;
 
-procedure TestTD2XRunOptsAll.CheckSimple(pOpt, pExp: string);
+procedure TestTD2XOptionsAll.CheckSimple(pOpt, pExp: string);
 begin
-  Check(ParseOption('-' + pOpt), pOpt + ' Return Value');
-  CheckLog('');
-  ParseOption('-@-' + pOpt);
-  CheckLog(pExp);
+  Check(ParseOption(pOpt), pOpt + ' Return Value');
+  CheckLog('', 'Report Options');
+  ParseOption('@-' + pOpt);
+  CheckLog(pExp, 'Report Options');
 end;
 
-procedure TestTD2XRunOptsAll.CheckUnknown(pOpt: string);
+procedure TestTD2XOptionsAll.CheckUnknown(pOpt: string);
 begin
-  CheckFalse(ParseOption('-' + pOpt), pOpt + ' Return Value');
-  CheckLog('Unknown option: ' + pOpt);
+  CheckFalse(ParseOption(pOpt), pOpt + ' Return Value');
+  CheckLog('Unknown option: ' + pOpt, 'Report Options');
 end;
 
-function TestTD2XRunOptsAll.ParseOption(pOpt: string): Boolean;
-begin
-  Result := fOpts.ProcessParam(pOpt, 'test', 0);
-end;
-
-procedure TestTD2XRunOptsAll.TestParseOptionA;
+procedure TestTD2XOptionsAll.TestParseOptionA;
 begin
   CheckUnknown('A');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionB;
+procedure TestTD2XOptionsAll.TestParseOptionB;
 begin
   CheckSimple('B', 'Base dir +');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionBBlank;
+procedure TestTD2XOptionsAll.TestParseOptionBBlank;
 begin
   CheckSimple('B:', 'Base dir +');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionBOff;
+procedure TestTD2XOptionsAll.TestParseOptionBOff;
 begin
   CheckSimple('B-', 'Base dir -');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionBOn;
+procedure TestTD2XOptionsAll.TestParseOptionBOn;
 begin
   CheckSimple('B+', 'Base dir +');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionBValue;
+procedure TestTD2XOptionsAll.TestParseOptionBValue;
 begin
   CheckSimple('B:Base', 'Base dir :Base\');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionC;
+procedure TestTD2XOptionsAll.TestParseOptionC;
 begin
   CheckSimple('C', 'Count Children :.cnt');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionCBlank;
+procedure TestTD2XOptionsAll.TestParseOptionCBlank;
 begin
   CheckSimple('C:', 'Count Children :.cnt');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionCExtn;
+procedure TestTD2XOptionsAll.TestParseOptionCExtn;
 begin
   CheckSimple('C:Extn', 'Count Children :.Extn');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionCOff;
+procedure TestTD2XOptionsAll.TestParseOptionCOff;
 begin
   CheckSimple('C-', 'Count Children -(.cnt)');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionCOn;
+procedure TestTD2XOptionsAll.TestParseOptionCOn;
 begin
   CheckSimple('C+', 'Count Children :.cnt');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionCFile;
+procedure TestTD2XOptionsAll.TestParseOptionCFile;
 begin
   CheckSimple('C:File.Extn', 'Count Children :File.Extn');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionD;
+procedure TestTD2XOptionsAll.TestParseOptionD;
 begin
   CheckInvalid('D', 'Invalid Defines option: D');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionDAdd;
+procedure TestTD2XOptionsAll.TestParseOptionDAdd;
 begin
   CheckSimple('D+Value', 'Use these Defines: Alpha, Beta, Gamma, Value');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionDClear;
+procedure TestTD2XOptionsAll.TestParseOptionDClear;
 begin
   CheckSimple('D!', 'Use default Defines');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionDDelete;
+procedure TestTD2XOptionsAll.TestParseOptionDDelete;
 begin
   CheckSimple('D-Beta', 'Use these Defines: Alpha, Gamma');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionDEmpty;
+procedure TestTD2XOptionsAll.TestParseOptionDEmpty;
 begin
   CheckSimple('D:', 'Use NO Defines');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionDLoad;
+procedure TestTD2XOptionsAll.TestParseOptionDLoad;
 begin
   CheckSimple('D:Test', 'Use these Defines: Tango, Uniform');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionDMany;
-var
-  ReturnValue: Boolean;
+procedure TestTD2XOptionsAll.TestParseOptionDMany;
 begin
-  ReturnValue := ParseOption('-D+Value1');
-  Check(ReturnValue, 'ReturnValue1');
-  ReturnValue := ParseOption('-D+Value2');
-  Check(ReturnValue, 'ReturnValue2');
-  ParseOption('-@-D');
-  CheckLog('Use these Defines: Alpha, Beta, Gamma, Value1, Value2');
+  Check(ParseOption('D+Value1'), 'ReturnValue1');
+  Check(ParseOption('D+Value2'), 'ReturnValue2');
+  ParseOption('@-D');
+  CheckLog('Use these Defines: Alpha, Beta, Gamma, Value1, Value2', 'Report Options');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionE;
+procedure TestTD2XOptionsAll.TestParseOptionE;
 begin
   CheckInvalid('E', 'Invalid Show elapsed option: E');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionEValue;
+procedure TestTD2XOptionsAll.TestParseOptionEValue;
 begin
   CheckSimple('ETotal', 'Show elapsed Total');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionF;
+procedure TestTD2XOptionsAll.TestParseOptionF;
 begin
   CheckSimple('F', 'Final Token +');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionFOff;
+procedure TestTD2XOptionsAll.TestParseOptionFOff;
 begin
   CheckSimple('F-', 'Final Token -');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionFOn;
+procedure TestTD2XOptionsAll.TestParseOptionFOn;
 begin
   CheckSimple('F+', 'Final Token +');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionG;
+procedure TestTD2XOptionsAll.TestParseOptionG;
 begin
   CheckSimple('G', 'Global name ' + ChangeFileExt(ExtractFileName(ParamStr(0)), ''));
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionGValue;
+procedure TestTD2XOptionsAll.TestParseOptionGValue;
 begin
   CheckSimple('GGlobal', 'Global name Global');
   //  CheckEqualsString('Global\', fOpts.XmlDirectory, 'XmlDirectory');
   //  CheckEqualsString('Global\', fOpts.DefinesDirectory, 'DefinesDirectory');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionH;
+procedure TestTD2XOptionsAll.TestParseOptionH;
 begin
   CheckUnknown('H');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionI;
+procedure TestTD2XOptionsAll.TestParseOptionI;
 begin
   CheckSimple('I', 'Config dir :Config\');
   //  CheckEqualsString('Config\Input.File', fOpts.InputFileOrExtn('Input.File'),
   //    'InputFileOrExtn');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionIBlank;
+procedure TestTD2XOptionsAll.TestParseOptionIBlank;
 begin
   CheckSimple('I:', 'Config dir +');
   //  CheckEqualsString('Input.File', fOpts.InputFileOrExtn('Input.File'), 'InputFileOrExtn');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionIOff;
+procedure TestTD2XOptionsAll.TestParseOptionIOff;
 begin
   CheckSimple('I-', 'Config dir -(Config\)');
   //  CheckEqualsString('Input.File', fOpts.InputFileOrExtn('Input.File'), 'InputFileOrExtn');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionIOn;
+procedure TestTD2XOptionsAll.TestParseOptionIOn;
 begin
   CheckSimple('I+', 'Config dir :Config\');
   //  CheckEqualsString('Config\Input.File', fOpts.InputFileOrExtn('Input.File'),
   //    'InputFileOrExtn');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionIValue;
+procedure TestTD2XOptionsAll.TestParseOptionIValue;
 begin
   CheckSimple('I:Input', 'Config dir :Input\');
   //  CheckEqualsString('Input\Input.File', fOpts.InputFileOrExtn('Input.File'),
   //    'InputFileOrExtn');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionJ;
+procedure TestTD2XOptionsAll.TestParseOptionJ;
 begin
   CheckUnknown('J');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionK;
+procedure TestTD2XOptionsAll.TestParseOptionK;
 begin
   CheckUnknown('K');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionL;
+procedure TestTD2XOptionsAll.TestParseOptionL;
 begin
   CheckSimple('L', 'Log Errors +');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionLOff;
+procedure TestTD2XOptionsAll.TestParseOptionLOff;
 begin
   CheckSimple('L-', 'Log Errors -');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionLOn;
+procedure TestTD2XOptionsAll.TestParseOptionLOn;
 begin
   CheckSimple('L+', 'Log Errors +');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionM;
+procedure TestTD2XOptionsAll.TestParseOptionM;
 begin
   CheckInvalid('M', 'Invalid Parse mode option: M');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionMValue;
+procedure TestTD2XOptionsAll.TestParseOptionMValue;
 begin
   CheckSimple('MUses', 'Parse mode Uses');
   //  CheckEqualsString('Uses', fOpts.GlobalName, 'GlobalName');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionN;
+procedure TestTD2XOptionsAll.TestParseOptionN;
 begin
   CheckSimple('N', 'Log Not Supp +');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionNOff;
+procedure TestTD2XOptionsAll.TestParseOptionNOff;
 begin
   CheckSimple('N-', 'Log Not Supp -');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionNOn;
+procedure TestTD2XOptionsAll.TestParseOptionNOn;
 begin
   CheckSimple('N+', 'Log Not Supp +');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionO;
+procedure TestTD2XOptionsAll.TestParseOptionO;
 begin
   CheckSimple('O', 'Log dir :Log\');
   //  CheckEqualsString('Log\Output.File', fOpts.OutputFileOrExtn('Output.File'),
   //    'OutputFileOrExtn');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionOBlank;
+procedure TestTD2XOptionsAll.TestParseOptionOBlank;
 begin
   CheckSimple('O:', 'Log dir +');
   //  CheckEqualsString('Output.File', fOpts.OutputFileOrExtn('Output.File'), 'OutputFileOrExtn');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionOOff;
+procedure TestTD2XOptionsAll.TestParseOptionOOff;
 begin
   CheckSimple('O-', 'Log dir -(Log\)');
   //  CheckEqualsString('Output.File', fOpts.OutputFileOrExtn('Output.File'), 'OutputFileOrExtn');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionOOn;
+procedure TestTD2XOptionsAll.TestParseOptionOOn;
 begin
   CheckSimple('O+', 'Log dir :Log\');
   //  CheckEqualsString('Log\Output.File', fOpts.OutputFileOrExtn('Output.File'),
   //    'OutputFileOrExtn');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionOValue;
+procedure TestTD2XOptionsAll.TestParseOptionOValue;
 begin
   CheckSimple('O:Output', 'Log dir :Output\');
   //  CheckEqualsString('Output\Output.File', fOpts.OutputFileOrExtn('Output.File'),
   //    'OutputFileOrExtn');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionP;
+procedure TestTD2XOptionsAll.TestParseOptionP;
 begin
   CheckInvalid('P', 'Invalid Results per option: P');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionPValue;
+procedure TestTD2XOptionsAll.TestParseOptionPValue;
 begin
   CheckSimple('PDir', 'Results per Dir');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionQ;
+procedure TestTD2XOptionsAll.TestParseOptionQ;
 begin
   CheckUnknown('Q');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionR;
+procedure TestTD2XOptionsAll.TestParseOptionR;
 begin
   CheckSimple('R', 'Recurse +');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionROff;
+procedure TestTD2XOptionsAll.TestParseOptionROff;
 begin
   CheckSimple('R-', 'Recurse -');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionROn;
+procedure TestTD2XOptionsAll.TestParseOptionROn;
 begin
   CheckSimple('R+', 'Recurse +');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionS;
+procedure TestTD2XOptionsAll.TestParseOptionS;
 begin
   CheckSimple('S', 'Skipped Methods :.skip');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionSBlank;
+procedure TestTD2XOptionsAll.TestParseOptionSBlank;
 begin
   CheckSimple('S:', 'Skipped Methods :.skip');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionSExtn;
+procedure TestTD2XOptionsAll.TestParseOptionSExtn;
 begin
   CheckSimple('S:.Extn', 'Skipped Methods :.Extn');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionSSimple;
+procedure TestTD2XOptionsAll.TestParseOptionSSimple;
 begin
   CheckSimple('S:Extn', 'Skipped Methods :Extn.skip');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionSFile;
+procedure TestTD2XOptionsAll.TestParseOptionSFile;
 begin
   CheckSimple('S:File.Extn', 'Skipped Methods :File.Extn');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionSOff;
+procedure TestTD2XOptionsAll.TestParseOptionSOff;
 begin
   CheckSimple('S-', 'Skipped Methods -(.skip)');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionSOn;
+procedure TestTD2XOptionsAll.TestParseOptionSOn;
 begin
   CheckSimple('S+', 'Skipped Methods :.skip');
   //  CheckEqualsString('.skip', fOpts.SkipMethodsFoE, 'SkipFileOrExtn');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionT;
+procedure TestTD2XOptionsAll.TestParseOptionT;
 begin
   CheckSimple('T', 'Timestamp +');
   //  CheckEqualsString(FormatDateTime('-HH-mm', Now), fOpts.OutputTimestamp, 'OutputTimestamp');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionTOff;
+procedure TestTD2XOptionsAll.TestParseOptionTOff;
 begin
   CheckSimple('T-', 'Timestamp -');
   //  CheckEqualsString(FormatDateTime('-HH-mm', Now), fOpts.OutputTimestamp, 'OutputTimestamp');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionTOn;
+procedure TestTD2XOptionsAll.TestParseOptionTOn;
 begin
   CheckSimple('T+', 'Timestamp +');
   //  CheckEqualsString(FormatDateTime('-HH-mm', Now), fOpts.OutputTimestamp, 'OutputTimestamp');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionU;
+procedure TestTD2XOptionsAll.TestParseOptionU;
 begin
   CheckSimple('U', 'Defines Used :.used');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionUBlank;
+procedure TestTD2XOptionsAll.TestParseOptionUBlank;
 begin
   CheckSimple('U:', 'Defines Used :.used');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionUExtn;
+procedure TestTD2XOptionsAll.TestParseOptionUExtn;
 begin
   CheckSimple('U:Extn', 'Defines Used :.Extn');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionUFile;
+procedure TestTD2XOptionsAll.TestParseOptionUFile;
 begin
   CheckSimple('U:File.Extn', 'Defines Used :File.Extn');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionUOff;
+procedure TestTD2XOptionsAll.TestParseOptionUOff;
 begin
   CheckSimple('U-', 'Defines Used -(.used)');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionUOn;
+procedure TestTD2XOptionsAll.TestParseOptionUOn;
 begin
   CheckSimple('U+', 'Defines Used :.used');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionV;
+procedure TestTD2XOptionsAll.TestParseOptionV;
 begin
   CheckSimple('V', 'Verbose +');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionVOff;
+procedure TestTD2XOptionsAll.TestParseOptionVOff;
 begin
   CheckSimple('V-', 'Verbose -');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionVOn;
+procedure TestTD2XOptionsAll.TestParseOptionVOn;
 begin
   CheckSimple('V+', 'Verbose +');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionW;
+procedure TestTD2XOptionsAll.TestParseOptionW;
 begin
   CheckSimple('W', 'Write Defines :Defines\');
   //  CheckEqualsString('Defines\', fOpts.DefinesDirectory, 'DefinesDirectory');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionWBlank;
+procedure TestTD2XOptionsAll.TestParseOptionWBlank;
 begin
   CheckSimple('W:', 'Write Defines +');
   //  CheckEqualsString('', fOpts.DefinesDirectory, 'DefinesDirectory');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionWOff;
+procedure TestTD2XOptionsAll.TestParseOptionWOff;
 begin
   CheckSimple('W-', 'Write Defines -(Defines\)');
   //  CheckEqualsString('Defines\', fOpts.DefinesDirectory, 'DefinesDirectory');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionWOn;
+procedure TestTD2XOptionsAll.TestParseOptionWOn;
 begin
   CheckSimple('W+', 'Write Defines :Defines\');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionWValue;
+procedure TestTD2XOptionsAll.TestParseOptionWValue;
 begin
   CheckSimple('W:Write', 'Write Defines :Write\');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionX;
+procedure TestTD2XOptionsAll.TestParseOptionX;
 begin
   CheckSimple('X', 'Generate XML :Xml\');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionXBlank;
+procedure TestTD2XOptionsAll.TestParseOptionXBlank;
 begin
   CheckSimple('X:', 'Generate XML +');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionXOff;
+procedure TestTD2XOptionsAll.TestParseOptionXOff;
 begin
   CheckSimple('X-', 'Generate XML -(Xml\)');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionXOn;
+procedure TestTD2XOptionsAll.TestParseOptionXOn;
 begin
   CheckSimple('X+', 'Generate XML :Xml\');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionXValue;
+procedure TestTD2XOptionsAll.TestParseOptionXValue;
 begin
   CheckSimple('X:Value', 'Generate XML :Value\');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionY;
+procedure TestTD2XOptionsAll.TestParseOptionY;
 begin
   CheckUnknown('Y');
 end;
 
-procedure TestTD2XRunOptsAll.TestParseOptionZ;
+procedure TestTD2XOptionsAll.TestParseOptionZ;
 begin
   CheckUnknown('Z');
 end;
@@ -1592,10 +1496,158 @@ begin
   Result := fOpts.Defines;
 end;
 
+{ TOptionsTestCase }
+
+function TOptionsTestCase.ParseOption(pOpt: string): Boolean;
+begin
+  Result := fOpts.ProcessParamOption(pOpt);
+end;
+
+procedure TOptionsTestCase.SetUp;
+begin
+  inherited;
+
+  fOpts := TD2XOptions.Create;
+  fOpts.JoinLog(fLog);
+end;
+
+procedure TOptionsTestCase.TearDown;
+begin
+  fOpts := nil;
+
+  inherited;
+end;
+
+{ TestTD2XOptions }
+
+procedure TestTD2XOptions.TestBeginResults;
+begin
+  fOpts.BeginResults('File', rpFile);
+  fOpts.BeginResults('Wildcard', rpWildcard);
+  fOpts.BeginResults('SubDir', rpSubDir);
+  fOpts.BeginResults('Dir', rpDir);
+  fOpts.BeginResults('Param', rpParam);
+  fOpts.BeginResults('Run', rpRun);
+  CheckLog('', 'Begin Results');
+end;
+
+procedure TestTD2XOptions.TestConfigFileOrExtn;
+begin
+  CheckEqualsString('Config\File', fOpts.ConfigFileOrExtn('File'), 'Default File');
+  CheckEqualsString('Config\Delphi2XmlTests.Extn', fOpts.ConfigFileOrExtn('.Extn'),
+    'Default Extn');
+  CheckEqualsString('Config\File.Extn', fOpts.ConfigFileOrExtn('File.Extn'),
+    'Default File.Extn');
+end;
+
+procedure TestTD2XOptions.TestDefines;
+begin
+  CheckList('VER230 WIN32 CPU386 MSWINDOWS CONDITIONALEXPRESSIONS UNICODE', 'Defines',
+    fOpts.Defines);
+end;
+
+procedure TestTD2XOptions.TestEndProcessing;
+begin
+  fOpts.EndProcessing;
+  CheckLog('', 'End Processing');
+end;
+
+procedure TestTD2XOptions.TestEndResults;
+begin
+  fOpts.EndResults('File', rpFile);
+  fOpts.EndResults('Wildcard', rpWildcard);
+  fOpts.EndResults('SubDir', rpSubDir);
+  fOpts.EndResults('Dir', rpDir);
+  fOpts.EndResults('Param', rpParam);
+  fOpts.EndResults('Run', rpRun);
+  CheckLog('', 'End Results');
+end;
+
+procedure TestTD2XOptions.TestProcessDirectory;
+begin
+  Check(fOpts.ProcessDirectory('Config\', 'Test*.pas'), 'Process Directory');
+  CheckLog(RECURSE_PROCESSING, 'Process Directory');
+end;
+
+procedure TestTD2XOptions.TestProcessFile;
+begin
+  Check(fOpts.ProcessFile('TestUnit.pas'), 'Process Unit');
+  CheckLog(UNIT_PROCESSING, 'Process Unit');
+  Check(fOpts.ProcessFile('TestProgram.dpr'), 'Process Program');
+  CheckLog(PROGRAM_PROCESSING, 'Process Program');
+end;
+
+procedure TestTD2XOptions.TestProcessInput;
+begin
+  Check(fOpts.ProcessInput, 'Process Input');
+  CheckLog(INPUT_PROCESSING, 'Process Input');
+end;
+
+procedure TestTD2XOptions.TestProcessParamOption;
+begin
+  Check(ParseOption('?'), 'Return Value');
+  CheckLog(EXPECTED_SHOW_OPTIONS, 'Nothing');
+end;
+
+procedure TestTD2XOptions.TestProcessStream;
+begin
+  fSS.WriteString('unit Test');
+  CheckFalse(fOpts.ProcessStream('(Stream)', fSS), 'Process Stream');
+  CheckLog(STREAM_PROCESSING, 'Process Stream');
+
+  fSS.WriteString('; end.');
+  Check(fOpts.ProcessStream('(Stream)', fSS), 'Process Stream');
+  CheckLog(STREAM_PROCESSING, 'Process Stream');
+end;
+
+procedure TestTD2XOptions.TestRecurse;
+begin
+  CheckFalse(fOpts.Recurse, 'Recurse Default');
+end;
+
+procedure TestTD2XOptions.TestRecurseDirectory;
+begin
+  Check(fOpts.RecurseDirectory('', 'Test*.pas', false), 'Recurse Directory');
+  CheckLog(RECURSE_PROCESSING, 'Recurse Directory');
+end;
+
+{ TestTD2XOptionsSpecific }
+
+procedure TestTD2XOptionsSpecific.TestCountChildren;
+begin
+  Check(ParseOption('!!'), 'Return Value 1');
+  Check(ParseOption('C'), 'Return Value 2');
+  fSB.Clear;
+
+  Check(fOpts.ProcessFile('TestUnit.pas'), 'Process Unit');
+  CheckLog('', 'Process Unit');
+end;
+
+procedure TestTD2XOptionsSpecific.TestNotSupported;
+begin
+  Check(ParseOption('!!'), 'Return Value 1');
+  Check(ParseOption('G'), 'Return Value 2');
+  Check(ParseOption('N'), 'Return Value 3');
+  fSB.Clear;
+
+  Check(fOpts.ProcessFile('TestUnit.pas'), 'Process Unit');
+  CheckLog('', 'Process Unit');
+end;
+
+procedure TestTD2XOptionsSpecific.TestWriteDefines;
+begin
+  Check(ParseOption('!!'), 'Return Value 1');
+  Check(ParseOption('W'), 'Return Value 2');
+  fSB.Clear;
+
+  Check(fOpts.ProcessFile('TestUnit.pas'), 'Process Unit');
+  CheckLog('', 'Process Unit');
+end;
+
 initialization
 
 RegisterTests('Options', [TestTD2XOptionEnums.Suite, TestTD2XOptionGeneral.Suite,
-    TestTD2XFileOptions.Suite, TestTD2XRunOptions.Suite, TestTD2XRunOptsAll.Suite,
-    TestTD2XRunOptsGeneral.Suite]);
+    TestTD2XFileOptions.Suite, TestTD2XOptions.Suite, TestTD2XOptionsAll.Suite,
+    TestTD2XOptionsGeneral.Suite, TestTD2XOptionsSpecific.Suite, TestTD2XRunOptions.Suite]);
 
 end.

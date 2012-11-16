@@ -109,8 +109,6 @@ type
 
     procedure InitParser;
 
-    function ProcessStream(pStream: TStringStream): Boolean;
-
     function GetRecurse: Boolean;
     function GetDefines: TStringList;
 
@@ -124,6 +122,7 @@ type
     procedure BeginResults(pNodename: string; pPer: TD2XResultPer);
     procedure EndResults(pFilename: string; pPer: TD2XResultPer);
 
+    function ProcessStream(pFilename: string; pStream: TStringStream): Boolean;
     function ProcessInput: Boolean;
     function ProcessFile(pFilename: string): Boolean;
     function ProcessDirectory(pDir, pWildCards: string): Boolean;
@@ -423,8 +422,7 @@ var
   lFile: string;
 begin
   Result := False;
-  fFilename := pFilename;
-  lFile := fFileOpts.BaseFileOrDir(fFilename);
+  lFile := fFileOpts.BaseFileOrDir(pFilename);
   if FileExists(lFile) then
   begin
     lSS := TStringStream.Create;
@@ -439,7 +437,7 @@ begin
         end;
       end;
 
-      Result := ProcessStream(lSS);
+      Result := ProcessStream(pFilename, lSS);
     finally
       FreeAndNil(lSS);
     end;
@@ -464,8 +462,7 @@ begin
       FreeAndNil(lIS);
     end;
 
-    fFilename := '(Input)';
-    Result := ProcessStream(lSS);
+    Result := ProcessStream('(Input)', lSS);
   finally
     FreeAndNil(lSS);
   end;
@@ -799,14 +796,14 @@ begin
   Result := fFileOpts.ConfigFileOrExtn(pFileOrExtn);
 end;
 
-function TD2XOptions.ProcessStream(pStream: TStringStream): Boolean;
+function TD2XOptions.ProcessStream(pFilename: string; pStream: TStringStream): Boolean;
 var
   lTimer: TStopwatch;
-  lFile: string;
+  lContent: string;
   lP: TD2XProcessor;
 begin
   if fElapsedMode.Value <> emNone then
-    Log('Processing %s ... ', [fFilename], False);
+    Log('Processing %s ... ', [pFilename], False);
   lTimer := TStopwatch.StartNew;
   try
     InitParser;
@@ -814,19 +811,20 @@ begin
       SetProxy;
 
     Result := False;
-    lFile := pStream.DataString;
+    lContent := pStream.DataString;
 
-    if ContainsText(LeftStr(lFile, 16), '<') then
+    if ContainsText(LeftStr(lContent, 16), '<') then
       Exit;
 
     BeginResults('D2X_File', rpFile);
     fXmlHandler.HasFiles := True;
 
+    fFilename := pFilename;
     for lP in fProcs do
-      lP.BeginFile(fFilename);
+      lP.BeginFile(pFilename);
 
     try
-      fParser.ProcessString(fFilename, lFile);
+      fParser.ProcessString(pFilename, lContent);
       Result := True;
     except
       on E: Exception do
@@ -838,9 +836,9 @@ begin
     end;
 
     for lP in fProcs do
-      lP.EndFile(fFilename);
+      lP.EndFile(pFilename);
 
-    EndResults(fFilename, rpFile);
+    EndResults(pFilename, rpFile);
   finally
     lTimer.Stop;
     case fElapsedMode.Value of

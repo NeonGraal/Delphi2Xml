@@ -190,6 +190,7 @@ begin
   fCurrent.Method := '';
   fCurrent.Children := 0;
   fStack := TStack<TMethodCount>.Create;
+  pInput;
 end;
 
 constructor TD2XCountHandler.Create;
@@ -262,6 +263,7 @@ end;
 procedure TD2XCountHandler.EndFile(pFile: string; pOutput: TD2XHandler.ThStreamCreator);
 begin
   FreeAndNil(fStack);
+  pOutput;
 end;
 
 procedure TD2XCountHandler.EndProcessing(pOutput: TD2XHandler.ThStreamCreator);

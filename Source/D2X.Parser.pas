@@ -1677,7 +1677,7 @@ procedure TD2XDefinesParser.MainUsedUnitExpression;
 begin
   fLastTokens := '';
   inherited;
-  DoAddText;
+  DoAddAttribute('file');
 end;
 
 procedure TD2XDefinesParser.NextToken;

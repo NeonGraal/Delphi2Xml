@@ -123,12 +123,12 @@ var
   pFilename: string;
 begin
   pFilename := 'TestMainUsedUnitExpression';
-  pContents := 'program Test; uses Test2; begin end.';
+  pContents := 'program Test; uses Test2 in ''Test2.pas''; begin end.';
 
   FD2XDefinesParser.ProcessString(pFilename, pContents);
 
   CheckText('Test2', 'Main Used Unit Name');
-  CheckAttribute('', '', 'Blank');
+  CheckAttribute('file', '''Test2.pas''', 'Blank');
 end;
 
 procedure TestTD2XDefinesParser.TestParseFile;
@@ -238,8 +238,8 @@ begin
 
   FD2XUsesParser.ProcessString(pFilename, pContents);
 
-  CheckText('''Test2.pas''', 'Main Used File Name');
-  CheckAttribute('', '', 'Blank');
+  CheckText('Test2', 'Main Used File Name');
+  CheckAttribute('file', '''Test2.pas''', 'Blank');
 end;
 
 { TestTD2XFullParser }
