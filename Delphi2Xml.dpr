@@ -32,7 +32,7 @@ begin
   try
     sOut := THandleStream.Create(GetStdHandle(STD_OUTPUT_HANDLE));
     opts := TD2XRunOptions.Create;
-    opts.L.JoinLog(TD2XLogger.Create(sOut));
+    opts.JoinLog(TD2XLogger.Create(sOut));
     bOk := True;
     for i := 1 to ParamCount do
       bOk := opts.ProcessParam(ParamStr(i), 'Param', i) and bOk;

@@ -15,7 +15,7 @@ type
     procedure TearDown; override;
   end;
 
-  TTestBoolFlag = class(TInterfacedObject, IParamFlag)
+  TTestBoolFlag = class(TInterfacedObject, ID2XFlag)
   private
     fFlag: Boolean;
 
@@ -826,7 +826,7 @@ end;
 
 procedure TParamsTestCase.TearDown;
 begin
-  fParams := nil;
+  FreeAndNil(fParams);
 
   inherited;
 end;
@@ -999,14 +999,14 @@ begin
   inherited;
 
   fOpts := TTestRunOptions.Create;
-  fOpts.L.StartLog(fLog);
+  fOpts.JoinLog(fLog);
 
   fIdx := 0;
 end;
 
 procedure TestTD2XRunOptions.TearDown;
 begin
-  fOpts := nil;
+  FreeAndNil(fOpts);
 
   inherited;
 end;
@@ -1513,7 +1513,7 @@ end;
 
 procedure TOptionsTestCase.TearDown;
 begin
-  fOpts := nil;
+  FreeAndNil(fOpts);
 
   inherited;
 end;

@@ -16,7 +16,7 @@ uses
 type
   TD2XProcessor = class abstract(TD2XLogger)
   public
-    constructor Create(pActive: IParamFlag);
+    constructor Create(pActive: ID2XFlag);
     destructor Destroy; override;
 
     function UseProxy: Boolean; virtual;
@@ -43,7 +43,7 @@ type
     procedure LexerInclude(const pFile: string; pX, pY: Integer); virtual;
 
   protected
-    fActive: IParamFlag;
+    fActive: ID2XFlag;
 
   end;
 
@@ -81,7 +81,7 @@ begin
   Result := True;
 end;
 
-constructor TD2XProcessor.Create(pActive: IParamFlag);
+constructor TD2XProcessor.Create(pActive: ID2XFlag);
 begin
   inherited Create;
 

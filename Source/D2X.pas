@@ -26,7 +26,15 @@ type
     procedure Log(pFmt: string; pArgs: array of const; pLine: Boolean = True);
   end;
 
-  TD2XLogger = class(TInterfacedObject, ID2XLogger)
+  TD2XInterfaced = class(TObject, IInterface)
+  protected
+    function QueryInterface(const IID: TGUID; out Obj): HResult; stdcall;
+    function _AddRef: Integer; stdcall;
+    function _Release: Integer; stdcall;
+
+  end;
+
+  TD2XLogger = class(TD2XInterfaced, ID2XLogger)
   private
     fMyWriter: TTextWriter;
     fLog: TTextWriter;
@@ -49,8 +57,6 @@ type
     procedure JoinLog(pLogger: ID2XLogger);
     procedure Log(pFmt: string; pArgs: array of const; pLine: Boolean = True);
 
-    procedure Lock;
-    procedure Unlock;
   end;
 
   TD2XCheckRef = reference to function: Boolean;
@@ -125,6 +131,11 @@ begin
   Result := Copy(lV.ToString, 3, 99);
 end;
 
+class function TD2X.Zero<T>: T;
+begin
+  Result := TValue.Empty.AsType<T>;
+end;
+
 { TD2XLogger }
 
 constructor TD2XLogger.Create;
@@ -174,11 +185,6 @@ end;
 procedure TD2XLogger.JoinLog(pLogger: ID2XLogger);
 begin
   fLogger := pLogger;
-end;
-
-procedure TD2XLogger.Lock;
-begin
-  _AddRef;
 end;
 
 procedure TD2XLogger.Log(pFmt: string; pArgs: array of const; pLine: Boolean);
@@ -232,14 +238,24 @@ begin
   fLogger := nil;
 end;
 
-procedure TD2XLogger.Unlock;
+{ TD2XInterfaced }
+
+function TD2XInterfaced.QueryInterface(const IID: TGUID; out Obj): HResult;
 begin
-  _Release;
+  if GetInterface(IID, Obj) then
+    Result := 0
+  else
+    Result := E_NOINTERFACE;
 end;
 
-class function TD2X.Zero<T>: T;
+function TD2XInterfaced._AddRef: Integer;
 begin
-  Result := TValue.Empty.AsType<T>;
+  Result := -1;
+end;
+
+function TD2XInterfaced._Release: Integer;
+begin
+  Result := -1;
 end;
 
 end.

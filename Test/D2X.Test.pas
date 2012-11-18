@@ -33,7 +33,7 @@ type
 
   TLoggerTestCase = class(TStringTestCase)
   protected
-    fLog: ID2XLogger;
+    fLog: TD2XLogger;
 
     procedure CheckLog(pExp, pLabel: string);
   public
@@ -86,6 +86,7 @@ type
   TestTD2XLogger = class(TStringTestCase)
   strict private
     FD2XLogger: TD2XLogger;
+
   public
     procedure SetUp; override;
     procedure TearDown; override;
@@ -123,8 +124,7 @@ end;
 
 procedure TestTD2X.TearDown;
 begin
-  fD2X.Free;
-  fD2X := nil;
+  FreeAndNil(fD2X);
 end;
 
 procedure TestTD2X.TestToLabel;
@@ -200,8 +200,7 @@ end;
 
 procedure TestTD2XLogger.TearDown;
 begin
-  FD2XLogger.Free;
-  FD2XLogger := nil;
+  FreeAndNil(FD2XLogger);
 
   inherited;
 end;
@@ -439,25 +438,12 @@ begin
   lLogBuilder := TStringBuilder.Create;
   try
     FD2XLogger := TD2XLogger.Create(lMyBuilder);
-    FD2XLogger.Log('Log check 1', [], False);
-    CheckString(lMyBuilder, 'Log check 1', 'Log check 1');
-    CheckString(lLogBuilder, '', 'Log check 1');
+    FD2XLogger.Log('Log check', [], False);
+    CheckString(lMyBuilder, 'Log check', 'Log check');
 
-    pLogger := TD2XLogger.Create(lLogBuilder);
-
-    pLogger.Log('Log check 2', [], False);
-    CheckString(lLogBuilder, 'Log check 2', 'Log check 2');
-    CheckString(lMyBuilder, '', 'Log check 2');
-
-    FD2XLogger.StartLog(pLogger);
-    FD2XLogger.Log('Log simple 1', [], False);
-    CheckString(lLogBuilder, 'Log simple 1', 'Log simple 1');
-    CheckString(lMyBuilder, '', 'Log simple 1');
-
-    FD2XLogger.JoinLog(nil);
-    FD2XLogger.Log('Log simple 2', [], False);
-    CheckString(lLogBuilder, '', 'Log simple 2');
-    CheckString(lMyBuilder, '', 'Log simple 2');
+    pLogger := TD2XLogger.Create(FD2XLogger);
+    FD2XLogger.Log('Log simple', [], False);
+    CheckString(lMyBuilder, 'Log simple', 'Log simple');
   finally
     lLogBuilder.Free;
     lMyBuilder.Free;
@@ -562,12 +548,10 @@ begin
     CheckLogs('Log check', 0);
 
     pLogger1 := TD2XLogger.Create(lLogBuilder1);
-    pLogger1.Lock;
     pLogger1.Log('Log check 1', [], False);
     CheckLogs('Log check 1', 1);
 
     pLogger2 := TD2XLogger.Create(lLogBuilder2);
-    pLogger2.Lock;
     pLogger2.Log('Log check 2', [], False);
     CheckLogs('Log check 2', 2);
 
@@ -591,8 +575,8 @@ begin
     FD2XLogger.Log('Log simple 5', [], False);
     CheckLogs('Log simple 5', 0);
   finally
-    pLogger1.Unlock;
-    pLogger2.Unlock;
+    pLogger1.Free;
+    pLogger2.Free;
     lLogBuilder2.Free;
     lLogBuilder1.Free;
     lMyBuilder.Free;
@@ -692,7 +676,7 @@ end;
 
 procedure TLoggerTestCase.TearDown;
 begin
-  fLog := nil;
+  FreeAndNil(fLog);
 
   inherited;
 end;

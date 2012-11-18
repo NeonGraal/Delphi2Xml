@@ -23,7 +23,7 @@ type
   strict private
     FD2XProcessor: TD2XLogProcessor;
 
-    fActive: IParamFlag;
+    fActive: ID2XFlag;
   public
     procedure SetUp; override;
     procedure TearDown; override;
@@ -41,7 +41,7 @@ type
     FHandler: TD2XHandlerTester;
     FD2XProcessor: TD2XHandlerProcessor;
 
-    fActive: IParamFlag;
+    fActive: ID2XFlag;
   public
     procedure SetUp; override;
     procedure TearDown; override;
@@ -84,10 +84,8 @@ end;
 
 procedure TestTD2XHandlerProcessor.TearDown;
 begin
-  FD2XProcessor.Free;
-  FD2XProcessor := nil;
-  FHandler.Free;
-  FHandler := nil;
+  FreeAndNil(FD2XProcessor);
+  FreeAndNil(FHandler);
 
   inherited;
 end;

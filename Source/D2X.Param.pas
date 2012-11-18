@@ -11,7 +11,7 @@ uses
 type
   EInvalidParam = class(Exception);
 
-  IParamFlag = interface
+  ID2XFlag = interface
     ['{1986FC52-3D32-4988-BE5E-9C936D0890C5}']
     function GetFlag: Boolean;
     procedure SetFlag(pVal: Boolean);
@@ -19,7 +19,7 @@ type
     property Flag: Boolean read GetFlag write SetFlag;
   end;
 
-  TD2XParam = class(TInterfacedObject)
+  TD2XParam = class(TD2XInterfaced)
   public
     constructor Create(pCode, pLabel, pSample, pDescr: string;
       pParser: TD2XStringCheckRef); virtual;
@@ -90,12 +90,13 @@ type
     procedure Zero; override;
 
   protected
+    fFormatter: TspFormatter;
+
     function GetFormatted(pDefault: Boolean): string; override;
 
   private
     fDefault: T;
     fConverter: TspConverter;
-    fFormatter: TspFormatter;
     fValidator: TspValidator;
     fValue: T;
 
@@ -107,7 +108,7 @@ type
     property Value: T read fValue write SetValue;
   end;
 
-  TD2XBooleanParam = class(TD2XSingleParam<Boolean>, IParamFlag)
+  TD2XBooleanParam = class(TD2XSingleParam<Boolean>, ID2XFlag)
   public
     constructor CreateParam(pCode, pLabel, pSample, pDescr: string; pDefault: Boolean;
       pConverter: TD2XSingleParam<Boolean>.TspConverter;
@@ -138,7 +139,7 @@ type
     function FormatString(pVal: string): string;
   end;
 
-  TD2XFlaggedStringParam = class(TD2XSingleParam<string>, IParamFlag)
+  TD2XFlaggedStringParam = class(TD2XSingleParam<string>, ID2XFlag)
   public type
     TfspFormatter = reference to function(pFlag: Boolean; pVal: string): string;
 
@@ -163,7 +164,7 @@ type
     fFlagDefault: Boolean;
     fFlag: Boolean;
     fStrConverter: TD2XSingleParam<string>.TspConverter;
-    fFormatter: TfspFormatter;
+    fFlagFormatter: TfspFormatter;
 
     function ConvertString(pStr: string; pDflt: string; out pVal: string): Boolean;
     function FormatFlagString(pFlag: Boolean; pVal: string): string;
@@ -176,7 +177,7 @@ type
     property FlagValue: Boolean read fFlag write fFlag;
   end;
 
-  TD2XDefinesParam = class(TD2XSingleParam<Boolean>, IParamFlag)
+  TD2XDefinesParam = class(TD2XSingleParam<Boolean>, ID2XFlag)
   public
     constructor CreateParam(pCode, pLabel, pSample, pDescr: string; pDefault: Boolean;
       pConverter: TD2XSingleParam<Boolean>.TspConverter;
@@ -203,7 +204,7 @@ type
     property Defines: TStringList read fDefines;
   end;
 
-  TD2XBoolFlag = class(TInterfacedObject, IParamFlag)
+  TD2XBoolFlag = class(TInterfacedObject, ID2XFlag)
   private
     fFlag: Boolean;
     function GetFlag: Boolean;
@@ -564,9 +565,9 @@ begin
   fStrConverter := pStrConverter;
   fFlagDefault := pFlagDefault;
   if Assigned(pFormatter) then
-    fFormatter := pFormatter
+    fFlagFormatter := pFormatter
   else
-    fFormatter := FormatFlagString;
+    fFlagFormatter := FormatFlagString;
 
   inherited CreateParam(pCode, pLabel, pSample, pDescr, pStrDefault, ConvertString,
     FormatString, pStrValidator);
@@ -608,9 +609,9 @@ end;
 function TD2XFlaggedStringParam.GetFormatted(pDefault: Boolean): string;
 begin
   if pDefault then
-    Result := fFormatter(fFlagDefault, fDefault)
+    Result := fFlagFormatter(fFlagDefault, fDefault)
   else
-    Result := fFormatter(fFlag, fValue);
+    Result := fFlagFormatter(fFlag, fValue);
 end;
 
 function TD2XFlaggedStringParam.GetSample: string;

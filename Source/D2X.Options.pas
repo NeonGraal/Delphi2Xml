@@ -134,7 +134,7 @@ type
     property Defines: TStringList read GetDefines;
   end;
 
-  TD2XRunOptions = class(TObject, ID2XLogger)
+  TD2XRunOptions = class(TD2XLogger)
   private
     function ProcessParamsFile(pFileOrExtn: string): Boolean;
 
@@ -142,14 +142,13 @@ type
     fOpts: TD2XOptions;
 
   public
-    constructor Create;
+    constructor Create; override;
     destructor Destroy; override;
 
     procedure EndProcessing;
 
     function ProcessParam(pStr, pFrom: string; pIdx: Integer): Boolean;
 
-    property L: TD2XOptions read fOpts implements ID2XLogger;
   end;
 
 function ConvertDir(pStr, pDflt: string; out pVal: string): Boolean;
@@ -1005,7 +1004,7 @@ function TD2XFileOptions.ConfigFileOrExtn(pFileOrExtn: string): string;
   end;
 
 begin
-  if IParamFlag(fConfigBase).Flag then
+  if ID2XFlag(fConfigBase).Flag then
     Result := fConfigBase.Value + GlobalFileOrExtn(pFileOrExtn)
   else
     Result := GlobalFileOrExtn(pFileOrExtn);
@@ -1032,7 +1031,7 @@ function TD2XFileOptions.LogFileOrExtn(pFileOrExtn: string): string;
   end;
 
 begin
-  if IParamFlag(fLogBase).Flag then
+  if ID2XFlag(fLogBase).Flag then
     Result := ForcePath(fLogBase.Value + GlobalFileOrExtn(pFileOrExtn))
   else
     Result := ForcePath(GlobalFileOrExtn(pFileOrExtn));
@@ -1059,11 +1058,12 @@ begin
   inherited;
 
   fOpts := TD2XOptions.Create;
+  fOpts.JoinLog(Self);
 end;
 
 destructor TD2XRunOptions.Destroy;
 begin
-  fOpts := nil;
+  FreeAndNil(fOpts);
 
   inherited;
 end;
@@ -1121,7 +1121,7 @@ begin
     fOpts.EndResults(pFrom + '-' + IntToStr(pIdx), rpParam);
   except
     on E: Exception do
-      L.Log('EXCEPTION (%s) processing "%s" : %s', [E.ClassName, pStr, E.Message]);
+      Log('EXCEPTION (%s) processing "%s" : %s', [E.ClassName, pStr, E.Message]);
   end;
 end;
 

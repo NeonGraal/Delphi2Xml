@@ -48,6 +48,7 @@ implementation
 uses
   System.Classes,
   System.Generics.Collections,
+  System.SysUtils,
   TestFramework;
 
 type
@@ -82,8 +83,7 @@ end;
 
 procedure TestTD2XHandler.TearDown;
 begin
-  FD2XHandler.Free;
-  FD2XHandler := nil;
+  FreeAndNil(FD2XHandler);
 end;
 
 procedure TestTD2XHandler.TestBeginProcessing;

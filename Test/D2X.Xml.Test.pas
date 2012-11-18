@@ -138,8 +138,7 @@ end;
 
 procedure TestTD2XmlNode.TearDown;
 begin
-  FD2XmlNode.Free;
-  FD2XmlNode := nil;
+  FreeAndNil(FD2XmlNode);
 end;
 
 procedure TestTD2XmlNode.TestAddAttribute;
@@ -308,8 +307,7 @@ end;
 
 procedure TestTD2XmlDoc.TearDown;
 begin
-  FD2XmlDoc.Free;
-  FD2XmlDoc := nil;
+  FreeAndNil(FD2XmlDoc);
 end;
 
 procedure TestTD2XmlDoc.TestAddChild;
@@ -359,8 +357,7 @@ end;
 
 procedure TD2XmlDocTestCase.TearDown;
 begin
-  fDoc.Free;
-  fDoc := nil;
+  FreeAndNil(fDoc);
 
   inherited;
 end;

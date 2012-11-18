@@ -34,8 +34,8 @@ type
 
   TD2XHandlerProcessor = class(TD2XProcessor)
   public
-    constructor CreateHandler(pActive: IParamFlag; pHandler: TD2XHandler);
-    constructor CreateClass(pActive: IParamFlag; pHandler: TD2XHandlerClass);
+    constructor CreateHandler(pActive: ID2XFlag; pHandler: TD2XHandler);
+    constructor CreateClass(pActive: ID2XFlag; pHandler: TD2XHandlerClass);
 
     function UseProxy: Boolean; override;
 
@@ -161,7 +161,7 @@ begin
   Result := not fActive.Flag or fHandler.CheckBeforeMethod(pMethod);
 end;
 
-constructor TD2XHandlerProcessor.CreateClass(pActive: IParamFlag;
+constructor TD2XHandlerProcessor.CreateClass(pActive: ID2XFlag;
   pHandler: TD2XHandlerClass);
 begin
   inherited Create(pActive);
@@ -169,7 +169,7 @@ begin
   fHandler := pHandler.Create;
 end;
 
-constructor TD2XHandlerProcessor.CreateHandler(pActive: IParamFlag; pHandler: TD2XHandler);
+constructor TD2XHandlerProcessor.CreateHandler(pActive: ID2XFlag; pHandler: TD2XHandler);
 begin
   inherited Create(pActive);
 
