@@ -26,20 +26,21 @@ type
     procedure BeginProcessing(pInput: ThStreamCreator); virtual;
     procedure EndProcessing(pOutput: ThStreamCreator); virtual;
 
-    procedure BeginFile(pFile: string; pInput: ThStreamCreator); virtual;
-    procedure EndFile(pFile: string; pOutput: ThStreamCreator); virtual;
+    procedure BeginFile(pFile: String; pInput: ThStreamCreator); virtual;
+    procedure EndFile(pFile: String; pOutput: ThStreamCreator); virtual;
 
     procedure BeginResults; virtual;
     procedure EndResults(pOutput: ThStreamCreator); virtual;
 
-    function CheckBeforeMethod(pMethod: string): Boolean; virtual;
-    function CheckAfterMethod(pMethod: string): Boolean; virtual;
+    function CheckBeforeMethod(pMethod: String): Boolean; virtual;
+    function CheckAfterMethod(pMethod: String): Boolean; virtual;
 
-    procedure BeginMethod(pMethod: string); virtual;
-    procedure EndMethod(pMethod: string); virtual;
+    procedure BeginMethod(pMethod: String); virtual;
+    procedure EndMethod(pMethod: String); virtual;
 
-    procedure ParserMessage(const pTyp: TMessageEventType; const pMsg: string; pX, pY: Integer); virtual;
-    procedure LexerInclude(const pFile: string; pX, pY: Integer); virtual;
+    procedure ParserMessage(const pTyp: TMessageEventType; const pMsg: String;
+      pX, pY: Integer); virtual;
+    procedure LexerInclude(const pFile: String; pX, pY: Integer); virtual;
   end;
 
   TD2XHandlerClass = class of TD2XHandler;
@@ -50,17 +51,21 @@ implementation
 
 function MakeStream(pS: TStream): TD2XHandler.ThStreamCreator;
 begin
-  Result := function: TStream begin pS.Position := 0; Result := pS; end;
+  Result := function: TStream
+    begin
+      pS.Position := 0;
+      Result := pS;
+    end;
 end;
 
 { TD2XHandler }
 
-procedure TD2XHandler.BeginFile(pFile: string; pInput: ThStreamCreator);
+procedure TD2XHandler.BeginFile(pFile: String; pInput: ThStreamCreator);
 begin
 
 end;
 
-procedure TD2XHandler.BeginMethod(pMethod: string);
+procedure TD2XHandler.BeginMethod(pMethod: String);
 begin
 
 end;
@@ -75,12 +80,12 @@ begin
 
 end;
 
-function TD2XHandler.CheckAfterMethod(pMethod: string): Boolean;
+function TD2XHandler.CheckAfterMethod(pMethod: String): Boolean;
 begin
   Result := True;
 end;
 
-function TD2XHandler.CheckBeforeMethod(pMethod: string): Boolean;
+function TD2XHandler.CheckBeforeMethod(pMethod: String): Boolean;
 begin
   Result := True;
 end;
@@ -95,12 +100,12 @@ begin
 
 end;
 
-procedure TD2XHandler.EndFile(pFile: string; pOutput: ThStreamCreator);
+procedure TD2XHandler.EndFile(pFile: String; pOutput: ThStreamCreator);
 begin
 
 end;
 
-procedure TD2XHandler.EndMethod(pMethod: string);
+procedure TD2XHandler.EndMethod(pMethod: String);
 begin
 
 end;
@@ -115,13 +120,13 @@ begin
 
 end;
 
-procedure TD2XHandler.LexerInclude(const pFile: string; pX, pY: Integer);
+procedure TD2XHandler.LexerInclude(const pFile: String; pX, pY: Integer);
 begin
 
 end;
 
 procedure TD2XHandler.ParserMessage(const pTyp: TMessageEventType;
-  const pMsg: string; pX, pY: Integer);
+  const pMsg: String; pX, pY: Integer);
 begin
 
 end;

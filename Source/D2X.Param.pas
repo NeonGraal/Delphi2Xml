@@ -732,7 +732,8 @@ begin
     end;
 end;
 
-constructor TD2XDefinesParam.CreateDefines(pCode, pLabel: string; pDefinesFileName: TD2XNamedStringRef);
+constructor TD2XDefinesParam.CreateDefines(pCode, pLabel: string;
+  pDefinesFileName: TD2XNamedStringRef);
 begin
   fDefines := TStringList.Create;
 

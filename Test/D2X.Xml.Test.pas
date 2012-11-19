@@ -99,7 +99,7 @@ type
     constructor Create;
   end;
 
-{ TestTD2XmlNode }
+  { TestTD2XmlNode }
 
 procedure TestTD2XmlNode.SetUp;
 begin
@@ -111,7 +111,7 @@ end;
 procedure TestTD2XmlNode.TestAddChild;
 var
   ReturnValue: TD2XmlNode;
-  pTag: string;
+  pTag: String;
 begin
   pTag := 'Child';
 
@@ -144,7 +144,7 @@ end;
 procedure TestTD2XmlNode.TestAddAttribute;
 var
   ReturnValue: TD2XmlNode;
-  pTag: string;
+  pTag: String;
 begin
   pTag := 'Attr';
 
@@ -206,7 +206,7 @@ end;
 procedure TestTD2XmlElement.TestAddChild;
 var
   ReturnValue: TD2XmlNode;
-  pTag: string;
+  pTag: String;
 begin
   pTag := 'Child';
 
@@ -219,7 +219,7 @@ end;
 procedure TestTD2XmlElement.TestAddChildren;
 var
   ReturnValue: TD2XmlNode;
-  pTag: string;
+  pTag: String;
 begin
   pTag := 'Child1';
   ReturnValue := FD2XmlElement.AddChild(pTag);
@@ -244,7 +244,7 @@ end;
 procedure TestTD2XmlElement.TestAddAttribute;
 var
   ReturnValue: TD2XmlNode;
-  pTag: string;
+  pTag: String;
 begin
   pTag := 'Attr';
 
@@ -257,7 +257,7 @@ end;
 procedure TestTD2XmlElement.TestAddAttributes;
 var
   ReturnValue: TD2XmlNode;
-  pTag: string;
+  pTag: String;
 begin
   pTag := 'Attr1';
   ReturnValue := FD2XmlElement.AddAttribute(pTag);
@@ -313,7 +313,7 @@ end;
 procedure TestTD2XmlDoc.TestAddChild;
 var
   ReturnValue: TD2XmlNode;
-  pTag: string;
+  pTag: String;
 begin
   pTag := 'Child';
 
@@ -326,7 +326,7 @@ end;
 procedure TestTD2XmlDoc.TestGetIndentedXml;
 var
   ReturnValue: TStringStream;
-  lNode : TD2XmlNode;
+  lNode: TD2XmlNode;
 begin
   lNode := FD2XmlDoc.AddChild('Test1');
   lNode.AddChild('Test2');
@@ -367,7 +367,8 @@ end;
 procedure TD2XmlTestCase.CheckDoc(pExpected, pLabel: String;
   pXml: TStringStream);
 begin
-  CheckEqualsString('<?xml version="1.0"?> ' + pExpected, ReduceString(pXml.DataString), pLabel + ' Document');
+  CheckEqualsString('<?xml version="1.0"?> ' + pExpected, ReduceString(pXml.DataString),
+    pLabel + ' Document');
 end;
 
 procedure TD2XmlTestCase.CheckXml(pExpected, pLabel: String;

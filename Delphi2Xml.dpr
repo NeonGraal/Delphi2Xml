@@ -21,11 +21,11 @@ uses
 var
   opts: TD2XRunOptions;
   i: Integer;
-  bOk : Boolean;
+  bOk: Boolean;
   sOut: THandleStream;
 
 begin
-//  CoInitializeEx(nil, 0);
+  //  CoInitializeEx(nil, 0);
   sOut := nil;
   opts := nil;
 
@@ -39,11 +39,11 @@ begin
     opts.EndProcessing;
     if not bOk then
       with TStreamWriter.Create(sOut) do
-      try
-        WriteLine('Errors ocurred processing parameters');
-      finally
-        Free;
-      end;
+        try
+          WriteLine('Errors ocurred processing parameters');
+        finally
+          Free;
+        end;
   finally
     FreeAndNil(opts);
     FreeAndNil(sOut);

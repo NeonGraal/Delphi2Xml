@@ -177,13 +177,13 @@
 					</Source>
 				</Delphi.Personality>
 				<Deployment>
+					<DeployFile LocalName="Delphi2XmlTests" Configuration="Debug" Class="ProjectOutput">
+						<Platform Name="All Platforms"/>
+					</DeployFile>
 					<DeployFile LocalName="Delphi2XmlTests.rsm" Configuration="Debug" Class="DebugSymbols">
 						<Platform Name="Win64">
 							<RemoteName>Delphi2XmlTests.rsm</RemoteName>
 						</Platform>
-					</DeployFile>
-					<DeployFile LocalName="Delphi2XmlTests" Configuration="Debug" Class="ProjectOutput">
-						<Platform Name="All Platforms"/>
 					</DeployFile>
 					<DeployFile LocalName="$(BDS)\Redist\osx32\libcgunwind.1.0.dylib" Class="DependencyModule">
 						<Platform Name="OSX32"/>

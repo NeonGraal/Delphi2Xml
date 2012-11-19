@@ -53,7 +53,6 @@ type
     fActive: ID2XFlag;
   end;
 
-
 implementation
 
 uses

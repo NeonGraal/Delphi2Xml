@@ -74,7 +74,7 @@ type
     procedure TestMainUsedUnitExpression;
   end;
 
-{ TestTD2XDefinesParser }
+  { TestTD2XDefinesParser }
 
 procedure TestTD2XDefinesParser.SetUp;
 begin
@@ -256,7 +256,6 @@ begin
   FD2XFullParser := nil;
 end;
 
-
 procedure TestTD2XFullParser.TestMainUnitName;
 var
   pContents: string;
@@ -346,7 +345,7 @@ end;
 initialization
 
 // Register any test cases with the test runner
-RegisterTests('Parser', [TestTD2XDefinesParser.Suite, TestTD2XUsesParser.Suite ,
-      TestTD2XFullParser.Suite ]);
+RegisterTests('Parser', [TestTD2XDefinesParser.Suite, TestTD2XUsesParser.Suite,
+    TestTD2XFullParser.Suite]);
 
 end.

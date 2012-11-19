@@ -173,7 +173,7 @@ begin
 end;
 
 constructor TD2XHandlerProcessor.CreateHandler(pActive: ID2XFlag; pHandler: TD2XHandler;
-pMine: Boolean);
+  pMine: Boolean);
 begin
   inherited Create(pActive);
 

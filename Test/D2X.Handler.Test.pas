@@ -29,8 +29,8 @@ type
     function UseProxy: Boolean; override;
     procedure BeginProcessing(pInput: TD2XHandler.ThStreamCreator); override;
     procedure EndProcessing(pOutput: TD2XHandler.ThStreamCreator); override;
-    procedure BeginFile(pFile: string; pInput: TD2XHandler.ThStreamCreator); override;
-    procedure EndFile(pFile: string; pOutput: TD2XHandler.ThStreamCreator); override;
+    procedure BeginFile(pFile: String; pInput: TD2XHandler.ThStreamCreator); override;
+    procedure EndFile(pFile: String; pOutput: TD2XHandler.ThStreamCreator); override;
     procedure BeginResults; override;
     procedure EndResults(pOutput: TD2XHandler.ThStreamCreator); override;
     function CheckBeforeMethod(pMethod: String): Boolean; override;
@@ -38,8 +38,9 @@ type
     procedure BeginMethod(pMethod: String); override;
     procedure EndMethod(pMethod: String); override;
     procedure Copy(pFrom: TD2XHandler); override;
-    procedure ParserMessage(const pTyp: TMessageEventType; const pMsg: string; pX, pY: Integer); override;
-    procedure LexerInclude(const pFile: string; pX, pY: Integer); override;
+    procedure ParserMessage(const pTyp: TMessageEventType; const pMsg: String;
+      pX, pY: Integer); override;
+    procedure LexerInclude(const pFile: String; pX, pY: Integer); override;
 
   end;
 
@@ -73,7 +74,7 @@ type
     procedure TestCopy;
   end;
 
-{ TestTD2XHandler }
+  { TestTD2XHandler }
 
 procedure TestTD2XHandler.SetUp;
 begin
@@ -170,7 +171,7 @@ begin
   CalledBeginMethod := true;
 end;
 
-procedure TD2XHandlerTester.BeginFile(pFile: string; pInput: TD2XHandler.ThStreamCreator);
+procedure TD2XHandlerTester.BeginFile(pFile: String; pInput: TD2XHandler.ThStreamCreator);
 begin
   CalledBeginFile := true;
   if CreateStreams then
@@ -191,14 +192,14 @@ end;
 
 function TD2XHandlerTester.CheckAfterMethod(pMethod: String): Boolean;
 begin
-  CalledCheckAfterMethod := True;
+  CalledCheckAfterMethod := true;
 
   Result := inherited CheckAfterMethod(pMethod);
 end;
 
 function TD2XHandlerTester.CheckBeforeMethod(pMethod: String): Boolean;
 begin
-  CalledCheckBeforeMethod := True;
+  CalledCheckBeforeMethod := true;
 
   Result := inherited CheckBeforeMethod(pMethod);
 end;
@@ -218,7 +219,7 @@ begin
   CalledEndMethod := true;
 end;
 
-procedure TD2XHandlerTester.EndFile(pFile: string; pOutput: TD2XHandler.ThStreamCreator);
+procedure TD2XHandlerTester.EndFile(pFile: String; pOutput: TD2XHandler.ThStreamCreator);
 begin
   CalledEndFile := true;
   if CreateStreams then
@@ -239,20 +240,20 @@ begin
     pOutput;
 end;
 
-procedure TD2XHandlerTester.LexerInclude(const pFile: string; pX, pY: Integer);
+procedure TD2XHandlerTester.LexerInclude(const pFile: String; pX, pY: Integer);
 begin
   CalledLexerInclude := true;
 end;
 
 procedure TD2XHandlerTester.ParserMessage(const pTyp: TMessageEventType;
-  const pMsg: string; pX, pY: Integer);
+  const pMsg: String; pX, pY: Integer);
 begin
   CalledParserMessage := true;
 end;
 
 function TD2XHandlerTester.UseProxy: Boolean;
 begin
-  Result := True;
+  Result := true;
 end;
 
 initialization
