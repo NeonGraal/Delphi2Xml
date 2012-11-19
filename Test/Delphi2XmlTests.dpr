@@ -15,6 +15,7 @@ program Delphi2XmlTests;
 {$ENDIF}
 
 uses
+  FastMM4,
   GuiTestRunner,
   TextTestRunner,
   System.StrUtils,

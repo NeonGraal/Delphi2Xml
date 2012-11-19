@@ -22,7 +22,7 @@ type
   TestTD2XLogProcessor = class(TParserTestCase)
   strict private
     FD2XProcessor: TD2XLogProcessor;
-
+    fFlag: TD2XBoolFlag;
     fActive: ID2XFlag;
   public
     procedure SetUp; override;
@@ -36,12 +36,10 @@ type
     procedure TestParserMessage;
   end;
 
-  TestTD2XHandlerProcessor = class(TStringTestCase)
+  TestTD2XHandlerProcessor = class(TFlagTestCase)
   strict private
     FHandler: TD2XHandlerTester;
     FD2XProcessor: TD2XHandlerProcessor;
-
-    fActive: ID2XFlag;
   public
     procedure SetUp; override;
     procedure TearDown; override;
@@ -78,14 +76,12 @@ begin
   inherited;
 
   FHandler := TD2XHandlerTester.Create;
-  fActive := TD2XBoolFlag.Create;
-  FD2XProcessor := TD2XHandlerProcessor.CreateHandler(fActive, FHandler);
+  FD2XProcessor := TD2XHandlerProcessor.CreateHandler(fActive, FHandler, True);
 end;
 
 procedure TestTD2XHandlerProcessor.TearDown;
 begin
   FreeAndNil(FD2XProcessor);
-  FreeAndNil(FHandler);
 
   inherited;
 end;
@@ -353,14 +349,16 @@ procedure TestTD2XLogProcessor.SetUp;
 begin
   inherited;
 
-  fActive := TD2XBoolFlag.Create;
-
+  fFlag := TD2XBoolFlag.Create;
+  fActive := fFlag;
   FD2XProcessor := TD2XLogProcessor.Create(fActive);
 end;
 
 procedure TestTD2XLogProcessor.TearDown;
 begin
   FreeAndNil(FD2XProcessor);
+  fActive := nil;
+  FreeAndNil(fFlag);
 
   inherited;
 end;

@@ -141,14 +141,17 @@ end;
 
 procedure TestID2XLogger.TestJoinLog;
 var
-  pLogger: ID2XLogger;
+  pLogger: TD2XLogger;
   lSB: TStringBuilder;
 begin
+  lSB := nil;
+  pLogger := nil;
+
   fLog.Log('Log String', [], False);
   CheckBuilder('Log String', 'Check Logging');
 
-  lSB := TStringBuilder.Create;
   try
+    lSB := TStringBuilder.Create;
     pLogger := TD2XLogger.Create(lSB);
     pLogger.Log('Log String1', [], False);
     CheckString(lSB, 'Log String1', 'Check Logging 1');
@@ -166,6 +169,7 @@ begin
     CheckLog('Log String3', 'Check Logging 3');
     CheckString(lSB, '', 'Check Not Logging 3');
   finally
+    pLogger.Free;
     lSB.Free;
   end;
 end;
@@ -238,11 +242,13 @@ end;
 
 procedure TestTD2XLogger.TestStartLogLogger;
 var
-  pLogger: ID2XLogger;
+  pLogger: TD2XLogger;
   lLogBuilder: TStringBuilder;
 begin
-  lLogBuilder := TStringBuilder.Create;
+  lLogBuilder := nil;
+  pLogger := nil;
   try
+    lLogBuilder := TStringBuilder.Create;
     FD2XLogger.StartLog(fSB);
     FD2XLogger.Log('Log check 1', [], False);
     CheckBuilder('Log check 1', 'Log check 1');
@@ -264,6 +270,7 @@ begin
     CheckString(lLogBuilder, '', 'Log simple 2');
     CheckBuilder('', 'Log simple 2');
   finally
+    pLogger.Free;
     lLogBuilder.Free;
   end;
 end;
@@ -338,12 +345,15 @@ end;
 procedure TestTD2XLogger.TestStopLogLogger;
 var
   lMyBuilder: TStringBuilder;
-  pLogger: ID2XLogger;
+  pLogger: TD2XLogger;
   lLogBuilder: TStringBuilder;
 begin
-  lMyBuilder := TStringBuilder.Create;
-  lLogBuilder := TStringBuilder.Create;
+  lMyBuilder := nil;
+  lLogBuilder := nil;
+  pLogger := nil;
   try
+    lMyBuilder := TStringBuilder.Create;
+    lLogBuilder := TStringBuilder.Create;
     FD2XLogger.StartLog(lMyBuilder);
     FD2XLogger.Log('Log check 1', [], False);
     CheckString(lMyBuilder, 'Log check 1', 'Log check 1');
@@ -365,6 +375,7 @@ begin
     CheckString(lLogBuilder, '', 'Log simple 2');
     CheckString(lMyBuilder, '', 'Log simple 2');
   finally
+    pLogger.Free;
     lLogBuilder.Free;
     lMyBuilder.Free;
   end;
@@ -430,13 +441,17 @@ end;
 procedure TestTD2XLogger.TestCreateLogger;
 var
   lMyBuilder: TStringBuilder;
-  pLogger: ID2XLogger;
+  pLogger: TD2XLogger;
   lLogBuilder: TStringBuilder;
 begin
+  lMyBuilder := nil;
+  lLogBuilder := nil;
+  pLogger := nil;
+
   FD2XLogger.Free;
-  lMyBuilder := TStringBuilder.Create;
-  lLogBuilder := TStringBuilder.Create;
   try
+    lMyBuilder := TStringBuilder.Create;
+    lLogBuilder := TStringBuilder.Create;
     FD2XLogger := TD2XLogger.Create(lMyBuilder);
     FD2XLogger.Log('Log check', [], False);
     CheckString(lMyBuilder, 'Log check', 'Log check');
@@ -445,6 +460,7 @@ begin
     FD2XLogger.Log('Log simple', [], False);
     CheckString(lMyBuilder, 'Log simple', 'Log simple');
   finally
+    pLogger.Free;
     lLogBuilder.Free;
     lMyBuilder.Free;
   end;
@@ -485,12 +501,15 @@ end;
 procedure TestTD2XLogger.TestJoinLog;
 var
   lMyBuilder: TStringBuilder;
-  pLogger: ID2XLogger;
+  pLogger: TD2XLogger;
   lLogBuilder: TStringBuilder;
 begin
-  lMyBuilder := TStringBuilder.Create;
-  lLogBuilder := TStringBuilder.Create;
+  lMyBuilder := nil;
+  lLogBuilder := nil;
+  pLogger := nil;
   try
+    lMyBuilder := TStringBuilder.Create;
+    lLogBuilder := TStringBuilder.Create;
     FD2XLogger.StartLog(lMyBuilder);
     FD2XLogger.Log('Log check 1', [], False);
     CheckString(lMyBuilder, 'Log check 1', 'Log check 1');
@@ -512,6 +531,7 @@ begin
     CheckString(lLogBuilder, '', 'Log simple 2');
     CheckString(lMyBuilder, 'Log simple 2', 'Log simple 2');
   finally
+    pLogger.Free;
     lLogBuilder.Free;
     lMyBuilder.Free;
   end;
@@ -575,8 +595,8 @@ begin
     FD2XLogger.Log('Log simple 5', [], False);
     CheckLogs('Log simple 5', 0);
   finally
-    pLogger1.Free;
     pLogger2.Free;
+    pLogger1.Free;
     lLogBuilder2.Free;
     lLogBuilder1.Free;
     lMyBuilder.Free;

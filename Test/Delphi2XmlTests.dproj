@@ -56,7 +56,7 @@
 			<DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
 			<DCC_UnitSearchPath>$(BDS)\Source\DUnit\src;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
 			<DCC_UsePackage>DBXInterBaseDriver;DataSnapServer;DataSnapCommon;DbxCommonDriver;dbxcds;CustomIPTransport;dsnap;IndyCore;IPIndyImpl;bindcompfmx;dbrtl;bindcomp;inetdb;xmlrtl;ibxpress;bindengine;soaprtl;DBXInformixDriver;DBXFirebirdDriver;inet;DBXSybaseASADriver;dbexpress;fmx;IndySystem;DataSnapClient;DataSnapProviderClient;DBXOracleDriver;fmxase;inetdbxpress;rtl;DbxClientDriver;IndyProtocols;DBXMySQLDriver;fmxobj;fmxdae;DataSnapIndy10ServerTransport;$(DCC_UsePackage)</DCC_UsePackage>
-			<DCC_Define>_CONSOLE_TESTRUNNER;$(DCC_Define)</DCC_Define>
+			<DCC_Define>_CONSOLE_TESTRUNNER;FASTMM;$(DCC_Define)</DCC_Define>
 			<DCC_DcuOutput>.\$(Platform)\$(Config)</DCC_DcuOutput>
 			<CfgDependentOn>..\CastaliaParser.optset</CfgDependentOn>
 		</PropertyGroup>
@@ -96,6 +96,7 @@
 			<DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
 			<DCC_DebugInformation>false</DCC_DebugInformation>
 		</PropertyGroup>
+		<Import Condition="'$(Base)'!='' And Exists('..\..\FastMM\FastMM.optset')" Project="..\..\FastMM\FastMM.optset"/>
 		<ItemGroup>
 			<DelphiCompile Include="$(MainSource)">
 				<MainSource>MainSource</MainSource>
@@ -176,16 +177,16 @@
 					</Source>
 				</Delphi.Personality>
 				<Deployment>
+					<DeployFile LocalName="Delphi2XmlTests.rsm" Configuration="Debug" Class="DebugSymbols">
+						<Platform Name="Win64">
+							<RemoteName>Delphi2XmlTests.rsm</RemoteName>
+						</Platform>
+					</DeployFile>
 					<DeployFile LocalName="Delphi2XmlTests" Configuration="Debug" Class="ProjectOutput">
 						<Platform Name="All Platforms"/>
 					</DeployFile>
 					<DeployFile LocalName="$(BDS)\Redist\osx32\libcgunwind.1.0.dylib" Class="DependencyModule">
 						<Platform Name="OSX32"/>
-					</DeployFile>
-					<DeployFile LocalName="Delphi2XmlTests.rsm" Configuration="Debug" Class="DebugSymbols">
-						<Platform Name="Win64">
-							<RemoteName>Delphi2XmlTests.rsm</RemoteName>
-						</Platform>
 					</DeployFile>
 					<DeployFile LocalName="Delphi2XmlTests.exe" Configuration="Debug" Class="ProjectOutput">
 						<Platform Name="Win64"/>

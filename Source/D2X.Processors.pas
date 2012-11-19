@@ -34,8 +34,9 @@ type
 
   TD2XHandlerProcessor = class(TD2XProcessor)
   public
-    constructor CreateHandler(pActive: ID2XFlag; pHandler: TD2XHandler);
+    constructor CreateHandler(pActive: ID2XFlag; pHandler: TD2XHandler; pMine: Boolean);
     constructor CreateClass(pActive: ID2XFlag; pHandler: TD2XHandlerClass);
+    destructor Destroy; override;
 
     function UseProxy: Boolean; override;
 
@@ -67,6 +68,7 @@ type
     function SetFileOutput(pFilename: TD2XNamedStringRef): TD2XHandlerProcessor;
 
   private
+    fMyHandler: Boolean;
     fHandler: TD2XHandler;
 
     fProcessingInput: TD2XStringRef;
@@ -166,14 +168,25 @@ constructor TD2XHandlerProcessor.CreateClass(pActive: ID2XFlag;
 begin
   inherited Create(pActive);
 
+  fMyHandler := True;
   fHandler := pHandler.Create;
 end;
 
-constructor TD2XHandlerProcessor.CreateHandler(pActive: ID2XFlag; pHandler: TD2XHandler);
+constructor TD2XHandlerProcessor.CreateHandler(pActive: ID2XFlag; pHandler: TD2XHandler;
+pMine: Boolean);
 begin
   inherited Create(pActive);
 
+  fMyHandler := pMine;
   fHandler := pHandler;
+end;
+
+destructor TD2XHandlerProcessor.Destroy;
+begin
+  if fMyHandler then
+    FreeAndNil(fHandler);
+
+  inherited;
 end;
 
 procedure TD2XHandlerProcessor.EndFile(pFile: string);
@@ -270,13 +283,15 @@ begin
     fHandler.ParserMessage(pTyp, pMsg, pX, pY);
 end;
 
-function TD2XHandlerProcessor.SetFileInput(pFilename: TD2XNamedStringRef): TD2XHandlerProcessor;
+function TD2XHandlerProcessor.SetFileInput(pFilename: TD2XNamedStringRef)
+  : TD2XHandlerProcessor;
 begin
   fFileInput := pFilename;
   Result := Self;
 end;
 
-function TD2XHandlerProcessor.SetFileOutput(pFilename: TD2XNamedStringRef): TD2XHandlerProcessor;
+function TD2XHandlerProcessor.SetFileOutput(pFilename: TD2XNamedStringRef)
+  : TD2XHandlerProcessor;
 begin
   fFileOutput := pFilename;
   Result := Self;
@@ -290,19 +305,22 @@ begin
     TD2XParserHandler(fHandler).InitParser(pParser);
 end;
 
-function TD2XHandlerProcessor.SetProcessingInput(pFilename: TD2XStringRef): TD2XHandlerProcessor;
+function TD2XHandlerProcessor.SetProcessingInput(pFilename: TD2XStringRef)
+  : TD2XHandlerProcessor;
 begin
   fProcessingInput := pFilename;
   Result := Self;
 end;
 
-function TD2XHandlerProcessor.SetProcessingOutput(pFilename: TD2XStringRef): TD2XHandlerProcessor;
+function TD2XHandlerProcessor.SetProcessingOutput(pFilename: TD2XStringRef)
+  : TD2XHandlerProcessor;
 begin
   fProcessingOutput := pFilename;
   Result := Self;
 end;
 
-function TD2XHandlerProcessor.SetResultsOutput(pFilename: TD2XNamedStringRef): TD2XHandlerProcessor;
+function TD2XHandlerProcessor.SetResultsOutput(pFilename: TD2XNamedStringRef)
+  : TD2XHandlerProcessor;
 begin
   fResultsOutput := pFilename;
   Result := Self;

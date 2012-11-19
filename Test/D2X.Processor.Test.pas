@@ -5,7 +5,8 @@ interface
 uses
   CastaliaPasLexTypes,
   D2X.Param,
-  D2X.Processor;
+  D2X.Processor,
+  D2X.Test;
 
 type
   TTestProcessor = class(TD2XProcessor)
@@ -41,13 +42,23 @@ type
 
   end;
 
+type
+  TFlagTestCase = class(TStringTestCase)
+  strict private
+    fFlag: TD2XBoolFlag;
+  public
+    procedure SetUp; override;
+    procedure TearDown; override;
+  protected
+    fActive: ID2XFlag;
+  end;
+
 
 implementation
 
 uses
   TestFramework,
   D2X.Xml,
-  D2X.Test,
   D2X.Handler,
   D2X.Handler.Test,
   D2X.Options,
@@ -59,10 +70,9 @@ uses
   System.Rtti;
 
 type
-  TestTD2XProcessor = class(TStringTestCase)
+  TestTD2XProcessor = class(TFlagTestCase)
   strict private
     FD2XProcessor: TTestProcessor;
-    fFlag: TD2XBoolFlag;
   public
     procedure SetUp; override;
     procedure TearDown; override;
@@ -88,14 +98,12 @@ procedure TestTD2XProcessor.SetUp;
 begin
   inherited;
 
-  fFlag := TD2XBoolFlag.Create;
-  FD2XProcessor := TTestProcessor.Create(fFlag);
+  FD2XProcessor := TTestProcessor.Create(fActive);
 end;
 
 procedure TestTD2XProcessor.TearDown;
 begin
-  FD2XProcessor := nil;
-  fFlag := nil;
+  FreeAndNil(FD2XProcessor);
 
   inherited;
 end;
@@ -261,6 +269,24 @@ function TTestProcessor.UseProxy: Boolean;
 begin
   CalledUseProxy := True;
   Result := True;
+end;
+
+{ TFlagTestCase }
+
+procedure TFlagTestCase.SetUp;
+begin
+  inherited;
+
+  fFlag := TD2XBoolFlag.Create;
+  fActive := fFlag;
+end;
+
+procedure TFlagTestCase.TearDown;
+begin
+  fActive := nil;
+  FreeAndNil(fFlag);
+
+  inherited;
 end;
 
 initialization

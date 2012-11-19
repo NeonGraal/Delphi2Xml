@@ -297,10 +297,11 @@ begin
   end;
 
   RemoveProxy;
-
   FreeAndNil(fParser);
 
+  FreeAndNil(fFileOpts);
   FreeAndNil(fProcs);
+  FreeAndNil(fParams);
 
   inherited;
 end;
@@ -740,9 +741,9 @@ begin
 
   fProcs.Add(lLogProcessor);
   fProcs.Add(TD2XHandlerProcessor.CreateHandler(lLogErrors,
-    TD2XErrorHandler.CreateError(meError, LogMessage)));
+    TD2XErrorHandler.CreateError(meError, LogMessage), True));
   fProcs.Add(TD2XHandlerProcessor.CreateHandler(lLogNotSupported,
-    TD2XErrorHandler.CreateError(meNotSupported, LogMessage)));
+    TD2XErrorHandler.CreateError(meNotSupported, LogMessage), True));
   fProcs.Add(TD2XHandlerProcessor.CreateClass(lSkipMethods, TD2XSkipHandler).SetFileInput(
     function(pFile: string): string
     begin
@@ -765,7 +766,7 @@ begin
     begin
       Result := fFileOpts.LogFileOrExtn(lCountChildren.Value);
     end));
-  fProcs.Add(TD2XHandlerProcessor.CreateHandler(lWriteXml, fXmlHandler).SetResultsOutput(
+  fProcs.Add(TD2XHandlerProcessor.CreateHandler(lWriteXml, fXmlHandler, True).SetResultsOutput(
     function(pFilename: string): string
     begin
       Result := fFileOpts.ForcePath(lWriteXml.Value + pFilename + '.xml');
@@ -776,13 +777,13 @@ begin
     begin
       Result := fFileOpts.ForcePath(lWriteDefines.Value + pFilename + '.def');
     end));
-  fProcs.Add(TD2XHandlerProcessor.CreateHandler(lDefinesUsed, fDefinesUsedHandler)
+  fProcs.Add(TD2XHandlerProcessor.CreateHandler(lDefinesUsed, fDefinesUsedHandler, True)
     .SetProcessingOutput(
     function: string
     begin
       Result := fFileOpts.ForcePath(fFileOpts.LogFileOrExtn(lDefinesUsed.Value));
     end));
-  fProcs.Add(TD2XHandlerProcessor.CreateHandler(fParserDefines, lParserDefinesHandler));
+  fProcs.Add(TD2XHandlerProcessor.CreateHandler(fParserDefines, lParserDefinesHandler, True));
 
   fParams.AddRange([fVerbose, lLogErrors, lLogNotSupported, lFinalToken, fRecurse]);
   fFileOpts.RegisterParams(fParams);

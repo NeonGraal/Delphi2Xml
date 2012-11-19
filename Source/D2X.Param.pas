@@ -184,6 +184,7 @@ type
       pFormatter: TD2XSingleParam<Boolean>.TspFormatter;
       pValidator: TD2XSingleParam<Boolean>.TspValidator); override;
     constructor CreateDefines(pCode, pLabel: string; pDefinesFileName: TD2XNamedStringRef);
+    destructor Destroy; override;
 
     procedure Report(pL: ID2XLogger); override;
     procedure Output(pSL: TStringList); override;
@@ -204,7 +205,7 @@ type
     property Defines: TStringList read fDefines;
   end;
 
-  TD2XBoolFlag = class(TInterfacedObject, ID2XFlag)
+  TD2XBoolFlag = class(TD2XInterfaced, ID2XFlag)
   private
     fFlag: Boolean;
     function GetFlag: Boolean;
@@ -747,6 +748,13 @@ constructor TD2XDefinesParam.CreateParam(pCode, pLabel, pSample, pDescr: string;
   pValidator: TD2XSingleParam<Boolean>.TspValidator);
 begin
   raise EInvalidParam.Create('Need to use correct constructor');
+end;
+
+destructor TD2XDefinesParam.Destroy;
+begin
+  FreeAndNil(fDefines);
+
+  inherited;
 end;
 
 function TD2XDefinesParam.FormatDefines(pVal: Boolean): string;
