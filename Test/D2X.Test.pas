@@ -4,6 +4,7 @@ interface
 
 uses
   D2X,
+  D2X.Stream,
   TestFramework,
   System.Classes,
   System.SysUtils;
@@ -16,8 +17,7 @@ type
     fW: TStringWriter;
     fL: TStringList;
 
-    fSR: TStreamReader;
-    fSW: TStreamWriter;
+    fDS: TD2XStream;
 
     procedure CheckBuilder(pExp, pLabel: string; pB: TStringBuilder = nil);
     procedure CheckList(pExp, pLabel: string; pL: TStringList = nil);
@@ -54,6 +54,22 @@ uses
   System.StrUtils;
 
 type
+  TD2XTestStream = class(TD2XStream)
+  private
+    fSW: TStreamWriter;
+    fSR: TStreamReader;
+
+    fS: TStringStream;
+  public
+    constructor Create(pS: TStringStream);
+    destructor Destroy; override;
+
+    function Description: String; override;
+    function Exists: Boolean; override;
+    function ReadFrom: TStreamReader; override;
+    function WriteTo(pAppend: Boolean = False): TStreamWriter; override;
+  end;
+
   TestTD2X = class(TTestCase)
   strict private
     fD2X: TD2X;
@@ -670,16 +686,13 @@ begin
   fB := TStringBuilder.Create;
   fL := TStringList.Create;
   fS := TStringStream.Create;
-
   fW := TStringWriter.Create(fB);
-  fSR := TStreamReader.Create(fS);
-  fSW := TStreamWriter.Create(fS);
+  fDS := TD2XTestStream.Create(fS);
 end;
 
 procedure TStringTestCase.TearDown;
 begin
-  FreeAndNil(fSW);
-  FreeAndNil(fSR);
+  FreeAndNil(fDS);
   FreeAndNil(fW);
   FreeAndNil(fS);
   FreeAndNil(fL);
@@ -732,10 +745,10 @@ var
 begin
   lDict := TStrIntDict.Create;
   try
-    OutputStrIntDict(lDict, fSW, PairFormat);
+    OutputStrIntDict(lDict, fDS.WriteTo, PairFormat);
     CheckStream('', 'No Entries');
     lDict.Add('Test', 1);
-    OutputStrIntDict(lDict, fSW, PairFormat);
+    OutputStrIntDict(lDict, fDS.WriteTo, PairFormat);
     CheckStream('Test=Test = 1', 'An Entry');
   finally
     lDict.Free;
@@ -746,7 +759,7 @@ procedure TestTD2XUtils.TestOutputStrIntDictNoDict;
 begin
   StartExpectingException(EAssertionFailed);
   try
-    OutputStrIntDict(nil, fSW, PairFormat);
+    OutputStrIntDict(nil, fDS.WriteTo, PairFormat);
   except
     on E: EAssertionFailed do
     begin
@@ -760,7 +773,7 @@ procedure TestTD2XUtils.TestOutputStrIntDictNoFunc;
 begin
   StartExpectingException(EAssertionFailed);
   try
-    OutputStrIntDict(nil, fSW, nil);
+    OutputStrIntDict(nil, fDS.WriteTo, nil);
   except
     on E: EAssertionFailed do
     begin
@@ -804,6 +817,46 @@ begin
   CheckEqualsString('A', TidyFilename('A?'), 'Query');
   CheckEqualsString('A', TidyFilename('A...'), 'Many');
   CheckEqualsString('ABCDEF', TidyFilename('A?*B..?C?*?D***.E????*F'), 'Complex');
+end;
+
+{ TD2XTestStream }
+
+constructor TD2XTestStream.Create(pS: TStringStream);
+begin
+  fS := pS;
+end;
+
+function TD2XTestStream.Description: String;
+begin
+  Result := 'Test';
+end;
+
+destructor TD2XTestStream.Destroy;
+begin
+  FreeAndNil(fSR);
+  FreeAndNil(fSW);
+
+  inherited;
+end;
+
+function TD2XTestStream.Exists: Boolean;
+begin
+  Result := True;
+end;
+
+function TD2XTestStream.ReadFrom: TStreamReader;
+begin
+  if not Assigned(fSR) then
+    fSR := TStreamReader.Create(fS);
+  fS.Position := 0;
+  Result := fSR;
+end;
+
+function TD2XTestStream.WriteTo(pAppend: Boolean): TStreamWriter;
+begin
+  if not Assigned(fSW) then
+    fSW := TStreamWriter.Create(fS);
+  Result := fSW;
 end;
 
 initialization

@@ -1,23 +1,11 @@
 program Delphi2XmlTests;
-{
 
- Delphi DUnit Test Project
- -------------------------
- This project contains the DUnit test framework and the GUI/Console test runners.
- Add "CONSOLE_TESTRUNNER" to the conditional defines entry in the project options
- to use the console test runner.  Otherwise the GUI test runner will be used by
- default.
-
-}
-
-{$IFDEF CONSOLE_TESTRUNNER}
 {$APPTYPE CONSOLE}
-{$ENDIF}
 
 uses
-{$IFDEF FASTMM}
+  {$IFDEF FASTMM}
   FastMM4,
-{$ENDIF}
+  {$ENDIF}
   GuiTestRunner,
   TextTestRunner,
   System.StrUtils,
@@ -44,7 +32,8 @@ uses
   D2X.FileOpts in '..\Source\D2X.FileOpts.pas',
   D2X.FileOpts.Test in 'D2X.FileOpts.Test.pas',
   D2X.Stream in '..\Source\D2X.Stream.pas',
-  D2X.Stream.Test in 'D2X.Stream.Test.pas';
+  D2X.Stream.Test in 'D2X.Stream.Test.pas',
+  D2X.Streams in '..\Source\D2X.Streams.pas';
 
 {$R *.RES}
 

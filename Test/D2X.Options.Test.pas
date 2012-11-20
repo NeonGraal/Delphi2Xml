@@ -27,7 +27,8 @@ uses
   D2X.Utils,
   System.Classes,
   System.StrUtils,
-  System.SysUtils;
+  System.SysUtils,
+  Winapi.Windows;
 
 type
   TestTD2XOptionEnums = class(TLoggerTestCase)
@@ -189,6 +190,7 @@ type
   published
     procedure TestCountChildren;
     procedure TestNotSupported;
+    procedure TestLogErrors;
     procedure TestWriteDefines;
   end;
 
@@ -1166,12 +1168,20 @@ begin
 end;
 
 procedure TestTD2XOptions.TestConfigFileOrExtn;
+var
+  ReturnValue: TD2XStream;
 begin
-  CheckEqualsString('Config\File', fOpts.ConfigFileOrExtn('File').Description, 'Default File');
-  CheckEqualsString('Config\Delphi2XmlTests.Extn', fOpts.ConfigFileOrExtn('.Extn').Description,
-    'Default Extn');
-  CheckEqualsString('Config\File.Extn', fOpts.ConfigFileOrExtn('File.Extn').Description,
-    'Default File.Extn');
+  ReturnValue := fOpts.ConfigFileOrExtn('File');
+  CheckEqualsString('Config\File', ReturnValue.Description, 'Default File');
+  ReturnValue.Free;
+
+  ReturnValue := fOpts.ConfigFileOrExtn('.Extn');
+  CheckEqualsString('Config\Delphi2XmlTests.Extn', ReturnValue.Description, 'Default Extn');
+  ReturnValue.Free;
+
+  ReturnValue := fOpts.ConfigFileOrExtn('File.Extn');
+  CheckEqualsString('Config\File.Extn', ReturnValue.Description, 'Default File.Extn');
+  ReturnValue.Free;
 end;
 
 procedure TestTD2XOptions.TestDefines;
@@ -1213,6 +1223,7 @@ end;
 
 procedure TestTD2XOptions.TestProcessInput;
 begin
+  CloseHandle(GetStdHandle(STD_INPUT_HANDLE));
   Check(fOpts.ProcessInput, 'Process Input');
   CheckLog(INPUT_PROCESSING, 'Process Input');
 end;
@@ -1227,12 +1238,12 @@ procedure TestTD2XOptions.TestProcessStream;
 begin
   fS.WriteString('unit Test');
   fS.Position := 0;
-  CheckFalse(fOpts.ProcessStream('(Stream)', fSR), 'Process Stream');
+  CheckFalse(fOpts.ProcessStream('(Stream)', fDS.ReadFrom), 'Process Stream');
   CheckLog(STREAM_PROCESSING, 'Process Stream');
 
   fS.WriteString('; end.');
   fS.Position := 0;
-  Check(fOpts.ProcessStream('(Stream)', fSR), 'Process Stream');
+  Check(fOpts.ProcessStream('(Stream)', fDS.ReadFrom), 'Process Stream');
   CheckLog(STREAM_PROCESSING, 'Process Stream');
 end;
 
@@ -1257,6 +1268,24 @@ begin
 
   Check(fOpts.ProcessFile('TestUnit.pas'), 'Process Unit');
   CheckLog('', 'Process Unit');
+end;
+
+procedure TestTD2XOptionsSpecific.TestLogErrors;
+begin
+  Check(ParseOption('!!'), 'Return Value 1');
+  Check(ParseOption('G'), 'Return Value 2');
+  Check(ParseOption('L'), 'Return Value 3');
+  fB.Clear;
+
+  fS.WriteString('unit Test; interface procedure A; beg');
+  fS.Position := 0;
+  CheckTrue(fOpts.ProcessStream('(Stream)', fDS.ReadFrom), 'Error Stream');
+  CheckLog('', 'Error Stream');
+
+  fS.WriteString('in end; end.');
+  fS.Position := 0;
+  Check(fOpts.ProcessStream('(Stream)', fDS.ReadFrom), 'Process Stream');
+  CheckLog('', 'Process Stream');
 end;
 
 procedure TestTD2XOptionsSpecific.TestNotSupported;

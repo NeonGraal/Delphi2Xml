@@ -20,6 +20,7 @@ implementation
 uses
   D2X,
   D2X.Stream,
+  D2X.Streams,
   D2X.Test,
   D2X.Utils,
   System.Classes,
@@ -1505,7 +1506,7 @@ begin
   fDefP := TD2XDefinesParam.CreateDefines('T', 'Test',
     function(pFile: string): TD2XStream
     begin
-      Result := nil; // 'Config\' + pFile;
+      Result := TD2XFileStream.Create('Config\' + pFile);
     end);
   fFlag := fDefP as ID2XFlag;
   fDefP.Defines.CommaText := 'Alpha,Beta,Gamma';
