@@ -182,7 +182,7 @@ end;
 procedure TestTD2XCountHandler.TestProcessing;
 begin
   fHndlr.BeginFile('',
-      function: TStream
+      function: TStreamReader
     begin
       Result := nil;
     end);
@@ -193,12 +193,12 @@ begin
   fHndlr.EndMethod('Gamma');
   fHndlr.EndMethod('Alpha');
   fHndlr.EndFile('',
-    function: TStream
+    function: TStreamWriter
     begin
       Result := nil;
     end);
 
-  fHndlr.EndProcessing(MakeStream(fSS));
+  fHndlr.EndProcessing(MakeWriter(fS));
 
   CheckStream('Alpha=2,2', 'Processing');
 end;
@@ -215,7 +215,7 @@ begin
   lCalled := False;
 
   fHndlr.BeginFile('',
-    function: TStream
+    function: TStreamReader
     begin
       Result := nil;
       lCalled := True;
@@ -232,7 +232,7 @@ begin
   lCalled := False;
 
   fHndlr.EndFile('',
-    function: TStream
+    function: TStreamWriter
     begin
       Result := nil;
       lCalled := True;
@@ -247,7 +247,7 @@ var
   pMethod: string;
 begin
   fHndlr.BeginFile('',
-    function: TStream
+    function: TStreamReader
     begin
       Result := nil;
     end);
@@ -267,7 +267,7 @@ var
   pMethod: string;
 begin
   fHndlr.BeginFile('',
-    function: TStream
+    function: TStreamReader
     begin
       Result := nil;
     end);
@@ -285,7 +285,7 @@ begin
   StartExpectingException(EAssertionFailed);
   try
     fHndlr.EndProcessing(
-      function: TStream
+      function: TStreamWriter
       begin
         Result := nil;
         lCalled := True;
@@ -318,8 +318,8 @@ end;
 
 procedure TestTD2XSkipHandler.TestBeginFile;
 begin
-  fSS.WriteString('Alpha=1'#13#10'Gamma');
-  fHndlr.BeginFile('', MakeStream(fSS));
+  fS.WriteString('Alpha=1'#13#10'Gamma');
+  fHndlr.BeginFile('', MakeReader(fS));
   CheckStream('Alpha=1 Gamma', 'Stream');
 end;
 
@@ -340,14 +340,14 @@ end;
 
 procedure TestTD2XSkipHandler.TestEndProcessing;
 begin
-  fHndlr.EndProcessing(MakeStream(fSS));
+  fHndlr.EndProcessing(MakeWriter(fS));
   CheckStream('', 'End Processing');
 end;
 
 procedure TestTD2XSkipHandler.TestProcessing;
 begin
-  fSS.WriteString('Alpha=1'#13#10'Gamma');
-  fHndlr.BeginFile('', MakeStream(fSS));
+  fS.WriteString('Alpha=1'#13#10'Gamma');
+  fHndlr.BeginFile('', MakeReader(fS));
   CheckStream('Alpha=1 Gamma', 'Stream');
 
   CheckTrue(fHndlr.CheckBeforeMethod('Alpha'), 'Check Before Alpha');
@@ -358,7 +358,7 @@ begin
   CheckFalse(fHndlr.CheckAfterMethod('Beta'), 'Check After Beta');
   CheckTrue(fHndlr.CheckAfterMethod('Gamma'), 'Check After Gamma');
 
-  fHndlr.EndProcessing(MakeStream(fSS));
+  fHndlr.EndProcessing(MakeWriter(fS));
   CheckStream('Alpha=1 Gamma=1', 'End Processing');
 end;
 
@@ -399,7 +399,7 @@ begin
   fHndlr.HasFiles := True;
   fHndlr.BeginMethod('Test');
   fHndlr.AddAttr('Test', 'Test');
-  fHndlr.EndResults(MakeStream(fSS));
+  fHndlr.EndResults(MakeWriter(fS));
   CheckStream('<?xml version="1.0"?> <Test parseMode="ParseMode" Test="Test" />',
     'End Results');
 end;
@@ -410,7 +410,7 @@ begin
   fHndlr.HasFiles := True;
   fHndlr.BeginMethod('Test');
   fHndlr.AddText('Test');
-  fHndlr.EndResults(MakeStream(fSS));
+  fHndlr.EndResults(MakeWriter(fS));
   CheckStream('<?xml version="1.0"?> <Test parseMode="ParseMode">Test</Test>', 'End Results');
 end;
 
@@ -419,7 +419,7 @@ begin
   fHndlr.BeginResults;
   fHndlr.HasFiles := True;
   fHndlr.BeginMethod('Test');
-  fHndlr.EndResults(MakeStream(fSS));
+  fHndlr.EndResults(MakeWriter(fS));
   CheckStream('<?xml version="1.0"?> <Test parseMode="ParseMode" />', 'End Results');
 end;
 
@@ -468,19 +468,19 @@ begin
   fHndlr.HasFiles := True;
   fHndlr.BeginMethod('Test');
   fHndlr.EndMethod('Test');
-  fHndlr.EndResults(MakeStream(fSS));
+  fHndlr.EndResults(MakeWriter(fS));
   CheckStream('<?xml version="1.0"?> <Test parseMode="ParseMode" />', 'End Results');
 end;
 
 procedure TestTD2XXmlHandler.TestEndResults;
 begin
   fHndlr.BeginResults;
-  fHndlr.EndResults(MakeStream(fSS));
+  fHndlr.EndResults(MakeWriter(fS));
   CheckStream('', 'End Results');
 
   fHndlr.BeginResults;
   fHndlr.HasFiles := True;
-  fHndlr.EndResults(MakeStream(fSS));
+  fHndlr.EndResults(MakeWriter(fS));
   CheckStream('<?xml version="1.0"?>', 'End Results');
 end;
 
@@ -522,7 +522,7 @@ begin
 
   fHndlr.LexerInclude('Test', 1, 2);
 
-  fHndlr.EndResults(MakeStream(fSS));
+  fHndlr.EndResults(MakeWriter(fS));
   CheckStream
     ('<?xml version="1.0"?> <Test parseMode="ParseMode"> <IncludeFile filename="Test" msgAt="1,2" /> </Test>',
     'End Results');
@@ -536,7 +536,7 @@ begin
 
   fHndlr.ParserMessage(meNotSupported, 'Test', 1, 2);
 
-  fHndlr.EndResults(MakeStream(fSS));
+  fHndlr.EndResults(MakeWriter(fS));
   CheckStream
     ('<?xml version="1.0"?> <Test parseMode="ParseMode"> <D2X_notSuppMsg msgAt="1,2">Test</D2X_notSuppMsg> </Test>',
     'End Results');
@@ -545,7 +545,7 @@ begin
   fHndlr.HasFiles := True;
   fHndlr.BeginMethod('Test');
   fHndlr.ParserMessage(meError, 'Test', 1, 2);
-  fHndlr.EndResults(MakeStream(fSS));
+  fHndlr.EndResults(MakeWriter(fS));
   CheckStream
     ('<?xml version="1.0"?> <Test parseMode="ParseMode"> <D2X_errorMsg msgAt="1,2">Test</D2X_errorMsg> </Test>',
     'End Results');
@@ -565,7 +565,7 @@ begin
   fHndlr.AddAttr('Test', 'Test');
   fHndlr.RollbackTo('Test1');
   fHndlr.BeginMethod('Test4');
-  fHndlr.EndResults(MakeStream(fSS));
+  fHndlr.EndResults(MakeWriter(fS));
   CheckStream
     ('<?xml version="1.0"?> <Test parseMode="ParseMode"> <Test1 Test="Test"> <Test2>Test</Test2> <Test3 Test="Test" /> <Test4 /> </Test1> </Test>',
     'End Results');
@@ -581,7 +581,7 @@ begin
   fHndlr.BeginMethod('Test3');
   fHndlr.RollbackTo('Test1');
   fHndlr.BeginMethod('Test4');
-  fHndlr.EndResults(MakeStream(fSS));
+  fHndlr.EndResults(MakeWriter(fS));
   CheckStream
     ('<?xml version="1.0"?> <Test parseMode="ParseMode"> <Test1> <Test2> <Test3 /> </Test2> <Test4 /> </Test1> </Test>',
     'End Results');
@@ -639,7 +639,7 @@ procedure TestTD2XWriteDefinesHandler.TestEndResults;
 begin
   fHndlr.InitParser(fParser);
 
-  fHndlr.EndResults(MakeStream(fSS));
+  fHndlr.EndResults(MakeWriter(fS));
   CheckStream('**** CONDITIONALEXPRESSIONS CPU386 MSWINDOWS UNICODE VER230 WIN32',
     'End Results');
 end;
@@ -677,7 +677,7 @@ procedure TestTD2XDefinesUsedHandler.TestDefineUsed;
 begin
   fHndlr.DefineUsed('Test');
 
-  fHndlr.EndProcessing(MakeStream(fSS));
+  fHndlr.EndProcessing(MakeWriter(fS));
   CheckStream('Test=1', 'Define Used');
 end;
 
@@ -694,7 +694,7 @@ begin
   StartExpectingException(EAssertionFailed);
   try
     fHndlr.EndProcessing(
-      function: TStream
+      function: TStreamWriter
       begin
         Result := nil;
         lCalled := True;
@@ -718,7 +718,7 @@ begin
   fHndlr.DefineUsed('Alpha');
   fHndlr.DefineUsed('Beta');
 
-  fHndlr.EndProcessing(MakeStream(fSS));
+  fHndlr.EndProcessing(MakeWriter(fS));
   CheckStream('Alpha=3 Beta=2 Gamma=1', 'Define Used');
 end;
 
@@ -825,7 +825,7 @@ end;
 
 procedure TestTD2XErrorHandler.LogMessage(pType, pMsg: string; pX, pY: Integer);
 begin
-  fSB.AppendFormat('%s: %s (%d,%d)', [pType, pMsg, pX, pY]);
+  fB.AppendFormat('%s: %s (%d,%d)', [pType, pMsg, pX, pY]);
 end;
 
 procedure TestTD2XErrorHandler.SetUp;
@@ -867,11 +867,30 @@ begin
   CheckBuilder('Error: Test (1,2)', 'Correct Parser Message');
 end;
 
+procedure InitStringListLoad;
+var
+  lS: TStream;
+  lSL: TStringList;
+begin
+  lS := nil;
+  lSL := nil;
+  try
+    lSL := TStringList.Create;
+    lS := TStringStream.Create;
+    lSL.LoadFromStream(lS);
+  finally
+    lS.Free;
+    lSL.Free;
+  end;
+end;
+
 initialization
 
 // Register any test cases with the test runner
 RegisterTests('Handlers', [TestTD2XCountHandler.Suite, TestTD2XDefinesUsedHandler.Suite,
   TestTD2XParserDefinesHandler.Suite, TestTD2XErrorHandler.Suite, TestTD2XSkipHandler.Suite,
   TestTD2XWriteDefinesHandler.Suite, TestTD2XXmlHandler.Suite]);
+
+InitStringListLoad;
 
 end.

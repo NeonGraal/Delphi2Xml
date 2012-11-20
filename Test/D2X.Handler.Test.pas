@@ -27,12 +27,12 @@ type
 
     function Description: String; override;
     function UseProxy: Boolean; override;
-    procedure BeginProcessing(pInput: TD2XHandler.ThStreamCreator); override;
-    procedure EndProcessing(pOutput: TD2XHandler.ThStreamCreator); override;
-    procedure BeginFile(pFile: String; pInput: TD2XHandler.ThStreamCreator); override;
-    procedure EndFile(pFile: String; pOutput: TD2XHandler.ThStreamCreator); override;
+    procedure BeginProcessing(pInput: TD2XHandler.ThStreamReaderRef); override;
+    procedure EndProcessing(pOutput: TD2XHandler.ThStreamWriterRef); override;
+    procedure BeginFile(pFile: String; pInput: TD2XHandler.ThStreamReaderRef); override;
+    procedure EndFile(pFile: String; pOutput: TD2XHandler.ThStreamWriterRef); override;
     procedure BeginResults; override;
-    procedure EndResults(pOutput: TD2XHandler.ThStreamCreator); override;
+    procedure EndResults(pOutput: TD2XHandler.ThStreamWriterRef); override;
     function CheckBeforeMethod(pMethod: String): Boolean; override;
     function CheckAfterMethod(pMethod: String): Boolean; override;
     procedure BeginMethod(pMethod: String); override;
@@ -171,14 +171,14 @@ begin
   CalledBeginMethod := true;
 end;
 
-procedure TD2XHandlerTester.BeginFile(pFile: String; pInput: TD2XHandler.ThStreamCreator);
+procedure TD2XHandlerTester.BeginFile(pFile: String; pInput: TD2XHandler.ThStreamReaderRef);
 begin
   CalledBeginFile := true;
   if CreateStreams then
     pInput;
 end;
 
-procedure TD2XHandlerTester.BeginProcessing(pInput: TD2XHandler.ThStreamCreator);
+procedure TD2XHandlerTester.BeginProcessing(pInput: TD2XHandler.ThStreamReaderRef);
 begin
   CalledBeginProcessing := true;
   if CreateStreams then
@@ -219,21 +219,21 @@ begin
   CalledEndMethod := true;
 end;
 
-procedure TD2XHandlerTester.EndFile(pFile: String; pOutput: TD2XHandler.ThStreamCreator);
+procedure TD2XHandlerTester.EndFile(pFile: String; pOutput: TD2XHandler.ThStreamWriterRef);
 begin
   CalledEndFile := true;
   if CreateStreams then
     pOutput;
 end;
 
-procedure TD2XHandlerTester.EndProcessing(pOutput: TD2XHandler.ThStreamCreator);
+procedure TD2XHandlerTester.EndProcessing(pOutput: TD2XHandler.ThStreamWriterRef);
 begin
   CalledEndProcessing := true;
   if CreateStreams then
     pOutput;
 end;
 
-procedure TD2XHandlerTester.EndResults(pOutput: TD2XHandler.ThStreamCreator);
+procedure TD2XHandlerTester.EndResults(pOutput: TD2XHandler.ThStreamWriterRef);
 begin
   CalledEndResults := true;
   if CreateStreams then

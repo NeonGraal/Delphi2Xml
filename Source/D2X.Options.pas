@@ -5,10 +5,12 @@ interface
 uses
   CastaliaPasLexTypes,
   D2X,
+  D2X.FileOpts,
   D2X.Handlers,
   D2X.Param,
   D2X.Parser,
   D2X.Processor,
+  D2X.Stream,
   System.Classes,
   System.Diagnostics,
   System.Generics.Collections,
@@ -18,37 +20,6 @@ uses
 
 type
   ED2XOptionsException = class(Exception);
-
-  TD2XFileOptions = class
-  public
-    constructor Create(pGlobalValidator: TD2XSingleParam<string>.TspValidator);
-
-    function ConfigFileOrExtn(pFileOrExtn: string): string;
-    function LogFileOrExtn(pFileOrExtn: string): string;
-    function BaseFileOrDir(pFileOrDir: string): string;
-
-    procedure RegisterParams(pParams: TD2XParams);
-
-  private
-    fLogBase: TD2XFlaggedStringParam;
-    fConfigBase: TD2XFlaggedStringParam;
-    fInputBase: TD2XFlaggedStringParam;
-    fGlobalName: TD2XStringParam;
-    fTimestampFiles: TD2XBooleanParam;
-
-    fOutputTimestamp: string;
-
-    function GetGlobalName: string;
-    function GetTimestampFiles: Boolean;
-    procedure SetGlobalName(const Value: string);
-
-  public
-    property OutputTimestamp: string read fOutputTimestamp;
-    property GlobalName: string read GetGlobalName write SetGlobalName;
-    property TimestampFiles: Boolean read GetTimestampFiles;
-
-    function ForcePath(pFilename: string): string;
-  end;
 
   TD2XOptions = class(TD2XLogger)
   strict private
@@ -117,12 +88,12 @@ type
     destructor Destroy; override;
 
     function ProcessParamOption(pOpt: string): Boolean;
-    function ConfigFileOrExtn(pFileOrExtn: string): string;
+    function ConfigFileOrExtn(pFileOrExtn: string): TD2XStream;
 
     procedure BeginResults(pNodename: string; pPer: TD2XResultPer);
     procedure EndResults(pFilename: string; pPer: TD2XResultPer);
 
-    function ProcessStream(pFilename: string; pStream: TStringStream): Boolean;
+    function ProcessStream(pFilename: string; pStream: TStreamReader): Boolean;
     function ProcessInput: Boolean;
     function ProcessFile(pFilename: string): Boolean;
     function ProcessDirectory(pDir, pWildCards: string): Boolean;
@@ -151,10 +122,6 @@ type
 
   end;
 
-function ConvertDir(pStr, pDflt: string; out pVal: string): Boolean;
-function ConvertExtn(pStr, pDflt: string; out pVal: string): Boolean;
-function ConvertFile(pStr, pDflt: string; out pVal: string): Boolean;
-
 implementation
 
 uses
@@ -165,33 +132,6 @@ uses
 
 type
   TD2XSetterFunc = reference to function(pVal: string): Boolean;
-
-function ConvertDir(pStr, pDflt: string; out pVal: string): Boolean;
-begin
-  Result := True;
-  if pStr > '' then
-    pVal := IncludeTrailingPathDelimiter(pStr)
-  else
-    pVal := '';
-end;
-
-function ConvertExtn(pStr, pDflt: string; out pVal: string): Boolean;
-begin
-  Result := True;
-  if pStr = '' then
-    pVal := pDflt
-  else
-    if ExtractFileExt(pStr) > '' then
-      pVal := pStr
-    else
-      pVal := '.' + pStr;
-end;
-
-function ConvertFile(pStr, pDflt: string; out pVal: string): Boolean;
-begin
-  Result := True;
-  pVal := MakeFileName(pStr, pDflt);
-end;
 
 function ConvertResultPer(pStr: string; pDflt: TD2XResultPer;
   out pVal: TD2XResultPer): Boolean;
@@ -357,13 +297,14 @@ end;
 
 procedure TD2XOptions.LogMessage(pType, pMsg: string; pX, pY: Integer);
 var
-  lErrFile: string;
+  lErrFile: TD2XStream;
   lExists: Boolean;
 begin
   lErrFile := fFileOpts.LogFileOrExtn('.err');
-  lExists := TFile.Exists(lErrFile);
-  with TFile.AppendText(lErrFile) do
-    try
+  try
+    lExists := lErrFile.Exists;
+    with lErrFile.WriteTo(True) do
+    begin
       if not lExists then
         WriteLine('Filename,Timestamp,Line,Char,Method,Type,Message');
       write(fFilename);
@@ -374,14 +315,16 @@ begin
       write(',');
       write(pX);
       write(',');
+      { TODO : Determine current Method name }
       write(''{fCurrent.Method});
       write(',');
       write(pType);
       write(',');
       WriteLine(pMsg);
-    finally
-      Free;
     end;
+  finally
+    lErrFile.Free;
+  end;
 end;
 
 procedure TD2XOptions.ParserMessage(pSender: TObject; const pTyp: TMessageEventType;
@@ -401,7 +344,7 @@ var
 begin
   Result := False;
 
-  lPath := fFileOpts.BaseFileOrDir(pDir);
+  lPath := fFileOpts.BaseDir(pDir);
 
   for lFile in SplitString(pWildCards, ',') do
     if System.SysUtils.FindFirst(lPath + lFile, faAnyFile - faDirectory, lFF) = 0 then
@@ -418,53 +361,34 @@ end;
 
 function TD2XOptions.ProcessFile(pFilename: string): Boolean;
 var
-  lSS: TStringStream;
-  lFile: string;
+  lFile: TD2XStream;
 begin
   Result := False;
-  lFile := fFileOpts.BaseFileOrDir(pFilename);
-  if FileExists(lFile) then
-  begin
-    lSS := TStringStream.Create;
+  lFile := fFileOpts.BaseFile(pFilename);
+  if Assigned(lFile) then
     try
-      try
-        lSS.LoadFromFile(lFile);
-      except
-        on E: Exception do
-        begin
-          LogParser('EXCEPTION', '(' + E.ClassName + ')' + E.Message);
-          Result := False;
-        end;
-      end;
-
-      Result := ProcessStream(pFilename, lSS);
+      if lFile.Exists then
+        Result := ProcessStream(pFilename, lFile.ReadFrom)
+      else
+        { TODO -oStruan -cTodo : Is thi sthe correct flag to check? }
+        if fVerbose.Value then
+          Log('Cannot find "%s"', [lFile]);
     finally
-      FreeAndNil(lSS);
+      lFile.Free;
     end;
-  end
-  else
-    { TODO -oStruan -cTodo : Is thi sthe correct flag to check? }
-    if fVerbose.Value then
-      Log('Cannot find "%s"', [lFile]);
 end;
 
 function TD2XOptions.ProcessInput: Boolean;
 var
-  lSS: TStringStream;
-  lIS: THandleStream;
+  lSR: TStreamReader;
 begin
-  lSS := TStringStream.Create;
   try
-    lIS := THandleStream.Create(GetStdHandle(STD_INPUT_HANDLE));
-    try
-      lSS.CopyFrom(lIS, 0);
-    finally
-      FreeAndNil(lIS);
-    end;
+    lSR := TStreamReader.Create(THandleStream.Create(GetStdHandle(STD_INPUT_HANDLE)));
+    lSR.OwnStream;
 
-    Result := ProcessStream('(Input)', lSS);
+    Result := ProcessStream('(Input)', lSR);
   finally
-    FreeAndNil(lSS);
+    FreeAndNil(lSR);
   end;
 end;
 
@@ -688,7 +612,7 @@ begin
     function(pStr: string): Boolean
     var
       lSL: TStringList;
-      lFile: string;
+      lFile: TD2XStream;
       lPrm: TD2XParam;
     begin
       Result := True;
@@ -708,9 +632,10 @@ begin
           try
             fParams.OutputAll(lSL);
             if lSL.Count > 0 then
-              lSL.SaveToFile(lFile);
+              lSL.SaveToStream(lFile.WriteTo.BaseStream);
           finally
             FreeAndNil(lSL);
+            FreeAndNil(lFile);
           end;
         end
       else
@@ -745,43 +670,43 @@ begin
   fProcs.Add(TD2XHandlerProcessor.CreateHandler(lLogNotSupported,
     TD2XErrorHandler.CreateError(meNotSupported, LogMessage), True));
   fProcs.Add(TD2XHandlerProcessor.CreateClass(lSkipMethods, TD2XSkipHandler).SetFileInput(
-    function(pFile: string): string
+    function: TD2XStream
     begin
       Result := fFileOpts.ConfigFileOrExtn(lSkipMethods.Value);
     end).SetProcessingOutput(
-    function: string
+    function: TD2XStream
     begin
       Result := fFileOpts.LogFileOrExtn(lSkipMethods.Value + '.log');
     end));
   fProcs.Add(TD2XHandlerProcessor.CreateClass(lCountChildren, TD2XCountHandler).SetFileInput(
-    function(pFile: string): string
+    function: TD2XStream
     begin
-      Result := '';
+      Result := nil
     end).SetFileOutput(
-    function(pFile: string): string
+    function: TD2XStream
     begin
-      Result := '';
+      Result := nil
     end).SetProcessingOutput(
-    function: string
+    function: TD2XStream
     begin
       Result := fFileOpts.LogFileOrExtn(lCountChildren.Value);
     end));
   fProcs.Add(TD2XHandlerProcessor.CreateHandler(lWriteXml, fXmlHandler, True).SetResultsOutput(
-    function(pFilename: string): string
+    function(pFilename: string): TD2XStream
     begin
-      Result := fFileOpts.ForcePath(lWriteXml.Value + pFilename + '.xml');
+      Result := fFileOpts.SimpleFile(lWriteXml.Value + pFilename + '.xml');
     end));
   fProcs.Add(TD2XHandlerProcessor.CreateClass(lWriteDefines, TD2XWriteDefinesHandler)
     .SetResultsOutput(
-    function(pFilename: string): string
+    function(pFilename: string): TD2XStream
     begin
-      Result := fFileOpts.ForcePath(lWriteDefines.Value + pFilename + '.def');
+      Result := fFileOpts.SimpleFile(lWriteDefines.Value + pFilename + '.def');
     end));
   fProcs.Add(TD2XHandlerProcessor.CreateHandler(lDefinesUsed, fDefinesUsedHandler, True)
     .SetProcessingOutput(
-    function: string
+    function: TD2XStream
     begin
-      Result := fFileOpts.ForcePath(fFileOpts.LogFileOrExtn(lDefinesUsed.Value));
+      Result := fFileOpts.LogFileOrExtn(lDefinesUsed.Value);
     end));
   fProcs.Add(TD2XHandlerProcessor.CreateHandler(fParserDefines, lParserDefinesHandler, True));
 
@@ -791,12 +716,12 @@ begin
   fParams.AddRange([lDefinesUsed, lCountChildren, lSkipMethods, fParserDefines]);
 end;
 
-function TD2XOptions.ConfigFileOrExtn(pFileOrExtn: string): string;
+function TD2XOptions.ConfigFileOrExtn(pFileOrExtn: string): TD2XStream;
 begin
   Result := fFileOpts.ConfigFileOrExtn(pFileOrExtn);
 end;
 
-function TD2XOptions.ProcessStream(pFilename: string; pStream: TStringStream): Boolean;
+function TD2XOptions.ProcessStream(pFilename: string; pStream: TStreamReader): Boolean;
 var
   lTimer: TStopwatch;
   lContent: string;
@@ -811,7 +736,7 @@ begin
       SetProxy;
 
     Result := False;
-    lContent := pStream.DataString;
+    lContent := pStream.ReadToEnd;
 
     if ContainsText(LeftStr(lContent, 16), '<') then
       Exit;
@@ -864,7 +789,7 @@ var
 begin
   Result := False;
 
-  lPath := fFileOpts.BaseFileOrDir(pDir);
+  lPath := fFileOpts.BaseDir(pDir);
 
   if System.SysUtils.FindFirst(lPath + '*', faAnyFile - faNormal - faTemporary, lFF) = 0 then
     try
@@ -943,115 +868,6 @@ begin
     Result := Result or lP.UseProxy;
 end;
 
-{ TD2XFileOptions }
-
-constructor TD2XFileOptions.Create(pGlobalValidator: TD2XSingleParam<string>.TspValidator);
-begin
-  inherited Create;
-
-  fConfigBase := TD2XFlaggedStringParam.CreateFlagStr('I', 'Config dir', '<dir>',
-    'Use <dir> as a base for all Config files', 'Config\', True, ConvertDir, nil, nil);
-  fLogBase := TD2XFlaggedStringParam.CreateFlagStr('O', 'Log dir', '<dir>',
-    'Use <dir> as a base for all Log files', 'Log\', True, ConvertDir, nil, nil);
-  fInputBase := TD2XFlaggedStringParam.CreateFlagStr('B', 'Base dir', '<dir>',
-    'Use <dir> as a base for all Input files', '', False, ConvertDir, nil, nil);
-  fGlobalName := TD2XStringParam.CreateStr('G', 'Global name', '<str>', 'Sets global name',
-    ChangeFileExt(ExtractFileName(ParamStr(0)), ''),
-    function(pStr: string; pDflt: string; out pVal: string): Boolean
-    begin
-      Result := True;
-      if pStr = '' then
-        pVal := ChangeFileExt(ExtractFileName(ParamStr(0)), '')
-      else
-        pVal := pStr;
-    end, pGlobalValidator);
-  fTimestampFiles := TD2XBooleanParam.CreateBool('T', 'Timestamp',
-    'Timestamp global output files');
-
-  fOutputTimestamp := FormatDateTime('-HH-mm', Now);
-end;
-
-function TD2XFileOptions.ForcePath(pFilename: string): string;
-begin
-  Result := pFilename;
-  ForceDirectories(ExtractFilePath(ParamStr(0)) + ExtractFilePath(pFilename));
-end;
-
-function TD2XFileOptions.GetGlobalName: string;
-begin
-  Result := fGlobalName.Value;
-end;
-
-function TD2XFileOptions.GetTimestampFiles: Boolean;
-begin
-  Result := fTimestampFiles.Value;
-end;
-
-function TD2XFileOptions.BaseFileOrDir(pFileOrDir: string): string;
-begin
-  if fInputBase.FlagValue then
-    Result := fInputBase.Value + pFileOrDir
-  else
-    Result := pFileOrDir;
-end;
-
-function TD2XFileOptions.ConfigFileOrExtn(pFileOrExtn: string): string;
-  function GlobalFileOrExtn(pFileOrExtn: string): string;
-  begin
-    if StartsText('.', pFileOrExtn) then
-      Result := ChangeFileExt(fGlobalName.Value, pFileOrExtn)
-    else
-      Result := pFileOrExtn;
-  end;
-
-begin
-  if ID2XFlag(fConfigBase).Flag then
-    Result := fConfigBase.Value + GlobalFileOrExtn(pFileOrExtn)
-  else
-    Result := GlobalFileOrExtn(pFileOrExtn);
-end;
-
-function TD2XFileOptions.LogFileOrExtn(pFileOrExtn: string): string;
-  function GlobalFileOrExtn(pFileOrExtn: string): string;
-  var
-    lExtn: string;
-  begin
-    if StartsText('.', pFileOrExtn) then
-      if fTimestampFiles.Value then
-        Result := ChangeFileExt(fGlobalName.Value, fOutputTimestamp + pFileOrExtn)
-      else
-        Result := ChangeFileExt(fGlobalName.Value, pFileOrExtn)
-    else
-      if fTimestampFiles.Value then
-      begin
-        lExtn := ExtractFileExt(pFileOrExtn);
-        Result := ChangeFileExt(pFileOrExtn, fOutputTimestamp + lExtn);
-      end
-      else
-        Result := pFileOrExtn;
-  end;
-
-begin
-  if ID2XFlag(fLogBase).Flag then
-    Result := ForcePath(fLogBase.Value + GlobalFileOrExtn(pFileOrExtn))
-  else
-    Result := ForcePath(GlobalFileOrExtn(pFileOrExtn));
-end;
-
-procedure TD2XFileOptions.RegisterParams(pParams: TD2XParams);
-begin
-  pParams.Add(fTimestampFiles);
-  pParams.Add(fGlobalName);
-  pParams.Add(fConfigBase);
-  pParams.Add(fLogBase);
-  pParams.Add(fInputBase);
-end;
-
-procedure TD2XFileOptions.SetGlobalName(const Value: string);
-begin
-  fGlobalName.Value := Value;
-end;
-
 { TD2XRunOptions }
 
 constructor TD2XRunOptions.Create;
@@ -1075,7 +891,7 @@ begin
 end;
 
 function TD2XRunOptions.ProcessParam(pStr, pFrom: string;
-  pIdx: Integer): Boolean;
+pIdx: Integer): Boolean;
 var
   lPath, lFile: string;
 begin
@@ -1130,16 +946,19 @@ function TD2XRunOptions.ProcessParamsFile(pFileOrExtn: string): Boolean;
 var
   lSL: TStringList;
   i: Integer;
-  lFile: string;
+  lFile: TD2XStream;
 begin
+  lSL := nil;
+  lFile := nil;
   Result := True;
-  lSL := TStringList.Create;
-  lFile := fOpts.ConfigFileOrExtn(pFileOrExtn);
   try
-    lSL.LoadFromFile(lFile);
+    lSL := TStringList.Create;
+    lFile := fOpts.ConfigFileOrExtn(pFileOrExtn);
+    lSL.LoadFromStream(lFile.ReadFrom.BaseStream);
     for i := 0 to lSL.Count - 1 do
-      Result := ProcessParam(lSL[i], lFile, i + 1) and Result;
+      Result := ProcessParam(lSL[i], lFile.Description, i + 1) and Result;
   finally
+    FreeAndNil(lFile);
     FreeAndNil(lSL);
   end;
 end;

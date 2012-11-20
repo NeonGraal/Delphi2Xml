@@ -11,20 +11,23 @@ uses
 type
   TStringTestCase = class(TTestCase)
   protected
-    fSB: TStringBuilder;
-    fSS: TStringStream;
-    fSW: TStringWriter;
-    fSL: TStringList;
+    fB: TStringBuilder;
+    fS: TStringStream;
+    fW: TStringWriter;
+    fL: TStringList;
 
-    procedure CheckBuilder(pExp, pLabel: string; pSB: TStringBuilder = nil);
-    procedure CheckList(pExp, pLabel: string; pSL: TStringList = nil);
-    procedure CheckStream(pExp, pLabel: string; pSS: TStringStream = nil);
-    procedure CheckWriter(pExp, pLabel: string; pSW: TStringWriter = nil);
+    fSR: TStreamReader;
+    fSW: TStreamWriter;
 
-    procedure CheckString(pSB: TStringBuilder; pExp, pLabel: string); overload;
-    procedure CheckString(pSL: TStringList; pExp, pLabel: string); overload;
-    procedure CheckString(pSS: TStringStream; pExp, pLabel: string); overload;
-    procedure CheckString(pSW: TStringWriter; pExp, pLabel: string); overload;
+    procedure CheckBuilder(pExp, pLabel: string; pB: TStringBuilder = nil);
+    procedure CheckList(pExp, pLabel: string; pL: TStringList = nil);
+    procedure CheckStream(pExp, pLabel: string; pS: TStringStream = nil);
+    procedure CheckWriter(pExp, pLabel: string; pW: TStringWriter = nil);
+
+    procedure CheckString(pB: TStringBuilder; pExp, pLabel: string); overload;
+    procedure CheckString(pL: TStringList; pExp, pLabel: string); overload;
+    procedure CheckString(pS: TStringStream; pExp, pLabel: string); overload;
+    procedure CheckString(pW: TStringWriter; pExp, pLabel: string); overload;
   public
     procedure SetUp; override;
     procedure TearDown; override;
@@ -211,7 +214,7 @@ end;
 
 procedure TestTD2XLogger.TestStartLogStream;
 begin
-  FD2XLogger.StartLog(fSS);
+  FD2XLogger.StartLog(fS);
 
   FD2XLogger.Log('Log simple', [], False);
   CheckStream('Log simple', 'Log simple');
@@ -234,7 +237,7 @@ end;
 
 procedure TestTD2XLogger.TestStartLogBuilder;
 begin
-  FD2XLogger.StartLog(fSB);
+  FD2XLogger.StartLog(fB);
 
   FD2XLogger.Log('Log simple', [], False);
   CheckBuilder('Log simple', 'Log simple');
@@ -249,7 +252,7 @@ begin
   pLogger := nil;
   try
     lLogBuilder := TStringBuilder.Create;
-    FD2XLogger.StartLog(fSB);
+    FD2XLogger.StartLog(fB);
     FD2XLogger.Log('Log check 1', [], False);
     CheckBuilder('Log check 1', 'Log check 1');
     CheckString(lLogBuilder, '', 'Log check 1');
@@ -605,58 +608,58 @@ end;
 
 { TStringBuilderTestCase }
 
-procedure TStringTestCase.CheckBuilder(pExp, pLabel: string; pSB: TStringBuilder);
+procedure TStringTestCase.CheckBuilder(pExp, pLabel: string; pB: TStringBuilder);
 begin
-  if not Assigned(pSB) then
-    pSB := fSB;
-  CheckEqualsString(pExp, ReduceString(pSB.ToString), pLabel);
-  pSB.Clear;
+  if not Assigned(pB) then
+    pB := fB;
+  CheckEqualsString(pExp, ReduceString(pB.ToString), pLabel);
+  pB.Clear;
 end;
 
-procedure TStringTestCase.CheckList(pExp, pLabel: string; pSL: TStringList);
+procedure TStringTestCase.CheckList(pExp, pLabel: string; pL: TStringList);
 begin
-  if not Assigned(pSL) then
-    pSL := fSL;
-  CheckEqualsString(pExp, ReduceString(pSL.Text), pLabel);
-  pSL.Clear;
+  if not Assigned(pL) then
+    pL := fL;
+  CheckEqualsString(pExp, ReduceString(pL.Text), pLabel);
+  pL.Clear;
 end;
 
-procedure TStringTestCase.CheckStream(pExp, pLabel: string; pSS: TStringStream);
+procedure TStringTestCase.CheckStream(pExp, pLabel: string; pS: TStringStream);
 begin
-  if not Assigned(pSS) then
-    pSS := fSS;
-  CheckEqualsString(pExp, ReduceString(pSS.DataString), pLabel);
-  pSS.Clear;
+  if not Assigned(pS) then
+    pS := fS;
+  CheckEqualsString(pExp, ReduceString(pS.DataString), pLabel);
+  pS.Clear;
 end;
 
-procedure TStringTestCase.CheckString(pSB: TStringBuilder; pExp, pLabel: string);
+procedure TStringTestCase.CheckString(pB: TStringBuilder; pExp, pLabel: string);
 begin
-  CheckBuilder(pExp, pLabel, pSB);
+  CheckBuilder(pExp, pLabel, pB);
 end;
 
-procedure TStringTestCase.CheckString(pSS: TStringStream; pExp, pLabel: string);
+procedure TStringTestCase.CheckString(pS: TStringStream; pExp, pLabel: string);
 begin
-  CheckStream(pExp, pLabel, pSS);
+  CheckStream(pExp, pLabel, pS);
 end;
 
-procedure TStringTestCase.CheckString(pSW: TStringWriter; pExp, pLabel: string);
+procedure TStringTestCase.CheckString(pW: TStringWriter; pExp, pLabel: string);
 begin
-  CheckWriter(pExp, pLabel, pSW);
+  CheckWriter(pExp, pLabel, pW);
 end;
 
-procedure TStringTestCase.CheckString(pSL: TStringList; pExp, pLabel: string);
+procedure TStringTestCase.CheckString(pL: TStringList; pExp, pLabel: string);
 begin
-  CheckList(pExp, pLabel, pSL);
+  CheckList(pExp, pLabel, pL);
 end;
 
-procedure TStringTestCase.CheckWriter(pExp, pLabel: string; pSW: TStringWriter);
+procedure TStringTestCase.CheckWriter(pExp, pLabel: string; pW: TStringWriter);
 begin
-  if Assigned(pSW) then
-    CheckEqualsString(pExp, ReduceString(pSW.ToString), pLabel)
+  if Assigned(pW) then
+    CheckEqualsString(pExp, ReduceString(pW.ToString), pLabel)
   else
   begin
-    CheckEqualsString(pExp, ReduceString(fSW.ToString), pLabel);
-    fSB.Clear;
+    CheckEqualsString(pExp, ReduceString(fW.ToString), pLabel);
+    fB.Clear;
   end;
 end;
 
@@ -664,18 +667,23 @@ procedure TStringTestCase.SetUp;
 begin
   inherited;
 
-  fSB := TStringBuilder.Create;
-  fSL := TStringList.Create;
-  fSS := TStringStream.Create;
-  fSW := TStringWriter.Create(fSB);
+  fB := TStringBuilder.Create;
+  fL := TStringList.Create;
+  fS := TStringStream.Create;
+
+  fW := TStringWriter.Create(fB);
+  fSR := TStreamReader.Create(fS);
+  fSW := TStreamWriter.Create(fS);
 end;
 
 procedure TStringTestCase.TearDown;
 begin
   FreeAndNil(fSW);
-  FreeAndNil(fSS);
-  FreeAndNil(fSL);
-  FreeAndNil(fSB);
+  FreeAndNil(fSR);
+  FreeAndNil(fW);
+  FreeAndNil(fS);
+  FreeAndNil(fL);
+  FreeAndNil(fB);
 
   inherited;
 end;
@@ -684,14 +692,14 @@ end;
 
 procedure TLoggerTestCase.CheckLog(pExp, pLabel: string);
 begin
-  CheckString(fSB, pExp, pLabel);
+  CheckString(fB, pExp, pLabel);
 end;
 
 procedure TLoggerTestCase.SetUp;
 begin
   inherited;
 
-  fLog := TD2XLogger.Create(fSB);
+  fLog := TD2XLogger.Create(fB);
 end;
 
 procedure TLoggerTestCase.TearDown;
@@ -724,10 +732,10 @@ var
 begin
   lDict := TStrIntDict.Create;
   try
-    OutputStrIntDict(lDict, fSS, PairFormat);
+    OutputStrIntDict(lDict, fSW, PairFormat);
     CheckStream('', 'No Entries');
     lDict.Add('Test', 1);
-    OutputStrIntDict(lDict, fSS, PairFormat);
+    OutputStrIntDict(lDict, fSW, PairFormat);
     CheckStream('Test=Test = 1', 'An Entry');
   finally
     lDict.Free;
@@ -738,7 +746,7 @@ procedure TestTD2XUtils.TestOutputStrIntDictNoDict;
 begin
   StartExpectingException(EAssertionFailed);
   try
-    OutputStrIntDict(nil, fSS, PairFormat);
+    OutputStrIntDict(nil, fSW, PairFormat);
   except
     on E: EAssertionFailed do
     begin
@@ -752,7 +760,7 @@ procedure TestTD2XUtils.TestOutputStrIntDictNoFunc;
 begin
   StartExpectingException(EAssertionFailed);
   try
-    OutputStrIntDict(nil, fSS, nil);
+    OutputStrIntDict(nil, fSW, nil);
   except
     on E: EAssertionFailed do
     begin

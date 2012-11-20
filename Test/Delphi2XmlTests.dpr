@@ -15,7 +15,9 @@ program Delphi2XmlTests;
 {$ENDIF}
 
 uses
+{$IFDEF FASTMM}
   FastMM4,
+{$ENDIF}
   GuiTestRunner,
   TextTestRunner,
   System.StrUtils,
@@ -38,7 +40,11 @@ uses
   D2X.Test in 'D2X.Test.pas',
   D2X.Utils in 'D2X.Utils.pas',
   D2X.Xml in '..\Source\D2X.Xml.pas',
-  D2X.Xml.Test in 'D2X.Xml.Test.pas';
+  D2X.Xml.Test in 'D2X.Xml.Test.pas',
+  D2X.FileOpts in '..\Source\D2X.FileOpts.pas',
+  D2X.FileOpts.Test in 'D2X.FileOpts.Test.pas',
+  D2X.Stream in '..\Source\D2X.Stream.pas',
+  D2X.Stream.Test in 'D2X.Stream.Test.pas';
 
 {$R *.RES}
 

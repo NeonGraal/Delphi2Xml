@@ -7,7 +7,6 @@ implementation
 uses
   TestFramework,
   CastaliaPasLexTypes,
-  D2X.Test,
   D2X.Handler,
   D2X.Handler.Test,
   D2X.Handlers.Test,
@@ -16,6 +15,8 @@ uses
   D2X.Parser.Test,
   D2X.Processors,
   D2X.Processor.Test,
+  D2X.Stream,
+  D2X.Test,
   System.SysUtils;
 
 type
@@ -89,9 +90,9 @@ end;
 procedure TestTD2XHandlerProcessor.TestBeginFile;
 begin
   FD2XProcessor.SetFileInput(
-      function(pFile: string): string
+      function: TD2XStream
     begin
-      Result := '';
+      Result := nil;
     end);
 
   FD2XProcessor.BeginFile('');
@@ -115,9 +116,9 @@ end;
 procedure TestTD2XHandlerProcessor.TestBeginProcessing;
 begin
   FD2XProcessor.SetProcessingInput(
-    function: string
+    function: TD2XStream
     begin
-      Result := '';
+      Result := nil;
     end);
 
   FD2XProcessor.BeginProcessing;
@@ -161,9 +162,9 @@ end;
 procedure TestTD2XHandlerProcessor.TestEndFile;
 begin
   FD2XProcessor.SetFileOutput(
-    function(pFile: string): string
+    function: TD2XStream
     begin
-      Result := '';
+      Result := nil;
     end);
 
   FD2XProcessor.EndFile('');
@@ -187,9 +188,9 @@ end;
 procedure TestTD2XHandlerProcessor.TestEndProcessing;
 begin
   FD2XProcessor.SetProcessingOutput(
-    function: string
+    function: TD2XStream
     begin
-      Result := '';
+      Result := nil;
     end);
 
   FD2XProcessor.EndProcessing;
@@ -203,9 +204,9 @@ end;
 procedure TestTD2XHandlerProcessor.TestEndResults;
 begin
   FD2XProcessor.SetResultsOutput(
-    function(pFile: string): string
+    function(pFile: string): TD2XStream
     begin
-      Result := '';
+      Result := nil;
     end);
 
   FD2XProcessor.EndResults('');
@@ -244,10 +245,10 @@ begin
   lCalled := False;
 
   FD2XProcessor.SetFileInput(
-    function(pFile: string): string
+    function: TD2XStream
     begin
       lCalled := True;
-      Result := '';
+      Result := nil;
     end);
 
   FD2XProcessor.BeginFile('');
@@ -266,10 +267,10 @@ begin
   lCalled := False;
 
   FD2XProcessor.SetFileOutput(
-    function(pFile: string): string
+    function: TD2XStream
     begin
       lCalled := True;
-      Result := '';
+      Result := nil;
     end);
 
   FD2XProcessor.EndFile('');
@@ -287,10 +288,10 @@ begin
   FHandler.CreateStreams := True;
   lCalled := False;
   FD2XProcessor.SetProcessingInput(
-    function: string
+    function: TD2XStream
     begin
       lCalled := True;
-      Result := '';
+      Result := nil;
     end);
 
   FD2XProcessor.BeginProcessing;
@@ -308,10 +309,10 @@ begin
   FHandler.CreateStreams := True;
   lCalled := False;
   FD2XProcessor.SetProcessingOutput(
-    function: string
+    function: TD2XStream
     begin
       lCalled := True;
-      Result := '';
+      Result := nil;
     end);
 
   FD2XProcessor.EndProcessing;
@@ -329,10 +330,10 @@ begin
   FHandler.CreateStreams := True;
   lCalled := False;
   FD2XProcessor.SetResultsOutput(
-    function(pFile: string): string
+    function(pFile: string): TD2XStream
     begin
       lCalled := True;
-      Result := '';
+      Result := nil;
     end);
 
   FD2XProcessor.EndResults('');

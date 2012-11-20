@@ -7,14 +7,6 @@ uses
   TestFramework;
 
 type
-  TParamsTestCase = class(TTestCase)
-  protected
-    fParams: TD2XParams;
-  public
-    procedure SetUp; override;
-    procedure TearDown; override;
-  end;
-
   TTestBoolFlag = class(TInterfacedObject, ID2XFlag)
   private
     fFlag: Boolean;
@@ -27,8 +19,11 @@ implementation
 
 uses
   D2X,
+  D2X.FileOpts,
   D2X.Options,
   D2X.Test,
+  D2X.Param.Test,
+  D2X.Stream,
   D2X.Utils,
   System.Classes,
   System.StrUtils,
@@ -51,40 +46,6 @@ type
     procedure TestConvertDir;
     procedure TestConvertExtn;
     procedure TestConvertFile;
-  end;
-
-  TestTD2XFileOptions = class(TParamsTestCase)
-  private
-    fFileOpts: TD2XFileOptions;
-  public
-    procedure SetUp; override;
-    procedure TearDown; override;
-  published
-    procedure TestGobalName;
-    procedure TestTimestampFiles;
-
-    procedure TestInputFile;
-    procedure TestInputExtn;
-    procedure TestInputDirFile;
-    procedure TestInputDirExtn;
-    procedure TestInputOffFile;
-    procedure TestInputOffExtn;
-    procedure TestInputOnFile;
-    procedure TestInputOnExtn;
-
-    procedure TestOutputFile;
-    procedure TestOutputExtn;
-    procedure TestOutputDirFile;
-    procedure TestOutputDirExtn;
-    procedure TestOutputOffFile;
-    procedure TestOutputOffExtn;
-    procedure TestOutputOnFile;
-    procedure TestOutputOnExtn;
-
-    procedure TestOutputTimestampFile;
-    procedure TestOutputTimestampExtn;
-    procedure TestOutputNoTimestampFile;
-    procedure TestOutputNoTimestampExtn;
   end;
 
   TOptionsTestCase = class(TLoggerTestCase)
@@ -258,6 +219,8 @@ type
     procedure TestProcessParamPasFiles;
     procedure TestProcessParamParamFile;
     procedure TestProcessParamInput;
+
+    procedure TestProcessXml;
   end;
 
 const
@@ -265,7 +228,8 @@ const
   STREAM_PROCESSING = 'Processing (Stream) ... done';
   UNIT_PROCESSING = 'Processing TestUnit.pas ... done';
   PROGRAM_PROCESSING = 'Processing TestProgram.dpr ... done';
-  RECURSE_PROCESSING = 'Processing Config\Test.pas ... done';
+  DIRECTORY_PROCESSING = 'Processing Config\TestDir.pas ... done';
+  RECURSE_PROCESSING = 'Processing Config\Test\TestSubDir.pas ... done';
   EXPECTED_SHOW_OPTIONS =
     'Usage: Delphi2XmlTests [ Option | @Params | mFilename | Wildcard ] ... ' +
     'Options: Default Description ? Show valid options ' +
@@ -310,330 +274,7 @@ const
   DEFINED_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Use these Defines: ' +
     'CONDITIONALEXPRESSIONS, CPU32, CPU386, MSWINDOWS, UNICODE, VER230, WIN32';
 
-  { TestTD2XFileOptions }
-
-procedure TestTD2XFileOptions.SetUp;
-begin
-  inherited;
-
-  fFileOpts := TD2XFileOptions.Create(nil);
-  fFileOpts.RegisterParams(fParams);
-end;
-
-procedure TestTD2XFileOptions.TearDown;
-begin
-  FreeAndNil(fFileOpts);
-
-  inherited;
-end;
-
-procedure TestTD2XFileOptions.TestGobalName;
-begin
-  fParams.ForCode('G').Parse('GGlobal');
-  CheckEqualsString('Global', fFileOpts.GlobalName, 'GlobalName');
-
-  fFileOpts.GlobalName := 'Test';
-  CheckEqualsString('Test', fFileOpts.GlobalName, 'GlobalName');
-end;
-
-procedure TestTD2XFileOptions.TestInputDirExtn;
-var
-  ReturnValue: string;
-  pExtn: string;
-begin
-  pExtn := '.Extn';
-  fParams.ForCode('I').Parse('I:In');
-
-  ReturnValue := fFileOpts.ConfigFileOrExtn(pExtn);
-  CheckEqualsString('In\' + fFileOpts.GlobalName + '.Extn', ReturnValue, 'ReturnValue');
-
-  fParams.ForCode('G').Parse('GGlobal');
-  ReturnValue := fFileOpts.ConfigFileOrExtn(pExtn);
-  CheckEqualsString('In\Global.Extn', ReturnValue, 'ReturnValue');
-end;
-
-procedure TestTD2XFileOptions.TestInputDirFile;
-var
-  ReturnValue: string;
-  pFile: string;
-begin
-  pFile := 'File.Extn';
-  fParams.ForCode('I').Parse('I:In');
-
-  ReturnValue := fFileOpts.ConfigFileOrExtn(pFile);
-
-  CheckEqualsString('In\File.Extn', ReturnValue, 'ReturnValue');
-end;
-
-procedure TestTD2XFileOptions.TestInputOffExtn;
-var
-  ReturnValue: string;
-  pExtn: string;
-begin
-  pExtn := '.Extn';
-  fParams.ForCode('I').Parse('I-');
-
-  ReturnValue := fFileOpts.ConfigFileOrExtn(pExtn);
-  CheckEqualsString(fFileOpts.GlobalName + '.Extn', ReturnValue, 'ReturnValue');
-
-  fParams.ForCode('G').Parse('GGlobal');
-  ReturnValue := fFileOpts.ConfigFileOrExtn(pExtn);
-  CheckEqualsString('Global.Extn', ReturnValue, 'ReturnValue');
-end;
-
-procedure TestTD2XFileOptions.TestInputOffFile;
-var
-  ReturnValue: string;
-  pFile: string;
-begin
-  pFile := 'File.Extn';
-  fParams.ForCode('I').Parse('I-');
-
-  ReturnValue := fFileOpts.ConfigFileOrExtn(pFile);
-
-  CheckEqualsString('File.Extn', ReturnValue, 'ReturnValue');
-end;
-
-procedure TestTD2XFileOptions.TestInputOnExtn;
-var
-  ReturnValue: string;
-  pExtn: string;
-begin
-  pExtn := '.Extn';
-  fParams.ForCode('I').Parse('I+');
-
-  ReturnValue := fFileOpts.ConfigFileOrExtn(pExtn);
-  CheckEqualsString('Config\' + fFileOpts.GlobalName + '.Extn', ReturnValue, 'ReturnValue');
-
-  fParams.ForCode('G').Parse('GGlobal');
-  ReturnValue := fFileOpts.ConfigFileOrExtn(pExtn);
-  CheckEqualsString('Config\Global.Extn', ReturnValue, 'ReturnValue');
-end;
-
-procedure TestTD2XFileOptions.TestInputOnFile;
-var
-  ReturnValue: string;
-  pFile: string;
-begin
-  pFile := 'File.Extn';
-  fParams.ForCode('I').Parse('I+');
-
-  ReturnValue := fFileOpts.ConfigFileOrExtn(pFile);
-
-  CheckEqualsString('Config\File.Extn', ReturnValue, 'ReturnValue');
-end;
-
-procedure TestTD2XFileOptions.TestInputExtn;
-var
-  ReturnValue: string;
-  pExtn: string;
-begin
-  pExtn := '.Extn';
-
-  ReturnValue := fFileOpts.ConfigFileOrExtn(pExtn);
-  CheckEqualsString('Config\' + fFileOpts.GlobalName + '.Extn', ReturnValue, 'ReturnValue');
-
-  fParams.ForCode('G').Parse('GGlobal');
-  ReturnValue := fFileOpts.ConfigFileOrExtn(pExtn);
-  CheckEqualsString('Config\Global.Extn', ReturnValue, 'ReturnValue');
-end;
-
-procedure TestTD2XFileOptions.TestInputFile;
-var
-  ReturnValue: string;
-  pFile: string;
-begin
-  pFile := 'File.Extn';
-
-  ReturnValue := fFileOpts.ConfigFileOrExtn(pFile);
-
-  CheckEqualsString('Config\File.Extn', ReturnValue, 'ReturnValue');
-end;
-
-procedure TestTD2XFileOptions.TestOutputDirExtn;
-var
-  ReturnValue: string;
-  pExtn: string;
-begin
-  pExtn := '.Extn';
-  fParams.ForCode('O').Parse('O:Out');
-
-  ReturnValue := fFileOpts.LogFileOrExtn(pExtn);
-  CheckEqualsString('Out\' + fFileOpts.GlobalName + '.Extn', ReturnValue, 'ReturnValue');
-
-  fParams.ForCode('G').Parse('GGlobal');
-  ReturnValue := fFileOpts.LogFileOrExtn(pExtn);
-  CheckEqualsString('Out\Global.Extn', ReturnValue, 'ReturnValue');
-end;
-
-procedure TestTD2XFileOptions.TestOutputDirFile;
-var
-  ReturnValue: string;
-  pFile: string;
-begin
-  pFile := 'File.Extn';
-  fParams.ForCode('O').Parse('O:Out');
-
-  ReturnValue := fFileOpts.LogFileOrExtn(pFile);
-
-  CheckEqualsString('Out\File.Extn', ReturnValue, 'ReturnValue');
-end;
-
-procedure TestTD2XFileOptions.TestOutputExtn;
-var
-  ReturnValue: string;
-  pExtn: string;
-begin
-  pExtn := '.Extn';
-
-  ReturnValue := fFileOpts.LogFileOrExtn(pExtn);
-  CheckEqualsString('Log\' + fFileOpts.GlobalName + '.Extn', ReturnValue, 'ReturnValue');
-
-  fParams.ForCode('G').Parse('GGlobal');
-  ReturnValue := fFileOpts.LogFileOrExtn(pExtn);
-  CheckEqualsString('Log\Global.Extn', ReturnValue, 'ReturnValue');
-end;
-
-procedure TestTD2XFileOptions.TestOutputFile;
-var
-  ReturnValue: string;
-  pFile: string;
-begin
-  pFile := 'File.Extn';
-
-  ReturnValue := fFileOpts.LogFileOrExtn(pFile);
-
-  CheckEqualsString('Log\File.Extn', ReturnValue, 'ReturnValue');
-end;
-
-procedure TestTD2XFileOptions.TestOutputNoTimestampExtn;
-var
-  ReturnValue: string;
-  pExtn: string;
-begin
-  pExtn := '.Extn';
-  fParams.ForCode('T').Parse('T-');
-
-  ReturnValue := fFileOpts.LogFileOrExtn(pExtn);
-  CheckEqualsString('Log\' + fFileOpts.GlobalName + '.Extn', ReturnValue, 'ReturnValue');
-
-  fParams.ForCode('G').Parse('GGlobal');
-  ReturnValue := fFileOpts.LogFileOrExtn(pExtn);
-  CheckEqualsString('Log\Global.Extn', ReturnValue, 'ReturnValue');
-end;
-
-procedure TestTD2XFileOptions.TestOutputNoTimestampFile;
-var
-  ReturnValue: string;
-  pFile: string;
-begin
-  pFile := 'File.Extn';
-  fParams.ForCode('T').Parse('T-');
-
-  ReturnValue := fFileOpts.LogFileOrExtn(pFile);
-
-  CheckEqualsString('Log\File.Extn', ReturnValue, 'ReturnValue');
-end;
-
-procedure TestTD2XFileOptions.TestOutputOffExtn;
-var
-  ReturnValue: string;
-  pExtn: string;
-begin
-  pExtn := '.Extn';
-  fParams.ForCode('O').Parse('O-');
-
-  ReturnValue := fFileOpts.LogFileOrExtn(pExtn);
-  CheckEqualsString(fFileOpts.GlobalName + '.Extn', ReturnValue, 'ReturnValue');
-
-  fParams.ForCode('G').Parse('GGlobal');
-  ReturnValue := fFileOpts.LogFileOrExtn(pExtn);
-  CheckEqualsString('Global.Extn', ReturnValue, 'ReturnValue');
-end;
-
-procedure TestTD2XFileOptions.TestOutputOffFile;
-var
-  ReturnValue: string;
-  pFile: string;
-begin
-  pFile := 'File.Extn';
-  fParams.ForCode('O').Parse('O-');
-
-  ReturnValue := fFileOpts.LogFileOrExtn(pFile);
-
-  CheckEqualsString('File.Extn', ReturnValue, 'ReturnValue');
-end;
-
-procedure TestTD2XFileOptions.TestOutputOnExtn;
-var
-  ReturnValue: string;
-  pExtn: string;
-begin
-  pExtn := '.Extn';
-  fParams.ForCode('O').Parse('O+');
-
-  ReturnValue := fFileOpts.LogFileOrExtn(pExtn);
-  CheckEqualsString('Log\' + fFileOpts.GlobalName + '.Extn', ReturnValue, 'ReturnValue');
-
-  fParams.ForCode('G').Parse('GGlobal');
-  ReturnValue := fFileOpts.LogFileOrExtn(pExtn);
-  CheckEqualsString('Log\Global.Extn', ReturnValue, 'ReturnValue');
-end;
-
-procedure TestTD2XFileOptions.TestOutputOnFile;
-var
-  ReturnValue: string;
-  pFile: string;
-begin
-  pFile := 'File.Extn';
-  fParams.ForCode('O').Parse('O+');
-
-  ReturnValue := fFileOpts.LogFileOrExtn(pFile);
-
-  CheckEqualsString('Log\File.Extn', ReturnValue, 'ReturnValue');
-end;
-
-procedure TestTD2XFileOptions.TestOutputTimestampExtn;
-var
-  ReturnValue: string;
-  pExtn: string;
-begin
-  pExtn := '.Extn';
-  fParams.ForCode('T').Parse('T');
-
-  ReturnValue := fFileOpts.LogFileOrExtn(pExtn);
-  CheckEqualsString('Log\' + fFileOpts.GlobalName + fFileOpts.OutputTimestamp + '.Extn',
-    ReturnValue, 'ReturnValue');
-
-  fParams.ForCode('G').Parse('GGlobal');
-  ReturnValue := fFileOpts.LogFileOrExtn(pExtn);
-  CheckEqualsString('Log\Global' + fFileOpts.OutputTimestamp + '.Extn', ReturnValue,
-    'ReturnValue');
-end;
-
-procedure TestTD2XFileOptions.TestOutputTimestampFile;
-var
-  ReturnValue: string;
-  pFile: string;
-begin
-  pFile := 'File.Extn';
-  fParams.ForCode('T').Parse('T');
-
-  ReturnValue := fFileOpts.LogFileOrExtn(pFile);
-
-  CheckEqualsString('Log\File' + fFileOpts.OutputTimestamp + '.Extn', ReturnValue,
-    'ReturnValue');
-end;
-
-procedure TestTD2XFileOptions.TestTimestampFiles;
-begin
-  CheckFalse(fFileOpts.TimestampFiles, 'GlobalName');
-
-  fParams.ForCode('T').Parse('T');
-  CheckTrue(fFileOpts.TimestampFiles, 'GlobalName');
-end;
-
-{ TestTD2XOptionEnums }
+  { TestTD2XOptionEnums }
 
 procedure TestTD2XOptionEnums.TestElapsedModeInvalidCreate;
 begin
@@ -815,22 +456,6 @@ begin
   CheckEqualsString('Test.Test', lResult, 'File, No Change');
 end;
 
-{ TParamsTestCase }
-
-procedure TParamsTestCase.SetUp;
-begin
-  inherited;
-
-  fParams := TD2XParams.Create;
-end;
-
-procedure TParamsTestCase.TearDown;
-begin
-  FreeAndNil(fParams);
-
-  inherited;
-end;
-
 { TestTD2XRunOptsAll }
 
 procedure TestTD2XRunOptions.TestEndProcessing;
@@ -867,6 +492,15 @@ begin
   CheckBuilder(UNIT_PROCESSING, 'Nothing');
 end;
 
+procedure TestTD2XRunOptions.TestProcessXml;
+begin
+  Check(ParseOption('-!!'), 'Return Value 1');
+  Check(ParseOption('-E!'), 'Return Value 2');
+  Check(ParseOption('-X'), 'Return Value 3');
+  Check(ParseOption('Test*.pas'), 'Return Value 4');
+  CheckBuilder(UNIT_PROCESSING, 'Nothing');
+end;
+
 { TTestBoolFlag }
 
 function TTestBoolFlag.GetFlag: Boolean;
@@ -889,7 +523,7 @@ begin
     if not ParseOption(C + ':Test') then
       ParseOption(C + '+');
   ParseOption('T-');
-  fSB.Clear;
+  fB.Clear;
 end;
 
 procedure TestTD2XOptionsGeneral.TestReportOptions;
@@ -961,7 +595,7 @@ begin
 
   Check(ParseOption('!'), 'Return Value 2');
 
-  fSB.Clear;
+  fB.Clear;
   Check(ParseOption('@'), 'Return Value 3');
   CheckLog(DEFAULT_REPORT_OPTIONS, 'Report Options');
 end;
@@ -981,7 +615,7 @@ begin
 
   Check(ParseOption('!!'), 'Return Value 2');
 
-  fSB.Clear;
+  fB.Clear;
   Check(ParseOption('@'), 'Return Value 3');
   CheckLog(ZERO_REPORT_OPTIONS, 'Report Options');
 end;
@@ -1533,10 +1167,10 @@ end;
 
 procedure TestTD2XOptions.TestConfigFileOrExtn;
 begin
-  CheckEqualsString('Config\File', fOpts.ConfigFileOrExtn('File'), 'Default File');
-  CheckEqualsString('Config\Delphi2XmlTests.Extn', fOpts.ConfigFileOrExtn('.Extn'),
+  CheckEqualsString('Config\File', fOpts.ConfigFileOrExtn('File').Description, 'Default File');
+  CheckEqualsString('Config\Delphi2XmlTests.Extn', fOpts.ConfigFileOrExtn('.Extn').Description,
     'Default Extn');
-  CheckEqualsString('Config\File.Extn', fOpts.ConfigFileOrExtn('File.Extn'),
+  CheckEqualsString('Config\File.Extn', fOpts.ConfigFileOrExtn('File.Extn').Description,
     'Default File.Extn');
 end;
 
@@ -1566,7 +1200,7 @@ end;
 procedure TestTD2XOptions.TestProcessDirectory;
 begin
   Check(fOpts.ProcessDirectory('Config\', 'Test*.pas'), 'Process Directory');
-  CheckLog(RECURSE_PROCESSING, 'Process Directory');
+  CheckLog(DIRECTORY_PROCESSING, 'Process Directory');
 end;
 
 procedure TestTD2XOptions.TestProcessFile;
@@ -1591,12 +1225,14 @@ end;
 
 procedure TestTD2XOptions.TestProcessStream;
 begin
-  fSS.WriteString('unit Test');
-  CheckFalse(fOpts.ProcessStream('(Stream)', fSS), 'Process Stream');
+  fS.WriteString('unit Test');
+  fS.Position := 0;
+  CheckFalse(fOpts.ProcessStream('(Stream)', fSR), 'Process Stream');
   CheckLog(STREAM_PROCESSING, 'Process Stream');
 
-  fSS.WriteString('; end.');
-  Check(fOpts.ProcessStream('(Stream)', fSS), 'Process Stream');
+  fS.WriteString('; end.');
+  fS.Position := 0;
+  Check(fOpts.ProcessStream('(Stream)', fSR), 'Process Stream');
   CheckLog(STREAM_PROCESSING, 'Process Stream');
 end;
 
@@ -1608,7 +1244,7 @@ end;
 procedure TestTD2XOptions.TestRecurseDirectory;
 begin
   Check(fOpts.RecurseDirectory('', 'Test*.pas', false), 'Recurse Directory');
-  CheckLog(RECURSE_PROCESSING, 'Recurse Directory');
+  CheckLog(DIRECTORY_PROCESSING + ' ' + RECURSE_PROCESSING, 'Recurse Directory');
 end;
 
 { TestTD2XOptionsSpecific }
@@ -1617,7 +1253,7 @@ procedure TestTD2XOptionsSpecific.TestCountChildren;
 begin
   Check(ParseOption('!!'), 'Return Value 1');
   Check(ParseOption('C'), 'Return Value 2');
-  fSB.Clear;
+  fB.Clear;
 
   Check(fOpts.ProcessFile('TestUnit.pas'), 'Process Unit');
   CheckLog('', 'Process Unit');
@@ -1628,7 +1264,7 @@ begin
   Check(ParseOption('!!'), 'Return Value 1');
   Check(ParseOption('G'), 'Return Value 2');
   Check(ParseOption('N'), 'Return Value 3');
-  fSB.Clear;
+  fB.Clear;
 
   Check(fOpts.ProcessFile('TestUnit.pas'), 'Process Unit');
   CheckLog('', 'Process Unit');
@@ -1638,7 +1274,7 @@ procedure TestTD2XOptionsSpecific.TestWriteDefines;
 begin
   Check(ParseOption('!!'), 'Return Value 1');
   Check(ParseOption('W'), 'Return Value 2');
-  fSB.Clear;
+  fB.Clear;
 
   Check(fOpts.ProcessFile('TestUnit.pas'), 'Process Unit');
   CheckLog('', 'Process Unit');
@@ -1647,7 +1283,7 @@ end;
 initialization
 
 RegisterTests('Options', [TestTD2XOptionEnums.Suite, TestTD2XOptionGeneral.Suite,
-    TestTD2XFileOptions.Suite, TestTD2XOptions.Suite, TestTD2XOptionsAll.Suite,
-    TestTD2XOptionsGeneral.Suite, TestTD2XOptionsSpecific.Suite, TestTD2XRunOptions.Suite]);
+    TestTD2XOptions.Suite, TestTD2XOptionsAll.Suite, TestTD2XOptionsGeneral.Suite,
+    TestTD2XOptionsSpecific.Suite, TestTD2XRunOptions.Suite]);
 
 end.

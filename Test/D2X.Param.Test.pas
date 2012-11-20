@@ -2,18 +2,30 @@ unit D2X.Param.Test;
 
 interface
 
+uses
+  D2X.Param,
+  TestFramework;
+
+type
+  TParamsTestCase = class(TTestCase)
+  protected
+    fParams: TD2XParams;
+  public
+    procedure SetUp; override;
+    procedure TearDown; override;
+  end;
+
 implementation
 
 uses
   D2X,
-  D2X.Param,
+  D2X.Stream,
   D2X.Test,
   D2X.Utils,
   System.Classes,
   System.Rtti,
   System.StrUtils,
-  System.SysUtils,
-  TestFramework;
+  System.SysUtils;
 
 type
   TestTD2XParam = class(TLoggerTestCase)
@@ -244,6 +256,22 @@ type
     procedure TestGetFlag; override;
     procedure TestSetFlag; override;
   end;
+
+{ TParamsTestCase }
+
+procedure TParamsTestCase.SetUp;
+begin
+  inherited;
+
+  fParams := TD2XParams.Create;
+end;
+
+procedure TParamsTestCase.TearDown;
+begin
+  FreeAndNil(fParams);
+
+  inherited;
+end;
 
   { TestTD2XSingleParam }
 
@@ -934,20 +962,20 @@ procedure TestTD2XParams.TestOutputAll;
 var
   lBP: TD2XBooleanParam;
 begin
-  fPs.OutputAll(fSL);
+  fPs.OutputAll(fL);
   CheckList('', 'Output No Params');
 
   fPs.Add(TD2XParam.Create('T', 'Test', '<tst>', 'Testing', TstParser));
-  fPs.OutputAll(fSL);
+  fPs.OutputAll(fL);
   CheckList('', 'Output One Param');
 
   lBP := TD2XBooleanParam.CreateBool('B', 'Boolean', 'Boolean param');
   fPs.Add(lBP);
-  fPs.OutputAll(fSL);
+  fPs.OutputAll(fL);
   CheckList('', 'Output Two Default Params');
 
   lBP.Value := True;
-  fPs.OutputAll(fSL);
+  fPs.OutputAll(fL);
   CheckList('-B+', 'Output Two Changed Params');
 end;
 
@@ -1475,9 +1503,9 @@ begin
   inherited;
 
   fDefP := TD2XDefinesParam.CreateDefines('T', 'Test',
-    function(pFile: string): string
+    function(pFile: string): TD2XStream
     begin
-      Result := 'Config\' + pFile;
+      Result := nil; // 'Config\' + pFile;
     end);
   fFlag := fDefP as ID2XFlag;
   fDefP.Defines.CommaText := 'Alpha,Beta,Gamma';

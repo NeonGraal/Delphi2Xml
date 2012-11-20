@@ -1721,7 +1721,8 @@ begin
   try
     fLength := Length(pContents);
     fProcessed := 0;
-    lMS.Write(PChar(pContents)^, fLength * Sizeof(Char));
+    lMS.Size := fLength * Sizeof(Char);
+    lMS.Write(PChar(pContents)^, lMS.Size);
 
     Run(pFilename, lMS);
   finally

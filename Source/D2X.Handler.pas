@@ -13,7 +13,8 @@ type
 
   TD2XHandler = class abstract
   public type
-    ThStreamCreator = reference to function: TStream;
+    ThStreamReaderRef = reference to function: TStreamReader;
+    ThStreamWriterRef = reference to function: TStreamWriter;
 
   public
     constructor Create; virtual;
@@ -23,14 +24,14 @@ type
 
     procedure Copy(pFrom: TD2XHandler); virtual;
 
-    procedure BeginProcessing(pInput: ThStreamCreator); virtual;
-    procedure EndProcessing(pOutput: ThStreamCreator); virtual;
+    procedure BeginProcessing(pInput: ThStreamReaderRef); virtual;
+    procedure EndProcessing(pOutput: ThStreamWriterRef); virtual;
 
-    procedure BeginFile(pFile: String; pInput: ThStreamCreator); virtual;
-    procedure EndFile(pFile: String; pOutput: ThStreamCreator); virtual;
+    procedure BeginFile(pFile: String; pInput: ThStreamReaderRef); virtual;
+    procedure EndFile(pFile: String; pOutput: ThStreamWriterRef); virtual;
 
     procedure BeginResults; virtual;
-    procedure EndResults(pOutput: ThStreamCreator); virtual;
+    procedure EndResults(pOutput: ThStreamWriterRef); virtual;
 
     function CheckBeforeMethod(pMethod: String): Boolean; virtual;
     function CheckAfterMethod(pMethod: String): Boolean; virtual;
@@ -45,22 +46,32 @@ type
 
   TD2XHandlerClass = class of TD2XHandler;
 
-function MakeStream(pS: TStream): TD2XHandler.ThStreamCreator;
+function MakeReader(pS: TStream): TD2XHandler.ThStreamReaderRef;
+function MakeWriter(pS: TStream): TD2XHandler.ThStreamWriterRef;
 
 implementation
 
-function MakeStream(pS: TStream): TD2XHandler.ThStreamCreator;
+function MakeReader(pS: TStream): TD2XHandler.ThStreamReaderRef;
 begin
-  Result := function: TStream
+  Result := function: TStreamReader
     begin
       pS.Position := 0;
-      Result := pS;
+      Result := TStreamReader.Create(pS);
+    end;
+end;
+
+function MakeWriter(pS: TStream): TD2XHandler.ThStreamWriterRef;
+begin
+  Result := function: TStreamWriter
+    begin
+      pS.Position := 0;
+      Result := TStreamWriter.Create(pS);
     end;
 end;
 
 { TD2XHandler }
 
-procedure TD2XHandler.BeginFile(pFile: String; pInput: ThStreamCreator);
+procedure TD2XHandler.BeginFile(pFile: String; pInput: ThStreamReaderRef);
 begin
 
 end;
@@ -70,7 +81,7 @@ begin
 
 end;
 
-procedure TD2XHandler.BeginProcessing(pInput: ThStreamCreator);
+procedure TD2XHandler.BeginProcessing(pInput: ThStreamReaderRef);
 begin
 
 end;
@@ -100,7 +111,7 @@ begin
 
 end;
 
-procedure TD2XHandler.EndFile(pFile: String; pOutput: ThStreamCreator);
+procedure TD2XHandler.EndFile(pFile: String; pOutput: ThStreamWriterRef);
 begin
 
 end;
@@ -110,12 +121,12 @@ begin
 
 end;
 
-procedure TD2XHandler.EndProcessing(pOutput: ThStreamCreator);
+procedure TD2XHandler.EndProcessing(pOutput: ThStreamWriterRef);
 begin
 
 end;
 
-procedure TD2XHandler.EndResults(pOutput: ThStreamCreator);
+procedure TD2XHandler.EndResults(pOutput: ThStreamWriterRef);
 begin
 
 end;

@@ -61,7 +61,6 @@ type
 
   TD2XCheckRef = reference to function: Boolean;
   TD2XStringRef = reference to function: string;
-  TD2XNamedStringRef = reference to function(pFile: string): string;
   TD2XStringCheckRef = reference to function(pStr: string): Boolean;
   TD2XLogMessage = reference to procedure(pType, pMsg: string; pX, pY: Integer);
 
@@ -69,7 +68,7 @@ type
   TStrIntDict = TDictionary<string, Integer>;
   TPairLogMethod = reference to function(pPair: TStrIntPair): string;
 
-procedure OutputStrIntDict(pDict: TStrIntDict; pStream: TStream; pFunc: TPairLogMethod);
+procedure OutputStrIntDict(pDict: TStrIntDict; pStream: TStreamWriter; pFunc: TPairLogMethod);
 
 function MakeFileName(pStr, pDflt: string): string;
 function TidyFilename(pFilename: string): string;
@@ -79,7 +78,7 @@ implementation
 uses
   System.StrUtils;
 
-procedure OutputStrIntDict(pDict: TStrIntDict; pStream: TStream; pFunc: TPairLogMethod);
+procedure OutputStrIntDict(pDict: TStrIntDict; pStream: TStreamWriter; pFunc: TPairLogMethod);
 var
   lP: TStrIntPair;
 begin
@@ -93,7 +92,7 @@ begin
           if lP.Value > 0 then
             Values[lP.Key] := pFunc(lP);
         Sort;
-        SaveToStream(pStream);
+        SaveToStream(pStream.BaseStream);
       finally
         Free;
       end;

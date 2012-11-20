@@ -9,6 +9,7 @@ uses
   D2X.Parser,
   D2X.Handler,
   D2X.Processor,
+  D2X.Stream,
   System.Generics.Collections;
 
 type
@@ -61,21 +62,21 @@ type
       pX, pY: Integer); override;
     procedure LexerInclude(const pFile: string; pX, pY: Integer); override;
 
-    function SetProcessingInput(pFilename: TD2XStringRef): TD2XHandlerProcessor;
-    function SetProcessingOutput(pFilename: TD2XStringRef): TD2XHandlerProcessor;
-    function SetResultsOutput(pFilename: TD2XNamedStringRef): TD2XHandlerProcessor;
-    function SetFileInput(pFilename: TD2XNamedStringRef): TD2XHandlerProcessor;
-    function SetFileOutput(pFilename: TD2XNamedStringRef): TD2XHandlerProcessor;
+    function SetProcessingInput(pFilename: TD2XStreamRef): TD2XHandlerProcessor;
+    function SetProcessingOutput(pFilename: TD2XStreamRef): TD2XHandlerProcessor;
+    function SetResultsOutput(pFilename: TD2XNamedStreamRef): TD2XHandlerProcessor;
+    function SetFileInput(pFilename: TD2XStreamRef): TD2XHandlerProcessor;
+    function SetFileOutput(pFilename: TD2XStreamRef): TD2XHandlerProcessor;
 
   private
     fMyHandler: Boolean;
     fHandler: TD2XHandler;
 
-    fProcessingInput: TD2XStringRef;
-    fProcessingOutput: TD2XStringRef;
-    fResultsOutput: TD2XNamedStringRef;
-    fFileInput: TD2XNamedStringRef;
-    fFileOutput: TD2XNamedStringRef;
+    fProcessingInput: TD2XStreamRef;
+    fProcessingOutput: TD2XStreamRef;
+    fResultsOutput: TD2XNamedStreamRef;
+    fFileInput: TD2XStreamRef;
+    fFileOutput: TD2XStreamRef;
 
   end;
 
@@ -91,26 +92,25 @@ uses
 
 procedure TD2XHandlerProcessor.BeginFile(pFile: string);
 var
-  lFS: TFileStream;
+  lS: TD2XStream;
 begin
-  lFS := nil;
+  lS := nil;
   if fActive.Flag then
     if Assigned(fFileInput) then
       try
         fHandler.BeginFile(pFile,
-            function: TStream
-          var
-            lFile: string;
+            function: TStreamReader
           begin
-            lFile := fFileInput(pFile);
-            if FileExists(lFile) then
-              lFS := TFileStream.Create(lFile, fmOpenRead)
+            Result := nil;
+            lS := fFileInput;
+            if Assigned(lS) then
+            if lS.Exists then
+              Result := lS.ReadFrom
             else
-              Log('WARNING: %1 file "%2" not found', [fHandler.Description, lFile]);
-            Result := lFS;
+              Log('WARNING: %1 file "%2" not found', [fHandler.Description, lS.Description]);
           end);
       finally
-        FreeAndNil(lFS);
+        FreeAndNil(lS);
       end
     else
       fHandler.BeginFile(pFile, nil);
@@ -124,24 +124,25 @@ end;
 
 procedure TD2XHandlerProcessor.BeginProcessing;
 var
-  lFS: TFileStream;
+  lS: TD2XStream;
 begin
-  lFS := nil;
+  lS := nil;
   if fActive.Flag then
     if Assigned(fProcessingInput) then
       try
         fHandler.BeginProcessing(
-          function: TStream
-          var
-            lFile: string;
+            function: TStreamReader
           begin
-            lFile := fProcessingInput;
-            if FileExists(lFile) then
-              lFS := TFileStream.Create(lFile, fmOpenRead);
-            Result := lFS;
+            Result := nil;
+            lS := fProcessingInput;
+            if Assigned(lS) then
+              if lS.Exists then
+                Result := lS.ReadFrom
+              else
+                Log('WARNING: %1 file "%2" not found', [fHandler.Description, lS.Description]);
           end);
       finally
-        FreeAndNil(lFS);
+        FreeAndNil(lS);
       end
     else
       fHandler.BeginProcessing(nil);
@@ -191,24 +192,23 @@ end;
 
 procedure TD2XHandlerProcessor.EndFile(pFile: string);
 var
-  lFS: TFileStream;
+  lS: TD2XStream;
 begin
-  lFS := nil;
+  lS := nil;
   if fActive.Flag then
     if Assigned(fFileOutput) then
       try
         fHandler.EndFile(pFile,
-          function: TStream
-          var
-            lFile: string;
+            function: TStreamWriter
           begin
-            lFile := fFileOutput(pFile);
-            if lFile > '' then
-              lFS := TFileStream.Create(lFile, fmCreate);
-            Result := lFS;
+            lS := fFileOutput;
+            if Assigned(lS) then
+              Result := lS.WriteTo
+            else
+              Result := nil;
           end);
       finally
-        FreeAndNil(lFS);
+        FreeAndNil(lS);
       end
     else
       fHandler.EndFile(pFile, nil);
@@ -222,24 +222,23 @@ end;
 
 procedure TD2XHandlerProcessor.EndProcessing;
 var
-  lFS: TFileStream;
+  lS: TD2XStream;
 begin
-  lFS := nil;
+  lS := nil;
   if fActive.Flag then
     if Assigned(fProcessingOutput) then
       try
         fHandler.EndProcessing(
-          function: TStream
-          var
-            lFile: string;
+            function: TStreamWriter
           begin
-            lFile := fProcessingOutput;
-            if lFile > '' then
-              lFS := TFileStream.Create(lFile, fmCreate);
-            Result := lFS;
+            lS := fProcessingOutput;
+            if Assigned(lS) then
+              Result := lS.WriteTo
+            else
+              Result := nil;
           end);
       finally
-        FreeAndNil(lFS);
+        FreeAndNil(lS);
       end
     else
       fHandler.EndProcessing(nil);
@@ -247,24 +246,23 @@ end;
 
 procedure TD2XHandlerProcessor.EndResults(pFile: string);
 var
-  lFS: TFileStream;
+  lS: TD2XStream;
 begin
-  lFS := nil;
+  lS := nil;
   if fActive.Flag then
     if Assigned(fResultsOutput) then
       try
         fHandler.EndResults(
-          function: TStream
-          var
-            lFile: string;
+            function: TStreamWriter
           begin
-            lFile := fResultsOutput(pFile);
-            if lFile > '' then
-              lFS := TFileStream.Create(lFile, fmCreate);
-            Result := lFS;
+            lS := fResultsOutput(pFile);
+            if Assigned(lS) then
+              Result := lS.WriteTo
+            else
+              Result := nil;
           end);
       finally
-        FreeAndNil(lFS);
+        FreeAndNil(lS);
       end
     else
       fHandler.EndResults(nil);
@@ -283,14 +281,14 @@ begin
     fHandler.ParserMessage(pTyp, pMsg, pX, pY);
 end;
 
-function TD2XHandlerProcessor.SetFileInput(pFilename: TD2XNamedStringRef)
+function TD2XHandlerProcessor.SetFileInput(pFilename: TD2XStreamRef)
   : TD2XHandlerProcessor;
 begin
   fFileInput := pFilename;
   Result := Self;
 end;
 
-function TD2XHandlerProcessor.SetFileOutput(pFilename: TD2XNamedStringRef)
+function TD2XHandlerProcessor.SetFileOutput(pFilename: TD2XStreamRef)
   : TD2XHandlerProcessor;
 begin
   fFileOutput := pFilename;
@@ -305,21 +303,21 @@ begin
     TD2XParserHandler(fHandler).InitParser(pParser);
 end;
 
-function TD2XHandlerProcessor.SetProcessingInput(pFilename: TD2XStringRef)
+function TD2XHandlerProcessor.SetProcessingInput(pFilename: TD2XStreamRef)
   : TD2XHandlerProcessor;
 begin
   fProcessingInput := pFilename;
   Result := Self;
 end;
 
-function TD2XHandlerProcessor.SetProcessingOutput(pFilename: TD2XStringRef)
+function TD2XHandlerProcessor.SetProcessingOutput(pFilename: TD2XStreamRef)
   : TD2XHandlerProcessor;
 begin
   fProcessingOutput := pFilename;
   Result := Self;
 end;
 
-function TD2XHandlerProcessor.SetResultsOutput(pFilename: TD2XNamedStringRef)
+function TD2XHandlerProcessor.SetResultsOutput(pFilename: TD2XNamedStreamRef)
   : TD2XHandlerProcessor;
 begin
   fResultsOutput := pFilename;

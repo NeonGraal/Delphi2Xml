@@ -16,7 +16,9 @@ uses
   D2X.Parser in 'Source\D2X.Parser.pas',
   D2X.Processor in 'Source\D2X.Processor.pas',
   D2X.Processors in 'Source\D2X.Processors.pas',
-  D2X.Xml in 'Source\D2X.Xml.pas';
+  D2X.Xml in 'Source\D2X.Xml.pas',
+  D2X.FileOpts in 'Source\D2X.FileOpts.pas',
+  D2X.Stream in 'Source\D2X.Stream.pas';
 
 var
   opts: TD2XRunOptions;

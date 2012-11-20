@@ -6,7 +6,8 @@ uses
   System.Classes,
   System.Generics.Collections,
   System.SysUtils,
-  D2X;
+  D2X,
+  D2X.Stream;
 
 type
   EInvalidParam = class(Exception);
@@ -183,7 +184,7 @@ type
       pConverter: TD2XSingleParam<Boolean>.TspConverter;
       pFormatter: TD2XSingleParam<Boolean>.TspFormatter;
       pValidator: TD2XSingleParam<Boolean>.TspValidator); override;
-    constructor CreateDefines(pCode, pLabel: string; pDefinesFileName: TD2XNamedStringRef);
+    constructor CreateDefines(pCode, pLabel: string; pDefinesFileName: TD2XNamedStreamRef);
     destructor Destroy; override;
 
     procedure Report(pL: ID2XLogger); override;
@@ -193,7 +194,7 @@ type
 
   private
     fDefines: TStringList;
-    fDefinesFileName: TD2XNamedStringRef;
+    fDefinesFileName: TD2XNamedStreamRef;
 
     function ConvertDefines(pStr: string; pDflt: Boolean; out pVal: Boolean): Boolean;
     function FormatDefines(pVal: Boolean): string;
@@ -692,6 +693,7 @@ function TD2XDefinesParam.ConvertDefines(pStr: string; pDflt: Boolean;
 var
   lStr: string;
   lIdx: Integer;
+  lS: TD2XStream;
 begin
   Result := False;
   if (pStr = '!') or (pStr = ':') then
@@ -726,14 +728,20 @@ begin
           begin
             Result := True;
             pVal := True;
-            fDefines.LoadFromFile(fDefinesFileName(MakeFileName(lStr, '.def')));
+            lS := fDefinesFileName(MakeFileName(lStr, '.def'));
+            if Assigned(lS) then
+              try
+                fDefines.LoadFromStream(lS.ReadFrom.BaseStream);
+              finally
+                lS.Free;
+              end;
           end;
       end;
     end;
 end;
 
 constructor TD2XDefinesParam.CreateDefines(pCode, pLabel: string;
-  pDefinesFileName: TD2XNamedStringRef);
+  pDefinesFileName: TD2XNamedStreamRef);
 begin
   fDefines := TStringList.Create;
 

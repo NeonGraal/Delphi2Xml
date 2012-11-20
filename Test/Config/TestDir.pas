@@ -1,4 +1,4 @@
-unit Test;
+unit TestDir;
 
 interface
 

@@ -35,10 +35,10 @@ type
     function Description: string; override;
     function UseProxy: Boolean; override;
 
-    procedure EndProcessing(pOutput: TD2XHandler.ThStreamCreator); override;
+    procedure EndProcessing(pOutput: TD2XHandler.ThStreamWriterRef); override;
 
-    procedure BeginFile(pFile: string; pInput: TD2XHandler.ThStreamCreator); override;
-    procedure EndFile(pFile: string; pOutput: TD2XHandler.ThStreamCreator); override;
+    procedure BeginFile(pFile: string; pInput: TD2XHandler.ThStreamReaderRef); override;
+    procedure EndFile(pFile: string; pOutput: TD2XHandler.ThStreamWriterRef); override;
 
     procedure BeginMethod(pMethod: string); override;
     procedure EndMethod(pMethod: string); override;
@@ -55,7 +55,7 @@ type
     function Description: string; override;
     function UseProxy: Boolean; override;
 
-    procedure EndProcessing(pOutput: TD2XHandler.ThStreamCreator); override;
+    procedure EndProcessing(pOutput: TD2XHandler.ThStreamWriterRef); override;
 
     procedure DefineUsed(pDef: string);
 
@@ -106,7 +106,7 @@ type
 
     procedure Copy(pFrom: TD2XHandler); override;
 
-    procedure BeginFile(pFile: string; pInput: TD2XHandler.ThStreamCreator); override;
+    procedure BeginFile(pFile: string; pInput: TD2XHandler.ThStreamReaderRef); override;
   end;
 
   TD2XSkipHandler = class(TD2XHandler)
@@ -123,9 +123,9 @@ type
     function CheckBeforeMethod(pMethod: string): Boolean; override;
     function CheckAfterMethod(pMethod: string): Boolean; override;
 
-    procedure BeginFile(pFile: string; pInput: TD2XHandler.ThStreamCreator); override;
+    procedure BeginFile(pFile: string; pInput: TD2XHandler.ThStreamReaderRef); override;
 
-    procedure EndProcessing(pOutput: TD2XHandler.ThStreamCreator); override;
+    procedure EndProcessing(pOutput: TD2XHandler.ThStreamWriterRef); override;
   end;
 
   TD2XWriteDefinesHandler = class(TD2XParserHandler)
@@ -133,7 +133,7 @@ type
     function Description: string; override;
     function UseProxy: Boolean; override;
 
-    procedure EndResults(pOutput: TD2XHandler.ThStreamCreator); override;
+    procedure EndResults(pOutput: TD2XHandler.ThStreamWriterRef); override;
   end;
 
   TD2XXmlHandler = class(TD2XParserHandler)
@@ -158,7 +158,7 @@ type
     procedure Copy(pFrom: TD2XHandler); override;
 
     procedure BeginResults; override;
-    procedure EndResults(pOutput: TD2XHandler.ThStreamCreator); override;
+    procedure EndResults(pOutput: TD2XHandler.ThStreamWriterRef); override;
 
     procedure BeginMethod(pMethod: string); override;
     procedure EndMethod(pMethod: string); override;
@@ -179,13 +179,14 @@ implementation
 
 uses
   D2X.Options,
+  D2X.Stream,
   System.IOUtils,
   System.SysUtils,
   Xml.XMLIntf;
 
 { TD2XCountHandler }
 
-procedure TD2XCountHandler.BeginFile(pFile: string; pInput: TD2XHandler.ThStreamCreator);
+procedure TD2XCountHandler.BeginFile(pFile: string; pInput: TD2XHandler.ThStreamReaderRef);
 begin
   fCurrent.Method := '';
   fCurrent.Children := 0;
@@ -260,13 +261,13 @@ begin
   end;
 end;
 
-procedure TD2XCountHandler.EndFile(pFile: string; pOutput: TD2XHandler.ThStreamCreator);
+procedure TD2XCountHandler.EndFile(pFile: string; pOutput: TD2XHandler.ThStreamWriterRef);
 begin
   FreeAndNil(fStack);
   pOutput;
 end;
 
-procedure TD2XCountHandler.EndProcessing(pOutput: TD2XHandler.ThStreamCreator);
+procedure TD2XCountHandler.EndProcessing(pOutput: TD2XHandler.ThStreamWriterRef);
 begin
   OutputStrIntDict(fMaxChildren, pOutput, MinMaxPairLog);
 end;
@@ -288,25 +289,26 @@ end;
 
 { TD2XSkipHandler }
 
-procedure TD2XSkipHandler.BeginFile(pFile: string; pInput: TD2XHandler.ThStreamCreator);
+procedure TD2XSkipHandler.BeginFile(pFile: string; pInput: TD2XHandler.ThStreamReaderRef);
 var
   i: Integer;
-  lS: TStream;
+  lS: TStreamReader;
+  lSL: TStringList;
 begin
-  with TStringList.Create do
-    try
-      lS := pInput;
-      if Assigned(lS) then
-        LoadFromStream(lS);
-      fSkippedMethods.Clear;
-      for i := 0 to Count - 1 do
-        if Names[i] = '' then
-          fSkippedMethods.Add(Strings[i], 0)
-        else
-          fSkippedMethods.Add(Names[i], 0);
-    finally
-      Free;
-    end
+  lSL := TStringList.Create;
+  try
+    lS := pInput;
+    if Assigned(lS) then
+      lSL.LoadFromStream(lS.BaseStream);
+    fSkippedMethods.Clear;
+    for i := 0 to lSL.Count - 1 do
+      if lSL.Names[i] = '' then
+        fSkippedMethods.Add(lSL[i], 0)
+      else
+        fSkippedMethods.Add(lSL.Names[i], 0);
+  finally
+    lSL.Free;
+  end
 end;
 
 function TD2XSkipHandler.CheckAfterMethod(pMethod: string): Boolean;
@@ -342,7 +344,7 @@ begin
   inherited;
 end;
 
-procedure TD2XSkipHandler.EndProcessing(pOutput: TD2XHandler.ThStreamCreator);
+procedure TD2XSkipHandler.EndProcessing(pOutput: TD2XHandler.ThStreamWriterRef);
 begin
   OutputStrIntDict(fSkippedMethods, pOutput,
       function(pPair: TStrIntPair): string
@@ -478,15 +480,15 @@ begin
   end;
 end;
 
-procedure TD2XXmlHandler.EndResults(pOutput: TD2XHandler.ThStreamCreator);
+procedure TD2XXmlHandler.EndResults(pOutput: TD2XHandler.ThStreamWriterRef);
 var
-  lFile: TStream;
+  lFile: TStreamWriter;
 begin
   if fHasFiles and Assigned(pOutput) then
   begin
     lFile := pOutput;
     if Assigned(lFile) then
-      fXmlDoc.Xml.SaveToStream(lFile);
+      fXmlDoc.Xml.SaveToStream(lFile.BaseStream);
   end;
 
   fXmlNode := nil;
@@ -541,13 +543,13 @@ begin
   Result := 'Write Defines';
 end;
 
-procedure TD2XWriteDefinesHandler.EndResults(pOutput: TD2XHandler.ThStreamCreator);
+procedure TD2XWriteDefinesHandler.EndResults(pOutput: TD2XHandler.ThStreamWriterRef);
 var
   lSL: TStringList;
   i: Integer;
-  lFS: TStream;
+  lS: TStreamWriter;
 const
-  DEF_BREAK: array [0 .. 9] of Byte = (13, 10, 42, 42, 42, 42, 13, 10, 13, 10);
+  DEF_BREAK= #13#10'****'#13#10#13#10;
 begin
   lSL := TStringList.Create;
   try
@@ -562,12 +564,13 @@ begin
       //        lFile := fProgramDir + fOpts.DefinesDirectory + ExtractFilePath(pFilename);
       //        ForceDirectories(lFile);
       //        lFS := TFileStream.Create(fOpts.DefinesDirectory + pFilename + '.def', fmCreate);
-      lFS := pOutput;
-      if Assigned(lFS) then
+      lS := pOutput;
+      if Assigned(lS) then
       begin
-        fParser.StartDefines.SaveToStream(lFS);
-        lFS.Write(DEF_BREAK, 10);
-        lSL.SaveToStream(lFS);
+        fParser.StartDefines.SaveToStream(lS.BaseStream);
+        lS.Write(DEF_BREAK);
+        lS.Flush;
+        lSL.SaveToStream(lS.BaseStream);
       end;
     end;
   finally
@@ -611,7 +614,7 @@ begin
   inherited;
 end;
 
-procedure TD2XDefinesUsedHandler.EndProcessing(pOutput: TD2XHandler.ThStreamCreator);
+procedure TD2XDefinesUsedHandler.EndProcessing(pOutput: TD2XHandler.ThStreamWriterRef);
 begin
   OutputStrIntDict(fDefinesDict, pOutput,
     function(pPair: TStrIntPair): string
@@ -628,7 +631,7 @@ end;
 { TD2XParserDefinesHandler }
 
 procedure TD2XParserDefinesHandler.BeginFile(pFile: string;
-  pInput: TD2XHandler.ThStreamCreator);
+  pInput: TD2XHandler.ThStreamReaderRef);
 begin
   fParser.StartDefines.Assign(fDefines);
 end;
