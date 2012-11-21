@@ -3,7 +3,9 @@ unit D2X.Options.Test;
 interface
 
 uses
+  D2X.Options,
   D2X.Param,
+  System.Classes,
   TestFramework;
 
 type
@@ -15,17 +17,20 @@ type
     procedure SetFlag(pVal: Boolean);
   end;
 
+  TTestOptions = class(TD2XOptions)
+    property Defines: TStringList read GetDefines;
+
+  end;
+
 implementation
 
 uses
   D2X,
   D2X.FileOpts,
-  D2X.Options,
   D2X.Test,
   D2X.Param.Test,
   D2X.Stream,
   D2X.Utils,
-  System.Classes,
   System.StrUtils,
   System.SysUtils,
   Winapi.Windows;
@@ -51,7 +56,7 @@ type
 
   TOptionsTestCase = class(TLoggerTestCase)
   private
-    fOpts: TD2XOptions;
+    fOpts: TTestOptions;
 
     function ParseOption(pOpt: string): Boolean;
   public
@@ -1129,7 +1134,7 @@ end;
 
 function TTestRunOptions.GetDefines: TStringList;
 begin
-  Result := fOpts.Defines;
+  Result := TTestOptions(fOpts).Defines;
 end;
 
 { TOptionsTestCase }
@@ -1143,7 +1148,7 @@ procedure TOptionsTestCase.SetUp;
 begin
   inherited;
 
-  fOpts := TD2XOptions.Create;
+  fOpts := TTestOptions.Create;
   fOpts.JoinLog(fLog);
 end;
 

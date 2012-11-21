@@ -61,18 +61,6 @@ type
 
   end;
 
-  TD2XParserHandler = class(TD2XHandler)
-  protected
-    fParser: TD2XDefinesParser;
-
-  public
-    procedure InitParser(pParser: TD2XDefinesParser); virtual;
-
-    procedure Copy(pFrom: TD2XHandler); override;
-
-    property Parser: TD2XDefinesParser read fParser;
-  end;
-
   TD2XErrorHandler = class(TD2XParserHandler)
   public
     constructor Create; override;
@@ -672,24 +660,6 @@ end;
 function TD2XParserDefinesHandler.UseProxy: Boolean;
 begin
   Result := False;
-end;
-
-{ TD2XParserHandler }
-
-procedure TD2XParserHandler.Copy(pFrom: TD2XHandler);
-var
-  lFrom: TD2XParserHandler;
-begin
-  if Assigned(pFrom) then
-  begin
-    lFrom := TD2XParserHandler(pFrom);
-    fParser := lFrom.fParser;
-  end;
-end;
-
-procedure TD2XParserHandler.InitParser(pParser: TD2XDefinesParser);
-begin
-  fParser := pParser;
 end;
 
 { TD2XErrorHandler }

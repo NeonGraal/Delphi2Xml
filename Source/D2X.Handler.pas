@@ -4,6 +4,7 @@ interface
 
 uses
   CastaliaPasLexTypes,
+  D2X.Parser,
   System.Classes,
   System.Generics.Collections,
   System.SysUtils;
@@ -46,28 +47,17 @@ type
 
   TD2XHandlerClass = class of TD2XHandler;
 
-function MakeReader(pS: TStream): TD2XHandler.ThStreamReaderRef;
-function MakeWriter(pS: TStream): TD2XHandler.ThStreamWriterRef;
+  TD2XParserHandler = class(TD2XHandler)
+  protected
+    fParser: TD2XDefinesParser;
+
+  public
+    procedure InitParser(pParser: TD2XDefinesParser); virtual;
+
+    procedure Copy(pFrom: TD2XHandler); override;
+  end;
 
 implementation
-
-function MakeReader(pS: TStream): TD2XHandler.ThStreamReaderRef;
-begin
-  Result := function: TStreamReader
-    begin
-      pS.Position := 0;
-      Result := TStreamReader.Create(pS);
-    end;
-end;
-
-function MakeWriter(pS: TStream): TD2XHandler.ThStreamWriterRef;
-begin
-  Result := function: TStreamWriter
-    begin
-      pS.Position := 0;
-      Result := TStreamWriter.Create(pS);
-    end;
-end;
 
 { TD2XHandler }
 
@@ -140,6 +130,24 @@ procedure TD2XHandler.ParserMessage(const pTyp: TMessageEventType;
   const pMsg: String; pX, pY: Integer);
 begin
 
+end;
+
+{ TD2XParserHandler }
+
+procedure TD2XParserHandler.Copy(pFrom: TD2XHandler);
+var
+  lFrom: TD2XParserHandler;
+begin
+  if Assigned(pFrom) then
+  begin
+    lFrom := TD2XParserHandler(pFrom);
+    fParser := lFrom.fParser;
+  end;
+end;
+
+procedure TD2XParserHandler.InitParser(pParser: TD2XDefinesParser);
+begin
+  fParser := pParser;
 end;
 
 end.

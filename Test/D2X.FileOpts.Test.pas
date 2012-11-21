@@ -2,10 +2,20 @@ unit D2X.FileOpts.Test;
 
 interface
 
+uses
+  D2X.FileOpts;
+
+type
+  TTestFileOptions = class(TD2XFileOptions)
+  public
+    property OutputTimestamp: string read fOutputTimestamp;
+    property TimestampFiles: Boolean read GetTimestampFiles;
+
+  end;
+
 implementation
 
 uses
-  D2X.FileOpts,
   D2X.Param.Test,
   D2X.Stream,
   System.SysUtils,
@@ -14,7 +24,7 @@ uses
 type
   TestTD2XFileOptions = class(TParamsTestCase)
   private
-    fFileOpts: TD2XFileOptions;
+    fFileOpts: TTestFileOptions;
 
     fDS: TD2XStream;
 
@@ -62,7 +72,7 @@ procedure TestTD2XFileOptions.SetUp;
 begin
   inherited;
 
-  fFileOpts := TD2XFileOptions.Create(nil);
+  fFileOpts := TTestFileOptions.Create(nil);
   fFileOpts.RegisterParams(fParams);
 end;
 

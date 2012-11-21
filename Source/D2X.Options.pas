@@ -15,7 +15,6 @@ uses
   System.Diagnostics,
   System.Generics.Collections,
   System.Rtti,
-  System.StrUtils,
   System.SysUtils;
 
 type
@@ -81,6 +80,8 @@ type
     procedure InitParser;
 
     function GetRecurse: Boolean;
+
+  protected
     function GetDefines: TStringList;
 
   public
@@ -102,7 +103,6 @@ type
     procedure EndProcessing;
 
     property Recurse: Boolean read GetRecurse;
-    property Defines: TStringList read GetDefines;
   end;
 
   TD2XRunOptions = class(TD2XLogger)
@@ -127,6 +127,7 @@ implementation
 uses
   D2X.Processors,
   System.IOUtils,
+  System.StrUtils,
   System.TypInfo,
   Winapi.Windows;
 

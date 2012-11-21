@@ -28,16 +28,16 @@ type
     fGlobalName: TD2XStringParam;
     fTimestampFiles: TD2XBooleanParam;
 
-    fOutputTimestamp: string;
-
     function GetGlobalName: string;
-    function GetTimestampFiles: Boolean;
     procedure SetGlobalName(const Value: string);
 
+  protected
+    fOutputTimestamp: string;
+
+    function GetTimestampFiles: Boolean;
+
   public
-    property OutputTimestamp: string read fOutputTimestamp;
     property GlobalName: string read GetGlobalName write SetGlobalName;
-    property TimestampFiles: Boolean read GetTimestampFiles;
   end;
 
 function ConvertDir(pStr, pDflt: string; out pVal: string): Boolean;

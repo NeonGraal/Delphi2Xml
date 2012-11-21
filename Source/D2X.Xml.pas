@@ -13,12 +13,12 @@ type
 
   TD2XmlNode = class
   strict private
-    fText: string;
     fParent: TD2XmlNode;
     fXml: TStringStream;
 
   strict protected
     fTag: string;
+    fText: string;
     fDoc: TD2XmlDoc;
 
     constructor CreateTag(pTag: string; pParent: TD2XmlNode); virtual;
@@ -235,11 +235,11 @@ begin
         lN.MakeXml(pW);
     FreeAndNil(fAtttributes);
 
-    if (fChildren.Count > 0) or (Text > '') then
+    if (fChildren.Count > 0) or (fText > '') then
     begin
       pW.Write('>');
-      if Text > '' then
-        pW.Write(Text)
+      if fText > '' then
+        pW.Write(fText)
       else
       begin
         if doNodeAutoIndent in fDoc.Options then
@@ -273,7 +273,7 @@ begin
       pW.WriteLine;
   end
   else
-    pW.Write(Text);
+    pW.Write(fText);
 end;
 
 { TD2XmlAttribute }
@@ -281,9 +281,9 @@ end;
 procedure TD2XmlAttribute.MakeXml(pW: TTextWriter);
 begin
   pW.Write(' ');
-  pW.Write(LocalName);
+  pW.Write(fTag);
   pW.Write('="');
-  pW.Write(XmlEscape(Text));
+  pW.Write(XmlEscape(fText));
   pW.Write('"');
 end;
 

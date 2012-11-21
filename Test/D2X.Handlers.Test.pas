@@ -3,6 +3,7 @@ unit D2X.Handlers.Test;
 interface
 
 uses
+  D2X.Handler,
   D2X.Parser,
   D2X.Test;
 
@@ -15,13 +16,18 @@ type
     procedure TearDown; override;
   end;
 
+  TTestParserHandler = class(TD2XParserHandler)
+    public
+    property Parser: TD2XDefinesParser read fParser;
+
+  end;
+
 implementation
 
 uses
   CastaliaPasLexTypes,
   D2X,
   D2X.Handlers,
-  D2X.Handler,
   D2X.Xml,
   System.Classes,
   System.Generics.Collections,
@@ -614,11 +620,11 @@ begin
 
     pFrom.InitParser(fParser);
 
-    CheckFalse(Assigned(fHndlr.Parser), 'Parser not set');
+    CheckFalse(Assigned(TTestParserHandler(fHndlr).Parser), 'Parser not set');
 
     fHndlr.Copy(pFrom);
 
-    Check(fParser = fHndlr.Parser, 'Parser set');
+    Check(fParser = TTestParserHandler(fHndlr).Parser, 'Parser set');
   finally
     pFrom.Free;
   end;
@@ -642,8 +648,8 @@ procedure TestTD2XWriteDefinesHandler.TestInit;
 begin
   fHndlr.InitParser(fParser);
 
-  Check(fParser = fHndlr.Parser, 'Parser set');
-  CheckTrue(Assigned(fHndlr.Parser), 'Parse Mode set');
+  CheckTrue(Assigned(TTestParserHandler(fHndlr).Parser), 'Parse Mode set');
+  Check(fParser = TTestParserHandler(fHndlr).Parser, 'Parser set');
 end;
 
 procedure TestTD2XWriteDefinesHandler.TestUseProxy;
@@ -771,11 +777,11 @@ begin
 
     pFrom.InitParser(fParser);
 
-    CheckFalse(Assigned(fHndlr.Parser), 'Parser not set');
+    CheckFalse(Assigned(TTestParserHandler(fHndlr).Parser), 'Parser not set');
 
     fHndlr.Copy(pFrom);
 
-    Check(fParser = fHndlr.Parser, 'Parser set');
+    Check(fParser = TTestParserHandler(fHndlr).Parser, 'Parser set');
   finally
     pFrom.Free;
   end;
@@ -790,8 +796,8 @@ procedure TestTD2XParserDefinesHandler.TestInit;
 begin
   fHndlr.InitParser(fParser);
 
-  Check(fParser = fHndlr.Parser, 'Parser set');
-  CheckTrue(Assigned(fHndlr.Parser), 'Parse Mode set');
+  CheckTrue(Assigned(TTestParserHandler(fHndlr).Parser), 'Parse Mode set');
+  Check(fParser = TTestParserHandler(fHndlr).Parser, 'Parser set');
 end;
 
 procedure TestTD2XParserDefinesHandler.TestUseProxy;
