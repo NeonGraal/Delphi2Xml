@@ -91,13 +91,19 @@ end;
 procedure TestTD2XDefinesParser.TestGetLexerDefines;
 var
   pDefs: TStringList;
+const
+{$IFDEF WIN32}
+  EXPECTED_DEFINES = 'CONDITIONALEXPRESSIONS,CPU386,MSWINDOWS,UNICODE,VER230,WIN32';
+{$ELSE}
+  EXPECTED_DEFINES = 'CONDITIONALEXPRESSIONS,MSWINDOWS,UNICODE,VER230';
+{$ENDIF}
 begin
   pDefs := TStringList.Create;
+  pDefs.Sorted := True;
   try
     FD2XDefinesParser.GetLexerDefines(pDefs);
 
-    CheckEqualsString('VER230,WIN32,CPU386,MSWINDOWS,CONDITIONALEXPRESSIONS,UNICODE',
-      pDefs.CommaText, 'Default Lexer Defines');
+    CheckEqualsString(EXPECTED_DEFINES, pDefs.CommaText, 'Default Lexer Defines');
   finally
     pDefs.Free;
   end;

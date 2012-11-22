@@ -4,7 +4,8 @@ interface
 
 uses
   CastaliaPasLexTypes,
-  D2X.Handler;
+  D2X.Handler,
+  D2X.Stream;
 
 type
   TD2XHandlerTester = class(TD2XHandler)
@@ -27,12 +28,12 @@ type
 
     function Description: String; override;
     function UseProxy: Boolean; override;
-    procedure BeginProcessing(pInput: TD2XHandler.ThStreamReaderRef); override;
-    procedure EndProcessing(pOutput: TD2XHandler.ThStreamWriterRef); override;
-    procedure BeginFile(pFile: String; pInput: TD2XHandler.ThStreamReaderRef); override;
-    procedure EndFile(pFile: String; pOutput: TD2XHandler.ThStreamWriterRef); override;
+    procedure BeginProcessing(pInput: TStreamReaderRef); override;
+    procedure EndProcessing(pOutput: TStreamWriterRef); override;
+    procedure BeginFile(pFile: String; pInput: TStreamReaderRef); override;
+    procedure EndFile(pFile: String; pOutput: TStreamWriterRef); override;
     procedure BeginResults; override;
-    procedure EndResults(pOutput: TD2XHandler.ThStreamWriterRef); override;
+    procedure EndResults(pOutput: TStreamWriterRef); override;
     function CheckBeforeMethod(pMethod: String): Boolean; override;
     function CheckAfterMethod(pMethod: String): Boolean; override;
     procedure BeginMethod(pMethod: String); override;
@@ -171,14 +172,14 @@ begin
   CalledBeginMethod := true;
 end;
 
-procedure TD2XHandlerTester.BeginFile(pFile: String; pInput: TD2XHandler.ThStreamReaderRef);
+procedure TD2XHandlerTester.BeginFile(pFile: String; pInput: TStreamReaderRef);
 begin
   CalledBeginFile := true;
   if CreateStreams then
     pInput;
 end;
 
-procedure TD2XHandlerTester.BeginProcessing(pInput: TD2XHandler.ThStreamReaderRef);
+procedure TD2XHandlerTester.BeginProcessing(pInput: TStreamReaderRef);
 begin
   CalledBeginProcessing := true;
   if CreateStreams then
@@ -219,21 +220,21 @@ begin
   CalledEndMethod := true;
 end;
 
-procedure TD2XHandlerTester.EndFile(pFile: String; pOutput: TD2XHandler.ThStreamWriterRef);
+procedure TD2XHandlerTester.EndFile(pFile: String; pOutput: TStreamWriterRef);
 begin
   CalledEndFile := true;
   if CreateStreams then
     pOutput;
 end;
 
-procedure TD2XHandlerTester.EndProcessing(pOutput: TD2XHandler.ThStreamWriterRef);
+procedure TD2XHandlerTester.EndProcessing(pOutput: TStreamWriterRef);
 begin
   CalledEndProcessing := true;
   if CreateStreams then
     pOutput;
 end;
 
-procedure TD2XHandlerTester.EndResults(pOutput: TD2XHandler.ThStreamWriterRef);
+procedure TD2XHandlerTester.EndResults(pOutput: TStreamWriterRef);
 begin
   CalledEndResults := true;
   if CreateStreams then

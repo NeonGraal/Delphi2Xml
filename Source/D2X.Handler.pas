@@ -4,6 +4,7 @@ interface
 
 uses
   CastaliaPasLexTypes,
+  D2X.Stream,
   D2X.Parser,
   System.Classes,
   System.Generics.Collections,
@@ -13,10 +14,6 @@ type
   EInvalidHandler = class(Exception);
 
   TD2XHandler = class abstract
-  public type
-    ThStreamReaderRef = reference to function: TStreamReader;
-    ThStreamWriterRef = reference to function: TStreamWriter;
-
   public
     constructor Create; virtual;
 
@@ -25,14 +22,14 @@ type
 
     procedure Copy(pFrom: TD2XHandler); virtual;
 
-    procedure BeginProcessing(pInput: ThStreamReaderRef); virtual;
-    procedure EndProcessing(pOutput: ThStreamWriterRef); virtual;
+    procedure BeginProcessing(pInput: TStreamReaderRef); virtual;
+    procedure EndProcessing(pOutput: TStreamWriterRef); virtual;
 
-    procedure BeginFile(pFile: String; pInput: ThStreamReaderRef); virtual;
-    procedure EndFile(pFile: String; pOutput: ThStreamWriterRef); virtual;
+    procedure BeginFile(pFile: String; pInput: TStreamReaderRef); virtual;
+    procedure EndFile(pFile: String; pOutput: TStreamWriterRef); virtual;
 
     procedure BeginResults; virtual;
-    procedure EndResults(pOutput: ThStreamWriterRef); virtual;
+    procedure EndResults(pOutput: TStreamWriterRef); virtual;
 
     function CheckBeforeMethod(pMethod: String): Boolean; virtual;
     function CheckAfterMethod(pMethod: String): Boolean; virtual;
@@ -61,7 +58,7 @@ implementation
 
 { TD2XHandler }
 
-procedure TD2XHandler.BeginFile(pFile: String; pInput: ThStreamReaderRef);
+procedure TD2XHandler.BeginFile(pFile: String; pInput: TStreamReaderRef);
 begin
 
 end;
@@ -71,7 +68,7 @@ begin
 
 end;
 
-procedure TD2XHandler.BeginProcessing(pInput: ThStreamReaderRef);
+procedure TD2XHandler.BeginProcessing(pInput: TStreamReaderRef);
 begin
 
 end;
@@ -101,7 +98,7 @@ begin
 
 end;
 
-procedure TD2XHandler.EndFile(pFile: String; pOutput: ThStreamWriterRef);
+procedure TD2XHandler.EndFile(pFile: String; pOutput: TStreamWriterRef);
 begin
 
 end;
@@ -111,12 +108,12 @@ begin
 
 end;
 
-procedure TD2XHandler.EndProcessing(pOutput: ThStreamWriterRef);
+procedure TD2XHandler.EndProcessing(pOutput: TStreamWriterRef);
 begin
 
 end;
 
-procedure TD2XHandler.EndResults(pOutput: ThStreamWriterRef);
+procedure TD2XHandler.EndResults(pOutput: TStreamWriterRef);
 begin
 
 end;

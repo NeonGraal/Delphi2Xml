@@ -1504,7 +1504,7 @@ begin
   inherited;
 
   fDefP := TD2XDefinesParam.CreateDefines('T', 'Test',
-    function(pFile: string): TD2XStream
+    function(pFile: string): ID2XFile
     begin
       Result := TD2XFileStream.Create('Config\' + pFile);
     end);

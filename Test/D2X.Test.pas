@@ -17,7 +17,7 @@ type
     fW: TStringWriter;
     fL: TStringList;
 
-    fDS: TD2XStream;
+    fDS: ID2XFile;
 
     procedure CheckBuilder(pExp, pLabel: string; pB: TStringBuilder = nil);
     procedure CheckList(pExp, pLabel: string; pL: TStringList = nil);
@@ -54,7 +54,7 @@ uses
   System.StrUtils;
 
 type
-  TD2XTestStream = class(TD2XStream)
+  TD2XTestStream = class(TD2XInterfaced, ID2XFile)
   private
     fSW: TStreamWriter;
     fSR: TStreamReader;
@@ -64,10 +64,10 @@ type
     constructor Create(pS: TStringStream);
     destructor Destroy; override;
 
-    function Description: String; override;
-    function Exists: Boolean; override;
-    function ReadFrom: TStreamReader; override;
-    function WriteTo(pAppend: Boolean = False): TStreamWriter; override;
+    function Description: String;
+    function Exists: Boolean;
+    function ReadFrom: TStreamReader;
+    function WriteTo(pAppend: Boolean = False): TStreamWriter;
   end;
 
   TestTD2X = class(TTestCase)
@@ -691,8 +691,15 @@ begin
 end;
 
 procedure TStringTestCase.TearDown;
+var
+  lDS: TD2XInterfaced;
 begin
-  FreeAndNil(fDS);
+  if Assigned(fDS) then
+  begin
+    lDS := fDS as TD2XInterfaced;
+    fDS := nil;
+    lDS.Free;
+  end;
   FreeAndNil(fW);
   FreeAndNil(fS);
   FreeAndNil(fL);

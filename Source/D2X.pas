@@ -21,17 +21,17 @@ type
     class function CnvDflt<T>(pStr: string; pDflt: T; out pVal: T): Boolean;
   end;
 
-  ID2XLogger = interface
-    procedure JoinLog(pLogger: ID2XLogger);
-    procedure Log(pFmt: string; pArgs: array of const; pLine: Boolean = True);
-  end;
-
   TD2XInterfaced = class(TObject, IInterface)
   protected
     function QueryInterface(const IID: TGUID; out Obj): HResult; stdcall;
     function _AddRef: Integer; stdcall;
     function _Release: Integer; stdcall;
 
+  end;
+
+  ID2XLogger = interface
+    procedure JoinLog(pLogger: ID2XLogger);
+    procedure Log(pFmt: string; pArgs: array of const; pLine: Boolean = True);
   end;
 
   TD2XLogger = class(TD2XInterfaced, ID2XLogger)

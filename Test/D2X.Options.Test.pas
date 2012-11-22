@@ -278,8 +278,13 @@ const
     'Count Children :.cnt Skipped Methods :.skip ';
   DEFAULT_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Use default Defines';
   EMPTY_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Use NO Defines';
+{$IFDEF WIN32}
   DEFINED_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Use these Defines: ' +
     'CONDITIONALEXPRESSIONS, CPU32, CPU386, MSWINDOWS, UNICODE, VER230, WIN32';
+{$ELSE}
+  DEFINED_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Use these Defines: ' +
+    'CONDITIONALEXPRESSIONS, CPU32, MSWINDOWS, UNICODE, VER230';
+{$ENDIF}
 
   { TestTD2XOptionEnums }
 
@@ -1174,25 +1179,30 @@ end;
 
 procedure TestTD2XOptions.TestConfigFileOrExtn;
 var
-  ReturnValue: TD2XStream;
+  ReturnValue: ID2XFile;
 begin
   ReturnValue := fOpts.ConfigFileOrExtn('File');
   CheckEqualsString('Config\File', ReturnValue.Description, 'Default File');
-  ReturnValue.Free;
+  DisposeOf(ReturnValue);
 
   ReturnValue := fOpts.ConfigFileOrExtn('.Extn');
   CheckEqualsString('Config\Delphi2XmlTests.Extn', ReturnValue.Description, 'Default Extn');
-  ReturnValue.Free;
+  DisposeOf(ReturnValue);
 
   ReturnValue := fOpts.ConfigFileOrExtn('File.Extn');
   CheckEqualsString('Config\File.Extn', ReturnValue.Description, 'Default File.Extn');
-  ReturnValue.Free;
+  DisposeOf(ReturnValue);
 end;
 
 procedure TestTD2XOptions.TestDefines;
+const
+{$IFDEF WIN32}
+  EXPECTED = 'CONDITIONALEXPRESSIONS CPU386 MSWINDOWS UNICODE VER230 WIN32';
+{$ELSE}
+  EXPECTED = 'CONDITIONALEXPRESSIONS MSWINDOWS UNICODE VER230';
+{$ENDIF}
 begin
-  CheckList('VER230 WIN32 CPU386 MSWINDOWS CONDITIONALEXPRESSIONS UNICODE', 'Defines',
-    fOpts.Defines);
+  CheckList(EXPECTED, 'Defines', fOpts.Defines);
 end;
 
 procedure TestTD2XOptions.TestEndProcessing;

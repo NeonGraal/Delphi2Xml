@@ -693,7 +693,7 @@ function TD2XDefinesParam.ConvertDefines(pStr: string; pDflt: Boolean;
 var
   lStr: string;
   lIdx: Integer;
-  lS: TD2XStream;
+  lS: ID2XFile;
 begin
   Result := False;
   if (pStr = '!') or (pStr = ':') then
@@ -733,7 +733,7 @@ begin
               try
                 fDefines.LoadFromStream(lS.ReadFrom.BaseStream);
               finally
-                lS.Free;
+                DisposeOf(lS);
               end;
           end;
       end;
@@ -744,6 +744,7 @@ constructor TD2XDefinesParam.CreateDefines(pCode, pLabel: string;
   pDefinesFileName: TD2XNamedStreamRef);
 begin
   fDefines := TStringList.Create;
+  fDefines.Sorted := True;
 
   inherited CreateParam(pCode, pLabel, '[+-!:]<def>', 'Add(+), Remove(-), Clear(!) or Load(:) '
       + pLabel, False, ConvertDefines, FormatDefines, nil);

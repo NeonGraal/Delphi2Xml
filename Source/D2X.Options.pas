@@ -89,7 +89,7 @@ type
     destructor Destroy; override;
 
     function ProcessParamOption(pOpt: string): Boolean;
-    function ConfigFileOrExtn(pFileOrExtn: string): TD2XStream;
+    function ConfigFileOrExtn(pFileOrExtn: string): ID2XFile;
 
     procedure BeginResults(pNodename: string; pPer: TD2XResultPer);
     procedure EndResults(pFilename: string; pPer: TD2XResultPer);
@@ -126,6 +126,7 @@ implementation
 
 uses
   D2X.Processors,
+  D2X.Streams,
   System.IOUtils,
   System.StrUtils,
   System.TypInfo,
@@ -298,8 +299,9 @@ end;
 
 procedure TD2XOptions.LogMessage(pType, pMsg: string; pX, pY: Integer);
 var
-  lErrFile: TD2XStream;
+  lErrFile: ID2XFile;
   lExists: Boolean;
+  lDS: TD2XInterfaced;
 begin
   lErrFile := fFileOpts.LogFileOrExtn('.err');
   try
@@ -324,7 +326,12 @@ begin
       WriteLine(pMsg);
     end;
   finally
-    lErrFile.Free;
+    if Assigned(lErrFile) then
+    begin
+      lDS := lErrFile as TD2XInterfaced;
+      lErrFile := nil;
+      lDS.Free;
+    end;
   end;
 end;
 
@@ -339,30 +346,32 @@ end;
 
 function TD2XOptions.ProcessDirectory(pDir, pWildCards: string): Boolean;
 var
-  lFF: TSearchRec;
-  lPath: string;
+  lPath: ID2XDir;
   lFile: string;
 begin
   Result := False;
 
   lPath := fFileOpts.BaseDir(pDir);
-
-  for lFile in SplitString(pWildCards, ',') do
-    if System.SysUtils.FindFirst(lPath + lFile, faAnyFile - faDirectory, lFF) = 0 then
-      try
-        BeginResults('D2X_Pattern', rpWildcard);
-        repeat
-          Result := ProcessFile(pDir + lFF.Name) or Result;
-        until System.SysUtils.FindNext(lFF) <> 0;
-        EndResults(pDir + 'Pattern-' + TidyFilename(lFile), rpWildcard);
-      finally
-        System.SysUtils.FindClose(lFF);
-      end;
+  try
+    for lFile in SplitString(pWildCards, ',') do
+      if lPath.FirstFile(lFile) then
+        try
+          BeginResults('D2X_Pattern', rpWildcard);
+          repeat
+            Result := ProcessFile(lPath.Current) or Result;
+          until not lPath.Next;
+          EndResults(pDir + 'Pattern-' + TidyFilename(lFile), rpWildcard);
+        finally
+          lPath.Close;
+        end;
+  finally
+    DisposeOf(lPath);
+  end;
 end;
 
 function TD2XOptions.ProcessFile(pFilename: string): Boolean;
 var
-  lFile: TD2XStream;
+  lFile: ID2XFile;
 begin
   Result := False;
   lFile := fFileOpts.BaseFile(pFilename);
@@ -375,7 +384,7 @@ begin
         if fVerbose.Value then
           Log('Cannot find "%s"', [lFile]);
     finally
-      lFile.Free;
+      DisposeOf(lFile);
     end;
 end;
 
@@ -613,7 +622,7 @@ begin
     function(pStr: string): Boolean
     var
       lSL: TStringList;
-      lFile: TD2XStream;
+      lFile: ID2XFile;
       lPrm: TD2XParam;
     begin
       Result := True;
@@ -636,7 +645,7 @@ begin
               lSL.SaveToStream(lFile.WriteTo.BaseStream);
           finally
             FreeAndNil(lSL);
-            FreeAndNil(lFile);
+            DisposeOf(lFile);
           end;
         end
       else
@@ -671,41 +680,41 @@ begin
   fProcs.Add(TD2XHandlerProcessor.CreateHandler(lLogNotSupported,
     TD2XErrorHandler.CreateError(meNotSupported, LogMessage), True));
   fProcs.Add(TD2XHandlerProcessor.CreateClass(lSkipMethods, TD2XSkipHandler).SetFileInput(
-    function: TD2XStream
+    function: ID2XFile
     begin
       Result := fFileOpts.ConfigFileOrExtn(lSkipMethods.Value);
     end).SetProcessingOutput(
-    function: TD2XStream
+    function: ID2XFile
     begin
       Result := fFileOpts.LogFileOrExtn(lSkipMethods.Value + '.log');
     end));
   fProcs.Add(TD2XHandlerProcessor.CreateClass(lCountChildren, TD2XCountHandler).SetFileInput(
-    function: TD2XStream
+    function: ID2XFile
     begin
       Result := nil
     end).SetFileOutput(
-    function: TD2XStream
+    function: ID2XFile
     begin
       Result := nil
     end).SetProcessingOutput(
-    function: TD2XStream
+    function: ID2XFile
     begin
       Result := fFileOpts.LogFileOrExtn(lCountChildren.Value);
     end));
   fProcs.Add(TD2XHandlerProcessor.CreateHandler(lWriteXml, fXmlHandler, True).SetResultsOutput(
-    function(pFilename: string): TD2XStream
+    function(pFilename: string): ID2XFile
     begin
       Result := fFileOpts.SimpleFile(lWriteXml.Value + pFilename + '.xml');
     end));
   fProcs.Add(TD2XHandlerProcessor.CreateClass(lWriteDefines, TD2XWriteDefinesHandler)
     .SetResultsOutput(
-    function(pFilename: string): TD2XStream
+    function(pFilename: string): ID2XFile
     begin
       Result := fFileOpts.SimpleFile(lWriteDefines.Value + pFilename + '.def');
     end));
   fProcs.Add(TD2XHandlerProcessor.CreateHandler(lDefinesUsed, fDefinesUsedHandler, True)
     .SetProcessingOutput(
-    function: TD2XStream
+    function: ID2XFile
     begin
       Result := fFileOpts.LogFileOrExtn(lDefinesUsed.Value);
     end));
@@ -717,7 +726,7 @@ begin
   fParams.AddRange([lDefinesUsed, lCountChildren, lSkipMethods, fParserDefines]);
 end;
 
-function TD2XOptions.ConfigFileOrExtn(pFileOrExtn: string): TD2XStream;
+function TD2XOptions.ConfigFileOrExtn(pFileOrExtn: string): ID2XFile;
 begin
   Result := fFileOpts.ConfigFileOrExtn(pFileOrExtn);
 end;
@@ -779,25 +788,20 @@ begin
   end;
 end;
 
-{$WARN SYMBOL_PLATFORM OFF}
-
 function TD2XOptions.RecurseDirectory(pDir, pWildCards: string;
 pMainDir: Boolean): Boolean;
 var
-  lFF: TSearchRec;
-  lPath: string;
+  lPath: ID2XDir;
   lFile: string;
 begin
   Result := False;
 
   lPath := fFileOpts.BaseDir(pDir);
-
-  if System.SysUtils.FindFirst(lPath + '*', faAnyFile - faNormal - faTemporary, lFF) = 0 then
-    try
-      repeat
-        if (lFF.Name <> '.') and (lFF.Name <> '..') and ((lFF.Attr and faDirectory) <> 0) then
-        begin
-          lFile := IncludeTrailingPathDelimiter(pDir + lFF.Name);
+  try
+    if lPath.FirstDir then
+      try
+        repeat
+          lFile := lPath.Current;
           if pMainDir then
             BeginResults('D2X_Dir', rpDir)
           else
@@ -808,13 +812,37 @@ begin
           Result := RecurseDirectory(lFile, pWildCards, False) or Result;
           if pMainDir then
             EndResults(ExcludeTrailingPathDelimiter(lFile), rpDir);
-        end;
-      until System.SysUtils.FindNext(lFF) <> 0;
-    finally
-      System.SysUtils.FindClose(lFF);
-    end;
+        until not lPath.Next;
+      finally
+        lPath.Close;
+      end;
+  finally
+    DisposeOf(lPath);
+  end;
+  {
+   if System.SysUtils.FindFirst(lPath + '*', faAnyFile - faNormal - faTemporary, lFF) = 0 then
+   try
+   repeat
+   if (lFF.Name <> '.') and (lFF.Name <> '..') and ((lFF.Attr and faDirectory) <> 0) then
+   begin
+   lFile := IncludeTrailingPathDelimiter(pDir + lFF.Name);
+   if pMainDir then
+   BeginResults('D2X_Dir', rpDir)
+   else
+   BeginResults('D2X_SubDir', rpSubDir);
+   Result := ProcessDirectory(lFile, pWildCards) or Result;
+   if not pMainDir then
+   EndResults(ExcludeTrailingPathDelimiter(lFile), rpSubDir);
+   Result := RecurseDirectory(lFile, pWildCards, False) or Result;
+   if pMainDir then
+   EndResults(ExcludeTrailingPathDelimiter(lFile), rpDir);
+   end;
+   until System.SysUtils.FindNext(lFF) <> 0;
+   finally
+   System.SysUtils.FindClose(lFF);
+   end;
+  }
 end;
-{$WARN SYMBOL_PLATFORM ON}
 
 procedure TD2XOptions.RemoveProxy;
 begin
@@ -947,7 +975,7 @@ function TD2XRunOptions.ProcessParamsFile(pFileOrExtn: string): Boolean;
 var
   lSL: TStringList;
   i: Integer;
-  lFile: TD2XStream;
+  lFile: ID2XFile;
 begin
   lSL := nil;
   lFile := nil;
@@ -959,7 +987,7 @@ begin
     for i := 0 to lSL.Count - 1 do
       Result := ProcessParam(lSL[i], lFile.Description, i + 1) and Result;
   finally
-    FreeAndNil(lFile);
+    DisposeOf(lFile);
     FreeAndNil(lSL);
   end;
 end;

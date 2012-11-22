@@ -70,7 +70,12 @@ type
     procedure TestParserMessage;
   end;
 
-  { TestTD2XHandlerProcessor }
+function NilFile: ID2XFile;
+begin
+  Result := nil;
+end;
+
+{ TestTD2XHandlerProcessor }
 
 procedure TestTD2XHandlerProcessor.SetUp;
 begin
@@ -89,11 +94,7 @@ end;
 
 procedure TestTD2XHandlerProcessor.TestBeginFile;
 begin
-  FD2XProcessor.SetFileInput(
-      function: TD2XStream
-    begin
-      Result := nil;
-    end);
+  FD2XProcessor.SetFileInput(NilFile);
 
   FD2XProcessor.BeginFile('');
   CheckFalse(FHandler.CalledBeginFile, 'Ignored Begin File');
@@ -115,11 +116,7 @@ end;
 
 procedure TestTD2XHandlerProcessor.TestBeginProcessing;
 begin
-  FD2XProcessor.SetProcessingInput(
-    function: TD2XStream
-    begin
-      Result := nil;
-    end);
+  FD2XProcessor.SetProcessingInput(NilFile);
 
   FD2XProcessor.BeginProcessing;
   CheckFalse(FHandler.CalledBeginProcessing, 'Ignored Begin Processing');
@@ -161,11 +158,7 @@ end;
 
 procedure TestTD2XHandlerProcessor.TestEndFile;
 begin
-  FD2XProcessor.SetFileOutput(
-    function: TD2XStream
-    begin
-      Result := nil;
-    end);
+  FD2XProcessor.SetFileOutput(NilFile);
 
   FD2XProcessor.EndFile('');
   CheckFalse(FHandler.CalledEndFile, 'Ignored End File');
@@ -187,11 +180,7 @@ end;
 
 procedure TestTD2XHandlerProcessor.TestEndProcessing;
 begin
-  FD2XProcessor.SetProcessingOutput(
-    function: TD2XStream
-    begin
-      Result := nil;
-    end);
+  FD2XProcessor.SetProcessingOutput(NilFile);
 
   FD2XProcessor.EndProcessing;
   CheckFalse(FHandler.CalledEndProcessing, 'Ignored End Processing');
@@ -204,7 +193,7 @@ end;
 procedure TestTD2XHandlerProcessor.TestEndResults;
 begin
   FD2XProcessor.SetResultsOutput(
-    function(pFile: string): TD2XStream
+      function(pName: string): ID2XFile
     begin
       Result := nil;
     end);
@@ -245,7 +234,7 @@ begin
   lCalled := False;
 
   FD2XProcessor.SetFileInput(
-    function: TD2XStream
+    function: ID2XFile
     begin
       lCalled := True;
       Result := nil;
@@ -267,7 +256,7 @@ begin
   lCalled := False;
 
   FD2XProcessor.SetFileOutput(
-    function: TD2XStream
+    function: ID2XFile
     begin
       lCalled := True;
       Result := nil;
@@ -288,7 +277,7 @@ begin
   FHandler.CreateStreams := True;
   lCalled := False;
   FD2XProcessor.SetProcessingInput(
-    function: TD2XStream
+    function: ID2XFile
     begin
       lCalled := True;
       Result := nil;
@@ -309,7 +298,7 @@ begin
   FHandler.CreateStreams := True;
   lCalled := False;
   FD2XProcessor.SetProcessingOutput(
-    function: TD2XStream
+    function: ID2XFile
     begin
       lCalled := True;
       Result := nil;
@@ -330,7 +319,7 @@ begin
   FHandler.CreateStreams := True;
   lCalled := False;
   FD2XProcessor.SetResultsOutput(
-    function(pFile: string): TD2XStream
+    function(pFile: string): ID2XFile
     begin
       lCalled := True;
       Result := nil;

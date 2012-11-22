@@ -13,11 +13,11 @@ type
   public
     constructor Create(pGlobalValidator: TD2XSingleParam<string>.TspValidator);
 
-    function ConfigFileOrExtn(pFileOrExtn: string): TD2XStream;
-    function LogFileOrExtn(pFileOrExtn: string): TD2XStream;
-    function BaseFile(pFileOrDir: string): TD2XStream;
-    function BaseDir(pFileOrDir: string): String;
-    function SimpleFile(pFile: string): TD2XStream;
+    function ConfigFileOrExtn(pFileOrExtn: string): ID2XFile;
+    function LogFileOrExtn(pFileOrExtn: string): ID2XFile;
+    function BaseFile(pFileOrDir: string): ID2XFile;
+    function BaseDir(pFileOrDir: string): ID2XDir;
+    function SimpleFile(pFile: string): ID2XFile;
 
     procedure RegisterParams(pParams: TD2XParams);
 
@@ -116,20 +116,23 @@ begin
   Result := fTimestampFiles.Value;
 end;
 
-function TD2XFileOptions.BaseDir(pFileOrDir: string): String;
+function TD2XFileOptions.BaseDir(pFileOrDir: string): ID2XDir;
 begin
   if fInputBase.FlagValue then
-    Result := fInputBase.Value + pFileOrDir
+    Result := TD2XDirPath.Create(fInputBase.Value + pFileOrDir)
   else
-    Result := pFileOrDir;
+    Result := TD2XDirPath.Create(pFileOrDir);
 end;
 
-function TD2XFileOptions.BaseFile(pFileOrDir: string): TD2XStream;
+function TD2XFileOptions.BaseFile(pFileOrDir: string): ID2XFile;
 begin
-  Result := TD2XFileStream.Create(BaseDir(pFileOrDir));
+  if fInputBase.FlagValue then
+    Result := TD2XFileStream.Create(fInputBase.Value + pFileOrDir)
+  else
+    Result := TD2XFileStream.Create(pFileOrDir);
 end;
 
-function TD2XFileOptions.ConfigFileOrExtn(pFileOrExtn: string): TD2XStream;
+function TD2XFileOptions.ConfigFileOrExtn(pFileOrExtn: string): ID2XFile;
   function GlobalFileOrExtn(pFileOrExtn: string): string;
   begin
     if StartsText('.', pFileOrExtn) then
@@ -145,7 +148,7 @@ begin
     Result := TD2XFileStream.Create(GlobalFileOrExtn(pFileOrExtn));
 end;
 
-function TD2XFileOptions.LogFileOrExtn(pFileOrExtn: string): TD2XStream;
+function TD2XFileOptions.LogFileOrExtn(pFileOrExtn: string): ID2XFile;
   function GlobalFileOrExtn(pFileOrExtn: string): string;
   var
     lExtn: string;
@@ -186,7 +189,7 @@ begin
   fGlobalName.Value := Value;
 end;
 
-function TD2XFileOptions.SimpleFile(pFile: string): TD2XStream;
+function TD2XFileOptions.SimpleFile(pFile: string): ID2XFile;
 begin
   Result := TD2XFileStream.Create(pFile);
 end;

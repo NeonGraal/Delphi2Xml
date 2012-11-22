@@ -5,8 +5,8 @@
 			<FrameworkType>None</FrameworkType>
 			<Base>True</Base>
 			<Config Condition="'$(Config)'==''">FastMM</Config>
-			<Platform Condition="'$(Platform)'==''">Win32</Platform>
-			<TargetedPlatforms>1</TargetedPlatforms>
+			<Platform Condition="'$(Platform)'==''">Win64</Platform>
+			<TargetedPlatforms>3</TargetedPlatforms>
 			<AppType>Console</AppType>
 			<MainSource>Delphi2XmlTests.dpr</MainSource>
 		</PropertyGroup>
@@ -46,6 +46,13 @@
 			<Cfg_1>true</Cfg_1>
 			<Base>true</Base>
 		</PropertyGroup>
+		<PropertyGroup Condition="('$(Platform)'=='Win64' and '$(Cfg_4)'=='true') or '$(Cfg_4_Win64)'!=''">
+			<Cfg_4_Win64>true</Cfg_4_Win64>
+			<CfgParent>Cfg_4</CfgParent>
+			<Cfg_4>true</Cfg_4>
+			<Cfg_1>true</Cfg_1>
+			<Base>true</Base>
+		</PropertyGroup>
 		<PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Cfg_4)'=='true') or '$(Cfg_4_Win32)'!=''">
 			<Cfg_4_Win32>true</Cfg_4_Win32>
 			<CfgParent>Cfg_4</CfgParent>
@@ -59,10 +66,37 @@
 			<Cfg_1>true</Cfg_1>
 			<Base>true</Base>
 		</PropertyGroup>
+		<PropertyGroup Condition="('$(Platform)'=='Win64' and '$(Cfg_2)'=='true') or '$(Cfg_2_Win64)'!=''">
+			<Cfg_2_Win64>true</Cfg_2_Win64>
+			<CfgParent>Cfg_2</CfgParent>
+			<Cfg_2>true</Cfg_2>
+			<Cfg_1>true</Cfg_1>
+			<Base>true</Base>
+		</PropertyGroup>
 		<PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Cfg_2)'=='true') or '$(Cfg_2_Win32)'!=''">
 			<Cfg_2_Win32>true</Cfg_2_Win32>
 			<CfgParent>Cfg_2</CfgParent>
 			<Cfg_2>true</Cfg_2>
+			<Cfg_1>true</Cfg_1>
+			<Base>true</Base>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Config)'=='Gui' or '$(Cfg_3)'!=''">
+			<Cfg_3>true</Cfg_3>
+			<CfgParent>Cfg_1</CfgParent>
+			<Cfg_1>true</Cfg_1>
+			<Base>true</Base>
+		</PropertyGroup>
+		<PropertyGroup Condition="('$(Platform)'=='Win64' and '$(Cfg_3)'=='true') or '$(Cfg_3_Win64)'!=''">
+			<Cfg_3_Win64>true</Cfg_3_Win64>
+			<CfgParent>Cfg_3</CfgParent>
+			<Cfg_3>true</Cfg_3>
+			<Cfg_1>true</Cfg_1>
+			<Base>true</Base>
+		</PropertyGroup>
+		<PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Cfg_3)'=='true') or '$(Cfg_3_Win32)'!=''">
+			<Cfg_3_Win32>true</Cfg_3_Win32>
+			<CfgParent>Cfg_3</CfgParent>
+			<Cfg_3>true</Cfg_3>
 			<Cfg_1>true</Cfg_1>
 			<Base>true</Base>
 		</PropertyGroup>
@@ -112,12 +146,29 @@
 		<PropertyGroup Condition="'$(Cfg_4)'!=''">
 			<DCC_Define>FASTMM;$(DCC_Define)</DCC_Define>
 		</PropertyGroup>
+		<PropertyGroup Condition="'$(Cfg_4_Win64)'!=''">
+			<VerInfo_Locale>1033</VerInfo_Locale>
+			<Debugger_RunParams></Debugger_RunParams>
+		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_4_Win32)'!=''">
 			<Debugger_RunParams></Debugger_RunParams>
 			<VerInfo_Locale>1033</VerInfo_Locale>
 		</PropertyGroup>
-		<PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
+		<PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
 			<VerInfo_Locale>1033</VerInfo_Locale>
+			<Debugger_RunParams></Debugger_RunParams>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
+			<Debugger_RunParams></Debugger_RunParams>
+			<VerInfo_Locale>1033</VerInfo_Locale>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Cfg_3_Win64)'!=''">
+			<VerInfo_Locale>1033</VerInfo_Locale>
+			<Debugger_RunParams></Debugger_RunParams>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Cfg_3_Win32)'!=''">
+			<VerInfo_Locale>1033</VerInfo_Locale>
+			<Debugger_RunParams></Debugger_RunParams>
 		</PropertyGroup>
 		<Import Condition="'$(Base)'!='' And Exists('..\..\FastMM\FastMM.optset')" Project="..\..\FastMM\FastMM.optset"/>
 		<ItemGroup>
@@ -157,6 +208,10 @@
 			</BuildConfiguration>
 			<BuildConfiguration Include="Console">
 				<Key>Cfg_2</Key>
+				<CfgParent>Cfg_1</CfgParent>
+			</BuildConfiguration>
+			<BuildConfiguration Include="Gui">
+				<Key>Cfg_3</Key>
 				<CfgParent>Cfg_1</CfgParent>
 			</BuildConfiguration>
 			<BuildConfiguration Include="Base">
@@ -296,7 +351,7 @@
 					<ProjectRoot Name="$(PROJECTNAME)" Platform="Win32"/>
 				</Deployment>
 				<Platforms>
-					<Platform value="Win64">False</Platform>
+					<Platform value="Win64">True</Platform>
 					<Platform value="OSX32">False</Platform>
 					<Platform value="Win32">True</Platform>
 				</Platforms>
