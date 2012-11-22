@@ -95,6 +95,12 @@ type
     procedure TestDescription;
     procedure TestExists;
 
+    procedure TestFirstFile;
+    procedure TestFirstDir;
+    procedure TestNext;
+    procedure TestClose;
+    procedure TestCurrent;
+
   end;
 
   { TestTD2XFile }
@@ -285,6 +291,17 @@ begin
   inherited;
 end;
 
+procedure TestTD2XDir.TestClose;
+begin
+  fDir.Close;
+  Check(True, 'Close');
+end;
+
+procedure TestTD2XDir.TestCurrent;
+begin
+  CheckEqualsString('', fDir.Current, 'Current');
+end;
+
 procedure TestTD2XDir.TestDescription;
 begin
   CheckEqualsString('Test', fDir.Description, 'Description');
@@ -293,6 +310,21 @@ end;
 procedure TestTD2XDir.TestExists;
 begin
   CheckTrue(fDir.Exists, 'Exists');
+end;
+
+procedure TestTD2XDir.TestFirstDir;
+begin
+  CheckFalse(fDir.FirstDir, 'First Dir');
+end;
+
+procedure TestTD2XDir.TestFirstFile;
+begin
+  CheckFalse(fDir.FirstFile('*'), 'First File');
+end;
+
+procedure TestTD2XDir.TestNext;
+begin
+  CheckFalse(fDir.Next, 'Next');
 end;
 
 initialization

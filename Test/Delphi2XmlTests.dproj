@@ -151,24 +151,19 @@
 			<Debugger_RunParams></Debugger_RunParams>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_4_Win32)'!=''">
-			<Debugger_RunParams></Debugger_RunParams>
 			<VerInfo_Locale>1033</VerInfo_Locale>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
 			<VerInfo_Locale>1033</VerInfo_Locale>
-			<Debugger_RunParams></Debugger_RunParams>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
-			<Debugger_RunParams></Debugger_RunParams>
 			<VerInfo_Locale>1033</VerInfo_Locale>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_3_Win64)'!=''">
 			<VerInfo_Locale>1033</VerInfo_Locale>
-			<Debugger_RunParams></Debugger_RunParams>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_3_Win32)'!=''">
 			<VerInfo_Locale>1033</VerInfo_Locale>
-			<Debugger_RunParams></Debugger_RunParams>
 		</PropertyGroup>
 		<Import Condition="'$(Base)'!='' And Exists('..\..\FastMM\FastMM.optset')" Project="..\..\FastMM\FastMM.optset"/>
 		<ItemGroup>
@@ -264,13 +259,13 @@
 					</Source>
 				</Delphi.Personality>
 				<Deployment>
+					<DeployFile LocalName="Delphi2XmlTests" Configuration="Debug" Class="ProjectOutput">
+						<Platform Name="All Platforms"/>
+					</DeployFile>
 					<DeployFile LocalName="Delphi2XmlTests.rsm" Configuration="Debug" Class="DebugSymbols">
 						<Platform Name="Win64">
 							<RemoteName>Delphi2XmlTests.rsm</RemoteName>
 						</Platform>
-					</DeployFile>
-					<DeployFile LocalName="Delphi2XmlTests" Configuration="Debug" Class="ProjectOutput">
-						<Platform Name="All Platforms"/>
 					</DeployFile>
 					<DeployFile LocalName="$(BDS)\Redist\osx32\libcgunwind.1.0.dylib" Class="DependencyModule">
 						<Platform Name="OSX32"/>
