@@ -9,6 +9,9 @@
 			<Projects Include="Test\Delphi2XmlTests.dproj">
 				<Dependencies/>
 			</Projects>
+			<Projects Include="Test\Delphi2XmlSingle.dproj">
+				<Dependencies/>
+			</Projects>
 		</ItemGroup>
 		<ProjectExtensions>
 			<Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -35,14 +38,23 @@
 		<Target Name="Delphi2XmlTests:Make">
 			<MSBuild Targets="Make" Projects="Test\Delphi2XmlTests.dproj"/>
 		</Target>
+		<Target Name="Delphi2XmlSingle">
+			<MSBuild Projects="Test\Delphi2XmlSingle.dproj"/>
+		</Target>
+		<Target Name="Delphi2XmlSingle:Clean">
+			<MSBuild Targets="Clean" Projects="Test\Delphi2XmlSingle.dproj"/>
+		</Target>
+		<Target Name="Delphi2XmlSingle:Make">
+			<MSBuild Targets="Make" Projects="Test\Delphi2XmlSingle.dproj"/>
+		</Target>
 		<Target Name="Build">
-			<CallTarget Targets="Delphi2Xml;Delphi2XmlTests"/>
+			<CallTarget Targets="Delphi2Xml;Delphi2XmlTests;Delphi2XmlSingle"/>
 		</Target>
 		<Target Name="Clean">
-			<CallTarget Targets="Delphi2Xml:Clean;Delphi2XmlTests:Clean"/>
+			<CallTarget Targets="Delphi2Xml:Clean;Delphi2XmlTests:Clean;Delphi2XmlSingle:Clean"/>
 		</Target>
 		<Target Name="Make">
-			<CallTarget Targets="Delphi2Xml:Make;Delphi2XmlTests:Make"/>
+			<CallTarget Targets="Delphi2Xml:Make;Delphi2XmlTests:Make;Delphi2XmlSingle:Make"/>
 		</Target>
 		<Import Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')" Project="$(BDS)\Bin\CodeGear.Group.Targets"/>
 	</Project>

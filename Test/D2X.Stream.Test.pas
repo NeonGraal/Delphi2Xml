@@ -59,7 +59,7 @@ uses
   TestFramework;
 
 type
-  TestTD2XIO = class(TTestCase)
+  TestID2XIO = class(TTestCase)
   private
     fIO: TTestIO;
   public
@@ -71,7 +71,7 @@ type
 
   end;
 
-  TestTD2XFile = class(TTestCase)
+  TestID2XFile = class(TTestCase)
   private
     fFile: TTestFile;
   public
@@ -85,7 +85,7 @@ type
 
   end;
 
-  TestTD2XDir = class(TTestCase)
+  TestID2XDir = class(TTestCase)
   private
     fDir: TTestDir;
   public
@@ -105,38 +105,39 @@ type
 
   { TestTD2XFile }
 
-procedure TestTD2XFile.SetUp;
+procedure TestID2XFile.SetUp;
 begin
   inherited;
 
   fFile := TTestFile.Create('Test', True, 'Test Input');
 end;
 
-procedure TestTD2XFile.TearDown;
+procedure TestID2XFile.TearDown;
 begin
   FreeAndNil(fFile);
 
   inherited;
 end;
 
-procedure TestTD2XFile.TestDescription;
+procedure TestID2XFile.TestDescription;
 begin
   CheckEqualsString('Test', fFile.Description, 'Description');
 end;
 
-procedure TestTD2XFile.TestExists;
+procedure TestID2XFile.TestExists;
 begin
   CheckTrue(fFile.Exists, 'Exists');
 end;
 
-procedure TestTD2XFile.TestReadFrom;
+procedure TestID2XFile.TestReadFrom;
 begin
   CheckEqualsString('Test Input', fFile.ReadFrom.ReadToEnd, 'Read From');
 end;
 
-procedure TestTD2XFile.TestWriteTo;
+procedure TestID2XFile.TestWriteTo;
 begin
-  with fFile.WriteTo do begin
+  with fFile.WriteTo do
+  begin
     Write('Testing');
     Flush;
   end;
@@ -251,84 +252,84 @@ end;
 
 { TestTD2XIO }
 
-procedure TestTD2XIO.SetUp;
+procedure TestID2XIO.SetUp;
 begin
   inherited;
 
   fIO := TTestIO.Create('Test', True);
 end;
 
-procedure TestTD2XIO.TearDown;
+procedure TestID2XIO.TearDown;
 begin
   FreeAndNil(fIO);
 
   inherited;
 end;
 
-procedure TestTD2XIO.TestDescription;
+procedure TestID2XIO.TestDescription;
 begin
   CheckEqualsString('Test', fIO.Description, 'Description');
 end;
 
-procedure TestTD2XIO.TestExists;
+procedure TestID2XIO.TestExists;
 begin
   CheckTrue(fIO.Exists, 'Exists');
 end;
 
 { TestTD2XDir }
 
-procedure TestTD2XDir.SetUp;
+procedure TestID2XDir.SetUp;
 begin
   inherited;
 
   fDir := TTestDir.Create('Test', True);
 end;
 
-procedure TestTD2XDir.TearDown;
+procedure TestID2XDir.TearDown;
 begin
   FreeAndNil(fDir);
 
   inherited;
 end;
 
-procedure TestTD2XDir.TestClose;
+procedure TestID2XDir.TestClose;
 begin
   fDir.Close;
   Check(True, 'Close');
 end;
 
-procedure TestTD2XDir.TestCurrent;
+procedure TestID2XDir.TestCurrent;
 begin
   CheckEqualsString('', fDir.Current, 'Current');
 end;
 
-procedure TestTD2XDir.TestDescription;
+procedure TestID2XDir.TestDescription;
 begin
   CheckEqualsString('Test', fDir.Description, 'Description');
 end;
 
-procedure TestTD2XDir.TestExists;
+procedure TestID2XDir.TestExists;
 begin
   CheckTrue(fDir.Exists, 'Exists');
 end;
 
-procedure TestTD2XDir.TestFirstDir;
+procedure TestID2XDir.TestFirstDir;
 begin
   CheckFalse(fDir.FirstDir, 'First Dir');
 end;
 
-procedure TestTD2XDir.TestFirstFile;
+procedure TestID2XDir.TestFirstFile;
 begin
   CheckFalse(fDir.FirstFile('*'), 'First File');
 end;
 
-procedure TestTD2XDir.TestNext;
+procedure TestID2XDir.TestNext;
 begin
   CheckFalse(fDir.Next, 'Next');
 end;
 
 initialization
 
-RegisterTests('Stream', [TestTD2XIO.Suite, TestTD2XFile.Suite, TestTD2XDir.Suite]);
+RegisterTests('Stream', [TestID2XIO.Suite, TestID2XFile.Suite, TestID2XDir.Suite]);
 
 end.

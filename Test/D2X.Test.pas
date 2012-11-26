@@ -21,11 +21,13 @@ type
 
     procedure CheckBuilder(pExp, pLabel: string; pB: TStringBuilder = nil);
     procedure CheckList(pExp, pLabel: string; pL: TStringList = nil);
+    procedure CheckReader(pExp, pLabel: string; pR: TStreamReader);
     procedure CheckStream(pExp, pLabel: string; pS: TStringStream = nil);
     procedure CheckWriter(pExp, pLabel: string; pW: TStringWriter = nil);
 
     procedure CheckString(pB: TStringBuilder; pExp, pLabel: string); overload;
     procedure CheckString(pL: TStringList; pExp, pLabel: string); overload;
+    procedure CheckString(pR: TStreamReader; pExp, pLabel: string); overload;
     procedure CheckString(pS: TStringStream; pExp, pLabel: string); overload;
     procedure CheckString(pW: TStringWriter; pExp, pLabel: string); overload;
   public
@@ -49,7 +51,6 @@ implementation
 
 uses
   D2X.Utils,
-  D2X.Options,
   System.Rtti,
   System.StrUtils;
 
@@ -640,6 +641,11 @@ begin
   pL.Clear;
 end;
 
+procedure TStringTestCase.CheckReader(pExp, pLabel: string; pR: TStreamReader);
+begin
+  CheckEqualsString(pExp, ReduceString(pR.ReadToEnd), pLabel);
+end;
+
 procedure TStringTestCase.CheckStream(pExp, pLabel: string; pS: TStringStream);
 begin
   if not Assigned(pS) then
@@ -661,6 +667,11 @@ end;
 procedure TStringTestCase.CheckString(pW: TStringWriter; pExp, pLabel: string);
 begin
   CheckWriter(pExp, pLabel, pW);
+end;
+
+procedure TStringTestCase.CheckString(pR: TStreamReader; pExp, pLabel: string);
+begin
+  CheckReader(pExp, pLabel, pR);
 end;
 
 procedure TStringTestCase.CheckString(pL: TStringList; pExp, pLabel: string);

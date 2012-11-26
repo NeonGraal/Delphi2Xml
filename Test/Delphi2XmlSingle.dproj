@@ -41,6 +41,7 @@
 			<Base>true</Base>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base)'!=''">
+			<DCC_Define>FASTMM;$(DCC_Define)</DCC_Define>
 			<Manifest_File>None</Manifest_File>
 			<VerInfo_Locale>5129</VerInfo_Locale>
 			<DCC_UnitSearchPath>$(BDS)\Source\DUnit\src;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
@@ -56,7 +57,6 @@
 			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base_Win32)'!=''">
-			<Debugger_RunParams></Debugger_RunParams>
 			<DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
 			<VerInfo_Locale>1033</VerInfo_Locale>
 			<DCC_UsePackage>dclRBADO1416;cxPageControlD16;dxComnD16;dxPSCoreD16;rbRAP1416;dcldxSkinsCoreD16;rbRCL1416;cxSpreadSheetD16;dxSkinHighContrastD16;dxSkinLiquidSkyD16;dxSkinSilverD16;vclimg;fmi;dxSkinOffice2010SilverD16;dxSkinOffice2010BlackD16;vcldb;rbRTL1416;cxPivotGridChartD16;rbUSER1416;dxRibbonD16;cxVerticalGridD16;dxSkinLilianD16;dxThemeD16;dxSkinBlueD16;dclRBBDE1416;cxSchedulerGridD16;rbCIDE1416;cxTreeListdxBarPopupMenuD16;dxSkinOffice2010BlueD16;rbDIDE1416;dxGDIPlusD16;CloudService;dxPSdxDBTVLnkD16;FmxTeeUI;dxSkinTheAsphaltWorldD16;dxSkinSevenD16;cxTreeListD16;cxLibraryD16;dxPSdxDBOCLnkD16;dxPScxSchedulerLnkD16;dxSkinPumpkinD16;dxBarExtItemsD16;dxLayoutControlD16;dxDockingD16;vcldbx;dxSkinXmas2008BlueD16;dxSkinMcSkinD16;cxPivotGridD16;dxPSTeeChartD16;cxEditorsD16;dxPScxCommonD16;DBXOdbcDriver;dxPSLnksD16;dxBarExtDBItemsD16;ibxpress;SynEdit_RXE2;RapidXE2;dxmdsD16;dxSkinsCoreD16;intrawebdb_120_160;FMXTee;vclactnband;bindcompvcl;dxSkinSummer2008D16;dxTabbedMDID16;vclie;rbIDE1416;dxPSdxLCLnkD16;dxSkinSharpPlusD16;dxSkinBlackD16;dsnapcon;vclx;dxSkinsdxBarPainterD16;dxPScxTLLnkD16;cxSchedulerD16;dxSkinValentineD16;dxSkinWhiteprintD16;cxPageControldxBarPopupMenuD16;cxDataD16;dxSkinOffice2007SilverD16;dxPSdxFCLnkD16;cxBarEditItemD16;TeeDB;plugedXE2;dxNavBarD16;dxSkinSpringTimeD16;Rave100VCL;vclib;inetdbbde;dxPSDBTeeChartD16;dxSkinOffice2007BlueD16;dxSkinsdxNavBarPainterD16;cxPivotGridOLAPD16;dxSpellCheckerD16;dxdbtrD16;DBXSybaseASEDriver;dxBarDBNavD16;dxSkinGlassOceansD16;dxSkinStardustD16;dxCoreD16;dxorgcD16;vcldsnap;dxSkinDarkSideD16;dxPScxExtCommonD16;dxSkinscxPCPainterD16;DBXDb2Driver;Intraweb_120_160;vclribbon;dxdborD16;vcl;rbTCUI1416;dxPSdxOCLnkD16;dxPScxSSLnkD16;DBXMSSQLDriver;CodeSiteExpressPkg;dxSkinCoffeeD16;dxSkinscxSchedulerPainterD16;dclRBE1416;dxSkinDarkRoomD16;dxPScxVGridLnkD16;dxPScxPivotGridLnkD16;webdsnap;dxBarD16;dxPScxPCProdD16;dxtrmdD16;rbRIDE1416;rbDAD1416;dxSkinDevExpressStyleD16;dxSkiniMaginaryD16;dxSkinOffice2007BlackD16;adortl;dxPScxGridLnkD16;rbUSERDesign1416;dxSkinLondonLiquidSkyD16;dxPsPrVwAdvD16;dxSkinOffice2007GreenD16;dxSkinSharpD16;Tee;rbDBDE1416;dxSkinSevenClassicD16;svnui;rbTC1416;dxSkinsdxDLPainterD16;dxPSPrVwRibbonD16;dxSkinBlueprintD16;TeeUI;dxSkinMoneyTwinsD16;rbADO1416;dxSkinDevExpressDarkStyleD16;dxSkinCaramelD16;vcltouch;rbBDE1416;websnap;dxSkinFoggyD16;VclSmp;rbDB1416;dxFlowChartD16;dxSkinsdxRibbonPainterD16;DataSnapConnectors;dxSkinVS2010D16;cxGridD16;dxSkinOffice2007PinkD16;svn;tflytreeproXE2;bdertl;$(DCC_UsePackage)</DCC_UsePackage>
@@ -73,7 +73,6 @@
 			<BCC_DebugLineNumbers>true</BCC_DebugLineNumbers>
 			<BCC_SourceDebuggingOn>true</BCC_SourceDebuggingOn>
 			<VerInfo_Locale>1033</VerInfo_Locale>
-			<Debugger_RunParams></Debugger_RunParams>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
 			<ILINK_FullDebugInfo>true</ILINK_FullDebugInfo>
@@ -87,9 +86,12 @@
 			<DelphiCompile Include="$(MainSource)">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
-			<DCCReference Include="D2X.Stream.Test.pas"/>
+			<DCCReference Include="D2X.Streams.Test.pas"/>
 			<DCCReference Include="..\Source\D2X.pas"/>
 			<DCCReference Include="..\Source\D2X.Stream.pas"/>
+			<DCCReference Include="..\Source\D2X.Streams.pas"/>
+			<DCCReference Include="D2X.Test.pas"/>
+			<DCCReference Include="D2X.Utils.pas"/>
 			<None Include="Profiling\Delphi2XmlSingle.aqt"/>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
@@ -131,7 +133,10 @@
 						<VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
 						<VersionInfoKeys Name="Comments"/>
 					</VersionInfoKeys>
-					<Excluded_Packages></Excluded_Packages>
+					<Excluded_Packages>
+						<Excluded_Packages Name="$(BDSBIN)\dcloffice2k160.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
+						<Excluded_Packages Name="$(BDSBIN)\dclofficexp160.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
+					</Excluded_Packages>
 					<Source>
 						<Source Name="MainSource">Delphi2XmlSingle.dpr</Source>
 					</Source>
