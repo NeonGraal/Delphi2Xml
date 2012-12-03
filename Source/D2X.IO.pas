@@ -51,6 +51,7 @@ type
   TStreamReaderRef = reference to function: TStreamReader;
   TStreamWriterRef = reference to function: TStreamWriter;
 
+procedure DisposeOf(var pIO: ID2XIO); overload;
 procedure DisposeOf(var pFile: ID2XFile); overload;
 procedure DisposeOf(var pDir: ID2XDir); overload;
 procedure DisposeOf(var pFact: ID2XIOFactory); overload;
@@ -59,6 +60,18 @@ function FileReaderRef(pFile: ID2XFile): TStreamReaderRef;
 function FileWriterRef(pFile: ID2XFile): TStreamWriterRef;
 
 implementation
+
+procedure DisposeOf(var pIO: ID2XIO); overload;
+var
+  lDS: TD2XInterfaced;
+begin
+  if Assigned(pIO) then
+  begin
+    lDS := pIO as TD2XInterfaced;
+    pIO := nil;
+    lDS.Free;
+  end;
+end;
 
 procedure DisposeOf(var pFile: ID2XFile); overload;
 var

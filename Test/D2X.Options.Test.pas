@@ -248,7 +248,7 @@ const
     'G<str> Delphi2XmlTests Sets global name ' +
     'I[+-]:<dir> :Config\ Use <dir> as a base for all Config files ' +
     'O[+-]:<dir> :Log\ Use <dir> as a base for all Log files ' +
-    'B[+-]:<dir> - Use <dir> as a base for all Input files ' +
+    'B[+-]:<dir> -(.\) Use <dir> as a base for all Input files ' +
     'M<mode> Full Set Parsing mode (F[ull], U[ses]) ' +
     'P<per> File Set Result per (F[ile], S[ubdir], D[ir], W[ildcard], P[aram], R[un]) ' +
     'E<mode> Quiet Set Elapsed time display to be (N[one], Q[uiet], T[otal], P[rocessing]) ' +
@@ -274,7 +274,7 @@ const
   BASE_REPORT_OPTIONS =
     'Current option settings: Verbose - Log Errors + Log Not Supp - Final Token + ' +
     'Recurse - Timestamp - Global name Delphi2XmlTests Config dir :Config\ ' +
-    'Log dir :Log\ Base dir - Parse mode Full Results per File Show elapsed Quiet ' +
+    'Log dir :Log\ Base dir -(.\) Parse mode Full Results per File Show elapsed Quiet ' +
     'Generate XML :Xml\ Write Defines -(Defines\) Defines Used :.used ' +
     'Count Children :.cnt Skipped Methods :.skip ';
   DEFAULT_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Use default Defines';
@@ -694,7 +694,7 @@ end;
 
 procedure TestTD2XOptionsAll.TestParseOptionB;
 begin
-  CheckSimple('B', 'Base dir +');
+  CheckSimple('B', 'Base dir :.\');
 end;
 
 procedure TestTD2XOptionsAll.TestParseOptionBBlank;
@@ -704,12 +704,12 @@ end;
 
 procedure TestTD2XOptionsAll.TestParseOptionBOff;
 begin
-  CheckSimple('B-', 'Base dir -');
+  CheckSimple('B-', 'Base dir -(.\)');
 end;
 
 procedure TestTD2XOptionsAll.TestParseOptionBOn;
 begin
-  CheckSimple('B+', 'Base dir +');
+  CheckSimple('B+', 'Base dir :.\');
 end;
 
 procedure TestTD2XOptionsAll.TestParseOptionBValue;

@@ -170,7 +170,7 @@ begin
   fLogBase := TD2XFlaggedStringParam.CreateFlagStr('O', 'Log dir', '<dir>',
     'Use <dir> as a base for all Log files', 'Log\', True, ConvertDir, nil, nil);
   fInputBase := TD2XFlaggedStringParam.CreateFlagStr('B', 'Base dir', '<dir>',
-    'Use <dir> as a base for all Input files', '', False, ConvertDir, nil, nil);
+    'Use <dir> as a base for all Input files', '.\', False, ConvertDir, nil, nil);
   fGlobalName := TD2XStringParam.CreateStr('G', 'Global name', '<str>', 'Sets global name',
     ChangeFileExt(ExtractFileName(ParamStr(0)), ''),
       function(pStr: string; pDflt: string; out pVal: string): Boolean

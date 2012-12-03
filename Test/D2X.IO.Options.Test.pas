@@ -26,7 +26,7 @@ type
     fFileOpts: TD2XFileOptionsTest;
     fValidatorCalled: Boolean;
 
-    procedure CheckStream(var pDS: ID2XFile; pExp, pLabel: string);
+    procedure CheckIO(var pDS: ID2XIO; pExp, pLabel: string);
     procedure CheckValidator(pLabel: string);
     function TestValidator(pStr: string): Boolean;
   public
@@ -45,7 +45,7 @@ type
 
   { TestTD2XFileOptions }
 
-procedure TestTD2XFileOptions.CheckStream(var pDS: ID2XFile; pExp, pLabel: string);
+procedure TestTD2XFileOptions.CheckIO(var pDS: ID2XIO; pExp, pLabel: string);
 begin
   try
     CheckEqualsString(pExp, pDS.Description, pLabel);
@@ -77,21 +77,67 @@ begin
 end;
 
 procedure TestTD2XFileOptions.TestBaseDir;
+var
+  lBase: TD2XParam;
+  lDS: ID2XIO;
 begin
-  fFileOpts.BaseDir('File.Extn');
+  lBase := fParams.ForCode('B');
 
+  lDS := fFileOpts.BaseDir('Config');
+  CheckIO(lDS, 'Config\', 'Default Dir');
+
+
+  lBase.Parse('B+');
+
+  lDS := fFileOpts.BaseDir('Config');
+  CheckIO(lDS, '.\Config\', 'Base On Dir');
+
+
+  lBase.Parse('B-');
+
+  lDS := fFileOpts.BaseDir('Config');
+  CheckIO(lDS, 'Config\', 'Base Off Dir');
+
+
+  lBase.Parse('B:Base');
+
+  lDS := fFileOpts.BaseDir('Config');
+  CheckIO(lDS, 'Base\Config\', 'Base Dir');
 end;
 
 procedure TestTD2XFileOptions.TestBaseFile;
+var
+  lBase: TD2XParam;
+  lDS: ID2XIO;
 begin
-  fFileOpts.BaseFile('File.Extn');
+  lBase := fParams.ForCode('B');
 
+  lDS := fFileOpts.BaseFile('File.Extn');
+  CheckIO(lDS, 'File.Extn', 'Default File');
+
+
+  lBase.Parse('B+');
+
+  lDS := fFileOpts.BaseFile('File.Extn');
+  CheckIO(lDS, '.\File.Extn', 'Base On File');
+
+
+  lBase.Parse('B-');
+
+  lDS := fFileOpts.BaseFile('File.Extn');
+  CheckIO(lDS, 'File.Extn', 'Base Off File');
+
+
+  lBase.Parse('B:Base');
+
+  lDS := fFileOpts.BaseFile('File.Extn');
+  CheckIO(lDS, 'Base\File.Extn', 'Base File');
 end;
 
 procedure TestTD2XFileOptions.TestConfigFileOrExtn;
 var
   lGlobal, lInput: TD2XParam;
-  lDS: ID2XFile;
+  lDS: ID2XIO;
   pExtn: string;
 begin
   lGlobal := fParams.ForCode('G');
@@ -99,54 +145,54 @@ begin
   pExtn := '.Extn';
 
   lDS := fFileOpts.ConfigFileOrExtn('File.Extn');
-  CheckStream(lDS, 'Config\File.Extn', 'Config File');
+  CheckIO(lDS, 'Config\File.Extn', 'Config File');
 
   lGlobal.Parse('G');
   lDS := fFileOpts.ConfigFileOrExtn(pExtn);
-  CheckStream(lDS, 'Config\' + fFileOpts.GlobalName + '.Extn', 'Config Default .Extn');
+  CheckIO(lDS, 'Config\' + fFileOpts.GlobalName + '.Extn', 'Config Default .Extn');
 
   lGlobal.Parse('GGlobal');
   lDS := fFileOpts.ConfigFileOrExtn(pExtn);
-  CheckStream(lDS, 'Config\Global.Extn', 'Config Global .Extn');
+  CheckIO(lDS, 'Config\Global.Extn', 'Config Global .Extn');
 
   lInput.Parse('I-');
 
   lDS := fFileOpts.ConfigFileOrExtn('File.Extn');
-  CheckStream(lDS, 'File.Extn', 'Input Off File');
+  CheckIO(lDS, 'File.Extn', 'Input Off File');
 
   lGlobal.Parse('G');
   lDS := fFileOpts.ConfigFileOrExtn(pExtn);
-  CheckStream(lDS, fFileOpts.GlobalName + '.Extn', 'Input Off Default .Extn ');
+  CheckIO(lDS, fFileOpts.GlobalName + '.Extn', 'Input Off Default .Extn ');
 
   fParams.ForCode('G').Parse('GGlobal');
   lDS := fFileOpts.ConfigFileOrExtn(pExtn);
-  CheckStream(lDS, 'Global.Extn', 'Input Off Global .Extn');
+  CheckIO(lDS, 'Global.Extn', 'Input Off Global .Extn');
 
   lInput.Parse('I+');
 
   lDS := fFileOpts.ConfigFileOrExtn('File.Extn');
-  CheckStream(lDS, 'Config\File.Extn', 'Input On File');
+  CheckIO(lDS, 'Config\File.Extn', 'Input On File');
 
   lGlobal.Parse('G');
   lDS := fFileOpts.ConfigFileOrExtn(pExtn);
-  CheckStream(lDS, 'Config\' + fFileOpts.GlobalName + '.Extn', 'Input On Default .Extn ');
+  CheckIO(lDS, 'Config\' + fFileOpts.GlobalName + '.Extn', 'Input On Default .Extn ');
 
   fParams.ForCode('G').Parse('GGlobal');
   lDS := fFileOpts.ConfigFileOrExtn(pExtn);
-  CheckStream(lDS, 'Config\Global.Extn', 'Input On Global .Extn');
+  CheckIO(lDS, 'Config\Global.Extn', 'Input On Global .Extn');
 
   lInput.Parse('I:In');
 
   lDS := fFileOpts.ConfigFileOrExtn('File.Extn');
-  CheckStream(lDS, 'In\File.Extn', 'Input File');
+  CheckIO(lDS, 'In\File.Extn', 'Input File');
 
   lGlobal.Parse('G');
   lDS := fFileOpts.ConfigFileOrExtn(pExtn);
-  CheckStream(lDS, 'In\' + fFileOpts.GlobalName + '.Extn', 'Input Default .Extn ');
+  CheckIO(lDS, 'In\' + fFileOpts.GlobalName + '.Extn', 'Input Default .Extn ');
 
   fParams.ForCode('G').Parse('GGlobal');
   lDS := fFileOpts.ConfigFileOrExtn(pExtn);
-  CheckStream(lDS, 'In\Global.Extn', 'Input Global .Extn');
+  CheckIO(lDS, 'In\Global.Extn', 'Input Global .Extn');
 end;
 
 procedure TestTD2XFileOptions.TestGobalName;
@@ -176,74 +222,76 @@ procedure TestTD2XFileOptions.TestLogFileOrExtn;
 var
   lGlobal, lOutput: TD2XParam;
   pExtn: string;
-  lDS: ID2XFile;
+  lDS: ID2XIO;
 begin
   pExtn := '.Extn';
   lGlobal := fParams.ForCode('G');
   lOutput := fParams.ForCode('O');
 
   lDS := fFileOpts.LogFileOrExtn('File.Extn');
-  CheckStream(lDS, 'Log\File.Extn', 'Log File');
+  CheckIO(lDS, 'Log\File.Extn', 'Log File');
 
   lGlobal.Parse('G');
   lDS := fFileOpts.LogFileOrExtn(pExtn);
-  CheckStream(lDS, 'Log\' + fFileOpts.GlobalName + '.Extn', 'Log Default Extn');
+  CheckIO(lDS, 'Log\' + fFileOpts.GlobalName + '.Extn', 'Log Default Extn');
 
   lGlobal.Parse('GGlobal');
   lDS := fFileOpts.LogFileOrExtn(pExtn);
-  CheckStream(lDS, 'Log\Global.Extn', 'Log Global Extn');
+  CheckIO(lDS, 'Log\Global.Extn', 'Log Global Extn');
 
   lOutput.Parse('O-');
 
   lDS := fFileOpts.LogFileOrExtn('File.Extn');
-  CheckStream(lDS, 'File.Extn', 'Output Off File');
+  CheckIO(lDS, 'File.Extn', 'Output Off File');
 
   lGlobal.Parse('G');
   lDS := fFileOpts.LogFileOrExtn(pExtn);
-  CheckStream(lDS, fFileOpts.GlobalName + '.Extn', 'Output Off Default Extn');
+  CheckIO(lDS, fFileOpts.GlobalName + '.Extn', 'Output Off Default Extn');
 
   lGlobal.Parse('GGlobal');
   lDS := fFileOpts.LogFileOrExtn(pExtn);
-  CheckStream(lDS, 'Global.Extn', 'Output Off Global Extn');
+  CheckIO(lDS, 'Global.Extn', 'Output Off Global Extn');
 
   lOutput.Parse('O+');
 
   lDS := fFileOpts.LogFileOrExtn('File.Extn');
-  CheckStream(lDS, 'Log\File.Extn', 'Output On File');
+  CheckIO(lDS, 'Log\File.Extn', 'Output On File');
 
   lGlobal.Parse('G');
   lDS := fFileOpts.LogFileOrExtn(pExtn);
-  CheckStream(lDS, 'Log\' + fFileOpts.GlobalName + '.Extn', 'Output On Default Extn');
+  CheckIO(lDS, 'Log\' + fFileOpts.GlobalName + '.Extn', 'Output On Default Extn');
 
   lGlobal.Parse('GGlobal');
   lDS := fFileOpts.LogFileOrExtn(pExtn);
-  CheckStream(lDS, 'Log\Global.Extn', 'Output On Global Extn');
+  CheckIO(lDS, 'Log\Global.Extn', 'Output On Global Extn');
 
   lOutput.Parse('O:Out');
 
   lDS := fFileOpts.LogFileOrExtn('File.Extn');
-  CheckStream(lDS, 'Out\File.Extn', 'Output File');
+  CheckIO(lDS, 'Out\File.Extn', 'Output File');
 
   lGlobal.Parse('G');
   lDS := fFileOpts.LogFileOrExtn(pExtn);
-  CheckStream(lDS, 'Out\' + fFileOpts.GlobalName + '.Extn', 'Output Default Extn');
+  CheckIO(lDS, 'Out\' + fFileOpts.GlobalName + '.Extn', 'Output Default Extn');
 
   lGlobal.Parse('GGlobal');
   lDS := fFileOpts.LogFileOrExtn(pExtn);
-  CheckStream(lDS, 'Out\Global.Extn', 'Output Global Extn');
+  CheckIO(lDS, 'Out\Global.Extn', 'Output Global Extn');
 end;
 
 procedure TestTD2XFileOptions.TestSimpleFile;
+var
+  lDS: ID2XIO;
 begin
-  fFileOpts.SimpleFile('File.Extn');
-
+  lDS := fFileOpts.SimpleFile('File.Extn');
+  CheckIO(lDS, 'File.Extn', 'Simple File');
 end;
 
 procedure TestTD2XFileOptions.TestTimestampFiles;
 var
   lGlobal, lTimestamp: TD2XParam;
   pExtn: string;
-  lDS: ID2XFile;
+  lDS: ID2XIO;
 begin
   pExtn := '.Extn';
   lGlobal := fParams.ForCode('G');
@@ -252,58 +300,58 @@ begin
   CheckFalse(fFileOpts.TimestampFiles, 'Timestamp Files Default');
 
   lDS := fFileOpts.LogFileOrExtn('File.Extn');
-  CheckStream(lDS, 'Log\File.Extn', 'Default Timestamp File');
+  CheckIO(lDS, 'Log\File.Extn', 'Default Timestamp File');
 
   lGlobal.Parse('G');
   lDS := fFileOpts.LogFileOrExtn(pExtn);
-  CheckStream(lDS, 'Log\' + fFileOpts.GlobalName + '.Extn', 'Default Timestamp Default Extn');
+  CheckIO(lDS, 'Log\' + fFileOpts.GlobalName + '.Extn', 'Default Timestamp Default Extn');
 
   lGlobal.Parse('GGlobal');
   lDS := fFileOpts.LogFileOrExtn(pExtn);
-  CheckStream(lDS, 'Log\Global.Extn', 'Default Timestamp Global Extn');
+  CheckIO(lDS, 'Log\Global.Extn', 'Default Timestamp Global Extn');
 
   lTimestamp.Parse('T+');
   CheckTrue(fFileOpts.TimestampFiles, 'Timestamp Files On');
 
   lDS := fFileOpts.LogFileOrExtn('File.Extn');
-  CheckStream(lDS, 'Log\File' + fFileOpts.OutputTimestamp + '.Extn', 'On Timestamp File');
+  CheckIO(lDS, 'Log\File' + fFileOpts.OutputTimestamp + '.Extn', 'On Timestamp File');
 
   lDS := fFileOpts.LogFileOrExtn(pExtn);
-  CheckStream(lDS, 'Log\' + fFileOpts.GlobalName + fFileOpts.OutputTimestamp + '.Extn',
+  CheckIO(lDS, 'Log\' + fFileOpts.GlobalName + fFileOpts.OutputTimestamp + '.Extn',
     'On Timestamp Default Extn');
 
   fParams.ForCode('G').Parse('GGlobal');
   lDS := fFileOpts.LogFileOrExtn(pExtn);
-  CheckStream(lDS, 'Log\Global' + fFileOpts.OutputTimestamp + '.Extn',
+  CheckIO(lDS, 'Log\Global' + fFileOpts.OutputTimestamp + '.Extn',
     'On Timestamp Global Extn');
 
   lTimestamp.Parse('T-');
   CheckFalse(fFileOpts.TimestampFiles, 'Timestamp Files Off');
 
   lDS := fFileOpts.LogFileOrExtn('File.Extn');
-  CheckStream(lDS, 'Log\File.Extn', 'Off Timestamp File');
+  CheckIO(lDS, 'Log\File.Extn', 'Off Timestamp File');
 
   lGlobal.Parse('G');
   lDS := fFileOpts.LogFileOrExtn(pExtn);
-  CheckStream(lDS, 'Log\' + fFileOpts.GlobalName + '.Extn', 'Off Timestamp Default Extn');
+  CheckIO(lDS, 'Log\' + fFileOpts.GlobalName + '.Extn', 'Off Timestamp Default Extn');
 
   lGlobal.Parse('GGlobal');
   lDS := fFileOpts.LogFileOrExtn(pExtn);
-  CheckStream(lDS, 'Log\Global.Extn', 'Off Timestamp Global Extn');
+  CheckIO(lDS, 'Log\Global.Extn', 'Off Timestamp Global Extn');
 
   lTimestamp.Parse('T');
   CheckTrue(fFileOpts.TimestampFiles, 'Timestamp Files');
 
   lDS := fFileOpts.LogFileOrExtn('File.Extn');
-  CheckStream(lDS, 'Log\File' + fFileOpts.OutputTimestamp + '.Extn', 'Timestamp File');
+  CheckIO(lDS, 'Log\File' + fFileOpts.OutputTimestamp + '.Extn', 'Timestamp File');
 
   lDS := fFileOpts.LogFileOrExtn(pExtn);
-  CheckStream(lDS, 'Log\' + fFileOpts.GlobalName + fFileOpts.OutputTimestamp + '.Extn',
+  CheckIO(lDS, 'Log\' + fFileOpts.GlobalName + fFileOpts.OutputTimestamp + '.Extn',
     'Timestamp Default Extn');
 
   fParams.ForCode('G').Parse('GGlobal');
   lDS := fFileOpts.LogFileOrExtn(pExtn);
-  CheckStream(lDS, 'Log\Global' + fFileOpts.OutputTimestamp + '.Extn',
+  CheckIO(lDS, 'Log\Global' + fFileOpts.OutputTimestamp + '.Extn',
     'Timestamp Global Extn');
 end;
 
