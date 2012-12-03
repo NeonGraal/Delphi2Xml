@@ -8,7 +8,7 @@ uses
   D2X.Param,
   D2X.Parser,
   D2X.Handler,
-  D2X.Stream,
+  D2X.IO,
   D2X.Xml,
   System.Classes,
   System.Generics.Collections;
@@ -172,6 +172,11 @@ uses
   System.SysUtils,
   Xml.XMLIntf;
 
+function PairToStr(pPair: TStrIntPair): string;
+begin
+  Result := IntToStr(pPair.Value);
+end;
+
 { TD2XCountHandler }
 
 procedure TD2XCountHandler.BeginFile(pFile: string; pInput: TStreamReaderRef);
@@ -334,11 +339,7 @@ end;
 
 procedure TD2XSkipHandler.EndProcessing(pOutput: TStreamWriterRef);
 begin
-  OutputStrIntDict(fSkippedMethods, pOutput,
-      function(pPair: TStrIntPair): string
-    begin
-      Result := IntToStr(pPair.Value);
-    end);
+  OutputStrIntDict(fSkippedMethods, pOutput, PairToStr);
 end;
 
 function TD2XSkipHandler.UseProxy: Boolean;
@@ -604,11 +605,7 @@ end;
 
 procedure TD2XDefinesUsedHandler.EndProcessing(pOutput: TStreamWriterRef);
 begin
-  OutputStrIntDict(fDefinesDict, pOutput,
-    function(pPair: TStrIntPair): string
-    begin
-      Result := IntToStr(pPair.Value);
-    end);
+  OutputStrIntDict(fDefinesDict, pOutput, PairToStr);
 end;
 
 function TD2XDefinesUsedHandler.UseProxy: Boolean;

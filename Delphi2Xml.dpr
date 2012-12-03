@@ -12,14 +12,15 @@ uses
   D2X.Handler in 'Source\D2X.Handler.pas',
   D2X.Handlers in 'Source\D2X.Handlers.pas',
   D2X.Options in 'Source\D2X.Options.pas',
-  D2X.Param in 'Source\D2X.Param.pas',
+  D2X.Params in 'Source\D2X.Params.pas',
   D2X.Parser in 'Source\D2X.Parser.pas',
   D2X.Processor in 'Source\D2X.Processor.pas',
   D2X.Processors in 'Source\D2X.Processors.pas',
   D2X.Xml in 'Source\D2X.Xml.pas',
-  D2X.FileOpts in 'Source\D2X.FileOpts.pas',
-  D2X.Stream in 'Source\D2X.Stream.pas',
-  D2X.Streams in 'Source\D2X.Streams.pas';
+  D2X.IO in 'Source\D2X.IO.pas',
+  D2X.IO.Actual in 'Source\D2X.IO.Actual.pas',
+  D2X.Param in 'Source\D2X.Param.pas',
+  D2X.IO.Options in 'Source\D2X.IO.Options.pas';
 
 var
   opts: TD2XRunOptions;
@@ -36,6 +37,7 @@ begin
     sOut := THandleStream.Create(GetStdHandle(STD_OUTPUT_HANDLE));
     opts := TD2XRunOptions.Create;
     opts.JoinLog(TD2XLogger.Create(sOut));
+    opts.InitOptions(TD2XFileOptions.Create);
     bOk := True;
     for i := 1 to ParamCount do
       bOk := opts.ProcessParam(ParamStr(i), 'Param', i) and bOk;

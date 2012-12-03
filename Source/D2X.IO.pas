@@ -1,9 +1,10 @@
-unit D2X.Stream;
+unit D2X.IO;
 
 interface
 
 uses
   D2X,
+  D2X.Param,
   System.Classes,
   System.SysUtils;
 
@@ -31,6 +32,19 @@ type
     function WriteTo(pAppend: Boolean = False): TStreamWriter;
   end;
 
+  ID2XIOFactory = interface
+    ['{ADCB308E-8D54-4B8A-A687-3EC1BD1DFB4C}']
+    function ConfigFileOrExtn(pFileOrExtn: string): ID2XFile;
+    function LogFileOrExtn(pFileOrExtn: string): ID2XFile;
+    function BaseFile(pFileOrDir: string): ID2XFile;
+    function BaseDir(pFileOrDir: string): ID2XDir;
+    function SimpleFile(pFile: string): ID2XFile;
+
+    procedure SetGlobalName(const pName: string);
+    procedure SetGlobalValidator(pValidator: TD2XSingleParam<string>.TspValidator);
+    procedure RegisterParams(pParams: TD2XParams);
+  end;
+
   TD2XFileRef = reference to function: ID2XFile;
   TD2XNamedStreamRef = reference to function(pFile: String): ID2XFile;
 
@@ -39,6 +53,7 @@ type
 
 procedure DisposeOf(var pFile: ID2XFile); overload;
 procedure DisposeOf(var pDir: ID2XDir); overload;
+procedure DisposeOf(var pFact: ID2XIOFactory); overload;
 
 function FileReaderRef(pFile: ID2XFile): TStreamReaderRef;
 function FileWriterRef(pFile: ID2XFile): TStreamWriterRef;
@@ -65,6 +80,18 @@ begin
   begin
     lDS := pDir as TD2XInterfaced;
     pDir :=  nil;
+    lDS.Free;
+  end;
+end;
+
+procedure DisposeOf(var pFact: ID2XIOFactory); overload;
+var
+  lDS: TD2XInterfaced;
+begin
+  if Assigned(pFact) then
+  begin
+    lDS := pFact as TD2XInterfaced;
+    pFact :=  nil;
     lDS.Free;
   end;
 end;

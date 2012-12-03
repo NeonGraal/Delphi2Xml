@@ -4,7 +4,7 @@ interface
 
 uses
   D2X,
-  D2X.Stream,
+  D2X.IO,
   TestFramework,
   System.Classes,
   System.SysUtils;

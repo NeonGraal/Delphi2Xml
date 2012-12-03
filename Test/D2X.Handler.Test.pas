@@ -5,7 +5,7 @@ interface
 uses
   CastaliaPasLexTypes,
   D2X.Handler,
-  D2X.Stream;
+  D2X.IO;
 
 type
   TD2XHandlerTester = class(TD2XHandler)

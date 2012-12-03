@@ -81,10 +81,10 @@
 			<Base>true</Base>
 		</PropertyGroup>
 		<Import Condition="'$(Base)'!='' And Exists('..\CastaliaParser.optset')" Project="..\CastaliaParser.optset"/>
+		<Import Condition="'$(Base)'!='' And Exists('Warnings.optset')" Project="Warnings.optset"/>
 		<PropertyGroup Condition="'$(Base)'!=''">
 			<DCC_OutputDependencies>true</DCC_OutputDependencies>
 			<DCC_OutputXMLDocumentation>true</DCC_OutputXMLDocumentation>
-			<DCC_SYMBOL_DEPRECATED>false</DCC_SYMBOL_DEPRECATED>
 			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
 			<Manifest_File>None</Manifest_File>
 			<VerInfo_Locale>5129</VerInfo_Locale>
@@ -92,7 +92,7 @@
 			<DCC_UnitSearchPath>$(BDS)\Source\DUnit\src;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
 			<DCC_UsePackage>DBXInterBaseDriver;DataSnapServer;DataSnapCommon;DbxCommonDriver;dbxcds;CustomIPTransport;dsnap;IndyCore;IPIndyImpl;bindcompfmx;dbrtl;bindcomp;inetdb;xmlrtl;ibxpress;bindengine;soaprtl;DBXInformixDriver;DBXFirebirdDriver;inet;DBXSybaseASADriver;dbexpress;fmx;IndySystem;DataSnapClient;DataSnapProviderClient;DBXOracleDriver;fmxase;inetdbxpress;rtl;DbxClientDriver;IndyProtocols;DBXMySQLDriver;fmxobj;fmxdae;DataSnapIndy10ServerTransport;$(DCC_UsePackage)</DCC_UsePackage>
 			<DCC_DcuOutput>.\$(Platform)\$(Config)</DCC_DcuOutput>
-			<CfgDependentOn>..\CastaliaParser.optset</CfgDependentOn>
+			<CfgDependentOn>..\CastaliaParser.optset;Warnings.optset</CfgDependentOn>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base_Win64)'!=''">
 			<DCC_Define>FASTMM;$(DCC_Define)</DCC_Define>
@@ -107,7 +107,6 @@
 			<DCC_UsePackage>cxLibraryRS16;dclRBADO1416;dxSkinSevenRS16;dxPsPrVwAdvRS16;dxSkinSummer2008RS16;dxPSCoreRS16;cxPivotGridOLAPRS16;rbRAP1416;dxPScxTLLnkRS16;rbRCL1416;dxPScxGridLnkRS16;cxPageControlRS16;dxSkinVS2010RS16;vclimg;dxSkinDevExpressStyleRS16;dxSkinWhiteprintRS16;fmi;dxComnRS16;vcldb;dxSkinBlackRS16;dxBarExtDBItemsRS16;rbUSER1416;dxSkinXmas2008BlueRS16;dclRBBDE1416;rbCIDE1416;dxSkinOffice2007BlueRS16;rbDIDE1416;CloudService;dxSkinOffice2007GreenRS16;FmxTeeUI;cxDataRS16;cxBarEditItemRS16;dxDockingRS16;dxPSDBTeeChartRS16;cxPageControldxBarPopupMenuRS16;dxPSLnksRS16;dxBarExtItemsRS16;JclDeveloperTools;dxPSTeeChartRS16;dxPSdxLCLnkRS16;cxVerticalGridRS16;dxSkinSharpRS16;dxSkinOffice2007BlackRS16;dxorgcRS16;dxSkinBlueprintRS16;dxPScxExtCommonRS16;vcldbx;dxNavBarRS16;DBXOdbcDriver;dxdbtrRS16;dxSkinFoggyRS16;SynEdit_RXE2;RapidXE2;dxPScxSSLnkRS16;dxSkinDarkSideRS16;intrawebdb_120_160;dxSkinscxPCPainterRS16;dxPSdxDBTVLnkRS16;FMXTee;vclactnband;dxPScxSchedulerLnkRS16;bindcompvcl;Jcl;vclie;rbIDE1416;dxSkinSilverRS16;dsnapcon;dcldxSkinsCoreRS16;dxSkinLilianRS16;vclx;dxSkinValentineRS16;dxFlowChartRS16;dxGDIPlusRS16;dxSkinSharpPlusRS16;dxdborRS16;dxPScxVGridLnkRS16;dxLayoutControlRS16;dxPScxPivotGridLnkRS16;dxCoreRS16;cxExportRS16;dxBarRS16;dxSkinsdxNavBarPainterRS16;cxSpreadSheetRS16;dxSkinCoffeeRS16;TeeDB;cxTreeListdxBarPopupMenuRS16;plugedXE2;Rave100VCL;vclib;inetdbbde;dxRibbonRS16;DBXSybaseASEDriver;cxTreeListRS16;dxSkinOffice2007SilverRS16;dxSkinsdxRibbonPainterRS16;vcldsnap;dxSkinBlueRS16;DBXDb2Driver;Intraweb_120_160;vclribbon;dxSkinDarkRoomRS16;dxSkinscxSchedulerPainterRS16;vcl;rbTCUI1416;dxSkinDevExpressDarkStyleRS16;DBXMSSQLDriver;CodeSiteExpressPkg;dclRBE1416;cxSchedulerGridRS16;webdsnap;dxSkinTheAsphaltWorldRS16;dxtrmdRS16;dxSkinsdxDLPainterRS16;rbRIDE1416;rbDAD1416;dxSkinOffice2010BlackRS16;dxSkinMoneyTwinsRS16;dxSkinPumpkinRS16;adortl;rbUSERDesign1416;dxSkinHighContrastRS16;dxSkiniMaginaryRS16;dxSkinLondonLiquidSkyRS16;dxPSdxDBOCLnkRS16;dxSkinsdxBarPainterRS16;Tee;JclContainers;dxSkinGlassOceansRS16;rbDBDE1416;dxSkinLiquidSkyRS16;dxSkinsCoreRS16;svnui;rbTC1416;cxPivotGridChartRS16;dxPScxCommonRS16;dxmdsRS16;dxSpellCheckerRS16;dxPSPrVwRibbonRS16;cxGridRS16;cxEditorsRS16;TeeUI;cxPivotGridRS16;dxSkinSevenClassicRS16;rbADO1416;cxSchedulerRS16;dxSkinOffice2010SilverRS16;vcltouch;rbBDE1416;websnap;dxSkinOffice2007PinkRS16;VclSmp;dxSkinSpringTimeRS16;rbDB1416;dxTabbedMDIRS16;DataSnapConnectors;dxSkinStardustRS16;dxPSdxOCLnkRS16;dxSkinOffice2010BlueRS16;dxPSdxFCLnkRS16;dxThemeRS16;JclVcl;dxPScxPCProdRS16;svn;tflytreeproXE2;dxSkinCaramelRS16;bdertl;dxSkinMcSkinRS16;dxBarDBNavRS16;$(DCC_UsePackage)</DCC_UsePackage>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1)'!=''">
-			<DCC_SYMBOL_DEPRECATED>false</DCC_SYMBOL_DEPRECATED>
 			<DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
 			<DCC_Optimize>false</DCC_Optimize>
 			<DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
@@ -126,18 +125,15 @@
 			<DCC_RemoteDebug>false</DCC_RemoteDebug>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
-			<Debugger_RunParams></Debugger_RunParams>
 			<VerInfo_Locale>1033</VerInfo_Locale>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
-			<Debugger_RunParams></Debugger_RunParams>
 			<VerInfo_Locale>1033</VerInfo_Locale>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_3_Win64)'!=''">
 			<ILINK_FullDebugInfo>true</ILINK_FullDebugInfo>
 			<BCC_DebugLineNumbers>true</BCC_DebugLineNumbers>
 			<BCC_SourceDebuggingOn>true</BCC_SourceDebuggingOn>
-			<Debugger_RunParams></Debugger_RunParams>
 			<VerInfo_Locale>1033</VerInfo_Locale>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_3_Win32)'!=''">
@@ -156,7 +152,7 @@
 			<DCCReference Include="D2X.Handlers.Test.pas"/>
 			<DCCReference Include="..\Source\D2X.Options.pas"/>
 			<DCCReference Include="D2X.Options.Test.pas"/>
-			<DCCReference Include="..\Source\D2X.Param.pas"/>
+			<DCCReference Include="..\Source\D2X.Params.pas"/>
 			<DCCReference Include="D2X.Param.Test.pas"/>
 			<DCCReference Include="..\Source\D2X.Parser.pas"/>
 			<DCCReference Include="D2X.Parser.Test.pas"/>
@@ -168,12 +164,13 @@
 			<DCCReference Include="D2X.Utils.pas"/>
 			<DCCReference Include="..\Source\D2X.Xml.pas"/>
 			<DCCReference Include="D2X.Xml.Test.pas"/>
-			<DCCReference Include="..\Source\D2X.FileOpts.pas"/>
-			<DCCReference Include="D2X.FileOpts.Test.pas"/>
-			<DCCReference Include="..\Source\D2X.Stream.pas"/>
-			<DCCReference Include="..\Source\D2X.Streams.pas"/>
-			<DCCReference Include="D2X.Streams.Test.pas"/>
-			<DCCReference Include="D2X.Stream.Test.pas"/>
+			<DCCReference Include="D2X.IO.Test.pas"/>
+			<DCCReference Include="D2X.IO.Actual.Test.pas"/>
+			<DCCReference Include="..\Source\D2X.IO.pas"/>
+			<DCCReference Include="..\Source\D2X.IO.Actual.pas"/>
+			<DCCReference Include="..\Source\D2X.Param.pas"/>
+			<DCCReference Include="..\Source\D2X.IO.Options.pas"/>
+			<DCCReference Include="D2X.IO.Options.Test.pas"/>
 			<None Include="Profiling\Delphi2XmlTest.aqt"/>
 			<None Include="Config\Test.def"/>
 			<None Include="Config\Test.prm"/>
@@ -187,7 +184,7 @@
 			</BuildConfiguration>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
-				<DependentOn>..\CastaliaParser.optset</DependentOn>
+				<DependentOn>..\CastaliaParser.optset;Warnings.optset</DependentOn>
 			</BuildConfiguration>
 			<BuildConfiguration Include="Debug">
 				<Key>Cfg_1</Key>
@@ -235,16 +232,16 @@
 					</Source>
 				</Delphi.Personality>
 				<Deployment>
+					<DeployFile LocalName="Delphi2XmlTests.rsm" Configuration="Debug" Class="DebugSymbols">
+						<Platform Name="Win64">
+							<RemoteName>Delphi2XmlTests.rsm</RemoteName>
+						</Platform>
+					</DeployFile>
 					<DeployFile LocalName="Delphi2XmlTests" Configuration="Debug" Class="ProjectOutput">
 						<Platform Name="All Platforms"/>
 					</DeployFile>
 					<DeployFile LocalName="$(BDS)\Redist\osx32\libcgunwind.1.0.dylib" Class="DependencyModule">
 						<Platform Name="OSX32"/>
-					</DeployFile>
-					<DeployFile LocalName="Delphi2XmlTests.rsm" Configuration="Debug" Class="DebugSymbols">
-						<Platform Name="Win64">
-							<RemoteName>Delphi2XmlTests.rsm</RemoteName>
-						</Platform>
 					</DeployFile>
 					<DeployFile LocalName="Delphi2XmlTests.exe" Configuration="Debug" Class="ProjectOutput">
 						<Platform Name="Win64"/>

@@ -1,10 +1,10 @@
-unit D2X.Stream.Test;
+unit D2X.IO.Test;
 
 interface
 
 uses
   D2X,
-  D2X.Stream,
+  D2X.IO,
   System.Classes;
 
 type

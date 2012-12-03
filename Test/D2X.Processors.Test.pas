@@ -15,7 +15,7 @@ uses
   D2X.Parser.Test,
   D2X.Processors,
   D2X.Processor.Test,
-  D2X.Stream,
+  D2X.IO,
   D2X.Test,
   System.SysUtils;
 
@@ -71,6 +71,11 @@ type
   end;
 
 function NilFile: ID2XFile;
+begin
+  Result := nil;
+end;
+
+function NilNamedFile(pName: string): ID2XFile;
 begin
   Result := nil;
 end;
@@ -192,11 +197,7 @@ end;
 
 procedure TestTD2XHandlerProcessor.TestEndResults;
 begin
-  FD2XProcessor.SetResultsOutput(
-      function(pName: string): ID2XFile
-    begin
-      Result := nil;
-    end);
+  FD2XProcessor.SetResultsOutput(NilNamedFile);
 
   FD2XProcessor.EndResults('');
   CheckFalse(FHandler.CalledEndResults, 'Ignored End Results');

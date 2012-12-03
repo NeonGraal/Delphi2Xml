@@ -26,10 +26,11 @@ implementation
 
 uses
   D2X,
-  D2X.FileOpts,
+  D2X.IO.Options,
   D2X.Test,
+  D2X.Params,
   D2X.Param.Test,
-  D2X.Stream,
+  D2X.IO,
   D2X.Utils,
   System.StrUtils,
   System.SysUtils,
@@ -646,6 +647,7 @@ begin
 
   fOpts := TTestRunOptions.Create;
   fOpts.JoinLog(fLog);
+  fOpts.InitOptions(TD2XFileOptions.Create);
 
   fIdx := 0;
 end;
@@ -1155,6 +1157,7 @@ begin
 
   fOpts := TTestOptions.Create;
   fOpts.JoinLog(fLog);
+  fOpts.InitProcessors(TD2XFileOptions.Create);
 end;
 
 procedure TOptionsTestCase.TearDown;

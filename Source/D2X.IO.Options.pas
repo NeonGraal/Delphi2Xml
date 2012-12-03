@@ -1,24 +1,26 @@
-unit D2X.FileOpts;
+unit D2X.IO.Options;
 
 interface
 
 uses
+  D2X,
+  D2X.IO,
   D2X.Param,
-  D2X.Stream,
+  D2X.Params,
   System.Classes,
   System.SysUtils;
 
 type
-  TD2XFileOptions = class
+  TD2XFileOptions = class(TD2XInterfaced, ID2XIOFactory)
   public
-    constructor Create(pGlobalValidator: TD2XSingleParam<string>.TspValidator);
-
     function ConfigFileOrExtn(pFileOrExtn: string): ID2XFile;
     function LogFileOrExtn(pFileOrExtn: string): ID2XFile;
     function BaseFile(pFileOrDir: string): ID2XFile;
     function BaseDir(pFileOrDir: string): ID2XDir;
     function SimpleFile(pFile: string): ID2XFile;
 
+    procedure SetGlobalName(const pName: string);
+    procedure SetGlobalValidator(pValidator: TD2XSingleParam<string>.TspValidator);
     procedure RegisterParams(pParams: TD2XParams);
 
   private
@@ -29,7 +31,6 @@ type
     fTimestampFiles: TD2XBooleanParam;
 
     function GetGlobalName: string;
-    procedure SetGlobalName(const Value: string);
 
   protected
     fOutputTimestamp: string;
@@ -47,8 +48,7 @@ function ConvertFile(pStr, pDflt: string; out pVal: string): Boolean;
 implementation
 
 uses
-  D2X,
-  D2X.Streams,
+  D2X.IO.Actual,
   System.StrUtils;
 
 function ConvertDir(pStr, pDflt: string; out pVal: string): Boolean;
@@ -79,32 +79,6 @@ begin
 end;
 
 { TD2XFileOptions }
-
-constructor TD2XFileOptions.Create(pGlobalValidator: TD2XSingleParam<string>.TspValidator);
-begin
-  inherited Create;
-
-  fConfigBase := TD2XFlaggedStringParam.CreateFlagStr('I', 'Config dir', '<dir>',
-    'Use <dir> as a base for all Config files', 'Config\', True, ConvertDir, nil, nil);
-  fLogBase := TD2XFlaggedStringParam.CreateFlagStr('O', 'Log dir', '<dir>',
-    'Use <dir> as a base for all Log files', 'Log\', True, ConvertDir, nil, nil);
-  fInputBase := TD2XFlaggedStringParam.CreateFlagStr('B', 'Base dir', '<dir>',
-    'Use <dir> as a base for all Input files', '', False, ConvertDir, nil, nil);
-  fGlobalName := TD2XStringParam.CreateStr('G', 'Global name', '<str>', 'Sets global name',
-    ChangeFileExt(ExtractFileName(ParamStr(0)), ''),
-      function(pStr: string; pDflt: string; out pVal: string): Boolean
-    begin
-      Result := True;
-      if pStr = '' then
-        pVal := ChangeFileExt(ExtractFileName(ParamStr(0)), '')
-      else
-        pVal := pStr;
-    end, pGlobalValidator);
-  fTimestampFiles := TD2XBooleanParam.CreateBool('T', 'Timestamp',
-    'Timestamp global output files');
-
-  fOutputTimestamp := FormatDateTime('-HH-mm', Now);
-end;
 
 function TD2XFileOptions.GetGlobalName: string;
 begin
@@ -184,9 +158,33 @@ begin
   pParams.Add(fInputBase);
 end;
 
-procedure TD2XFileOptions.SetGlobalName(const Value: string);
+procedure TD2XFileOptions.SetGlobalName(const pName: string);
 begin
-  fGlobalName.Value := Value;
+  fGlobalName.Value := pName;
+end;
+
+procedure TD2XFileOptions.SetGlobalValidator(pValidator: TD2XSingleParam<string>.TspValidator);
+begin
+  fConfigBase := TD2XFlaggedStringParam.CreateFlagStr('I', 'Config dir', '<dir>',
+    'Use <dir> as a base for all Config files', 'Config\', True, ConvertDir, nil, nil);
+  fLogBase := TD2XFlaggedStringParam.CreateFlagStr('O', 'Log dir', '<dir>',
+    'Use <dir> as a base for all Log files', 'Log\', True, ConvertDir, nil, nil);
+  fInputBase := TD2XFlaggedStringParam.CreateFlagStr('B', 'Base dir', '<dir>',
+    'Use <dir> as a base for all Input files', '', False, ConvertDir, nil, nil);
+  fGlobalName := TD2XStringParam.CreateStr('G', 'Global name', '<str>', 'Sets global name',
+    ChangeFileExt(ExtractFileName(ParamStr(0)), ''),
+      function(pStr: string; pDflt: string; out pVal: string): Boolean
+    begin
+      Result := True;
+      if pStr = '' then
+        pVal := ChangeFileExt(ExtractFileName(ParamStr(0)), '')
+      else
+        pVal := pStr;
+    end, pValidator);
+  fTimestampFiles := TD2XBooleanParam.CreateBool('T', 'Timestamp',
+    'Timestamp global output files');
+
+  fOutputTimestamp := FormatDateTime('-HH-mm', Now);
 end;
 
 function TD2XFileOptions.SimpleFile(pFile: string): ID2XFile;

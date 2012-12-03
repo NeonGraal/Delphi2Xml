@@ -1,4 +1,4 @@
-unit D2X.Streams.Test;
+unit D2X.IO.Actual.Test;
 
 interface
 
@@ -7,8 +7,8 @@ implementation
 uses
   D2X,
   D2X.Test,
-  D2X.Stream,
-  D2X.Streams,
+  D2X.IO,
+  D2X.IO.Actual,
   System.Classes,
   System.SysUtils,
   TestFramework;

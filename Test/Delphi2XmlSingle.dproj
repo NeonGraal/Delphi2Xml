@@ -40,6 +40,7 @@
 			<Cfg_1>true</Cfg_1>
 			<Base>true</Base>
 		</PropertyGroup>
+		<Import Condition="'$(Base)'!='' And Exists('Warnings.optset')" Project="Warnings.optset"/>
 		<PropertyGroup Condition="'$(Base)'!=''">
 			<DCC_Define>FASTMM;$(DCC_Define)</DCC_Define>
 			<Manifest_File>None</Manifest_File>
@@ -49,6 +50,7 @@
 			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
 			<DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
 			<DCC_DcuOutput>.\$(Platform)\$(Config)</DCC_DcuOutput>
+			<CfgDependentOn>Warnings.optset</CfgDependentOn>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base_Win64)'!=''">
 			<DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;$(DCC_Namespace)</DCC_Namespace>
@@ -86,15 +88,18 @@
 			<DelphiCompile Include="$(MainSource)">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
-			<DCCReference Include="D2X.Streams.Test.pas"/>
 			<DCCReference Include="..\Source\D2X.pas"/>
-			<DCCReference Include="..\Source\D2X.Stream.pas"/>
-			<DCCReference Include="..\Source\D2X.Streams.pas"/>
 			<DCCReference Include="D2X.Test.pas"/>
 			<DCCReference Include="D2X.Utils.pas"/>
+			<DCCReference Include="D2X.IO.Actual.Test.pas"/>
+			<DCCReference Include="D2X.IO.Test.pas"/>
+			<DCCReference Include="..\Source\D2X.IO.Actual.pas"/>
+			<DCCReference Include="..\Source\D2X.IO.pas"/>
+			<DCCReference Include="..\Source\D2X.Param.pas"/>
 			<None Include="Profiling\Delphi2XmlSingle.aqt"/>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
+				<DependentOn>Warnings.optset</DependentOn>
 			</BuildConfiguration>
 			<BuildConfiguration Include="Debug">
 				<Key>Cfg_1</Key>

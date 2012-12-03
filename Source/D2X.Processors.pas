@@ -9,7 +9,7 @@ uses
   D2X.Parser,
   D2X.Handler,
   D2X.Processor,
-  D2X.Stream,
+  D2X.IO,
   System.Generics.Collections;
 
 type

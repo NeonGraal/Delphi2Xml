@@ -28,7 +28,7 @@ uses
   CastaliaPasLexTypes,
   D2X,
   D2X.Handlers,
-  D2X.Stream,
+  D2X.IO,
   D2X.Xml,
   System.Classes,
   System.Generics.Collections,

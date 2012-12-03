@@ -15,7 +15,7 @@ uses
   D2X.Handlers.Test in 'D2X.Handlers.Test.pas',
   D2X.Options in '..\Source\D2X.Options.pas',
   D2X.Options.Test in 'D2X.Options.Test.pas',
-  D2X.Param in '..\Source\D2X.Param.pas',
+  D2X.Params in '..\Source\D2X.Params.pas',
   D2X.Param.Test in 'D2X.Param.Test.pas',
   D2X.Parser in '..\Source\D2X.Parser.pas',
   D2X.Parser.Test in 'D2X.Parser.Test.pas',
@@ -27,12 +27,13 @@ uses
   D2X.Utils in 'D2X.Utils.pas',
   D2X.Xml in '..\Source\D2X.Xml.pas',
   D2X.Xml.Test in 'D2X.Xml.Test.pas',
-  D2X.FileOpts in '..\Source\D2X.FileOpts.pas',
-  D2X.FileOpts.Test in 'D2X.FileOpts.Test.pas',
-  D2X.Stream in '..\Source\D2X.Stream.pas',
-  D2X.Streams in '..\Source\D2X.Streams.pas',
-  D2X.Streams.Test in 'D2X.Streams.Test.pas',
-  D2X.Stream.Test in 'D2X.Stream.Test.pas';
+  D2X.IO.Test in 'D2X.IO.Test.pas',
+  D2X.IO.Actual.Test in 'D2X.IO.Actual.Test.pas',
+  D2X.IO in '..\Source\D2X.IO.pas',
+  D2X.IO.Actual in '..\Source\D2X.IO.Actual.pas',
+  D2X.Param in '..\Source\D2X.Param.pas',
+  D2X.IO.Options in '..\Source\D2X.IO.Options.pas',
+  D2X.IO.Options.Test in 'D2X.IO.Options.Test.pas';
 
 {$R *.RES}
 

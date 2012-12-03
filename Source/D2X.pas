@@ -19,6 +19,7 @@ type
     class function Zero<T>: T;
     class function ToLabel<T>(pVal: T): string;
     class function CnvDflt<T>(pStr: string; pDflt: T; out pVal: T): Boolean;
+    class function CnvEnum<T>(pStr: string; pDflt: T; out pVal: T): Boolean;
   end;
 
   TD2XInterfaced = class(TObject, IInterface)
@@ -66,9 +67,9 @@ type
 
   TStrIntPair = TPair<string, Integer>;
   TStrIntDict = TDictionary<string, Integer>;
-  TPairLogMethod = reference to function(pPair: TStrIntPair): string;
+  TPairLogRef = reference to function(pPair: TStrIntPair): string;
 
-procedure OutputStrIntDict(pDict: TStrIntDict; pStream: TStreamWriter; pFunc: TPairLogMethod);
+procedure OutputStrIntDict(pDict: TStrIntDict; pStream: TStreamWriter; pFunc: TPairLogRef);
 
 function MakeFileName(pStr, pDflt: string): string;
 function TidyFilename(pFilename: string): string;
@@ -76,9 +77,10 @@ function TidyFilename(pFilename: string): string;
 implementation
 
 uses
-  System.StrUtils;
+  System.StrUtils,
+  System.TypInfo;
 
-procedure OutputStrIntDict(pDict: TStrIntDict; pStream: TStreamWriter; pFunc: TPairLogMethod);
+procedure OutputStrIntDict(pDict: TStrIntDict; pStream: TStreamWriter; pFunc: TPairLogRef);
 var
   lP: TStrIntPair;
 begin
@@ -120,6 +122,33 @@ class function TD2X.CnvDflt<T>(pStr: string; pDflt: T; out pVal: T): Boolean;
 begin
   pVal := pDflt;
   Result := True;
+end;
+
+class function TD2X.CnvEnum<T>(pStr: string; pDflt: T; out pVal: T): Boolean;
+var
+  lTI: PTypeInfo;
+  lTD: PTypeData;
+  i: Integer;
+  lV: TValue;
+  lName: String;
+begin
+  lTI := TypeInfo(T);
+  Assert(tkEnumeration = lTI.Kind, 'CnvEnum requires an Enumeration Type');
+  Result := pStr > '';
+  pVal := pDflt;
+  if Result then
+  begin
+    lTD := GetTypeData(lTI);
+    for i := lTD.MinValue to lTD.MaxValue do begin
+      lName := Copy(GetEnumName(lTI, i), 3, 99);
+      if StartsText(pStr, lName) then
+      begin
+        lV := TValue.FromOrdinal(lTI, i);
+        pVal := lV.AsType<T>;
+        Exit;
+      end;
+    end;
+  end;
 end;
 
 class function TD2X.ToLabel<T>(pVal: T): string;

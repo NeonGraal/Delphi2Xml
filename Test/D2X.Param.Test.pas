@@ -19,8 +19,9 @@ implementation
 
 uses
   D2X,
-  D2X.Stream,
-  D2X.Streams,
+  D2X.IO,
+  D2X.IO.Actual,
+  D2X.Params,
   D2X.Test,
   D2X.Utils,
   System.Classes,
