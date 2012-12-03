@@ -132,52 +132,52 @@ uses
   System.TypInfo,
   Winapi.Windows;
 
-  {
-   function ConvertResultPer(pStr: string; pDflt: TD2XResultPer;
-   out pVal: TD2XResultPer): Boolean;
-   begin
-   Result := pStr > '';
-   if Result then
-   case pStr[1] of
-   'R', 'r':
-   pVal := rpRun;
-   'P', 'p':
-   pVal := rpParam;
-   'W', 'w':
-   pVal := rpWildcard;
-   'S', 's':
-   pVal := rpSubDir;
-   'D', 'd':
-   pVal := rpDir;
-   '!':
-   pVal := pDflt;
-   else
-   pVal := rpFile;
-   end;
-   end;
+{
+ function ConvertResultPer(pStr: string; pDflt: TD2XResultPer;
+ out pVal: TD2XResultPer): Boolean;
+ begin
+ Result := pStr > '';
+ if Result then
+ case pStr[1] of
+ 'R', 'r':
+ pVal := rpRun;
+ 'P', 'p':
+ pVal := rpParam;
+ 'W', 'w':
+ pVal := rpWildcard;
+ 'S', 's':
+ pVal := rpSubDir;
+ 'D', 'd':
+ pVal := rpDir;
+ '!':
+ pVal := pDflt;
+ else
+ pVal := rpFile;
+ end;
+ end;
 
-   function ConvertElapsedMode(pStr: string; pDflt: TD2XElapsedMode;
-   out pVal: TD2XElapsedMode): Boolean;
-   begin
-   Result := pStr > '';
-   if Result then
-   case pStr[1] of
-   'N', 'n':
-   pVal := emNone;
-   'Q', 'q':
-   pVal := emQuiet;
-   'T', 't':
-   pVal := emTotal;
-   'P', 'p':
-   pVal := emProcessing;
-   '!':
-   pVal := pDflt;
-   else
-   pVal := emQuiet;
-   end;
-   end;
-  }
-  { TD2XOptions }
+ function ConvertElapsedMode(pStr: string; pDflt: TD2XElapsedMode;
+ out pVal: TD2XElapsedMode): Boolean;
+ begin
+ Result := pStr > '';
+ if Result then
+ case pStr[1] of
+ 'N', 'n':
+ pVal := emNone;
+ 'Q', 'q':
+ pVal := emQuiet;
+ 'T', 't':
+ pVal := emTotal;
+ 'P', 'p':
+ pVal := emProcessing;
+ '!':
+ pVal := pDflt;
+ else
+ pVal := emQuiet;
+ end;
+ end;
+}
+{ TD2XOptions }
 
 procedure TD2XOptions.BeginResults(pNodename: string; pPer: TD2XResultPer);
 var

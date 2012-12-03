@@ -17,7 +17,7 @@ type
   end;
 
   TTestParserHandler = class(TD2XParserHandler)
-    public
+  public
     property Parser: TD2XDefinesParser read fParser;
 
   end;
@@ -170,7 +170,7 @@ type
     procedure TestProcessing;
   end;
 
-  const
+const
 {$IFDEF WIN32}
   EXPECTED_DEFINES = 'CONDITIONALEXPRESSIONS CPU386 MSWINDOWS UNICODE VER230 WIN32';
 {$ELSE}
@@ -214,7 +214,11 @@ begin
   fHndlr.EndMethod('Alpha');
   fHndlr.EndFile('', NilWriter);
 
-  fHndlr.EndProcessing(function: TStreamWriter begin Result := fDS.WriteTo; end);
+  fHndlr.EndProcessing(
+      function: TStreamWriter
+    begin
+      Result := fDS.WriteTo;
+    end);
 
   CheckStream('Alpha=2,2', 'Processing');
 end;

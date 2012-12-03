@@ -235,7 +235,7 @@ begin
   lCalled := False;
 
   FD2XProcessor.SetFileInput(
-    function: ID2XFile
+      function: ID2XFile
     begin
       lCalled := True;
       Result := nil;

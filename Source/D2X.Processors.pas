@@ -104,10 +104,10 @@ begin
             Result := nil;
             lS := fFileInput;
             if Assigned(lS) then
-            if lS.Exists then
-              Result := lS.ReadFrom
-            else
-              Log('WARNING: %1 file "%2" not found', [fHandler.Description, lS.Description]);
+              if lS.Exists then
+                Result := lS.ReadFrom
+              else
+                Log('WARNING: %1 file "%2" not found', [fHandler.Description, lS.Description]);
           end);
       finally
         DisposeOf(lS);
@@ -131,7 +131,7 @@ begin
     if Assigned(fProcessingInput) then
       try
         fHandler.BeginProcessing(
-            function: TStreamReader
+          function: TStreamReader
           begin
             Result := nil;
             lS := fProcessingInput;
@@ -199,7 +199,7 @@ begin
     if Assigned(fFileOutput) then
       try
         fHandler.EndFile(pFile,
-            function: TStreamWriter
+          function: TStreamWriter
           begin
             lS := fFileOutput;
             if Assigned(lS) then
@@ -229,7 +229,7 @@ begin
     if Assigned(fProcessingOutput) then
       try
         fHandler.EndProcessing(
-            function: TStreamWriter
+          function: TStreamWriter
           begin
             lS := fProcessingOutput;
             if Assigned(lS) then
@@ -253,7 +253,7 @@ begin
     if Assigned(fResultsOutput) then
       try
         fHandler.EndResults(
-            function: TStreamWriter
+          function: TStreamWriter
           begin
             lS := fResultsOutput(pFile);
             if Assigned(lS) then
@@ -281,15 +281,13 @@ begin
     fHandler.ParserMessage(pTyp, pMsg, pX, pY);
 end;
 
-function TD2XHandlerProcessor.SetFileInput(pFilename: TD2XFileRef)
-  : TD2XHandlerProcessor;
+function TD2XHandlerProcessor.SetFileInput(pFilename: TD2XFileRef): TD2XHandlerProcessor;
 begin
   fFileInput := pFilename;
   Result := Self;
 end;
 
-function TD2XHandlerProcessor.SetFileOutput(pFilename: TD2XFileRef)
-  : TD2XHandlerProcessor;
+function TD2XHandlerProcessor.SetFileOutput(pFilename: TD2XFileRef): TD2XHandlerProcessor;
 begin
   fFileOutput := pFilename;
   Result := Self;
@@ -303,8 +301,7 @@ begin
     TD2XParserHandler(fHandler).InitParser(pParser);
 end;
 
-function TD2XHandlerProcessor.SetProcessingInput(pFilename: TD2XFileRef)
-  : TD2XHandlerProcessor;
+function TD2XHandlerProcessor.SetProcessingInput(pFilename: TD2XFileRef): TD2XHandlerProcessor;
 begin
   fProcessingInput := pFilename;
   Result := Self;

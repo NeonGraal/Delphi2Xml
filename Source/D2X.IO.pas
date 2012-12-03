@@ -34,14 +34,14 @@ type
 
   ID2XIOFactory = interface
     ['{ADCB308E-8D54-4B8A-A687-3EC1BD1DFB4C}']
-    function ConfigFileOrExtn(pFileOrExtn: string): ID2XFile;
-    function LogFileOrExtn(pFileOrExtn: string): ID2XFile;
-    function BaseFile(pFileOrDir: string): ID2XFile;
-    function BaseDir(pFileOrDir: string): ID2XDir;
-    function SimpleFile(pFile: string): ID2XFile;
+    function ConfigFileOrExtn(pFileOrExtn: String): ID2XFile;
+    function LogFileOrExtn(pFileOrExtn: String): ID2XFile;
+    function BaseFile(pFileOrDir: String): ID2XFile;
+    function BaseDir(pFileOrDir: String): ID2XDir;
+    function SimpleFile(pFile: String): ID2XFile;
 
-    procedure SetGlobalName(const pName: string);
-    procedure SetGlobalValidator(pValidator: TD2XSingleParam<string>.TspValidator);
+    procedure SetGlobalName(const pName: String);
+    procedure SetGlobalValidator(pValidator: TD2XSingleParam<String>.TspValidator);
     procedure RegisterParams(pParams: TD2XParams);
   end;
 
@@ -67,7 +67,7 @@ begin
   if Assigned(pFile) then
   begin
     lDS := pFile as TD2XInterfaced;
-    pFile :=  nil;
+    pFile := nil;
     lDS.Free;
   end;
 end;
@@ -79,7 +79,7 @@ begin
   if Assigned(pDir) then
   begin
     lDS := pDir as TD2XInterfaced;
-    pDir :=  nil;
+    pDir := nil;
     lDS.Free;
   end;
 end;
@@ -91,7 +91,7 @@ begin
   if Assigned(pFact) then
   begin
     lDS := pFact as TD2XInterfaced;
-    pFact :=  nil;
+    pFact := nil;
     lDS.Free;
   end;
 end;

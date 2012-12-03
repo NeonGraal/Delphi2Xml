@@ -130,7 +130,7 @@ var
   lTD: PTypeData;
   i: Integer;
   lV: TValue;
-  lName: String;
+  lName: string;
 begin
   lTI := TypeInfo(T);
   Assert(tkEnumeration = lTI.Kind, 'CnvEnum requires an Enumeration Type');
@@ -139,7 +139,8 @@ begin
   if Result then
   begin
     lTD := GetTypeData(lTI);
-    for i := lTD.MinValue to lTD.MaxValue do begin
+    for i := lTD.MinValue to lTD.MaxValue do
+    begin
       lName := Copy(GetEnumName(lTI, i), 3, 99);
       if StartsText(pStr, lName) then
       begin

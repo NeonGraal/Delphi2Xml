@@ -286,7 +286,6 @@ const
   DEFINED_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Use these Defines: ' +
     'CONDITIONALEXPRESSIONS, CPU32, MSWINDOWS, UNICODE, VER230';
 {$ENDIF}
-
   { TestTD2XOptionEnums }
 
 procedure TestTD2XOptionEnums.TestElapsedModeInvalidCreate;

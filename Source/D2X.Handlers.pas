@@ -538,7 +538,7 @@ var
   i: Integer;
   lS: TStreamWriter;
 const
-  DEF_BREAK= #13#10'****'#13#10#13#10;
+  DEF_BREAK = #13#10'****'#13#10#13#10;
 begin
   lSL := TStringList.Create;
   try

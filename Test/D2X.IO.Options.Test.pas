@@ -7,6 +7,7 @@ implementation
 uses
   D2X,
   D2X.IO.Options,
+  D2X.Param,
   D2X.Param.Test,
   D2X.IO,
   System.SysUtils,
@@ -23,45 +24,40 @@ type
   TestTD2XFileOptions = class(TParamsTestCase)
   private
     fFileOpts: TD2XFileOptionsTest;
+    fValidatorCalled: Boolean;
 
-    procedure CheckStream(var pDS: ID2XFile; pExp, pLabel: String);
+    procedure CheckStream(var pDS: ID2XFile; pExp, pLabel: string);
+    procedure CheckValidator(pLabel: string);
+    function TestValidator(pStr: string): Boolean;
   public
     procedure SetUp; override;
     procedure TearDown; override;
   published
     procedure TestGobalName;
     procedure TestTimestampFiles;
+    procedure TestConfigFileOrExtn;
+    procedure TestLogFileOrExtn;
+    procedure TestBaseFile;
+    procedure TestBaseDir;
+    procedure TestSimpleFile;
 
-    procedure TestInputFile;
-    procedure TestInputExtn;
-    procedure TestInputDirFile;
-    procedure TestInputDirExtn;
-    procedure TestInputOffFile;
-    procedure TestInputOffExtn;
-    procedure TestInputOnFile;
-    procedure TestInputOnExtn;
-
-    procedure TestOutputFile;
-    procedure TestOutputExtn;
-    procedure TestOutputDirFile;
-    procedure TestOutputDirExtn;
-    procedure TestOutputOffFile;
-    procedure TestOutputOffExtn;
-    procedure TestOutputOnFile;
-    procedure TestOutputOnExtn;
-
-    procedure TestOutputTimestampFile;
-    procedure TestOutputTimestampExtn;
-    procedure TestOutputNoTimestampFile;
-    procedure TestOutputNoTimestampExtn;
   end;
 
   { TestTD2XFileOptions }
 
-procedure TestTD2XFileOptions.CheckStream(var pDS: ID2XFile; pExp, pLabel: String);
+procedure TestTD2XFileOptions.CheckStream(var pDS: ID2XFile; pExp, pLabel: string);
 begin
-  CheckEqualsString(pExp, pDS.Description, pLabel);
-  DisposeOf(pDS);
+  try
+    CheckEqualsString(pExp, pDS.Description, pLabel);
+  finally
+    DisposeOf(pDS);
+  end;
+end;
+
+procedure TestTD2XFileOptions.CheckValidator(pLabel: string);
+begin
+  CheckTrue(fValidatorCalled, pLabel);
+  fValidatorCalled := False;
 end;
 
 procedure TestTD2XFileOptions.SetUp;
@@ -69,7 +65,7 @@ begin
   inherited;
 
   fFileOpts := TD2XFileOptionsTest.Create;
-  fFileOpts.SetGlobalValidator(nil);
+  fFileOpts.SetGlobalValidator(TestValidator);
   fFileOpts.RegisterParams(fParams);
 end;
 
@@ -80,286 +76,241 @@ begin
   inherited;
 end;
 
+procedure TestTD2XFileOptions.TestBaseDir;
+begin
+  fFileOpts.BaseDir('File.Extn');
+
+end;
+
+procedure TestTD2XFileOptions.TestBaseFile;
+begin
+  fFileOpts.BaseFile('File.Extn');
+
+end;
+
+procedure TestTD2XFileOptions.TestConfigFileOrExtn;
+var
+  lGlobal, lInput: TD2XParam;
+  lDS: ID2XFile;
+  pExtn: string;
+begin
+  lGlobal := fParams.ForCode('G');
+  lInput := fParams.ForCode('I');
+  pExtn := '.Extn';
+
+  lDS := fFileOpts.ConfigFileOrExtn('File.Extn');
+  CheckStream(lDS, 'Config\File.Extn', 'Config File');
+
+  lGlobal.Parse('G');
+  lDS := fFileOpts.ConfigFileOrExtn(pExtn);
+  CheckStream(lDS, 'Config\' + fFileOpts.GlobalName + '.Extn', 'Config Default .Extn');
+
+  lGlobal.Parse('GGlobal');
+  lDS := fFileOpts.ConfigFileOrExtn(pExtn);
+  CheckStream(lDS, 'Config\Global.Extn', 'Config Global .Extn');
+
+  lInput.Parse('I-');
+
+  lDS := fFileOpts.ConfigFileOrExtn('File.Extn');
+  CheckStream(lDS, 'File.Extn', 'Input Off File');
+
+  lGlobal.Parse('G');
+  lDS := fFileOpts.ConfigFileOrExtn(pExtn);
+  CheckStream(lDS, fFileOpts.GlobalName + '.Extn', 'Input Off Default .Extn ');
+
+  fParams.ForCode('G').Parse('GGlobal');
+  lDS := fFileOpts.ConfigFileOrExtn(pExtn);
+  CheckStream(lDS, 'Global.Extn', 'Input Off Global .Extn');
+
+  lInput.Parse('I+');
+
+  lDS := fFileOpts.ConfigFileOrExtn('File.Extn');
+  CheckStream(lDS, 'Config\File.Extn', 'Input On File');
+
+  lGlobal.Parse('G');
+  lDS := fFileOpts.ConfigFileOrExtn(pExtn);
+  CheckStream(lDS, 'Config\' + fFileOpts.GlobalName + '.Extn', 'Input On Default .Extn ');
+
+  fParams.ForCode('G').Parse('GGlobal');
+  lDS := fFileOpts.ConfigFileOrExtn(pExtn);
+  CheckStream(lDS, 'Config\Global.Extn', 'Input On Global .Extn');
+
+  lInput.Parse('I:In');
+
+  lDS := fFileOpts.ConfigFileOrExtn('File.Extn');
+  CheckStream(lDS, 'In\File.Extn', 'Input File');
+
+  lGlobal.Parse('G');
+  lDS := fFileOpts.ConfigFileOrExtn(pExtn);
+  CheckStream(lDS, 'In\' + fFileOpts.GlobalName + '.Extn', 'Input Default .Extn ');
+
+  fParams.ForCode('G').Parse('GGlobal');
+  lDS := fFileOpts.ConfigFileOrExtn(pExtn);
+  CheckStream(lDS, 'In\Global.Extn', 'Input Global .Extn');
+end;
+
 procedure TestTD2XFileOptions.TestGobalName;
+var
+  lGlobal: TD2XParam;
+  lDefault: string;
 begin
-  fParams.ForCode('G').Parse('GGlobal');
-  CheckEqualsString('Global', fFileOpts.GlobalName, 'GlobalName');
+  lGlobal := fParams.ForCode('G');
+  lDefault := ChangeFileExt(ExtractFileName(ParamStr(0)), '');
 
-  fFileOpts.GlobalName := 'Test';
-  CheckEqualsString('Test', fFileOpts.GlobalName, 'GlobalName');
+  CheckEqualsString(lDefault, fFileOpts.GlobalName, 'Default Global Name');
+
+  lGlobal.Parse('GGlobal');
+  CheckEqualsString('Global', fFileOpts.GlobalName, 'Global Name');
+  CheckValidator('Global Name');
+
+  fFileOpts.SetGlobalName('Test');
+  CheckEqualsString('Test', fFileOpts.GlobalName, 'Test Global Name');
+  CheckValidator('Test Global Name');
+
+  lGlobal.Parse('G');
+  CheckEqualsString(lDefault, fFileOpts.GlobalName, 'Reset Global Name');
+  CheckValidator('Reset Global Name');
 end;
 
-procedure TestTD2XFileOptions.TestInputDirExtn;
+procedure TestTD2XFileOptions.TestLogFileOrExtn;
 var
-  pExtn: String;
-  lDS : ID2XFile;
+  lGlobal, lOutput: TD2XParam;
+  pExtn: string;
+  lDS: ID2XFile;
 begin
   pExtn := '.Extn';
-  fParams.ForCode('I').Parse('I:In');
-
-  lDS := fFileOpts.ConfigFileOrExtn(pExtn);
-  CheckStream(lDS, 'In\' + fFileOpts.GlobalName + '.Extn', 'Return Value');
-
-  fParams.ForCode('G').Parse('GGlobal');
-  lDS := fFileOpts.ConfigFileOrExtn(pExtn);
-  CheckStream(lDS, 'In\Global.Extn', 'Return Value');
-end;
-
-procedure TestTD2XFileOptions.TestInputDirFile;
-var
-  lDS : ID2XFile;
-begin
-  fParams.ForCode('I').Parse('I:In');
-
-  lDS := fFileOpts.ConfigFileOrExtn('File.Extn');
-
-  CheckStream(lDS, 'In\File.Extn', 'Return Value');
-end;
-
-procedure TestTD2XFileOptions.TestInputOffExtn;
-var
-  pExtn: String;
-  lDS : ID2XFile;
-begin
-  pExtn := '.Extn';
-  fParams.ForCode('I').Parse('I-');
-
-  lDS := fFileOpts.ConfigFileOrExtn(pExtn);
-  CheckStream(lDS, fFileOpts.GlobalName + '.Extn', 'Return Value');
-
-  fParams.ForCode('G').Parse('GGlobal');
-  lDS := fFileOpts.ConfigFileOrExtn(pExtn);
-  CheckStream(lDS, 'Global.Extn', 'Return Value');
-end;
-
-procedure TestTD2XFileOptions.TestInputOffFile;
-var
-  lDS : ID2XFile;
-begin
-  fParams.ForCode('I').Parse('I-');
-
-  lDS := fFileOpts.ConfigFileOrExtn('File.Extn');
-
-  CheckStream(lDS, 'File.Extn', 'Return Value');
-end;
-
-procedure TestTD2XFileOptions.TestInputOnExtn;
-var
-  pExtn: String;
-  lDS : ID2XFile;
-begin
-  pExtn := '.Extn';
-  fParams.ForCode('I').Parse('I+');
-
-  lDS := fFileOpts.ConfigFileOrExtn(pExtn);
-  CheckStream(lDS, 'Config\' + fFileOpts.GlobalName + '.Extn', 'Return Value');
-
-  fParams.ForCode('G').Parse('GGlobal');
-  lDS := fFileOpts.ConfigFileOrExtn(pExtn);
-  CheckStream(lDS, 'Config\Global.Extn', 'Return Value');
-end;
-
-procedure TestTD2XFileOptions.TestInputOnFile;
-var
-  lDS : ID2XFile;
-begin
-  fParams.ForCode('I').Parse('I+');
-
-  lDS := fFileOpts.ConfigFileOrExtn('File.Extn');
-
-  CheckStream(lDS, 'Config\File.Extn', 'Return Value');
-end;
-
-procedure TestTD2XFileOptions.TestInputExtn;
-var
-  pExtn: String;
-  lDS : ID2XFile;
-begin
-  pExtn := '.Extn';
-
-  lDS := fFileOpts.ConfigFileOrExtn(pExtn);
-  CheckStream(lDS, 'Config\' + fFileOpts.GlobalName + '.Extn', 'Return Value');
-
-  fParams.ForCode('G').Parse('GGlobal');
-  lDS := fFileOpts.ConfigFileOrExtn(pExtn);
-  CheckStream(lDS, 'Config\Global.Extn', 'Return Value');
-end;
-
-procedure TestTD2XFileOptions.TestInputFile;
-var
-  lDS : ID2XFile;
-begin
-  lDS := fFileOpts.ConfigFileOrExtn('File.Extn');
-
-  CheckStream(lDS, 'Config\File.Extn', 'Return Value');
-end;
-
-procedure TestTD2XFileOptions.TestOutputDirExtn;
-var
-  pExtn: String;
-  lDS : ID2XFile;
-begin
-  pExtn := '.Extn';
-  fParams.ForCode('O').Parse('O:Out');
-
-  lDS := fFileOpts.LogFileOrExtn(pExtn);
-  CheckStream(lDS, 'Out\' + fFileOpts.GlobalName + '.Extn', 'Return Value');
-
-  fParams.ForCode('G').Parse('GGlobal');
-  lDS := fFileOpts.LogFileOrExtn(pExtn);
-  CheckStream(lDS, 'Out\Global.Extn', 'Return Value');
-end;
-
-procedure TestTD2XFileOptions.TestOutputDirFile;
-var
-  lDS : ID2XFile;
-begin
-  fParams.ForCode('O').Parse('O:Out');
+  lGlobal := fParams.ForCode('G');
+  lOutput := fParams.ForCode('O');
 
   lDS := fFileOpts.LogFileOrExtn('File.Extn');
+  CheckStream(lDS, 'Log\File.Extn', 'Log File');
 
-  CheckStream(lDS, 'Out\File.Extn', 'Return Value');
-end;
-
-procedure TestTD2XFileOptions.TestOutputExtn;
-var
-  pExtn: String;
-  lDS : ID2XFile;
-begin
-  pExtn := '.Extn';
-
+  lGlobal.Parse('G');
   lDS := fFileOpts.LogFileOrExtn(pExtn);
-  CheckStream(lDS, 'Log\' + fFileOpts.GlobalName + '.Extn', 'Return Value');
+  CheckStream(lDS, 'Log\' + fFileOpts.GlobalName + '.Extn', 'Log Default Extn');
 
-  fParams.ForCode('G').Parse('GGlobal');
+  lGlobal.Parse('GGlobal');
   lDS := fFileOpts.LogFileOrExtn(pExtn);
-  CheckStream(lDS, 'Log\Global.Extn', 'Return Value');
-end;
+  CheckStream(lDS, 'Log\Global.Extn', 'Log Global Extn');
 
-procedure TestTD2XFileOptions.TestOutputFile;
-var
-  lDS : ID2XFile;
-begin
-  lDS := fFileOpts.LogFileOrExtn('File.Extn');
-
-  CheckStream(lDS, 'Log\File.Extn', 'Return Value');
-end;
-
-procedure TestTD2XFileOptions.TestOutputNoTimestampExtn;
-var
-  pExtn: String;
-  lDS : ID2XFile;
-begin
-  pExtn := '.Extn';
-  fParams.ForCode('T').Parse('T-');
-
-  lDS := fFileOpts.LogFileOrExtn(pExtn);
-  CheckStream(lDS, 'Log\' + fFileOpts.GlobalName + '.Extn', 'Return Value');
-
-  fParams.ForCode('G').Parse('GGlobal');
-  lDS := fFileOpts.LogFileOrExtn(pExtn);
-  CheckStream(lDS, 'Log\Global.Extn', 'Return Value');
-end;
-
-procedure TestTD2XFileOptions.TestOutputNoTimestampFile;
-var
-  lDS : ID2XFile;
-begin
-  fParams.ForCode('T').Parse('T-');
+  lOutput.Parse('O-');
 
   lDS := fFileOpts.LogFileOrExtn('File.Extn');
+  CheckStream(lDS, 'File.Extn', 'Output Off File');
 
-  CheckStream(lDS, 'Log\File.Extn', 'Return Value');
-end;
-
-procedure TestTD2XFileOptions.TestOutputOffExtn;
-var
-  pExtn: String;
-  lDS : ID2XFile;
-begin
-  pExtn := '.Extn';
-  fParams.ForCode('O').Parse('O-');
-
+  lGlobal.Parse('G');
   lDS := fFileOpts.LogFileOrExtn(pExtn);
-  CheckStream(lDS, fFileOpts.GlobalName + '.Extn', 'Return Value');
+  CheckStream(lDS, fFileOpts.GlobalName + '.Extn', 'Output Off Default Extn');
 
-  fParams.ForCode('G').Parse('GGlobal');
+  lGlobal.Parse('GGlobal');
   lDS := fFileOpts.LogFileOrExtn(pExtn);
-  CheckStream(lDS, 'Global.Extn', 'Return Value');
-end;
+  CheckStream(lDS, 'Global.Extn', 'Output Off Global Extn');
 
-procedure TestTD2XFileOptions.TestOutputOffFile;
-var
-  lDS : ID2XFile;
-begin
-  fParams.ForCode('O').Parse('O-');
+  lOutput.Parse('O+');
 
   lDS := fFileOpts.LogFileOrExtn('File.Extn');
+  CheckStream(lDS, 'Log\File.Extn', 'Output On File');
 
-  CheckStream(lDS, 'File.Extn', 'Return Value');
-end;
-
-procedure TestTD2XFileOptions.TestOutputOnExtn;
-var
-  pExtn: String;
-  lDS : ID2XFile;
-begin
-  pExtn := '.Extn';
-  fParams.ForCode('O').Parse('O+');
-
+  lGlobal.Parse('G');
   lDS := fFileOpts.LogFileOrExtn(pExtn);
-  CheckStream(lDS, 'Log\' + fFileOpts.GlobalName + '.Extn', 'Return Value');
+  CheckStream(lDS, 'Log\' + fFileOpts.GlobalName + '.Extn', 'Output On Default Extn');
 
-  fParams.ForCode('G').Parse('GGlobal');
+  lGlobal.Parse('GGlobal');
   lDS := fFileOpts.LogFileOrExtn(pExtn);
-  CheckStream(lDS, 'Log\Global.Extn', 'Return Value');
-end;
+  CheckStream(lDS, 'Log\Global.Extn', 'Output On Global Extn');
 
-procedure TestTD2XFileOptions.TestOutputOnFile;
-var
-  lDS : ID2XFile;
-begin
-  fParams.ForCode('O').Parse('O+');
+  lOutput.Parse('O:Out');
 
   lDS := fFileOpts.LogFileOrExtn('File.Extn');
+  CheckStream(lDS, 'Out\File.Extn', 'Output File');
 
-  CheckStream(lDS, 'Log\File.Extn', 'Return Value');
+  lGlobal.Parse('G');
+  lDS := fFileOpts.LogFileOrExtn(pExtn);
+  CheckStream(lDS, 'Out\' + fFileOpts.GlobalName + '.Extn', 'Output Default Extn');
+
+  lGlobal.Parse('GGlobal');
+  lDS := fFileOpts.LogFileOrExtn(pExtn);
+  CheckStream(lDS, 'Out\Global.Extn', 'Output Global Extn');
 end;
 
-procedure TestTD2XFileOptions.TestOutputTimestampExtn;
-var
-  pExtn: String;
-  lDS : ID2XFile;
+procedure TestTD2XFileOptions.TestSimpleFile;
 begin
-  pExtn := '.Extn';
-  fParams.ForCode('T').Parse('T');
+  fFileOpts.SimpleFile('File.Extn');
 
-  lDS := fFileOpts.LogFileOrExtn(pExtn);
-  CheckStream(lDS, 'Log\' + fFileOpts.GlobalName + fFileOpts.OutputTimestamp + '.Extn',
-    'Return Value');
-
-  fParams.ForCode('G').Parse('GGlobal');
-  lDS := fFileOpts.LogFileOrExtn(pExtn);
-  CheckStream(lDS, 'Log\Global' + fFileOpts.OutputTimestamp + '.Extn', 'Return Value');
-end;
-
-procedure TestTD2XFileOptions.TestOutputTimestampFile;
-var
-  lDS : ID2XFile;
-begin
-  fParams.ForCode('T').Parse('T');
-
-  lDS := fFileOpts.LogFileOrExtn('File.Extn');
-
-  CheckStream(lDS, 'Log\File' + fFileOpts.OutputTimestamp + '.Extn', 'Return Value');
 end;
 
 procedure TestTD2XFileOptions.TestTimestampFiles;
+var
+  lGlobal, lTimestamp: TD2XParam;
+  pExtn: string;
+  lDS: ID2XFile;
 begin
-  CheckFalse(fFileOpts.TimestampFiles, 'GlobalName');
+  pExtn := '.Extn';
+  lGlobal := fParams.ForCode('G');
+  lTimestamp := fParams.ForCode('T');
 
-  fParams.ForCode('T').Parse('T');
-  CheckTrue(fFileOpts.TimestampFiles, 'GlobalName');
+  CheckFalse(fFileOpts.TimestampFiles, 'Timestamp Files Default');
+
+  lDS := fFileOpts.LogFileOrExtn('File.Extn');
+  CheckStream(lDS, 'Log\File.Extn', 'Default Timestamp File');
+
+  lGlobal.Parse('G');
+  lDS := fFileOpts.LogFileOrExtn(pExtn);
+  CheckStream(lDS, 'Log\' + fFileOpts.GlobalName + '.Extn', 'Default Timestamp Default Extn');
+
+  lGlobal.Parse('GGlobal');
+  lDS := fFileOpts.LogFileOrExtn(pExtn);
+  CheckStream(lDS, 'Log\Global.Extn', 'Default Timestamp Global Extn');
+
+  lTimestamp.Parse('T+');
+  CheckTrue(fFileOpts.TimestampFiles, 'Timestamp Files On');
+
+  lDS := fFileOpts.LogFileOrExtn('File.Extn');
+  CheckStream(lDS, 'Log\File' + fFileOpts.OutputTimestamp + '.Extn', 'On Timestamp File');
+
+  lDS := fFileOpts.LogFileOrExtn(pExtn);
+  CheckStream(lDS, 'Log\' + fFileOpts.GlobalName + fFileOpts.OutputTimestamp + '.Extn',
+    'On Timestamp Default Extn');
+
+  fParams.ForCode('G').Parse('GGlobal');
+  lDS := fFileOpts.LogFileOrExtn(pExtn);
+  CheckStream(lDS, 'Log\Global' + fFileOpts.OutputTimestamp + '.Extn',
+    'On Timestamp Global Extn');
+
+  lTimestamp.Parse('T-');
+  CheckFalse(fFileOpts.TimestampFiles, 'Timestamp Files Off');
+
+  lDS := fFileOpts.LogFileOrExtn('File.Extn');
+  CheckStream(lDS, 'Log\File.Extn', 'Off Timestamp File');
+
+  lGlobal.Parse('G');
+  lDS := fFileOpts.LogFileOrExtn(pExtn);
+  CheckStream(lDS, 'Log\' + fFileOpts.GlobalName + '.Extn', 'Off Timestamp Default Extn');
+
+  lGlobal.Parse('GGlobal');
+  lDS := fFileOpts.LogFileOrExtn(pExtn);
+  CheckStream(lDS, 'Log\Global.Extn', 'Off Timestamp Global Extn');
+
+  lTimestamp.Parse('T');
+  CheckTrue(fFileOpts.TimestampFiles, 'Timestamp Files');
+
+  lDS := fFileOpts.LogFileOrExtn('File.Extn');
+  CheckStream(lDS, 'Log\File' + fFileOpts.OutputTimestamp + '.Extn', 'Timestamp File');
+
+  lDS := fFileOpts.LogFileOrExtn(pExtn);
+  CheckStream(lDS, 'Log\' + fFileOpts.GlobalName + fFileOpts.OutputTimestamp + '.Extn',
+    'Timestamp Default Extn');
+
+  fParams.ForCode('G').Parse('GGlobal');
+  lDS := fFileOpts.LogFileOrExtn(pExtn);
+  CheckStream(lDS, 'Log\Global' + fFileOpts.OutputTimestamp + '.Extn',
+    'Timestamp Global Extn');
+end;
+
+function TestTD2XFileOptions.TestValidator(pStr: string): Boolean;
+begin
+  fValidatorCalled := True;
+  Result := True;
 end;
 
 initialization

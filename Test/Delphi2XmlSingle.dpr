@@ -11,11 +11,13 @@ uses
   D2X in '..\Source\D2X.pas',
   D2X.Test in 'D2X.Test.pas',
   D2X.Utils in 'D2X.Utils.pas',
-  D2X.IO.Actual.Test in 'D2X.IO.Actual.Test.pas',
-  D2X.IO.Test in 'D2X.IO.Test.pas',
   D2X.IO.Actual in '..\Source\D2X.IO.Actual.pas',
   D2X.IO in '..\Source\D2X.IO.pas',
-  D2X.Param in '..\Source\D2X.Param.pas';
+  D2X.IO.Options.Test in 'D2X.IO.Options.Test.pas',
+  D2X.IO.Options in '..\Source\D2X.IO.Options.pas',
+  D2X.Param in '..\Source\D2X.Param.pas',
+  D2X.Param.Test in 'D2X.Param.Test.pas',
+  D2X.Params in '..\Source\D2X.Params.pas';
 
 {$R *.RES}
 
@@ -30,4 +32,3 @@ begin
       Free;
 
 end.
-

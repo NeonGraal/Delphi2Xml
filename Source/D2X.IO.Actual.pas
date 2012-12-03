@@ -124,6 +124,7 @@ begin
 end;
 
 {$WARN SYMBOL_PLATFORM OFF}
+
 function TD2XDirPath.FirstDir: Boolean;
 begin
   Result := FindFirst(fPath + '*', faAnyFile - faNormal - faTemporary, fSR) = 0;

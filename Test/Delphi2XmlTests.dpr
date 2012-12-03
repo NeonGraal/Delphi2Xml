@@ -16,7 +16,7 @@ uses
   D2X.Options in '..\Source\D2X.Options.pas',
   D2X.Options.Test in 'D2X.Options.Test.pas',
   D2X.Params in '..\Source\D2X.Params.pas',
-  D2X.Param.Test in 'D2X.Param.Test.pas',
+  D2X.Params.Test in 'D2X.Params.Test.pas',
   D2X.Parser in '..\Source\D2X.Parser.pas',
   D2X.Parser.Test in 'D2X.Parser.Test.pas',
   D2X.Processor in '..\Source\D2X.Processor.pas',
@@ -33,7 +33,8 @@ uses
   D2X.IO.Actual in '..\Source\D2X.IO.Actual.pas',
   D2X.Param in '..\Source\D2X.Param.pas',
   D2X.IO.Options in '..\Source\D2X.IO.Options.pas',
-  D2X.IO.Options.Test in 'D2X.IO.Options.Test.pas';
+  D2X.IO.Options.Test in 'D2X.IO.Options.Test.pas',
+  D2X.Param.Test in 'D2X.Param.Test.pas';
 
 {$R *.RES}
 
