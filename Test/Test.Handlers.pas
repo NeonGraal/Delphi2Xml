@@ -3,9 +3,9 @@ unit Test.Handlers;
 interface
 
 uses
+  Test.Global,
   D2X.Handler,
-  D2X.Parser,
-  Test.Test;
+  D2X.Parser;
 
 type
   TParserTestCase = class(TLoggerTestCase)

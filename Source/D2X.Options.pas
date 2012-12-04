@@ -5,7 +5,6 @@ interface
 uses
   CastaliaPasLexTypes,
   D2X,
-  D2X.IO.Options,
   D2X.Handlers,
   D2X.Param,
   D2X.Params,
@@ -114,7 +113,7 @@ type
     constructor Create; override;
     destructor Destroy; override;
 
-    procedure InitOptions(pFileOpts: TD2XFileOptions);
+    procedure InitOptions(pFileOpts: ID2XIOFactory);
 
     procedure EndProcessing;
 
@@ -127,6 +126,7 @@ implementation
 uses
   D2X.Processors,
   D2X.IO.Actual,
+  D2X.IO.Options,
   System.IOUtils,
   System.StrUtils,
   System.TypInfo,
@@ -898,7 +898,7 @@ begin
   fOpts.EndProcessing;
 end;
 
-procedure TD2XRunOptions.InitOptions(pFileOpts: TD2XFileOptions);
+procedure TD2XRunOptions.InitOptions(pFileOpts: ID2XIOFactory);
 begin
   fOpts.JoinLog(Self);
   fOpts.InitProcessors(pFileOpts);

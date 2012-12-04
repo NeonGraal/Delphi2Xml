@@ -96,8 +96,8 @@
 			<DCCReference Include="..\Source\D2X.Param.pas"/>
 			<DCCReference Include="..\Source\D2X.Params.pas"/>
 			<DCCReference Include="Test.IO.Options.pas"/>
-			<DCCReference Include="Test.Test.pas"/>
 			<DCCReference Include="Test.Utils.pas"/>
+			<DCCReference Include="Test.Global.pas"/>
 			<None Include="Profiling\Delphi2XmlSingle.aqt"/>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>

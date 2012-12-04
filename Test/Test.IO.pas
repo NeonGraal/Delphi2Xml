@@ -5,7 +5,10 @@ interface
 uses
   D2X,
   D2X.IO,
-  System.Classes;
+  D2X.Param,
+  System.Classes,
+  System.Generics.Collections,
+  System.Types;
 
 type
   TTestIO = class(TD2XInterfaced, ID2XIO)
@@ -40,8 +43,12 @@ type
   end;
 
   TTestDir = class(TTestIO, ID2XDir)
+  private
+    fDirs, fFiles: TStringDynArray;
+    fCurr: TStack<string>;
+
   public
-    constructor Create(pDesc: string; pExists: Boolean);
+    constructor Create(pDesc: string; pExists: Boolean; pDirs, pFiles: array of string);
     destructor Destroy; override;
 
     function FirstFile(pWildcard: string): Boolean;
@@ -52,9 +59,26 @@ type
 
   end;
 
+  TTestFactory = class(TD2XInterfaced, ID2XIOFactory)
+  public
+    constructor Create;
+
+    function ConfigFileOrExtn(pFileOrExtn: string): ID2XFile;
+    function LogFileOrExtn(pFileOrExtn: string): ID2XFile;
+    function BaseFile(pFileOrDir: string): ID2XFile;
+    function BaseDir(pFileOrDir: string): ID2XDir;
+    function SimpleFile(pFile: string): ID2XFile;
+
+    procedure SetGlobalName(const pName: string);
+    procedure SetGlobalValidator(pValidator: TD2XSingleParam<string>.TspValidator);
+    procedure RegisterParams(pParams: TD2XParams);
+  end;
+
 implementation
 
 uses
+  System.RegularExpressions,
+  System.StrUtils,
   System.SysUtils,
   TestFramework;
 
@@ -219,35 +243,70 @@ begin
 
 end;
 
-constructor TTestDir.Create(pDesc: string; pExists: Boolean);
+constructor TTestDir.Create(pDesc: string; pExists: Boolean; pDirs, pFiles: array of string);
+var
+  i: Integer;
 begin
   inherited Create(pDesc, pExists);
+
+  SetLength(fDirs, Length(pDirs));
+  for i := 0 to High(pDirs) do
+    fDirs[i] := pDirs[i];
+  SetLength(fFiles, Length(pFiles));
+  for i := 0 to High(pFiles) do
+    fFiles[i] := pFiles[i];
+  fCurr := TStack<string>.Create;
 end;
 
 function TTestDir.Current: string;
 begin
-  Result := '';
+  if fCurr.Count > 0 then
+  begin
+    if fDesc > '' then
+      Result := IncludeTrailingPathDelimiter(fDesc) + fCurr.Peek
+    else
+      Result := fCurr.Peek;
+  end
+  else
+    Result := '';
 end;
 
 destructor TTestDir.Destroy;
 begin
+  FreeAndNil(fCurr);
 
   inherited;
 end;
 
 function TTestDir.FirstDir: Boolean;
+var
+  i: Integer;
 begin
-  Result := False;
+  Result := Length(fDirs) > 0;
+  fCurr.Clear;
+  for i := High(fDirs) downto 0 do
+    fCurr.Push(fDirs[i]);
 end;
 
 function TTestDir.FirstFile(pWildcard: string): Boolean;
+var
+  i: Integer;
+  r: TRegEx;
 begin
-  Result := False;
+  Result := Length(fFiles) > 0;
+  fCurr.Clear;
+  r := TRegEx.Create(ReplaceStr(ReplaceStr(ReplaceStr(pWildcard, '.', '\.'), '?', '.?'),
+      '*', '.*'));
+  for i := High(fFiles) downto 0 do
+    if r.IsMatch(fFiles[i]) then
+      fCurr.Push(fFiles[i]);
 end;
 
 function TTestDir.Next: Boolean;
 begin
-  Result := False;
+  Result := fCurr.Count > 1;
+  if Result then
+    fCurr.Pop;
 end;
 
 { TestTD2XIO }
@@ -282,7 +341,7 @@ procedure TestID2XDir.SetUp;
 begin
   inherited;
 
-  fDir := TTestDir.Create('Test', True);
+  fDir := TTestDir.Create('Test', True, [], []);
 end;
 
 procedure TestID2XDir.TearDown;
@@ -326,6 +385,106 @@ end;
 procedure TestID2XDir.TestNext;
 begin
   CheckFalse(fDir.Next, 'Next');
+end;
+
+{ TTestFactor }
+
+function TTestFactory.BaseDir(pFileOrDir: string): ID2XDir;
+var
+  lDirs, lFiles: TStringDynArray;
+begin
+  if StartsText('Config\Test', pFileOrDir) then
+  begin
+    SetLength(lDirs, 0);
+    SetLength(lFiles, 1);
+    lFiles[0] := 'Testing.SubDir.pas';
+  end
+  else
+    if StartsText('Config', pFileOrDir) then
+    begin
+      SetLength(lDirs, 1);
+      lDirs[0] := 'Test';
+      SetLength(lFiles, 1);
+      lFiles[0] := 'Testing.Dir.pas';
+    end
+    else
+      if pFileOrDir = '' then
+      begin
+        SetLength(lDirs, 2);
+        lDirs[0] := 'Config';
+        lDirs[1] := 'Test';
+        SetLength(lFiles, 2);
+        lFiles[0] := 'Testing.Unit.pas';
+        lFiles[1] := 'Testing.Program.dpr';
+      end;
+
+  Result := TTestDir.Create(pFileOrDir, True, lDirs, lFiles);
+end;
+
+function TTestFactory.BaseFile(pFileOrDir: string): ID2XFile;
+var
+  lInput: string;
+begin
+  if pFileOrDir = 'Testing.*.pas' then
+    Result := TTestFile.Create(pFileOrDir, False, lInput)
+  else
+  begin
+    if pFileOrDir = 'Testing.Unit.pas' then
+      lInput := 'unit Testing.Unit; end.'
+    else
+      if pFileOrDir = 'Testing.Program.dpr' then
+        lInput := 'program Testing.Program; end.';
+
+    Result := TTestFile.Create(pFileOrDir, True, lInput);
+  end;
+end;
+
+function TTestFactory.ConfigFileOrExtn(pFileOrExtn: string): ID2XFile;
+var
+  lInput: string;
+begin
+  if pFileOrExtn = 'Test.def' then
+    lInput := 'Uniform'#13#10'Tango'
+  else
+    if pFileOrExtn = 'Test.prm' then
+      lInput := '-@'#13#10'-@Test.out';
+
+  Result := TTestFile.Create(pFileOrExtn, True, lInput);
+end;
+
+constructor TTestFactory.Create;
+begin
+  inherited;
+
+end;
+
+function TTestFactory.LogFileOrExtn(pFileOrExtn: string): ID2XFile;
+var
+  lInput: string;
+begin
+  Result := TTestFile.Create(pFileOrExtn, True, lInput);
+end;
+
+procedure TTestFactory.RegisterParams(pParams: TD2XParams);
+begin
+
+end;
+
+procedure TTestFactory.SetGlobalName(const pName: string);
+begin
+
+end;
+
+procedure TTestFactory.SetGlobalValidator(pValidator: TD2XSingleParam<string>.TspValidator);
+begin
+
+end;
+
+function TTestFactory.SimpleFile(pFile: string): ID2XFile;
+var
+  lInput: string;
+begin
+  Result := TTestFile.Create(pFile, True, lInput);
 end;
 
 initialization

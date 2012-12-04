@@ -1,4 +1,4 @@
-unit Test.Test;
+unit Test.Global;
 
 interface
 

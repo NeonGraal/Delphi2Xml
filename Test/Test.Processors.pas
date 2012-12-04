@@ -12,11 +12,11 @@ uses
   D2X.Parser,
   D2X.Processors,
   System.SysUtils,
+  Test.Global,
   Test.Handler,
   Test.Handlers,
   Test.Parser,
   Test.Processor,
-  Test.Test,
   TestFramework;
 
 type

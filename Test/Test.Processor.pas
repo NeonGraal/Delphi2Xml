@@ -6,7 +6,7 @@ uses
   CastaliaPasLexTypes,
   D2X.Param,
   D2X.Processor,
-  Test.Test;
+  Test.Global;
 
 type
   TTestProcessor = class(TD2XProcessor)

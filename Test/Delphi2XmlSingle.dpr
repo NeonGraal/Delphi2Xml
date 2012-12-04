@@ -15,8 +15,8 @@ uses
   D2X.Param in '..\Source\D2X.Param.pas',
   D2X.Params in '..\Source\D2X.Params.pas',
   Test.IO.Options in 'Test.IO.Options.pas',
-  Test.Test in 'Test.Test.pas',
-  Test.Utils in 'Test.Utils.pas';
+  Test.Utils in 'Test.Utils.pas',
+  Test.Global in 'Test.Global.pas';
 
 {$R *.RES}
 

@@ -43,6 +43,13 @@ type
 
   end;
 
+  TestTD2XOptionGeneral = class(TTestCase)
+  published
+    procedure TestConvertDir;
+    procedure TestConvertExtn;
+    procedure TestConvertFile;
+  end;
+
   { TestTD2XFileOptions }
 
 procedure TestTD2XFileOptions.CheckIO(var pDS: ID2XIO; pExp, pLabel: string);
@@ -86,18 +93,15 @@ begin
   lDS := fFileOpts.BaseDir('Config');
   CheckIO(lDS, 'Config\', 'Default Dir');
 
-
   lBase.Parse('B+');
 
   lDS := fFileOpts.BaseDir('Config');
   CheckIO(lDS, '.\Config\', 'Base On Dir');
 
-
   lBase.Parse('B-');
 
   lDS := fFileOpts.BaseDir('Config');
   CheckIO(lDS, 'Config\', 'Base Off Dir');
-
 
   lBase.Parse('B:Base');
 
@@ -115,18 +119,15 @@ begin
   lDS := fFileOpts.BaseFile('File.Extn');
   CheckIO(lDS, 'File.Extn', 'Default File');
 
-
   lBase.Parse('B+');
 
   lDS := fFileOpts.BaseFile('File.Extn');
   CheckIO(lDS, '.\File.Extn', 'Base On File');
 
-
   lBase.Parse('B-');
 
   lDS := fFileOpts.BaseFile('File.Extn');
   CheckIO(lDS, 'File.Extn', 'Base Off File');
-
 
   lBase.Parse('B:Base');
 
@@ -322,8 +323,7 @@ begin
 
   fParams.ForCode('G').Parse('GGlobal');
   lDS := fFileOpts.LogFileOrExtn(pExtn);
-  CheckIO(lDS, 'Log\Global' + fFileOpts.OutputTimestamp + '.Extn',
-    'On Timestamp Global Extn');
+  CheckIO(lDS, 'Log\Global' + fFileOpts.OutputTimestamp + '.Extn', 'On Timestamp Global Extn');
 
   lTimestamp.Parse('T-');
   CheckFalse(fFileOpts.TimestampFiles, 'Timestamp Files Off');
@@ -351,8 +351,7 @@ begin
 
   fParams.ForCode('G').Parse('GGlobal');
   lDS := fFileOpts.LogFileOrExtn(pExtn);
-  CheckIO(lDS, 'Log\Global' + fFileOpts.OutputTimestamp + '.Extn',
-    'Timestamp Global Extn');
+  CheckIO(lDS, 'Log\Global' + fFileOpts.OutputTimestamp + '.Extn', 'Timestamp Global Extn');
 end;
 
 function TestTD2XFileOptions.TestValidator(pStr: string): Boolean;
@@ -361,8 +360,67 @@ begin
   Result := True;
 end;
 
+{ TestTD2XOptionGeneral }
+
+procedure TestTD2XOptionGeneral.TestConvertDir;
+var
+  lResult: string;
+begin
+  ConvertDir('', '', lResult);
+  CheckEqualsString('', lResult, 'Empty All, No change');
+
+  ConvertDir('', 'Default', lResult);
+  CheckEqualsString('', lResult, 'Default only, No change');
+
+  ConvertDir('Test', '', lResult);
+  CheckEqualsString('Test\', lResult, 'Dir only, Path Char added');
+
+  ConvertDir('Test', 'Default', lResult);
+  CheckEqualsString('Test\', lResult, 'Both, Path Char added');
+end;
+
+procedure TestTD2XOptionGeneral.TestConvertExtn;
+var
+  lResult: string;
+begin
+  ConvertExtn('', '', lResult);
+  CheckEqualsString('', lResult, 'Empty All, No change');
+
+  ConvertExtn('', 'Default', lResult);
+  CheckEqualsString('Default', lResult, 'Default only, Just Default');
+
+  ConvertExtn('Test', '', lResult);
+  CheckEqualsString('.Test', lResult, 'Extn, Extn Char added');
+
+  ConvertExtn('Test', 'Default', lResult);
+  CheckEqualsString('.Test', lResult, 'Both, Extn Char added');
+
+  ConvertExtn('Test.Test', 'Default', lResult);
+  CheckEqualsString('Test.Test', lResult, 'File, File returned');
+end;
+
+procedure TestTD2XOptionGeneral.TestConvertFile;
+var
+  lResult: string;
+begin
+  ConvertFile('', '', lResult);
+  CheckEqualsString('', lResult, 'Empty All, No change');
+
+  ConvertFile('', '.Def', lResult);
+  CheckEqualsString('.Def', lResult, 'Default only, Just Default');
+
+  ConvertFile('Test', '', lResult);
+  CheckEqualsString('Test', lResult, 'File only, No Change');
+
+  ConvertFile('Test', '.Def', lResult);
+  CheckEqualsString('Test.Def', lResult, 'Both, Extn added');
+
+  ConvertFile('Test.Test', '.Def', lResult);
+  CheckEqualsString('Test.Test', lResult, 'File, No Change');
+end;
+
 initialization
 
-RegisterTests('IO', [TestTD2XFileOptions.Suite]);
+RegisterTests('IO', [TestTD2XOptionGeneral.Suite, TestTD2XFileOptions.Suite]);
 
 end.

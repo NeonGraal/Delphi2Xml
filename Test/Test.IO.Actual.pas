@@ -10,7 +10,7 @@ uses
   D2X.IO.Actual,
   System.Classes,
   System.SysUtils,
-  Test.Test,
+  Test.Global,
   TestFramework;
 
 type

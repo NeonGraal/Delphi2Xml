@@ -14,8 +14,8 @@ uses
   System.Rtti,
   System.StrUtils,
   System.SysUtils,
+  Test.Global,
   Test.Param,
-  Test.Test,
   Test.Utils,
   TestFramework;
 
