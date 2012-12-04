@@ -1,11 +1,11 @@
-unit D2X.Handlers.Test;
+unit Test.Handlers;
 
 interface
 
 uses
   D2X.Handler,
   D2X.Parser,
-  D2X.Test;
+  Test.Test;
 
 type
   TParserTestCase = class(TLoggerTestCase)

@@ -81,7 +81,7 @@
 			<Base>true</Base>
 		</PropertyGroup>
 		<Import Condition="'$(Base)'!='' And Exists('..\CastaliaParser.optset')" Project="..\CastaliaParser.optset"/>
-		<Import Condition="'$(Base)'!='' And Exists('Warnings.optset')" Project="Warnings.optset"/>
+		<Import Condition="'$(Base)'!='' And Exists('..\Warnings.optset')" Project="..\Warnings.optset"/>
 		<PropertyGroup Condition="'$(Base)'!=''">
 			<DCC_OutputDependencies>true</DCC_OutputDependencies>
 			<DCC_OutputXMLDocumentation>true</DCC_OutputXMLDocumentation>
@@ -92,7 +92,7 @@
 			<DCC_UnitSearchPath>$(BDS)\Source\DUnit\src;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
 			<DCC_UsePackage>DBXInterBaseDriver;DataSnapServer;DataSnapCommon;DbxCommonDriver;dbxcds;CustomIPTransport;dsnap;IndyCore;IPIndyImpl;bindcompfmx;dbrtl;bindcomp;inetdb;xmlrtl;ibxpress;bindengine;soaprtl;DBXInformixDriver;DBXFirebirdDriver;inet;DBXSybaseASADriver;dbexpress;fmx;IndySystem;DataSnapClient;DataSnapProviderClient;DBXOracleDriver;fmxase;inetdbxpress;rtl;DbxClientDriver;IndyProtocols;DBXMySQLDriver;fmxobj;fmxdae;DataSnapIndy10ServerTransport;$(DCC_UsePackage)</DCC_UsePackage>
 			<DCC_DcuOutput>.\$(Platform)\$(Config)</DCC_DcuOutput>
-			<CfgDependentOn>..\CastaliaParser.optset;Warnings.optset</CfgDependentOn>
+			<CfgDependentOn>..\CastaliaParser.optset;..\Warnings.optset</CfgDependentOn>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base_Win64)'!=''">
 			<DCC_Define>FASTMM;$(DCC_Define)</DCC_Define>
@@ -140,6 +140,7 @@
 			<Debugger_RunParams></Debugger_RunParams>
 			<VerInfo_Locale>1033</VerInfo_Locale>
 		</PropertyGroup>
+		<Import Condition="'$(Base)'!='' And Exists('Warnings.optset')" Project="Warnings.optset"/>
 		<Import Condition="'$(Base)'!='' And Exists('..\..\FastMM\FastMM.optset')" Project="..\..\FastMM\FastMM.optset"/>
 		<ItemGroup>
 			<DelphiCompile Include="$(MainSource)">
@@ -147,31 +148,31 @@
 			</DelphiCompile>
 			<DCCReference Include="..\Source\D2X.pas"/>
 			<DCCReference Include="..\Source\D2X.Handler.pas"/>
-			<DCCReference Include="D2X.Handler.Test.pas"/>
 			<DCCReference Include="..\Source\D2X.Handlers.pas"/>
-			<DCCReference Include="D2X.Handlers.Test.pas"/>
-			<DCCReference Include="..\Source\D2X.Options.pas"/>
-			<DCCReference Include="D2X.Options.Test.pas"/>
-			<DCCReference Include="..\Source\D2X.Params.pas"/>
-			<DCCReference Include="D2X.Params.Test.pas"/>
-			<DCCReference Include="..\Source\D2X.Parser.pas"/>
-			<DCCReference Include="D2X.Parser.Test.pas"/>
-			<DCCReference Include="..\Source\D2X.Processor.pas"/>
-			<DCCReference Include="D2X.Processor.Test.pas"/>
-			<DCCReference Include="..\Source\D2X.Processors.pas"/>
-			<DCCReference Include="D2X.Processors.Test.pas"/>
-			<DCCReference Include="D2X.Test.pas"/>
-			<DCCReference Include="D2X.Utils.pas"/>
-			<DCCReference Include="..\Source\D2X.Xml.pas"/>
-			<DCCReference Include="D2X.Xml.Test.pas"/>
-			<DCCReference Include="D2X.IO.Test.pas"/>
-			<DCCReference Include="D2X.IO.Actual.Test.pas"/>
 			<DCCReference Include="..\Source\D2X.IO.pas"/>
 			<DCCReference Include="..\Source\D2X.IO.Actual.pas"/>
-			<DCCReference Include="..\Source\D2X.Param.pas"/>
 			<DCCReference Include="..\Source\D2X.IO.Options.pas"/>
-			<DCCReference Include="D2X.IO.Options.Test.pas"/>
-			<DCCReference Include="D2X.Param.Test.pas"/>
+			<DCCReference Include="..\Source\D2X.Options.pas"/>
+			<DCCReference Include="..\Source\D2X.Param.pas"/>
+			<DCCReference Include="..\Source\D2X.Params.pas"/>
+			<DCCReference Include="..\Source\D2X.Parser.pas"/>
+			<DCCReference Include="..\Source\D2X.Processor.pas"/>
+			<DCCReference Include="..\Source\D2X.Processors.pas"/>
+			<DCCReference Include="..\Source\D2X.Xml.pas"/>
+			<DCCReference Include="Test.Handler.pas"/>
+			<DCCReference Include="Test.Handlers.pas"/>
+			<DCCReference Include="Test.IO.Actual.pas"/>
+			<DCCReference Include="Test.IO.Options.pas"/>
+			<DCCReference Include="Test.IO.pas"/>
+			<DCCReference Include="Test.Options.pas"/>
+			<DCCReference Include="Test.Param.pas"/>
+			<DCCReference Include="Test.Params.pas"/>
+			<DCCReference Include="Test.Parser.pas"/>
+			<DCCReference Include="Test.Processor.pas"/>
+			<DCCReference Include="Test.Processors.pas"/>
+			<DCCReference Include="Test.Test.pas"/>
+			<DCCReference Include="Test.Utils.pas"/>
+			<DCCReference Include="Test.Xml.pas"/>
 			<None Include="Profiling\Delphi2XmlTest.aqt"/>
 			<None Include="Config\Test.def"/>
 			<None Include="Config\Test.prm"/>
@@ -185,7 +186,7 @@
 			</BuildConfiguration>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
-				<DependentOn>..\CastaliaParser.optset;Warnings.optset</DependentOn>
+				<DependentOn>..\CastaliaParser.optset;..\Warnings.optset</DependentOn>
 			</BuildConfiguration>
 			<BuildConfiguration Include="Debug">
 				<Key>Cfg_1</Key>
@@ -238,11 +239,11 @@
 							<RemoteName>Delphi2XmlTests.rsm</RemoteName>
 						</Platform>
 					</DeployFile>
-					<DeployFile LocalName="$(BDS)\Redist\osx32\libcgunwind.1.0.dylib" Class="DependencyModule">
-						<Platform Name="OSX32"/>
-					</DeployFile>
 					<DeployFile LocalName="Delphi2XmlTests" Configuration="Debug" Class="ProjectOutput">
 						<Platform Name="All Platforms"/>
+					</DeployFile>
+					<DeployFile LocalName="$(BDS)\Redist\osx32\libcgunwind.1.0.dylib" Class="DependencyModule">
+						<Platform Name="OSX32"/>
 					</DeployFile>
 					<DeployFile LocalName="Delphi2XmlTests.exe" Configuration="Debug" Class="ProjectOutput">
 						<Platform Name="Win64"/>

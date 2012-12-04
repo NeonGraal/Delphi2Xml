@@ -1,23 +1,23 @@
-unit D2X.Processors.Test;
+unit Test.Processors;
 
 interface
 
 implementation
 
 uses
-  TestFramework,
   CastaliaPasLexTypes,
   D2X.Handler,
-  D2X.Handler.Test,
-  D2X.Handlers.Test,
+  D2X.IO,
   D2X.Param,
   D2X.Parser,
-  D2X.Parser.Test,
   D2X.Processors,
-  D2X.Processor.Test,
-  D2X.IO,
-  D2X.Test,
-  System.SysUtils;
+  System.SysUtils,
+  Test.Handler,
+  Test.Handlers,
+  Test.Parser,
+  Test.Processor,
+  Test.Test,
+  TestFramework;
 
 type
   TestTD2XLogProcessor = class(TParserTestCase)

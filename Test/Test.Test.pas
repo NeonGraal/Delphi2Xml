@@ -1,13 +1,13 @@
-unit D2X.Test;
+unit Test.Test;
 
 interface
 
 uses
   D2X,
   D2X.IO,
-  TestFramework,
   System.Classes,
-  System.SysUtils;
+  System.SysUtils,
+  TestFramework;
 
 type
   TStringTestCase = class(TTestCase)
@@ -44,9 +44,9 @@ type
 implementation
 
 uses
-  D2X.Utils,
   System.Rtti,
-  System.StrUtils;
+  System.StrUtils,
+  Test.Utils;
 
 type
   TD2XTestStream = class(TD2XInterfaced, ID2XFile)

@@ -1,4 +1,4 @@
-unit D2X.Processor.Test;
+unit Test.Processor;
 
 interface
 
@@ -6,7 +6,7 @@ uses
   CastaliaPasLexTypes,
   D2X.Param,
   D2X.Processor,
-  D2X.Test;
+  Test.Test;
 
 type
   TTestProcessor = class(TD2XProcessor)
@@ -56,17 +56,17 @@ type
 implementation
 
 uses
-  TestFramework,
   D2X.Xml,
   D2X.Handler,
-  D2X.Handler.Test,
   D2X.Options,
   D2X.Parser,
   System.Classes,
   System.Diagnostics,
   System.Generics.Collections,
   System.SysUtils,
-  System.Rtti;
+  System.Rtti,
+  Test.Handler,
+  TestFramework;
 
 type
   TestTD2XProcessor = class(TFlagTestCase)

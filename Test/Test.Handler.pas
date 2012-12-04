@@ -1,4 +1,4 @@
-unit D2X.Handler.Test;
+unit Test.Handler;
 
 interface
 

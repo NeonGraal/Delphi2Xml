@@ -1,4 +1,4 @@
-unit D2X.IO.Test;
+unit Test.IO;
 
 interface
 
@@ -330,6 +330,6 @@ end;
 
 initialization
 
-RegisterTests('Stream', [TestID2XIO.Suite, TestID2XFile.Suite, TestID2XDir.Suite]);
+RegisterTests('IO', [TestID2XIO.Suite, TestID2XFile.Suite, TestID2XDir.Suite]);
 
 end.

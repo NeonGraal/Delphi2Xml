@@ -1,4 +1,4 @@
-unit D2X.IO.Actual.Test;
+unit Test.IO.Actual;
 
 interface
 
@@ -6,11 +6,11 @@ implementation
 
 uses
   D2X,
-  D2X.Test,
   D2X.IO,
   D2X.IO.Actual,
   System.Classes,
   System.SysUtils,
+  Test.Test,
   TestFramework;
 
 type
@@ -49,7 +49,7 @@ procedure TestTD2XFileStream.SetUp;
 begin
   inherited;
 
-  fFile := TD2XFileStream.Create('TestUnit.pas');
+  fFile := TD2XFileStream.Create('Testing.Unit.pas');
 end;
 
 procedure TestTD2XFileStream.TearDown;
@@ -61,7 +61,7 @@ end;
 
 procedure TestTD2XFileStream.TestDescription;
 begin
-  CheckEqualsString('TestUnit.pas', fFile.Description, 'Description');
+  CheckEqualsString('Testing.Unit.pas', fFile.Description, 'Description');
 end;
 
 procedure TestTD2XFileStream.TestExists;
@@ -133,13 +133,13 @@ end;
 procedure TestTD2XDirPath.TestFiles;
 begin
   CheckTrue(fDir.FirstFile('*.pas'), 'First File');
-  CheckEqualsString('Config\TestDir.pas', fDir.Current, 'First File Current');
+  CheckEqualsString('Config\Testing.Dir.pas', fDir.Current, 'First File Current');
   CheckFalse(fDir.Next, 'First File Next');
   fDir.Close;
 end;
 
 initialization
 
-RegisterTests('Stream', [TestTD2XFileStream.Suite, TestTD2XDirPath.Suite]);
+RegisterTests('IO', [TestTD2XFileStream.Suite, TestTD2XDirPath.Suite]);
 
 end.

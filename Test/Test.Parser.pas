@@ -1,4 +1,4 @@
-unit D2X.Parser.Test;
+unit Test.Parser;
 
 interface
 

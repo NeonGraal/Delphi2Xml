@@ -1,11 +1,11 @@
-unit D2X.Xml.Test;
+unit Test.Xml;
 
 interface
 
 uses
-  TestFramework,
+  D2X.Xml,
   System.Classes,
-  D2X.Xml;
+  TestFramework;
 
 type
   TD2XmlTestCase = class(TTestCase)
@@ -37,9 +37,9 @@ type
 implementation
 
 uses
-  D2X.Utils,
   System.Generics.Collections,
   System.SysUtils,
+  Test.Utils,
   Xml.XMLIntf;
 
 type

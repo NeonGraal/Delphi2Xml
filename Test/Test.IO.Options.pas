@@ -1,4 +1,4 @@
-unit D2X.IO.Options.Test;
+unit Test.IO.Options;
 
 interface
 
@@ -6,11 +6,11 @@ implementation
 
 uses
   D2X,
+  D2X.IO,
   D2X.IO.Options,
   D2X.Param,
-  D2X.Param.Test,
-  D2X.IO,
   System.SysUtils,
+  Test.Param,
   TestFramework;
 
 type
@@ -363,6 +363,6 @@ end;
 
 initialization
 
-RegisterTests('FileOpts', [TestTD2XFileOptions.Suite]);
+RegisterTests('IO', [TestTD2XFileOptions.Suite]);
 
 end.

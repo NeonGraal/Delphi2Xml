@@ -1,4 +1,4 @@
-unit D2X.Param.Test;
+unit Test.Param;
 
 interface
 

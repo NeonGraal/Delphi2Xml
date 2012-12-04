@@ -1,4 +1,4 @@
-unit D2X.Options.Test;
+unit Test.Options;
 
 interface
 
@@ -26,14 +26,14 @@ implementation
 
 uses
   D2X,
-  D2X.IO.Options,
-  D2X.Test,
-  D2X.Params,
-  D2X.Param.Test,
   D2X.IO,
-  D2X.Utils,
+  D2X.IO.Options,
+  D2X.Params,
   System.StrUtils,
   System.SysUtils,
+  Test.Param,
+  Test.Test,
+  Test.Utils,
   Winapi.Windows;
 
 type
@@ -234,10 +234,10 @@ type
 const
   INPUT_PROCESSING = 'Processing (Input) ... done';
   STREAM_PROCESSING = 'Processing (Stream) ... done';
-  UNIT_PROCESSING = 'Processing TestUnit.pas ... done';
-  PROGRAM_PROCESSING = 'Processing TestProgram.dpr ... done';
-  DIRECTORY_PROCESSING = 'Processing Config\TestDir.pas ... done';
-  RECURSE_PROCESSING = 'Processing Config\Test\TestSubDir.pas ... done';
+  UNIT_PROCESSING = 'Processing Testing.Unit.pas ... done';
+  PROGRAM_PROCESSING = 'Processing Testing.Program.dpr ... done';
+  DIRECTORY_PROCESSING = 'Processing Config\Testing.Dir.pas ... done';
+  RECURSE_PROCESSING = 'Processing Config\Test\Testing.SubDir.pas ... done';
   EXPECTED_SHOW_OPTIONS =
     'Usage: Delphi2XmlTests [ Option | @Params | mFilename | Wildcard ] ... ' +
     'Options: Default Description ? Show valid options ' +
@@ -500,7 +500,7 @@ procedure TestTD2XRunOptions.TestProcessParamPasFiles;
 begin
   Check(ParseOption('-!!'), 'Return Value 1');
   Check(ParseOption('-E!'), 'Return Value 2');
-  Check(ParseOption('Test*.pas'), 'Return Value 3');
+  Check(ParseOption('Testing.*.pas'), 'Return Value 3');
   CheckBuilder(UNIT_PROCESSING, 'Nothing');
 end;
 
@@ -509,7 +509,7 @@ begin
   Check(ParseOption('-!!'), 'Return Value 1');
   Check(ParseOption('-E!'), 'Return Value 2');
   Check(ParseOption('-X'), 'Return Value 3');
-  Check(ParseOption('Test*.pas'), 'Return Value 4');
+  Check(ParseOption('Testing.*.pas'), 'Return Value 4');
   CheckBuilder(UNIT_PROCESSING, 'Nothing');
 end;
 
@@ -1226,15 +1226,15 @@ end;
 
 procedure TestTD2XOptions.TestProcessDirectory;
 begin
-  Check(fOpts.ProcessDirectory('Config\', 'Test*.pas'), 'Process Directory');
+  Check(fOpts.ProcessDirectory('Config\', 'Testing.*.pas'), 'Process Directory');
   CheckLog(DIRECTORY_PROCESSING, 'Process Directory');
 end;
 
 procedure TestTD2XOptions.TestProcessFile;
 begin
-  Check(fOpts.ProcessFile('TestUnit.pas'), 'Process Unit');
+  Check(fOpts.ProcessFile('Testing.Unit.pas'), 'Process Unit');
   CheckLog(UNIT_PROCESSING, 'Process Unit');
-  Check(fOpts.ProcessFile('TestProgram.dpr'), 'Process Program');
+  Check(fOpts.ProcessFile('Testing.Program.dpr'), 'Process Program');
   CheckLog(PROGRAM_PROCESSING, 'Process Program');
 end;
 
@@ -1271,7 +1271,7 @@ end;
 
 procedure TestTD2XOptions.TestRecurseDirectory;
 begin
-  Check(fOpts.RecurseDirectory('', 'Test*.pas', false), 'Recurse Directory');
+  Check(fOpts.RecurseDirectory('', 'Testing.*.pas', false), 'Recurse Directory');
   CheckLog(DIRECTORY_PROCESSING + ' ' + RECURSE_PROCESSING, 'Recurse Directory');
 end;
 
@@ -1283,7 +1283,7 @@ begin
   Check(ParseOption('C'), 'Return Value 2');
   fB.Clear;
 
-  Check(fOpts.ProcessFile('TestUnit.pas'), 'Process Unit');
+  Check(fOpts.ProcessFile('Testing.Unit.pas'), 'Process Unit');
   CheckLog('', 'Process Unit');
 end;
 
@@ -1312,7 +1312,7 @@ begin
   Check(ParseOption('N'), 'Return Value 3');
   fB.Clear;
 
-  Check(fOpts.ProcessFile('TestUnit.pas'), 'Process Unit');
+  Check(fOpts.ProcessFile('Testing.Unit.pas'), 'Process Unit');
   CheckLog('', 'Process Unit');
 end;
 
@@ -1322,7 +1322,7 @@ begin
   Check(ParseOption('W'), 'Return Value 2');
   fB.Clear;
 
-  Check(fOpts.ProcessFile('TestUnit.pas'), 'Process Unit');
+  Check(fOpts.ProcessFile('Testing.Unit.pas'), 'Process Unit');
   CheckLog('', 'Process Unit');
 end;
 

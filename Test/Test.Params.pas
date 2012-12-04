@@ -1,4 +1,4 @@
-unit D2X.Params.Test;
+unit Test.Params;
 
 interface
 
@@ -10,13 +10,13 @@ uses
   D2X.IO.Actual,
   D2X.Param,
   D2X.Params,
-  D2X.Param.Test,
-  D2X.Test,
-  D2X.Utils,
   System.Classes,
   System.Rtti,
   System.StrUtils,
   System.SysUtils,
+  Test.Param,
+  Test.Test,
+  Test.Utils,
   TestFramework;
 
 type
