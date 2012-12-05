@@ -150,6 +150,7 @@ type
   published
     procedure TestInvalidCreateReset;
     procedure TestInvalidCreateParam;
+    procedure TestCreateStr;
     procedure TestParse;
     procedure TestReset;
     procedure TestZero;
@@ -652,6 +653,28 @@ begin
   FreeAndNil(fStrP);
 
   inherited;
+end;
+
+procedure TestTD2XStringParam.TestCreateStr;
+begin
+  FreeAndNil(fStrP);
+
+  fStrP := TD2XStringParam.CreateStr('T', 'Test', '<Example>', 'Test String Param', 'Tst',
+    function(pStr, pDflt: string; out pVal: string): Boolean
+    begin
+      pVal := pStr + pDflt;
+      Result := True;
+    end, nil);
+
+  CheckEqualsString('Tst', fStrP.Value, 'Default Value Set');
+
+  Check(fStrP.Parse('T'), 'Parse right code with No value');
+  CheckEqualsString('Tst', fStrP.Value, 'Blank Value');
+  CheckEqualsString('TTst', fStrP.ToString, 'Blank ToString');
+
+  Check(fStrP.Parse('TSimple'), 'Parse right code with value');
+  CheckEqualsString('SimpleTst', fStrP.Value, 'Simple Value');
+  CheckEqualsString('TSimpleTst', fStrP.ToString, 'Simple ToString');
 end;
 
 procedure TestTD2XStringParam.TestDescribe;

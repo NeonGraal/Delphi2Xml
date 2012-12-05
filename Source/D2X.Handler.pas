@@ -17,8 +17,8 @@ type
   public
     constructor Create; virtual;
 
-    function Description: String; virtual; abstract;
-    function UseProxy: Boolean; virtual; abstract;
+    function Description: String; virtual;
+    function UseProxy: Boolean; virtual;
 
     procedure Copy(pFrom: TD2XHandler); virtual;
 
@@ -98,6 +98,11 @@ begin
 
 end;
 
+function TD2XHandler.Description: String;
+begin
+  Result := 'Base Handler';
+end;
+
 procedure TD2XHandler.EndFile(pFile: String; pOutput: TStreamWriterRef);
 begin
 
@@ -127,6 +132,11 @@ procedure TD2XHandler.ParserMessage(const pTyp: TMessageEventType;
   const pMsg: String; pX, pY: Integer);
 begin
 
+end;
+
+function TD2XHandler.UseProxy: Boolean;
+begin
+  Result := False;
 end;
 
 { TD2XParserHandler }

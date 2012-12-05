@@ -27,7 +27,6 @@ implementation
 uses
   D2X,
   D2X.IO,
-  //  D2X.IO.Options,
   D2X.Params,
   System.StrUtils,
   System.SysUtils,
@@ -85,10 +84,6 @@ type
   published
     procedure TestParseOptionA;
     //    procedure TestParseOptionB;
-    //    procedure TestParseOptionBOff;
-    //    procedure TestParseOptionBOn;
-    //    procedure TestParseOptionBBlank;
-    //    procedure TestParseOptionBValue;
     procedure TestParseOptionC;
     procedure TestParseOptionCBlank;
     procedure TestParseOptionCExtn;
@@ -108,13 +103,8 @@ type
     procedure TestParseOptionFOff;
     procedure TestParseOptionFOn;
     //    procedure TestParseOptionG;
-    //    procedure TestParseOptionGValue;
     procedure TestParseOptionH;
     //    procedure TestParseOptionI;
-    //    procedure TestParseOptionIOff;
-    //    procedure TestParseOptionIOn;
-    //    procedure TestParseOptionIBlank;
-    //    procedure TestParseOptionIValue;
     procedure TestParseOptionJ;
     procedure TestParseOptionK;
     procedure TestParseOptionL;
@@ -126,10 +116,6 @@ type
     procedure TestParseOptionNOff;
     procedure TestParseOptionNOn;
     //    procedure TestParseOptionO;
-    //    procedure TestParseOptionOOff;
-    //    procedure TestParseOptionOOn;
-    //    procedure TestParseOptionOBlank;
-    //    procedure TestParseOptionOValue;
     procedure TestParseOptionP;
     procedure TestParseOptionPValue;
     procedure TestParseOptionQ;
@@ -144,8 +130,6 @@ type
     procedure TestParseOptionSOn;
     procedure TestParseOptionSSimple;
     //    procedure TestParseOptionT;
-    //    procedure TestParseOptionTOff;
-    //    procedure TestParseOptionTOn;
     procedure TestParseOptionU;
     procedure TestParseOptionUBlank;
     procedure TestParseOptionUExtn;
@@ -228,10 +212,10 @@ type
 const
   INPUT_PROCESSING = 'Processing (Input) ... done';
   STREAM_PROCESSING = 'Processing (Stream) ... done';
-  UNIT_PROCESSING = 'Processing Testing.Unit.pas ... done';
-  PROGRAM_PROCESSING = 'Processing Testing.Program.dpr ... done';
-  DIRECTORY_PROCESSING = 'Processing Config\Testing.Dir.pas ... done';
-  RECURSE_PROCESSING = 'Processing Config\Test\Testing.SubDir.pas ... done';
+  UNIT_PROCESSING = 'Processing Testing.TestUnit.pas ... done';
+  PROGRAM_PROCESSING = 'Processing Testing.TestProgram.dpr ... done';
+  DIRECTORY_PROCESSING = 'Processing Config\Testing.TestDir.pas ... done';
+  RECURSE_PROCESSING = 'Processing Config\Test\Testing.TestSubDir.pas ... done';
   EXPECTED_SHOW_OPTIONS =
     'Usage: Delphi2XmlTests [ Option | @Params | mFilename | Wildcard ] ... ' +
     'Options: Default Description ? Show valid options ' +
@@ -439,7 +423,7 @@ procedure TestTD2XRunOptions.TestProcessParamPasFiles;
 begin
   Check(ParseOption('-!!'), 'Return Value 1');
   Check(ParseOption('-E!'), 'Return Value 2');
-  Check(ParseOption('Testing.*.pas'), 'Return Value 3');
+  Check(ParseOption('Testing.Test*.pas'), 'Return Value 3');
   CheckBuilder(UNIT_PROCESSING, 'Processing Pas files');
 end;
 
@@ -448,7 +432,8 @@ begin
   Check(ParseOption('-!!'), 'Return Value 1');
   Check(ParseOption('-E!'), 'Return Value 2');
   Check(ParseOption('-X'), 'Return Value 3');
-  Check(ParseOption('Testing.*.pas'), 'Return Value 4');
+  Check(ParseOption('-F'), 'Return Value 4');
+  Check(ParseOption('Testing.Test*.pas'), 'Return Value 5');
   CheckBuilder(UNIT_PROCESSING, 'Processing Xml');
 end;
 
@@ -631,32 +616,6 @@ begin
   CheckUnknown('A');
 end;
 
-(*
- procedure TestTD2XOptionsAll.TestParseOptionB;
- begin
- CheckSimple('B', 'Base dir :.\');
- end;
-
- procedure TestTD2XOptionsAll.TestParseOptionBBlank;
- begin
- CheckSimple('B:', 'Base dir +');
- end;
-
- procedure TestTD2XOptionsAll.TestParseOptionBOff;
- begin
- CheckSimple('B-', 'Base dir -(.\)');
- end;
-
- procedure TestTD2XOptionsAll.TestParseOptionBOn;
- begin
- CheckSimple('B+', 'Base dir :.\');
- end;
-
- procedure TestTD2XOptionsAll.TestParseOptionBValue;
- begin
- CheckSimple('B:Base', 'Base dir :Base\');
- end;
-*)
 procedure TestTD2XOptionsAll.TestParseOptionC;
 begin
   CheckSimple('C', 'Count Children :.cnt');
@@ -750,58 +709,11 @@ begin
   CheckSimple('F+', 'Final Token +');
 end;
 
-(*
- procedure TestTD2XOptionsAll.TestParseOptionG;
- begin
- CheckSimple('G', 'Global name ' + ChangeFileExt(ExtractFileName(ParamStr(0)), ''));
- end;
-
- procedure TestTD2XOptionsAll.TestParseOptionGValue;
- begin
- CheckSimple('GGlobal', 'Global name Global');
- //  CheckEqualsString('Global\', fOpts.XmlDirectory, 'XmlDirectory');
- //  CheckEqualsString('Global\', fOpts.DefinesDirectory, 'DefinesDirectory');
- end;
-*)
 procedure TestTD2XOptionsAll.TestParseOptionH;
 begin
   CheckUnknown('H');
 end;
 
-(*
- procedure TestTD2XOptionsAll.TestParseOptionI;
- begin
- CheckSimple('I', 'Config dir :Config\');
- //  CheckEqualsString('Config\Input.File', fOpts.InputFileOrExtn('Input.File'),
- //    'InputFileOrExtn');
- end;
-
- procedure TestTD2XOptionsAll.TestParseOptionIBlank;
- begin
- CheckSimple('I:', 'Config dir +');
- //  CheckEqualsString('Input.File', fOpts.InputFileOrExtn('Input.File'), 'InputFileOrExtn');
- end;
-
- procedure TestTD2XOptionsAll.TestParseOptionIOff;
- begin
- CheckSimple('I-', 'Config dir -(Config\)');
- //  CheckEqualsString('Input.File', fOpts.InputFileOrExtn('Input.File'), 'InputFileOrExtn');
- end;
-
- procedure TestTD2XOptionsAll.TestParseOptionIOn;
- begin
- CheckSimple('I+', 'Config dir :Config\');
- //  CheckEqualsString('Config\Input.File', fOpts.InputFileOrExtn('Input.File'),
- //    'InputFileOrExtn');
- end;
-
- procedure TestTD2XOptionsAll.TestParseOptionIValue;
- begin
- CheckSimple('I:Input', 'Config dir :Input\');
- //  CheckEqualsString('Input\Input.File', fOpts.InputFileOrExtn('Input.File'),
- //    'InputFileOrExtn');
- end;
-*)
 procedure TestTD2XOptionsAll.TestParseOptionJ;
 begin
   CheckUnknown('J');
@@ -853,40 +765,6 @@ begin
   CheckSimple('N+', 'Log Not Supp +');
 end;
 
-(*
- procedure TestTD2XOptionsAll.TestParseOptionO;
- begin
- CheckSimple('O', 'Log dir :Log\');
- //  CheckEqualsString('Log\Output.File', fOpts.OutputFileOrExtn('Output.File'),
- //    'OutputFileOrExtn');
- end;
-
- procedure TestTD2XOptionsAll.TestParseOptionOBlank;
- begin
- CheckSimple('O:', 'Log dir +');
- //  CheckEqualsString('Output.File', fOpts.OutputFileOrExtn('Output.File'), 'OutputFileOrExtn');
- end;
-
- procedure TestTD2XOptionsAll.TestParseOptionOOff;
- begin
- CheckSimple('O-', 'Log dir -(Log\)');
- //  CheckEqualsString('Output.File', fOpts.OutputFileOrExtn('Output.File'), 'OutputFileOrExtn');
- end;
-
- procedure TestTD2XOptionsAll.TestParseOptionOOn;
- begin
- CheckSimple('O+', 'Log dir :Log\');
- //  CheckEqualsString('Log\Output.File', fOpts.OutputFileOrExtn('Output.File'),
- //    'OutputFileOrExtn');
- end;
-
- procedure TestTD2XOptionsAll.TestParseOptionOValue;
- begin
- CheckSimple('O:Output', 'Log dir :Output\');
- //  CheckEqualsString('Output\Output.File', fOpts.OutputFileOrExtn('Output.File'),
- //    'OutputFileOrExtn');
- end;
-*)
 procedure TestTD2XOptionsAll.TestParseOptionP;
 begin
   CheckInvalid('P', 'Invalid Results per option: P');
@@ -953,25 +831,6 @@ begin
   //  CheckEqualsString('.skip', fOpts.SkipMethodsFoE, 'SkipFileOrExtn');
 end;
 
-(*
- procedure TestTD2XOptionsAll.TestParseOptionT;
- begin
- CheckSimple('T', 'Timestamp +');
- //  CheckEqualsString(FormatDateTime('-HH-mm', Now), fOpts.OutputTimestamp, 'OutputTimestamp');
- end;
-
- procedure TestTD2XOptionsAll.TestParseOptionTOff;
- begin
- CheckSimple('T-', 'Timestamp -');
- //  CheckEqualsString(FormatDateTime('-HH-mm', Now), fOpts.OutputTimestamp, 'OutputTimestamp');
- end;
-
- procedure TestTD2XOptionsAll.TestParseOptionTOn;
- begin
- CheckSimple('T+', 'Timestamp +');
- //  CheckEqualsString(FormatDateTime('-HH-mm', Now), fOpts.OutputTimestamp, 'OutputTimestamp');
- end;
-*)
 procedure TestTD2XOptionsAll.TestParseOptionU;
 begin
   CheckSimple('U', 'Defines Used :.used');
@@ -1173,15 +1032,15 @@ end;
 
 procedure TestTD2XOptions.TestProcessDirectory;
 begin
-  Check(fOpts.ProcessDirectory('Config\', 'Testing.*.pas'), 'Process Directory');
+  Check(fOpts.ProcessDirectory('Config\', 'Testing.Test*.pas'), 'Process Directory');
   CheckLog(DIRECTORY_PROCESSING, 'Process Directory');
 end;
 
 procedure TestTD2XOptions.TestProcessFile;
 begin
-  Check(fOpts.ProcessFile('Testing.Unit.pas'), 'Process Unit');
+  Check(fOpts.ProcessFile('Testing.TestUnit.pas'), 'Process Unit');
   CheckLog(UNIT_PROCESSING, 'Process Unit');
-  Check(fOpts.ProcessFile('Testing.Program.dpr'), 'Process Program');
+  Check(fOpts.ProcessFile('Testing.TestProgram.dpr'), 'Process Program');
   CheckLog(PROGRAM_PROCESSING, 'Process Program');
 end;
 
@@ -1200,12 +1059,12 @@ end;
 
 procedure TestTD2XOptions.TestProcessStream;
 begin
-  fS.WriteString('unit Test');
+  fS.WriteString('program ');
   fS.Position := 0;
   CheckFalse(fOpts.ProcessStream('(Stream)', fDS.ReadFrom), 'Process Stream');
   CheckLog(STREAM_PROCESSING, 'Process Stream');
 
-  fS.WriteString('; end.');
+  fS.WriteString('Testing.Program; uses TestUnit in ''TestUnit.pas''; begin end.');
   fS.Position := 0;
   Check(fOpts.ProcessStream('(Stream)', fDS.ReadFrom), 'Process Stream');
   CheckLog(STREAM_PROCESSING, 'Process Stream');
@@ -1218,7 +1077,7 @@ end;
 
 procedure TestTD2XOptions.TestRecurseDirectory;
 begin
-  Check(fOpts.RecurseDirectory('', 'Testing.*.pas', false), 'Recurse Directory');
+  Check(fOpts.RecurseDirectory('', 'Testing.Test*.pas', false), 'Recurse Directory');
   CheckLog(DIRECTORY_PROCESSING + ' ' + RECURSE_PROCESSING, 'Recurse Directory');
 end;
 
@@ -1230,14 +1089,13 @@ begin
   Check(ParseOption('C'), 'Return Value 2');
   fB.Clear;
 
-  Check(fOpts.ProcessFile('Testing.Unit.pas'), 'Process Unit');
+  Check(fOpts.ProcessFile('Testing.TestUnit.pas'), 'Process Unit');
   CheckLog('', 'Process Unit');
 end;
 
 procedure TestTD2XOptionsSpecific.TestLogErrors;
 begin
   Check(ParseOption('!!'), 'Return Value 1');
-  Check(ParseOption('G'), 'Return Value 2');
   Check(ParseOption('L'), 'Return Value 3');
   fB.Clear;
 
@@ -1255,11 +1113,10 @@ end;
 procedure TestTD2XOptionsSpecific.TestNotSupported;
 begin
   Check(ParseOption('!!'), 'Return Value 1');
-  Check(ParseOption('G'), 'Return Value 2');
   Check(ParseOption('N'), 'Return Value 3');
   fB.Clear;
 
-  Check(fOpts.ProcessFile('Testing.Unit.pas'), 'Process Unit');
+  Check(fOpts.ProcessFile('Testing.TestUnit.pas'), 'Process Unit');
   CheckLog('', 'Process Unit');
 end;
 
@@ -1269,7 +1126,7 @@ begin
   Check(ParseOption('W'), 'Return Value 2');
   fB.Clear;
 
-  Check(fOpts.ProcessFile('Testing.Unit.pas'), 'Process Unit');
+  Check(fOpts.ProcessFile('Testing.TestUnit.pas'), 'Process Unit');
   CheckLog('', 'Process Unit');
 end;
 

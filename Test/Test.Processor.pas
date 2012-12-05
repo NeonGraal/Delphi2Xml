@@ -193,7 +193,7 @@ end;
 
 procedure TestTD2XProcessor.TestUseProxy;
 begin
-  CheckTrue(FD2XProcessor.UseProxy, 'Call Use Proxy');
+  CheckFalse(FD2XProcessor.UseProxy, 'Call Use Proxy');
 
   CheckTrue(FD2XProcessor.CalledUseProxy, 'Called Use Proxy');
 end;
@@ -204,70 +204,80 @@ end;
 procedure TTestProcessor.BeginFile(pFile: string);
 begin
   CalledBeginFile := True;
+  inherited;
 end;
 
 procedure TTestProcessor.BeginMethod(pMethod: string);
 begin
   CalledBeginMethod := True;
+  inherited;
 end;
 
 procedure TTestProcessor.BeginProcessing;
 begin
   CalledBeginProcessing := True;
+  inherited;
 end;
 
 procedure TTestProcessor.BeginResults;
 begin
   CalledBeginResults := True;
+  inherited;
 end;
 
 function TTestProcessor.CheckAfterMethod(pMethod: string): Boolean;
 begin
-  Result := True;
   CalledCheckAfterMethod := True;
+  Result := inherited CheckAfterMethod(pMethod);
 end;
 
 function TTestProcessor.CheckBeforeMethod(pMethod: string): Boolean;
 begin
-  Result := True;
   CalledCheckBeforeMethod := True;
+  Result := inherited CheckBeforeMethod(pMethod);
 end;
 
 procedure TTestProcessor.EndFile(pFile: string);
 begin
   CalledEndFile := True;
+  inherited;
 end;
 
 procedure TTestProcessor.EndMethod(pMethod: string);
 begin
   CalledEndMethod := True;
+  inherited;
 end;
 
 procedure TTestProcessor.EndProcessing;
 begin
   CalledEndProcessing := True;
+  inherited;
 end;
 
 procedure TTestProcessor.EndResults(pFile: string);
 begin
   CalledEndResults := True;
+  inherited;
 end;
 
 procedure TTestProcessor.LexerInclude(const pFile: string; pX, pY: Integer);
 begin
   CalledLexerInclude := True;
+  inherited;
 end;
 
 procedure TTestProcessor.ParserMessage(const pTyp: TMessageEventType;
   const pMsg: string; pX, pY: Integer);
 begin
   CalledParserMessage := True;
+  inherited;
 end;
 
 function TTestProcessor.UseProxy: Boolean;
 begin
   CalledUseProxy := True;
-  Result := True;
+  Result := inherited UseProxy;
 end;
 
 { TFlagTestCase }

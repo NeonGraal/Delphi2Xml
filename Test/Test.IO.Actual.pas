@@ -49,7 +49,7 @@ procedure TestTD2XFileStream.SetUp;
 begin
   inherited;
 
-  fFile := TD2XFileStream.Create('Testing.Unit.pas');
+  fFile := TD2XFileStream.Create('Testing.TestUnit.pas');
 end;
 
 procedure TestTD2XFileStream.TearDown;
@@ -61,7 +61,7 @@ end;
 
 procedure TestTD2XFileStream.TestDescription;
 begin
-  CheckEqualsString('Testing.Unit.pas', fFile.Description, 'Description');
+  CheckEqualsString('Testing.TestUnit.pas', fFile.Description, 'Description');
 end;
 
 procedure TestTD2XFileStream.TestExists;
@@ -71,7 +71,7 @@ end;
 
 procedure TestTD2XFileStream.TestReadFrom;
 const
-  EXPECTED_FILE = 'unit Test; interface uses System.Classes; {$DEFINE TEST} ' +
+  EXPECTED_FILE = 'unit Testing.TestUnit; interface uses System.Classes; {$DEFINE TEST} ' +
     '{$INCLUDE Test.inc} {$D+} implementation uses System.SysUtils; {$IFDEF TEST} ' +
     '{$DEFINE TEST1} {$ELSE} {$DEFINE TEST2} {$ENDIF} {$IFNDEF TEST} {$DEFINE TEST3} ' +
     '{$ENDIF} {$IFOPT D+} {$DEFINE TEST6} {$ENDIF} {$IF Defined(TEST)} {$DEFINE TEST4} ' +
@@ -133,7 +133,7 @@ end;
 procedure TestTD2XDirPath.TestFiles;
 begin
   CheckTrue(fDir.FirstFile('*.pas'), 'First File');
-  CheckEqualsString('Config\Testing.Dir.pas', fDir.Current, 'First File Current');
+  CheckEqualsString('Config\Testing.TestDir.pas', fDir.Current, 'First File Current');
   CheckFalse(fDir.Next, 'First File Next');
   fDir.Close;
 end;

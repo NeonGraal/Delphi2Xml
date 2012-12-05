@@ -397,7 +397,7 @@ begin
   begin
     SetLength(lDirs, 0);
     SetLength(lFiles, 1);
-    lFiles[0] := 'Testing.SubDir.pas';
+    lFiles[0] := 'Testing.TestSubDir.pas';
   end
   else
     if StartsText('Config', pFileOrDir) then
@@ -405,7 +405,7 @@ begin
       SetLength(lDirs, 1);
       lDirs[0] := 'Test';
       SetLength(lFiles, 1);
-      lFiles[0] := 'Testing.Dir.pas';
+      lFiles[0] := 'Testing.TestDir.pas';
     end
     else
       if pFileOrDir = '' then
@@ -414,8 +414,8 @@ begin
         lDirs[0] := 'Config';
         lDirs[1] := 'Test';
         SetLength(lFiles, 2);
-        lFiles[0] := 'Testing.Unit.pas';
-        lFiles[1] := 'Testing.Program.dpr';
+        lFiles[0] := 'Testing.TestUnit.pas';
+        lFiles[1] := 'Testing.TestProgram.dpr';
       end;
 
   Result := TTestDir.Create(pFileOrDir, True, lDirs, lFiles);
@@ -424,16 +424,25 @@ end;
 function TTestFactory.BaseFile(pFileOrDir: string): ID2XFile;
 var
   lInput: string;
+const
+  TESTING_UNIT = 'unit Testing.TestUnit; interface uses System.Classes;' +
+    '{$DEFINE TEST} {$INCLUDE Test.inc} {$D+}' +
+    'implementation uses System.SysUtils;' +
+    '{$IFDEF TEST}{$DEFINE TEST1}{$ELSE}{$DEFINE TEST2}{$ENDIF}' +
+    '{$IFNDEF TEST}{$DEFINE TEST3}{$ENDIF}' +
+    '{$IFOPT D+}{$DEFINE TEST6}{$ENDIF}' +
+    '{$IF Defined(TEST)}{$DEFINE TEST4}{$ELSEIF Defined(TEST1)}{$DEFINE TEST5}{$ENDIF}' +
+    'end.';
 begin
-  if pFileOrDir = 'Testing.*.pas' then
+  if pFileOrDir = 'Testing.Test*.pas' then
     Result := TTestFile.Create(pFileOrDir, False, lInput)
   else
   begin
-    if pFileOrDir = 'Testing.Unit.pas' then
-      lInput := 'unit Testing.Unit; end.'
+    if pFileOrDir = 'Testing.TestUnit.pas' then
+      lInput := TESTING_UNIT
     else
-      if pFileOrDir = 'Testing.Program.dpr' then
-        lInput := 'program Testing.Program; end.';
+      if pFileOrDir = 'Testing.TestProgram.dpr' then
+        lInput := 'program Testing.TestProgram; uses Testing.TestUnit in ''Testing.TestUnit.pas''; begin end.';
 
     Result := TTestFile.Create(pFileOrDir, True, lInput);
   end;
