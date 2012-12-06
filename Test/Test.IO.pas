@@ -8,9 +8,12 @@ uses
   D2X.Param,
   System.Classes,
   System.Generics.Collections,
+  System.SysUtils,
   System.Types;
 
 type
+  ETestIOException = class(Exception);
+
   TTestIO = class(TD2XInterfaced, ID2XIO)
   private
     fDesc: string;
@@ -21,25 +24,6 @@ type
 
     function Description: string;
     function Exists: Boolean;
-  end;
-
-  TTestFile = class(TTestIO, ID2XFile)
-  private
-    fSR: TStreamReader;
-    fSW: TStreamWriter;
-    fSS: TStringStream;
-
-    fInput: string;
-
-  public
-    constructor Create(pDesc: string; pExists: Boolean; pInput: string);
-    destructor Destroy; override;
-
-    function Written: string;
-
-    function ReadFrom: TStreamReader;
-    function WriteTo(pAppend: Boolean = False): TStreamWriter;
-
   end;
 
   TTestDir = class(TTestIO, ID2XDir)
@@ -59,9 +43,26 @@ type
 
   end;
 
+  TATestDir = record
+    Dirs, Files: TStringDynArray;
+
+    constructor Create(pDirs, pFiles: array of string);
+  end;
+
   TTestFactory = class(TD2XInterfaced, ID2XIOFactory)
+  private
+    fConfigFiles: TDictionary<string, string>;
+    fBaseFiles: TDictionary<string, string>;
+    fBaseDirs: TDictionary<string, TATestDir>;
+    fOutputFiles: TDictionary<string, string>;
+
+    procedure InitFiles;
+
+    procedure StoreOutput(pFile, pOutput: string);
+
   public
     constructor Create;
+    destructor Destroy; override;
 
     function ConfigFileOrExtn(pFileOrExtn: string): ID2XFile;
     function LogFileOrExtn(pFileOrExtn: string): ID2XFile;
@@ -72,6 +73,29 @@ type
     procedure SetGlobalName(const pName: string);
     procedure SetGlobalValidator(pValidator: TD2XSingleParam<string>.TspValidator);
     procedure RegisterParams(pParams: TD2XParams);
+
+    function CheckOutput(pFile: string): string;
+  end;
+
+  TTestFile = class(TTestIO, ID2XFile)
+  private
+    fSR: TStreamReader;
+    fSW: TStreamWriter;
+    fSS: TStringStream;
+
+    fAppending: Boolean;
+    fInput: string;
+    fFact: TTestFactory;
+
+  public
+    constructor Create(pDesc: string; pExists: Boolean; pInput: string; pFact: TTestFactory);
+    destructor Destroy; override;
+
+    function Written: string;
+
+    function ReadFrom: TStreamReader;
+    function WriteTo(pAppend: Boolean = False): TStreamWriter;
+
   end;
 
 implementation
@@ -79,7 +103,6 @@ implementation
 uses
   System.RegularExpressions,
   System.StrUtils,
-  System.SysUtils,
   TestFramework;
 
 type
@@ -133,7 +156,7 @@ procedure TestID2XFile.SetUp;
 begin
   inherited;
 
-  fFile := TTestFile.Create('Test', True, 'Test Input');
+  fFile := TTestFile.Create('Test', True, 'Test Input', nil);
 end;
 
 procedure TestID2XFile.TearDown;
@@ -170,11 +193,14 @@ end;
 
 { TTestFile }
 
-constructor TTestFile.Create(pDesc: string; pExists: Boolean; pInput: string);
+constructor TTestFile.Create(pDesc: string; pExists: Boolean; pInput: string;
+  pFact: TTestFactory);
 begin
   inherited Create(pDesc, pExists);
 
+  fAppending := False;
   fInput := pInput;
+  fFact := pFact;
 
   fSR := nil;
   fSW := nil;
@@ -183,12 +209,28 @@ begin
 end;
 
 destructor TTestFile.Destroy;
+var
+  lData: string;
 begin
-  FreeAndNil(fSR);
-  FreeAndNil(fSW);
+  lData := fSS.DataString;
   FreeAndNil(fSS);
+  FreeAndNil(fSR);
 
-  inherited;
+  if Assigned(fSW) then
+  begin
+    FreeAndNil(fSW);
+    inherited;
+    if lData > '' then
+    begin
+      if Assigned(fFact) then
+        fFact.StoreOutput(Description, lData)
+      else
+        if not fAppending then
+          raise ETestIOException.Create('Unchecked (' + Description + '): ' + lData);
+    end;
+  end
+  else
+    inherited;
 end;
 
 function TTestFile.ReadFrom: TStreamReader;
@@ -205,6 +247,7 @@ function TTestFile.WriteTo(pAppend: Boolean): TStreamWriter;
 begin
   if Assigned(fSW) then
     fSW.Free;
+  fAppending := pAppend;
   fSW := TStreamWriter.Create(fSS);
   fSS.Clear;
   Result := fSW;
@@ -216,6 +259,7 @@ begin
     fSW.Flush;
   Result := fSS.DataString;
   fSS.Clear;
+  FreeAndNil(fSW);
 end;
 
 { TTestIO }
@@ -391,87 +435,117 @@ end;
 
 function TTestFactory.BaseDir(pFileOrDir: string): ID2XDir;
 var
-  lDirs, lFiles: TStringDynArray;
+  lD: TATestDir;
 begin
-  if StartsText('Config\Test', pFileOrDir) then
-  begin
-    SetLength(lDirs, 0);
-    SetLength(lFiles, 1);
-    lFiles[0] := 'Testing.TestSubDir.pas';
-  end
+  pFileOrDir := ExcludeTrailingPathDelimiter(pFileOrDir);
+  if fBaseDirs.ContainsKey(pFileOrDir) then
+    lD := fBaseDirs[pFileOrDir]
   else
-    if StartsText('Config', pFileOrDir) then
-    begin
-      SetLength(lDirs, 1);
-      lDirs[0] := 'Test';
-      SetLength(lFiles, 1);
-      lFiles[0] := 'Testing.TestDir.pas';
-    end
-    else
-      if pFileOrDir = '' then
-      begin
-        SetLength(lDirs, 2);
-        lDirs[0] := 'Config';
-        lDirs[1] := 'Test';
-        SetLength(lFiles, 2);
-        lFiles[0] := 'Testing.TestUnit.pas';
-        lFiles[1] := 'Testing.TestProgram.dpr';
-      end;
+    raise ETestIOException.Create('Unknown test Base dir : ' + pFileOrDir);
 
-  Result := TTestDir.Create(pFileOrDir, True, lDirs, lFiles);
+  Result := TTestDir.Create(pFileOrDir, True, lD.Dirs, lD.Files);
 end;
 
 function TTestFactory.BaseFile(pFileOrDir: string): ID2XFile;
 var
   lInput: string;
-const
-  TESTING_UNIT = 'unit Testing.TestUnit; interface uses System.Classes;' +
-    '{$DEFINE TEST} {$INCLUDE Test.inc} {$D+}' +
-    'implementation uses System.SysUtils;' +
-    '{$IFDEF TEST}{$DEFINE TEST1}{$ELSE}{$DEFINE TEST2}{$ENDIF}' +
-    '{$IFNDEF TEST}{$DEFINE TEST3}{$ENDIF}' +
-    '{$IFOPT D+}{$DEFINE TEST6}{$ENDIF}' +
-    '{$IF Defined(TEST)}{$DEFINE TEST4}{$ELSEIF Defined(TEST1)}{$DEFINE TEST5}{$ENDIF}' +
-    'end.';
 begin
-  if pFileOrDir = 'Testing.Test*.pas' then
-    Result := TTestFile.Create(pFileOrDir, False, lInput)
+  if fBaseFiles.ContainsKey(pFileOrDir) then
+    lInput := fBaseFiles[pFileOrDir]
   else
-  begin
-    if pFileOrDir = 'Testing.TestUnit.pas' then
-      lInput := TESTING_UNIT
-    else
-      if pFileOrDir = 'Testing.TestProgram.dpr' then
-        lInput := 'program Testing.TestProgram; uses Testing.TestUnit in ''Testing.TestUnit.pas''; begin end.';
+    raise ETestIOException.Create('Unknown test Base file: ' + pFileOrDir);
 
-    Result := TTestFile.Create(pFileOrDir, True, lInput);
-  end;
+  Result := TTestFile.Create(pFileOrDir, lInput > '', lInput, Self);
+end;
+
+function TTestFactory.CheckOutput(pFile: string): string;
+begin
+  if fOutputFiles.TryGetValue(pFile, Result) then
+    fOutputFiles.Remove(pFile);
 end;
 
 function TTestFactory.ConfigFileOrExtn(pFileOrExtn: string): ID2XFile;
 var
   lInput: string;
 begin
-  if pFileOrExtn = 'Test.def' then
-    lInput := 'Uniform'#13#10'Tango'
+  if fConfigFiles.ContainsKey(pFileOrExtn) then
+    lInput := fConfigFiles[pFileOrExtn]
   else
-    if pFileOrExtn = 'Test.prm' then
-      lInput := '-@'#13#10'-@Test.out';
+    raise ETestIOException.Create('Unknown test Config file: ' + pFileOrExtn);
 
-  Result := TTestFile.Create(pFileOrExtn, True, lInput);
+  Result := TTestFile.Create(pFileOrExtn, True, lInput, Self);
 end;
 
 constructor TTestFactory.Create;
 begin
   inherited;
 
+  fConfigFiles := TDictionary<string, string>.Create;
+  fBaseFiles := TDictionary<string, string>.Create;
+  fBaseDirs := TDictionary<string, TATestDir>.Create;
+  fOutputFiles := TDictionary<string, string>.Create;
+
+  InitFiles;
+end;
+
+destructor TTestFactory.Destroy;
+var
+  lMsg, lSep, lS: string;
+begin
+  lMsg := '';
+  lSep := 'Unchecked: ';
+  for lS in fOutputFiles.Keys do
+  begin
+    lMsg := lMsg + lSep + lS;
+    lSep := ', ';
+  end;
+
+  FreeAndNil(fOutputFiles);
+  FreeAndNil(fBaseDirs);
+  FreeAndNil(fBaseFiles);
+  FreeAndNil(fConfigFiles);
+
+  inherited;
+  if lMsg > '' then
+    raise ETestIOException.Create(lMsg);
+end;
+
+procedure TTestFactory.InitFiles;
+const
+  TESTING_UNIT = 'unit Testing.TestUnit; interface uses System.Classes;' +
+    '{$DEFINE TEST} {$INCLUDE Test.inc} {$D+}' + 'implementation uses System.SysUtils;' +
+    '{$IFDEF TEST}{$DEFINE TEST1}{$ELSE}{$DEFINE TEST2}{$ENDIF}' +
+    '{$IFNDEF TEST}{$DEFINE TEST3}{$ENDIF}' + '{$IFOPT D+}{$DEFINE TEST6}{$ENDIF}' +
+    '{$IF Defined(TEST)}{$DEFINE TEST4}{$ELSEIF Defined(TEST1)}{$DEFINE TEST5}{$ENDIF}' +
+    'end.';
+  TESTING_PROGRAM = 'program Testing.TestProgram; ' +
+    'uses Testing.TestUnit in ''Testing.TestUnit.pas''; begin end.';
+begin
+  fConfigFiles.Add('Test.def', 'Uniform'#13#10'Tango');
+  fConfigFiles.Add('Test.prm', '-@'#13#10'-@Test.out');
+  fConfigFiles.Add('File', '');
+  fConfigFiles.Add('.Extn', '');
+  fConfigFiles.Add('File.Extn', '');
+  fConfigFiles.Add('.skip', '');
+
+  fBaseFiles.Add('Testing.Test*.pas', '');
+  fBaseFiles.Add('Testing.TestUnit.pas', TESTING_UNIT);
+  fBaseFiles.Add('Testing.TestProgram.dpr', TESTING_PROGRAM);
+  fBaseFiles.Add('Config\Testing.TestDir.pas', 'unit Testing.TestDir; end.');
+  fBaseFiles.Add('Config\Test\Testing.TestSubDir.pas', 'unit Testing.TestSubDir; end.');
+
+  fBaseDirs.Add('', TATestDir.Create(['Config', 'Test'], ['Testing.TestUnit.pas',
+        'Testing.TestProgram.dpr']));
+  fBaseDirs.Add('Config', TATestDir.Create(['Test'], ['Testing.TestDir.pas']));
+  fBaseDirs.Add('Config\Test', TATestDir.Create([], ['Testing.TestSubDir.pas']));
+  fBaseDirs.Add('Test', TATestDir.Create([], []));
 end;
 
 function TTestFactory.LogFileOrExtn(pFileOrExtn: string): ID2XFile;
 var
   lInput: string;
 begin
-  Result := TTestFile.Create(pFileOrExtn, True, lInput);
+  Result := TTestFile.Create(pFileOrExtn, True, lInput, Self);
 end;
 
 procedure TTestFactory.RegisterParams(pParams: TD2XParams);
@@ -493,7 +567,26 @@ function TTestFactory.SimpleFile(pFile: string): ID2XFile;
 var
   lInput: string;
 begin
-  Result := TTestFile.Create(pFile, True, lInput);
+  Result := TTestFile.Create(pFile, True, lInput, Self);
+end;
+
+procedure TTestFactory.StoreOutput(pFile, pOutput: string);
+begin
+  fOutputFiles.AddOrSetValue(pFile, pOutput);
+end;
+
+{ TATestDir }
+
+constructor TATestDir.Create(pDirs, pFiles: array of string);
+var
+  i: Integer;
+begin
+  SetLength(Dirs, Length(pDirs));
+  for i := 0 to High(pDirs) do
+    Dirs[i] := pDirs[i];
+  SetLength(Files, Length(pFiles));
+  for i := 0 to High(pFiles) do
+    Files[i] := pFiles[i];
 end;
 
 initialization

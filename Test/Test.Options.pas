@@ -6,6 +6,8 @@ uses
   D2X.Options,
   D2X.Param,
   System.Classes,
+  Test.Global,
+  Test.IO,
   TestFramework;
 
 type
@@ -22,6 +24,17 @@ type
 
   end;
 
+  TFactoryTestCase = class(TLoggerTestCase)
+  protected
+    fFact: TTestFactory;
+
+    procedure CheckFile(pFile, pExpected: String);
+    procedure CheckErrorLog(pExpected: String);
+  public
+    procedure SetUp; override;
+
+  end;
+
 implementation
 
 uses
@@ -30,8 +43,6 @@ uses
   D2X.Params,
   System.StrUtils,
   System.SysUtils,
-  Test.Global,
-  Test.IO,
   Test.Param,
   Test.Utils,
   Winapi.Windows;
@@ -48,11 +59,11 @@ type
     procedure TestResultPerParam;
   end;
 
-  TOptionsTestCase = class(TLoggerTestCase)
+  TOptionsTestCase = class(TFactoryTestCase)
   private
     fOpts: TTestOptions;
 
-    function ParseOption(pOpt: string): Boolean;
+    function ParseOption(pOpt: String): Boolean;
   public
     procedure SetUp; override;
     procedure TearDown; override;
@@ -76,9 +87,9 @@ type
 
   TestTD2XOptionsAll = class(TOptionsTestCase)
   private
-    procedure CheckUnknown(pOpt: string);
-    procedure CheckInvalid(pOpt, pExp: string);
-    procedure CheckSimple(pOpt, pExp: string);
+    procedure CheckUnknown(pOpt: String);
+    procedure CheckInvalid(pOpt, pExp: String);
+    procedure CheckSimple(pOpt, pExp: String);
   public
     procedure SetUp; override;
   published
@@ -187,14 +198,14 @@ type
 
   end;
 
-  TestTD2XRunOptions = class(TLoggerTestCase)
+  TestTD2XRunOptions = class(TFactoryTestCase)
   private
     fIdx: Integer;
 
   protected
     fOpts: TTestRunOptions;
 
-    function ParseOption(pOpt: string): Boolean;
+    function ParseOption(pOpt: String): Boolean;
   public
     procedure SetUp; override;
     procedure TearDown; override;
@@ -268,6 +279,32 @@ const
   DEFINED_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Use these Defines: ' +
     'CONDITIONALEXPRESSIONS, CPU32, MSWINDOWS, UNICODE, VER230';
 {$ENDIF}
+  TESTFILE_DIR = '<?xml version="1.0"?> ' +
+    '<D2X_File parseMode="Full" fileName="Config\Testing.TestDir.pas" lastToken="end.">' +
+    'Testing.TestDir</D2X_File>';
+  TESTFILE_SUBDIR = '<?xml version="1.0"?> ' +
+    '<D2X_File parseMode="Full" fileName="Config\Test\Testing.TestSubDir.pas" lastToken="end.">'
+    + 'Testing.TestSubDir</D2X_File>';
+  TESTFILE_UNIT = '<?xml version="1.0"?> ' +
+    '<D2X_File parseMode="Full" fileName="Testing.TestUnit.pas" ' +
+    'lastToken=";{$ELSE}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}end.">Testing.TestUnitSystem.Classes</D2X_File>';
+  TESTFILE_PROGRAM = '<?xml version="1.0"?> ' +
+    '<D2X_File parseMode="Full" file="''Testing.TestUnit.pas''" fileName="Testing.TestProgram.dpr" '
+    + 'lastToken=";beginend.">Testing.TestProgramTesting.TestUnit</D2X_File>';
+  TESTFILE_INPUT = '<?xml version="1.0"?> <D2X_File parseMode="Full" fileName="(Input)" />';
+  TESTFILE_DEF = '**** CONDITIONALEXPRESSIONS CPU386 MSWINDOWS ' +
+    'TEST TEST1 TEST2 TEST3 TEST4 TEST5 TEST6 UNICODE VER230 WIN32';
+  TESTFILE_XML =
+    '<?xml version="1.0"?> <D2X_File parseMode="Full" fileName="Testing.TestUnit.pas"> ' +
+    '<ParseFile> <UnitFile> <MainUnitName> <UnitName lastToken="Testing.TestUnit" /> </MainUnitName> '
+    + '<InterfaceSection> <UsesClause> <UsedUnitsList> <UsedUnitName> <UnitName lastToken="System.Classes" /> '
+    + '</UsedUnitName> </UsedUnitsList> <IncludeFile filename="TEST.INC" msgAt="68,0" /> ' +
+    '<D2X_notSuppMsg msgAt="88,0">Currently not supported {$D+}</D2X_notSuppMsg> </UsesClause> '
+    + '</InterfaceSection> <ImplementationSection> ' +
+    '<UsesClause lastToken=";{$ELSE}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}"> <UsedUnitsList> <UsedUnitName> '
+    + '<UnitName lastToken="System.SysUtils" /> </UsedUnitName> </UsedUnitsList> </UsesClause> '
+    + '</ImplementationSection> <InitializationSection lastToken="end" /> </UnitFile> </ParseFile> </D2X_File>';
+
   { TestTD2XOptionEnums }
 
 procedure TestTD2XOptionEnums.TestElapsedModeInvalidCreate;
@@ -435,6 +472,7 @@ begin
   Check(ParseOption('-F'), 'Return Value 4');
   Check(ParseOption('Testing.Test*.pas'), 'Return Value 5');
   CheckBuilder(UNIT_PROCESSING, 'Processing Xml');
+  CheckFile('Testing.TestUnit.pas.xml', TESTFILE_XML);
 end;
 
 { TTestBoolFlag }
@@ -498,6 +536,8 @@ begin
 
   Check(ParseOption('@Test.tst'), 'Return Value');
   CheckLog('', 'Report Options');
+  CheckFile('Test.tst',
+    '-V+ -N+ -R+ -X:Test\ -W:Test\ -U:.Test -C:.Test -S:Test.skip -D: -D+Tango -D+Uniform');
 end;
 
 procedure TestTD2XOptionsGeneral.TestReportOptionsFile;
@@ -506,6 +546,8 @@ begin
 
   Check(ParseOption('@Test'), 'Return Value');
   CheckLog('', 'Report Options');
+  CheckFile('Test.prm',
+    '-V+ -N+ -R+ -X:Test\ -W:Test\ -U:.Test -C:.Test -S:Test.skip -D: -D+Tango -D+Uniform');
 end;
 
 procedure TestTD2XOptionsGeneral.TestReportOptionsFileDefault;
@@ -558,7 +600,7 @@ end;
 
 { TOptionsTestCase }
 
-function TestTD2XRunOptions.ParseOption(pOpt: string): Boolean;
+function TestTD2XRunOptions.ParseOption(pOpt: String): Boolean;
 begin
   Result := fOpts.ProcessParam(pOpt, 'Test', fIdx);
   Inc(fIdx);
@@ -570,7 +612,7 @@ begin
 
   fOpts := TTestRunOptions.Create;
   fOpts.JoinLog(fLog);
-  fOpts.InitOptions(TTestFactory.Create);
+  fOpts.InitOptions(fFact);
 
   fIdx := 0;
 end;
@@ -591,13 +633,13 @@ begin
   fOpts.Defines.CommaText := 'Alpha,Beta,Gamma';
 end;
 
-procedure TestTD2XOptionsAll.CheckInvalid(pOpt, pExp: string);
+procedure TestTD2XOptionsAll.CheckInvalid(pOpt, pExp: String);
 begin
   CheckFalse(ParseOption(pOpt), pOpt + ' Return Value');
   CheckLog(pExp, 'Report Options');
 end;
 
-procedure TestTD2XOptionsAll.CheckSimple(pOpt, pExp: string);
+procedure TestTD2XOptionsAll.CheckSimple(pOpt, pExp: String);
 begin
   Check(ParseOption(pOpt), pOpt + ' Return Value');
   CheckLog('', 'Report Options');
@@ -605,7 +647,7 @@ begin
   CheckLog(pExp, 'Report Options');
 end;
 
-procedure TestTD2XOptionsAll.CheckUnknown(pOpt: string);
+procedure TestTD2XOptionsAll.CheckUnknown(pOpt: String);
 begin
   CheckFalse(ParseOption(pOpt), pOpt + ' Return Value');
   CheckLog('Unknown option: ' + pOpt, 'Report Options');
@@ -948,7 +990,7 @@ end;
 
 { TOptionsTestCase }
 
-function TOptionsTestCase.ParseOption(pOpt: string): Boolean;
+function TOptionsTestCase.ParseOption(pOpt: String): Boolean;
 begin
   Result := fOpts.ProcessParamOption(pOpt);
 end;
@@ -959,7 +1001,7 @@ begin
 
   fOpts := TTestOptions.Create;
   fOpts.JoinLog(fLog);
-  fOpts.InitProcessors(TTestFactory.Create);
+  fOpts.InitProcessors(fFact);
 end;
 
 procedure TOptionsTestCase.TearDown;
@@ -1034,14 +1076,19 @@ procedure TestTD2XOptions.TestProcessDirectory;
 begin
   Check(fOpts.ProcessDirectory('Config\', 'Testing.Test*.pas'), 'Process Directory');
   CheckLog(DIRECTORY_PROCESSING, 'Process Directory');
+  CheckErrorLog('''Implementation'' expected found ''end''');
+  CheckFile('Xml\Config\Testing.TestDir.pas.xml', TESTFILE_DIR);
 end;
 
 procedure TestTD2XOptions.TestProcessFile;
 begin
   Check(fOpts.ProcessFile('Testing.TestUnit.pas'), 'Process Unit');
   CheckLog(UNIT_PROCESSING, 'Process Unit');
+  CheckFile('Xml\Testing.TestUnit.pas.xml', TESTFILE_UNIT);
+
   Check(fOpts.ProcessFile('Testing.TestProgram.dpr'), 'Process Program');
   CheckLog(PROGRAM_PROCESSING, 'Process Program');
+  CheckFile('Xml\Testing.TestProgram.dpr.xml', TESTFILE_PROGRAM);
 end;
 
 procedure TestTD2XOptions.TestProcessInput;
@@ -1049,6 +1096,7 @@ begin
   CloseHandle(GetStdHandle(STD_INPUT_HANDLE));
   Check(fOpts.ProcessInput, 'Process Input');
   CheckLog(INPUT_PROCESSING, 'Process Input');
+  CheckFile('Xml\(Input).xml', TESTFILE_INPUT);
 end;
 
 procedure TestTD2XOptions.TestProcessParamOption;
@@ -1063,11 +1111,14 @@ begin
   fS.Position := 0;
   CheckFalse(fOpts.ProcessStream('(Stream)', fDS.ReadFrom), 'Process Stream');
   CheckLog(STREAM_PROCESSING, 'Process Stream');
+  CheckErrorLog('(ESyntaxError)''Identifier'' expected found ''end of file''');
 
   fS.WriteString('Testing.Program; uses TestUnit in ''TestUnit.pas''; begin end.');
   fS.Position := 0;
   Check(fOpts.ProcessStream('(Stream)', fDS.ReadFrom), 'Process Stream');
   CheckLog(STREAM_PROCESSING, 'Process Stream');
+  CheckFile('Xml\(Stream).xml',
+    '<?xml version="1.0"?> <D2X_File parseMode="Full" fileName="(Stream)" />');
 end;
 
 procedure TestTD2XOptions.TestRecurse;
@@ -1079,6 +1130,9 @@ procedure TestTD2XOptions.TestRecurseDirectory;
 begin
   Check(fOpts.RecurseDirectory('', 'Testing.Test*.pas', false), 'Recurse Directory');
   CheckLog(DIRECTORY_PROCESSING + ' ' + RECURSE_PROCESSING, 'Recurse Directory');
+  CheckErrorLog('''Implementation'' expected found ''end''');
+  CheckFile('Xml\Config\Testing.TestDir.pas.xml', TESTFILE_DIR);
+  CheckFile('Xml\Config\Test\Testing.TestSubDir.pas.xml', TESTFILE_SUBDIR);
 end;
 
 { TestTD2XOptionsSpecific }
@@ -1103,6 +1157,7 @@ begin
   fS.Position := 0;
   CheckTrue(fOpts.ProcessStream('(Stream)', fDS.ReadFrom), 'Error Stream');
   CheckLog('', 'Error Stream');
+  CheckErrorLog('''Point'' expected found ''beg''');
 
   fS.WriteString('in end; end.');
   fS.Position := 0;
@@ -1118,6 +1173,7 @@ begin
 
   Check(fOpts.ProcessFile('Testing.TestUnit.pas'), 'Process Unit');
   CheckLog('', 'Process Unit');
+  CheckErrorLog('Currently not supported {$D+}');
 end;
 
 procedure TestTD2XOptionsSpecific.TestWriteDefines;
@@ -1128,6 +1184,32 @@ begin
 
   Check(fOpts.ProcessFile('Testing.TestUnit.pas'), 'Process Unit');
   CheckLog('', 'Process Unit');
+  CheckFile('Testing.TestUnit.pas.def', TESTFILE_DEF);
+end;
+
+{ TFactoryTestCase }
+
+procedure TFactoryTestCase.CheckErrorLog(pExpected: String);
+var
+  lErr: String;
+begin
+  lErr := fFact.CheckOutput('.err');
+  if ContainsText(lErr, pExpected) then
+    Check(True, 'Error Log')
+  else
+    CheckEqualsString(pExpected, lErr, 'Error Log containing');
+end;
+
+procedure TFactoryTestCase.CheckFile(pFile, pExpected: String);
+begin
+  CheckEqualsString(pExpected, ReduceString(fFact.CheckOutput(pFile)), pFile);
+end;
+
+procedure TFactoryTestCase.SetUp;
+begin
+  inherited;
+
+  fFact := TTestFactory.Create;
 end;
 
 initialization
