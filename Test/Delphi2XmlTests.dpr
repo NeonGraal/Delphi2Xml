@@ -34,7 +34,9 @@ uses
   Test.Processor in 'Test.Processor.pas',
   Test.Processors in 'Test.Processors.pas',
   Test.Utils in 'Test.Utils.pas',
-  Test.Xml in 'Test.Xml.pas';
+  Test.Xml in 'Test.Xml.pas',
+  D2X.RunParam in '..\Source\D2X.RunParam.pas',
+  Test.RunParam in 'Test.RunParam.pas';
 
 {$R *.RES}
 

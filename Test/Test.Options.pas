@@ -24,16 +24,39 @@ type
 
   end;
 
-  TFactoryTestCase = class(TLoggerTestCase)
-  protected
-    fFact: TTestFactory;
-
-    procedure CheckFile(pFile, pExpected: String);
-    procedure CheckErrorLog(pExpected: String);
-  public
-    procedure SetUp; override;
-
-  end;
+const
+  INPUT_PROCESSING = 'Processing (Input) ... done';
+  UNIT_PROCESSING = 'Processing Testing.TestUnit.pas ... done';
+  EXPECTED_SHOW_OPTIONS =
+    'Usage: %s [ Option | @Params | mFilename | Wildcard ] ... ' +
+    'Options: Default Description ? Show valid options ' +
+    '! Reset all options to defaults @<file> Report/Output Current options ' +
+    'V[+|-] - Log all Parser methods called L[+|-] + Log Error messages ' +
+    'N[+|-] - Log Not Supported messages F[+|-] + Record Final Token ' +
+    'R[+|-] - Recurse into subdirectories ' +
+  //    'R[+|-] - Recurse into subdirectories T[+|-] - Timestamp global output files ' +
+  //    'G<str> Delphi2XmlTests Sets global name ' +
+  //    'I[+-]:<dir> :Config\ Use <dir> as a base for all Config files ' +
+  //    'O[+-]:<dir> :Log\ Use <dir> as a base for all Log files ' +
+  //    'B[+-]:<dir> -(.\) Use <dir> as a base for all Input files ' +
+    'M<mode> Full Set Parsing mode (F[ull], U[ses]) ' +
+    'P<per> File Set Result per (F[ile], S[ubdir], D[ir], W[ildcard], P[aram], R[un]) ' +
+    'E<mode> Quiet Set Elapsed time display to be (N[one], Q[uiet], T[otal], P[rocessing]) ' +
+    'X[+-]:<dir> :Xml\ Generate XML files into current or given <dir> ' +
+    'W[+-]:<dir> -(Defines\) Generate Final Defines files into current or given <dir> ' +
+    'U[+-]:<f/e> :.used Report Defines Used into <f/e> ' +
+    'C[+-]:<f/e> :.cnt Report Min/Max Children into <f/e> ' +
+    'S[+-]:<f/e> :.skip Load Skipped Methods from <f/e> ' +
+    'D[+-!:]<def> Add(+), Remove(-), Clear(!) or Load(:) Defines ' +
+    'Definitions: <f/e> If value begins with "." is appended to global name to give file name';
+  BASE_REPORT_OPTIONS =
+    'Current option settings: Verbose - Log Errors + Log Not Supp - Final Token + ' +
+  //    'Recurse - Timestamp - Global name Delphi2XmlTests Config dir :Config\ ' +
+  //    'Log dir :Log\ Base dir -(.\) Parse mode Full Results per File Show elapsed Quiet ' +
+    'Recurse - Parse mode Full Results per File Show elapsed Quiet ' +
+    'Generate XML :Xml\ Write Defines -(Defines\) Defines Used :.used ' +
+    'Count Children :.cnt Skipped Methods :.skip ';
+  DEFAULT_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Use default Defines';
 
 implementation
 
@@ -59,11 +82,13 @@ type
     procedure TestResultPerParam;
   end;
 
-  TOptionsTestCase = class(TFactoryTestCase)
+  TOptionsTestCase = class(TLoggerTestCase)
   private
+    fFact: TTestFactory;
     fOpts: TTestOptions;
 
-    function ParseOption(pOpt: String): Boolean;
+    procedure CheckFile(pFile, pExpected: String);
+    procedure CheckErrorLog(pExpected: String);
   public
     procedure SetUp; override;
     procedure TearDown; override;
@@ -71,7 +96,7 @@ type
 
   TestTD2XOptions = class(TOptionsTestCase)
   published
-    procedure TestProcessParamOption;
+    procedure TestProcessOption;
     procedure TestConfigFileOrExtn;
     procedure TestBeginResults;
     procedure TestEndResults;
@@ -80,6 +105,7 @@ type
     procedure TestProcessFile;
     procedure TestProcessDirectory;
     procedure TestRecurseDirectory;
+    procedure TestProcessParam;
     procedure TestEndProcessing;
     procedure TestRecurse;
     procedure TestDefines;
@@ -187,69 +213,15 @@ type
     procedure TestNotSupported;
     procedure TestLogErrors;
     procedure TestWriteDefines;
-  end;
-
-  TTestRunOptions = class(TD2XRunOptions)
-  private
-    function GetDefines: TStringList;
-
-  public
-    property Defines: TStringList read GetDefines;
-
-  end;
-
-  TestTD2XRunOptions = class(TFactoryTestCase)
-  private
-    fIdx: Integer;
-
-  protected
-    fOpts: TTestRunOptions;
-
-    function ParseOption(pOpt: String): Boolean;
-  public
-    procedure SetUp; override;
-    procedure TearDown; override;
-  published
-    procedure TestEndProcessing;
-
-    procedure TestProcessParam;
-    procedure TestProcessParamPasFiles;
-    procedure TestProcessParamParamFile;
-    procedure TestProcessParamInput;
 
     procedure TestProcessXml;
   end;
 
 const
-  INPUT_PROCESSING = 'Processing (Input) ... done';
   STREAM_PROCESSING = 'Processing (Stream) ... done';
-  UNIT_PROCESSING = 'Processing Testing.TestUnit.pas ... done';
   PROGRAM_PROCESSING = 'Processing Testing.TestProgram.dpr ... done';
   DIRECTORY_PROCESSING = 'Processing Config\Testing.TestDir.pas ... done';
   RECURSE_PROCESSING = 'Processing Config\Test\Testing.TestSubDir.pas ... done';
-  EXPECTED_SHOW_OPTIONS =
-    'Usage: Delphi2XmlTests [ Option | @Params | mFilename | Wildcard ] ... ' +
-    'Options: Default Description ? Show valid options ' +
-    '! Reset all options to defaults @<file> Report/Output Current options ' +
-    'V[+|-] - Log all Parser methods called L[+|-] + Log Error messages ' +
-    'N[+|-] - Log Not Supported messages F[+|-] + Record Final Token ' +
-    'R[+|-] - Recurse into subdirectories ' +
-  //    'R[+|-] - Recurse into subdirectories T[+|-] - Timestamp global output files ' +
-  //    'G<str> Delphi2XmlTests Sets global name ' +
-  //    'I[+-]:<dir> :Config\ Use <dir> as a base for all Config files ' +
-  //    'O[+-]:<dir> :Log\ Use <dir> as a base for all Log files ' +
-  //    'B[+-]:<dir> -(.\) Use <dir> as a base for all Input files ' +
-    'M<mode> Full Set Parsing mode (F[ull], U[ses]) ' +
-    'P<per> File Set Result per (F[ile], S[ubdir], D[ir], W[ildcard], P[aram], R[un]) ' +
-    'E<mode> Quiet Set Elapsed time display to be (N[one], Q[uiet], T[otal], P[rocessing]) ' +
-    'X[+-]:<dir> :Xml\ Generate XML files into current or given <dir> ' +
-    'W[+-]:<dir> -(Defines\) Generate Final Defines files into current or given <dir> ' +
-    'U[+-]:<f/e> :.used Report Defines Used into <f/e> ' +
-    'C[+-]:<f/e> :.cnt Report Min/Max Children into <f/e> ' +
-    'S[+-]:<f/e> :.skip Load Skipped Methods from <f/e> ' +
-    'D[+-!:]<def> Add(+), Remove(-), Clear(!) or Load(:) Defines ' +
-    'Definitions: <f/e> If value begins with "." is appended to global name to give file name';
-
   ALTERED_REPORT_OPTIONS =
     'Current option settings: Verbose + Log Errors + Log Not Supp + Final Token + ' +
   //    'Recurse + Timestamp - Global name :Test Config dir :Test\ Log dir :Test\ ' +
@@ -263,14 +235,6 @@ const
   //    'Parse mode Full Results per File Show elapsed None Generate XML - ' +
     'Recurse - Parse mode Full Results per File Show elapsed None Generate XML - ' +
     'Write Defines - Defines Used - Count Children - Skipped Methods - Use default Defines';
-  BASE_REPORT_OPTIONS =
-    'Current option settings: Verbose - Log Errors + Log Not Supp - Final Token + ' +
-  //    'Recurse - Timestamp - Global name Delphi2XmlTests Config dir :Config\ ' +
-  //    'Log dir :Log\ Base dir -(.\) Parse mode Full Results per File Show elapsed Quiet ' +
-    'Recurse - Parse mode Full Results per File Show elapsed Quiet ' +
-    'Generate XML :Xml\ Write Defines -(Defines\) Defines Used :.used ' +
-    'Count Children :.cnt Skipped Methods :.skip ';
-  DEFAULT_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Use default Defines';
   EMPTY_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Use NO Defines';
 {$IFDEF WIN32}
   DEFINED_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Use these Defines: ' +
@@ -428,53 +392,6 @@ begin
   end;
 end;
 
-{ TestTD2XRunOptsAll }
-
-procedure TestTD2XRunOptions.TestEndProcessing;
-begin
-  fOpts.EndProcessing;
-  CheckBuilder('', 'Nothing');
-end;
-
-procedure TestTD2XRunOptions.TestProcessParam;
-begin
-  Check(ParseOption('-?'), 'Return Value');
-  CheckLog(EXPECTED_SHOW_OPTIONS, 'Nothing');
-end;
-
-procedure TestTD2XRunOptions.TestProcessParamInput;
-begin
-  Check(ParseOption('-!!'), 'Return Value 1');
-  Check(ParseOption('-E!'), 'Return Value 2');
-  Check(ParseOption('-'), 'Return Value 3');
-  CheckBuilder(INPUT_PROCESSING, 'Nothing');
-end;
-
-procedure TestTD2XRunOptions.TestProcessParamParamFile;
-begin
-  Check(ParseOption('@Test.prm'), 'Return Value');
-  CheckBuilder(DEFAULT_REPORT_OPTIONS, 'Processing Param file');
-end;
-
-procedure TestTD2XRunOptions.TestProcessParamPasFiles;
-begin
-  Check(ParseOption('-!!'), 'Return Value 1');
-  Check(ParseOption('-E!'), 'Return Value 2');
-  Check(ParseOption('Testing.Test*.pas'), 'Return Value 3');
-  CheckBuilder(UNIT_PROCESSING, 'Processing Pas files');
-end;
-
-procedure TestTD2XRunOptions.TestProcessXml;
-begin
-  Check(ParseOption('-!!'), 'Return Value 1');
-  Check(ParseOption('-E!'), 'Return Value 2');
-  Check(ParseOption('-X'), 'Return Value 3');
-  Check(ParseOption('-F'), 'Return Value 4');
-  Check(ParseOption('Testing.Test*.pas'), 'Return Value 5');
-  CheckBuilder(UNIT_PROCESSING, 'Processing Xml');
-  CheckFile('Testing.TestUnit.pas.xml', TESTFILE_XML);
-end;
-
 { TTestBoolFlag }
 
 function TTestBoolFlag.GetFlag: Boolean;
@@ -494,9 +411,9 @@ var
   C: Char;
 begin
   for C := 'A' to 'Z' do
-    if not ParseOption(C + ':Test') then
-      ParseOption(C + '+');
-  ParseOption('T-');
+    if not fOpts.ProcessOption(C + ':Test') then
+      fOpts.ProcessOption(C + '+');
+  fOpts.ProcessOption('T-');
   fB.Clear;
 end;
 
@@ -504,29 +421,29 @@ procedure TestTD2XOptionsGeneral.TestReportOptions;
 begin
   SetAllOptions;
 
-  Check(ParseOption('@'), 'Return Value');
+  Check(fOpts.ProcessOption('@'), 'Return Value');
   CheckLog(ALTERED_REPORT_OPTIONS, 'Report Options');
 end;
 
 procedure TestTD2XOptionsGeneral.TestReportOptionsDefault;
 begin
-  Check(ParseOption('@'), 'Return Value');
+  Check(fOpts.ProcessOption('@'), 'Return Value');
   CheckLog(DEFAULT_REPORT_OPTIONS, 'Report Options');
 end;
 
 procedure TestTD2XOptionsGeneral.TestReportOptionsDefines;
 begin
-  Check(ParseOption('D+CPU32'), 'Return Value 1');
+  Check(fOpts.ProcessOption('D+CPU32'), 'Return Value 1');
 
-  Check(ParseOption('@'), 'Return Value 2');
+  Check(fOpts.ProcessOption('@'), 'Return Value 2');
   CheckLog(DEFINED_REPORT_OPTIONS, 'Report Options');
 end;
 
 procedure TestTD2XOptionsGeneral.TestReportOptionsEmpty;
 begin
-  Check(ParseOption('D:'), 'Return Value 1');
+  Check(fOpts.ProcessOption('D:'), 'Return Value 1');
 
-  Check(ParseOption('@'), 'Return Value 2');
+  Check(fOpts.ProcessOption('@'), 'Return Value 2');
   CheckLog(EMPTY_REPORT_OPTIONS, 'Report Options');
 end;
 
@@ -534,7 +451,7 @@ procedure TestTD2XOptionsGeneral.TestReportOptionsExtn;
 begin
   SetAllOptions;
 
-  Check(ParseOption('@Test.tst'), 'Return Value');
+  Check(fOpts.ProcessOption('@Test.tst'), 'Return Value');
   CheckLog('', 'Report Options');
   CheckFile('Test.tst',
     '-V+ -N+ -R+ -X:Test\ -W:Test\ -U:.Test -C:.Test -S:Test.skip -D: -D+Tango -D+Uniform');
@@ -544,7 +461,7 @@ procedure TestTD2XOptionsGeneral.TestReportOptionsFile;
 begin
   SetAllOptions;
 
-  Check(ParseOption('@Test'), 'Return Value');
+  Check(fOpts.ProcessOption('@Test'), 'Return Value');
   CheckLog('', 'Report Options');
   CheckFile('Test.prm',
     '-V+ -N+ -R+ -X:Test\ -W:Test\ -U:.Test -C:.Test -S:Test.skip -D: -D+Tango -D+Uniform');
@@ -552,15 +469,15 @@ end;
 
 procedure TestTD2XOptionsGeneral.TestReportOptionsFileDefault;
 begin
-  Check(ParseOption('@Test'), 'ReturnValue');
+  Check(fOpts.ProcessOption('@Test'), 'ReturnValue');
   CheckLog('', 'Report Options');
 end;
 
 procedure TestTD2XOptionsGeneral.TestReportOptionsReset;
 begin
-  Check(ParseOption('!'), 'Return Value 1');
+  Check(fOpts.ProcessOption('!'), 'Return Value 1');
 
-  Check(ParseOption('@'), 'Return Value 2');
+  Check(fOpts.ProcessOption('@'), 'Return Value 2');
   CheckLog(DEFAULT_REPORT_OPTIONS, 'Report Options');
 end;
 
@@ -568,19 +485,19 @@ procedure TestTD2XOptionsGeneral.TestResetOptions;
 begin
   SetAllOptions;
 
-  Check(ParseOption('@'), 'Return Value 1');
+  Check(fOpts.ProcessOption('@'), 'Return Value 1');
   CheckLog(ALTERED_REPORT_OPTIONS, 'Report Options');
 
-  Check(ParseOption('!'), 'Return Value 2');
+  Check(fOpts.ProcessOption('!'), 'Return Value 2');
 
   fB.Clear;
-  Check(ParseOption('@'), 'Return Value 3');
+  Check(fOpts.ProcessOption('@'), 'Return Value 3');
   CheckLog(DEFAULT_REPORT_OPTIONS, 'Report Options');
 end;
 
 procedure TestTD2XOptionsGeneral.TestShowOptions;
 begin
-  Check(ParseOption('?'), 'Return Value');
+  Check(fOpts.ProcessOption('?'), 'Return Value');
   CheckLog(EXPECTED_SHOW_OPTIONS, 'Report Options');
 end;
 
@@ -588,40 +505,14 @@ procedure TestTD2XOptionsGeneral.TestZeroOptions;
 begin
   SetAllOptions;
 
-  Check(ParseOption('@'), 'Return Value 1');
+  Check(fOpts.ProcessOption('@'), 'Return Value 1');
   CheckLog(ALTERED_REPORT_OPTIONS, 'Report Options');
 
-  Check(ParseOption('!!'), 'Return Value 2');
+  Check(fOpts.ProcessOption('!!'), 'Return Value 2');
 
   fB.Clear;
-  Check(ParseOption('@'), 'Return Value 3');
+  Check(fOpts.ProcessOption('@'), 'Return Value 3');
   CheckLog(ZERO_REPORT_OPTIONS, 'Report Options');
-end;
-
-{ TOptionsTestCase }
-
-function TestTD2XRunOptions.ParseOption(pOpt: String): Boolean;
-begin
-  Result := fOpts.ProcessParam(pOpt, 'Test', fIdx);
-  Inc(fIdx);
-end;
-
-procedure TestTD2XRunOptions.SetUp;
-begin
-  inherited;
-
-  fOpts := TTestRunOptions.Create;
-  fOpts.JoinLog(fLog);
-  fOpts.InitOptions(fFact);
-
-  fIdx := 0;
-end;
-
-procedure TestTD2XRunOptions.TearDown;
-begin
-  FreeAndNil(fOpts);
-
-  inherited;
 end;
 
 { TestTD2XRunOptsAll }
@@ -635,21 +526,21 @@ end;
 
 procedure TestTD2XOptionsAll.CheckInvalid(pOpt, pExp: String);
 begin
-  CheckFalse(ParseOption(pOpt), pOpt + ' Return Value');
+  CheckFalse(fOpts.ProcessOption(pOpt), pOpt + ' Return Value');
   CheckLog(pExp, 'Report Options');
 end;
 
 procedure TestTD2XOptionsAll.CheckSimple(pOpt, pExp: String);
 begin
-  Check(ParseOption(pOpt), pOpt + ' Return Value');
+  Check(fOpts.ProcessOption(pOpt), pOpt + ' Return Value');
   CheckLog('', 'Report Options');
-  ParseOption('@-' + pOpt);
+  fOpts.ProcessOption('@-' + pOpt);
   CheckLog(pExp, 'Report Options');
 end;
 
 procedure TestTD2XOptionsAll.CheckUnknown(pOpt: String);
 begin
-  CheckFalse(ParseOption(pOpt), pOpt + ' Return Value');
+  CheckFalse(fOpts.ProcessOption(pOpt), pOpt + ' Return Value');
   CheckLog('Unknown option: ' + pOpt, 'Report Options');
 end;
 
@@ -720,9 +611,9 @@ end;
 
 procedure TestTD2XOptionsAll.TestParseOptionDMany;
 begin
-  Check(ParseOption('D+Value1'), 'ReturnValue1');
-  Check(ParseOption('D+Value2'), 'ReturnValue2');
-  ParseOption('@-D');
+  Check(fOpts.ProcessOption('D+Value1'), 'ReturnValue1');
+  Check(fOpts.ProcessOption('D+Value2'), 'ReturnValue2');
+  fOpts.ProcessOption('@-D');
   CheckLog('Use these Defines: Alpha, Beta, Gamma, Value1, Value2', 'Report Options');
 end;
 
@@ -981,24 +872,29 @@ begin
   CheckUnknown('Z');
 end;
 
-{ TTestRunOptions }
-
-function TTestRunOptions.GetDefines: TStringList;
-begin
-  Result := TTestOptions(fOpts).Defines;
-end;
-
 { TOptionsTestCase }
 
-function TOptionsTestCase.ParseOption(pOpt: String): Boolean;
+procedure TOptionsTestCase.CheckErrorLog(pExpected: String);
+var
+  lErr: String;
 begin
-  Result := fOpts.ProcessParamOption(pOpt);
+  lErr := fFact.CheckOutput('.err');
+  if ContainsText(lErr, pExpected) then
+    Check(True, 'Error Log')
+  else
+    CheckEqualsString(pExpected, lErr, 'Error Log containing');
+end;
+
+procedure TOptionsTestCase.CheckFile(pFile, pExpected: String);
+begin
+  CheckEqualsString(pExpected, ReduceString(fFact.CheckOutput(pFile)), pFile);
 end;
 
 procedure TOptionsTestCase.SetUp;
 begin
   inherited;
 
+  fFact := TTestFactory.Create;
   fOpts := TTestOptions.Create;
   fOpts.JoinLog(fLog);
   fOpts.InitProcessors(fFact);
@@ -1099,9 +995,16 @@ begin
   CheckFile('Xml\(Input).xml', TESTFILE_INPUT);
 end;
 
-procedure TestTD2XOptions.TestProcessParamOption;
+procedure TestTD2XOptions.TestProcessParam;
 begin
-  Check(ParseOption('?'), 'Return Value');
+  Check(fOpts.ProcessParam('Testing.Test*.pas', 'Process Xml'), 'Return Value');
+  CheckLog(UNIT_PROCESSING, 'Process Param');
+  CheckFile('Xml\Testing.TestUnit.pas.xml', TESTFILE_UNIT);
+end;
+
+procedure TestTD2XOptions.TestProcessOption;
+begin
+  Check(fOpts.ProcessOption('?'), 'Return Value');
   CheckLog(EXPECTED_SHOW_OPTIONS, 'Nothing');
 end;
 
@@ -1139,8 +1042,8 @@ end;
 
 procedure TestTD2XOptionsSpecific.TestCountChildren;
 begin
-  Check(ParseOption('!!'), 'Return Value 1');
-  Check(ParseOption('C'), 'Return Value 2');
+  Check(fOpts.ProcessOption('!!'), 'Return Value 1');
+  Check(fOpts.ProcessOption('C'), 'Return Value 2');
   fB.Clear;
 
   Check(fOpts.ProcessFile('Testing.TestUnit.pas'), 'Process Unit');
@@ -1149,8 +1052,8 @@ end;
 
 procedure TestTD2XOptionsSpecific.TestLogErrors;
 begin
-  Check(ParseOption('!!'), 'Return Value 1');
-  Check(ParseOption('L'), 'Return Value 3');
+  Check(fOpts.ProcessOption('!!'), 'Return Value 1');
+  Check(fOpts.ProcessOption('L'), 'Return Value 3');
   fB.Clear;
 
   fS.WriteString('unit Test; interface procedure A; beg');
@@ -1167,8 +1070,8 @@ end;
 
 procedure TestTD2XOptionsSpecific.TestNotSupported;
 begin
-  Check(ParseOption('!!'), 'Return Value 1');
-  Check(ParseOption('N'), 'Return Value 3');
+  Check(fOpts.ProcessOption('!!'), 'Return Value 1');
+  Check(fOpts.ProcessOption('N'), 'Return Value 3');
   fB.Clear;
 
   Check(fOpts.ProcessFile('Testing.TestUnit.pas'), 'Process Unit');
@@ -1176,10 +1079,21 @@ begin
   CheckErrorLog('Currently not supported {$D+}');
 end;
 
+procedure TestTD2XOptionsSpecific.TestProcessXml;
+begin
+  Check(fOpts.ProcessOption('!!'), 'Return Value 1');
+  Check(fOpts.ProcessOption('E!'), 'Return Value 2');
+  Check(fOpts.ProcessOption('X'), 'Return Value 3');
+  Check(fOpts.ProcessOption('F'), 'Return Value 4');
+  Check(fOpts.ProcessParam('Testing.Test*.pas', 'Process Xml'), 'Return Value 5');
+  CheckLog(UNIT_PROCESSING, 'Processing Xml');
+  CheckFile('Testing.TestUnit.pas.xml', TESTFILE_XML);
+end;
+
 procedure TestTD2XOptionsSpecific.TestWriteDefines;
 begin
-  Check(ParseOption('!!'), 'Return Value 1');
-  Check(ParseOption('W'), 'Return Value 2');
+  Check(fOpts.ProcessOption('!!'), 'Return Value 1');
+  Check(fOpts.ProcessOption('W'), 'Return Value 2');
   fB.Clear;
 
   Check(fOpts.ProcessFile('Testing.TestUnit.pas'), 'Process Unit');
@@ -1187,35 +1101,9 @@ begin
   CheckFile('Testing.TestUnit.pas.def', TESTFILE_DEF);
 end;
 
-{ TFactoryTestCase }
-
-procedure TFactoryTestCase.CheckErrorLog(pExpected: String);
-var
-  lErr: String;
-begin
-  lErr := fFact.CheckOutput('.err');
-  if ContainsText(lErr, pExpected) then
-    Check(True, 'Error Log')
-  else
-    CheckEqualsString(pExpected, lErr, 'Error Log containing');
-end;
-
-procedure TFactoryTestCase.CheckFile(pFile, pExpected: String);
-begin
-  CheckEqualsString(pExpected, ReduceString(fFact.CheckOutput(pFile)), pFile);
-end;
-
-procedure TFactoryTestCase.SetUp;
-begin
-  inherited;
-
-  fFact := TTestFactory.Create;
-end;
-
 initialization
 
 RegisterTests('Options', [TestTD2XOptionEnums.Suite, TestTD2XOptions.Suite,
-    TestTD2XOptionsAll.Suite, TestTD2XOptionsGeneral.Suite, TestTD2XOptionsSpecific.Suite,
-    TestTD2XRunOptions.Suite]);
+    TestTD2XOptionsAll.Suite, TestTD2XOptionsGeneral.Suite, TestTD2XOptionsSpecific.Suite]);
 
 end.

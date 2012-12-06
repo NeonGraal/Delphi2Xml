@@ -41,16 +41,17 @@
 			<Base>true</Base>
 		</PropertyGroup>
 		<Import Condition="'$(Base)'!='' And Exists('..\Warnings.optset')" Project="..\Warnings.optset"/>
+		<Import Condition="'$(Base)'!='' And Exists('..\CastaliaParser.optset')" Project="..\CastaliaParser.optset"/>
 		<PropertyGroup Condition="'$(Base)'!=''">
 			<DCC_Define>FASTMM;$(DCC_Define)</DCC_Define>
 			<Manifest_File>None</Manifest_File>
 			<VerInfo_Locale>5129</VerInfo_Locale>
-			<DCC_UnitSearchPath>$(BDS)\Source\DUnit\src;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+			<DCC_UnitSearchPath>$(BDS)\Source\DUnit\src;..\Source;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
 			<DCC_UsePackage>DBXInterBaseDriver;DataSnapServer;DataSnapCommon;DbxCommonDriver;dbxcds;CustomIPTransport;dsnap;IndyCore;IPIndyImpl;bindcompfmx;dbrtl;bindcomp;inetdb;xmlrtl;bindengine;soaprtl;DBXInformixDriver;DBXFirebirdDriver;inet;DBXSybaseASADriver;dbexpress;fmx;IndySystem;DataSnapClient;DataSnapProviderClient;DBXOracleDriver;fmxase;inetdbxpress;rtl;DbxClientDriver;IndyProtocols;DBXMySQLDriver;fmxobj;fmxdae;DataSnapIndy10ServerTransport;$(DCC_UsePackage)</DCC_UsePackage>
 			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
 			<DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
 			<DCC_DcuOutput>.\$(Platform)\$(Config)</DCC_DcuOutput>
-			<CfgDependentOn>..\Warnings.optset</CfgDependentOn>
+			<CfgDependentOn>..\Warnings.optset;..\CastaliaParser.optset</CfgDependentOn>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base_Win64)'!=''">
 			<DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;$(DCC_Namespace)</DCC_Namespace>
@@ -89,19 +90,11 @@
 			<DelphiCompile Include="$(MainSource)">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
-			<DCCReference Include="..\Source\D2X.pas"/>
-			<DCCReference Include="..\Source\D2X.IO.Actual.pas"/>
-			<DCCReference Include="..\Source\D2X.IO.pas"/>
-			<DCCReference Include="..\Source\D2X.IO.Options.pas"/>
-			<DCCReference Include="..\Source\D2X.Param.pas"/>
-			<DCCReference Include="..\Source\D2X.Params.pas"/>
-			<DCCReference Include="Test.IO.Options.pas"/>
-			<DCCReference Include="Test.Utils.pas"/>
-			<DCCReference Include="Test.Global.pas"/>
+			<DCCReference Include="Test.Options.pas"/>
 			<None Include="Profiling\Delphi2XmlSingle.aqt"/>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
-				<DependentOn>..\Warnings.optset</DependentOn>
+				<DependentOn>..\Warnings.optset;..\CastaliaParser.optset</DependentOn>
 			</BuildConfiguration>
 			<BuildConfiguration Include="Debug">
 				<Key>Cfg_1</Key>

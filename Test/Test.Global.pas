@@ -692,7 +692,7 @@ end;
 
 procedure TLoggerTestCase.CheckLog(pExp, pLabel: string);
 begin
-  CheckBuilder(pExp, pLabel, fB);
+  CheckBuilder(Format(pExp, [ChangeFileExt(ExtractFileName(ParamStr(0)), '')]), pLabel, fB);
 end;
 
 procedure TLoggerTestCase.SetUp;

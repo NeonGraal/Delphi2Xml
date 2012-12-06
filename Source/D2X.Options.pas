@@ -85,7 +85,7 @@ type
 
     procedure InitProcessors(pFileOpts: ID2XIOFactory);
 
-    function ProcessParamOption(pOpt: string): Boolean;
+    function ProcessOption(pOpt: string): Boolean;
     function ConfigFileOrExtn(pFileOrExtn: string): ID2XFile;
 
     procedure BeginResults(pNodename: string; pPer: TD2XResultPer);
@@ -96,29 +96,11 @@ type
     function ProcessFile(pFilename: string): Boolean;
     function ProcessDirectory(pDir, pWildCards: string): Boolean;
     function RecurseDirectory(pDir, pWildCards: string; pMainDir: Boolean): Boolean;
+    function ProcessParam(pParam, pFrom: string): Boolean;
 
     procedure EndProcessing;
 
     property Recurse: Boolean read GetRecurse;
-  end;
-
-  TD2XRunOptions = class(TD2XLogger)
-  private
-    function ProcessParamsFile(pFileOrExtn: string): Boolean;
-
-  protected
-    fOpts: TD2XOptions;
-
-  public
-    constructor Create; override;
-    destructor Destroy; override;
-
-    procedure InitOptions(pFileOpts: ID2XIOFactory);
-
-    procedure EndProcessing;
-
-    function ProcessParam(pStr, pFrom: string; pIdx: Integer): Boolean;
-
   end;
 
 implementation
@@ -132,51 +114,7 @@ uses
   System.TypInfo,
   Winapi.Windows;
 
-{
- function ConvertResultPer(pStr: string; pDflt: TD2XResultPer;
- out pVal: TD2XResultPer): Boolean;
- begin
- Result := pStr > '';
- if Result then
- case pStr[1] of
- 'R', 'r':
- pVal := rpRun;
- 'P', 'p':
- pVal := rpParam;
- 'W', 'w':
- pVal := rpWildcard;
- 'S', 's':
- pVal := rpSubDir;
- 'D', 'd':
- pVal := rpDir;
- '!':
- pVal := pDflt;
- else
- pVal := rpFile;
- end;
- end;
 
- function ConvertElapsedMode(pStr: string; pDflt: TD2XElapsedMode;
- out pVal: TD2XElapsedMode): Boolean;
- begin
- Result := pStr > '';
- if Result then
- case pStr[1] of
- 'N', 'n':
- pVal := emNone;
- 'Q', 'q':
- pVal := emQuiet;
- 'T', 't':
- pVal := emTotal;
- 'P', 'p':
- pVal := emProcessing;
- '!':
- pVal := pDflt;
- else
- pVal := emQuiet;
- end;
- end;
-}
 { TD2XOptions }
 
 procedure TD2XOptions.BeginResults(pNodename: string; pPer: TD2XResultPer);
@@ -452,7 +390,31 @@ end;
  end;
 *)
 
-function TD2XOptions.ProcessParamOption(pOpt: string): Boolean;
+function TD2XOptions.ProcessParam(pParam, pFrom: string): Boolean;
+var
+  lPath, lFile: string;
+begin
+  BeginResults('D2X_Param', rpParam);
+  if pParam = '-' then
+    Result := ProcessInput
+  else
+  begin
+    Result := ProcessFile(pParam);
+    if not Result then
+    begin
+      lPath := ExtractFilePath(pParam);
+      lFile := ExtractFileName(pParam);
+      BeginResults('D2X_Dir', rpDir);
+      Result := ProcessDirectory(lPath, lFile);
+      EndResults(ExcludeTrailingPathDelimiter(lPath), rpDir);
+      if Recurse then
+        Result := RecurseDirectory(lPath, lFile, True) or Result;
+    end;
+  end;
+  EndResults(pFrom, rpParam);
+end;
+
+function TD2XOptions.ProcessOption(pOpt: string): Boolean;
 var
   lPrevPer: TD2XResultPer;
   lPrm: TD2XParam;
@@ -875,106 +837,6 @@ begin
   Result := False;
   for lP in fProcs do
     Result := Result or lP.UseProxy;
-end;
-
-{ TD2XRunOptions }
-
-constructor TD2XRunOptions.Create;
-begin
-  inherited Create;
-
-  fOpts := TD2XOptions.Create;
-end;
-
-destructor TD2XRunOptions.Destroy;
-begin
-  FreeAndNil(fOpts);
-
-  inherited;
-end;
-
-procedure TD2XRunOptions.EndProcessing;
-begin
-  fOpts.EndProcessing;
-end;
-
-procedure TD2XRunOptions.InitOptions(pFileOpts: ID2XIOFactory);
-begin
-  fOpts.JoinLog(Self);
-  fOpts.InitProcessors(pFileOpts);
-end;
-
-function TD2XRunOptions.ProcessParam(pStr, pFrom: string;
-pIdx: Integer): Boolean;
-var
-  lPath, lFile: string;
-begin
-  Result := False;
-  try
-    if (Length(pStr) > 1) then
-    begin
-      case pStr[1] of
-        '-', '/':
-          begin
-            Result := fOpts.ProcessParamOption(Copy(pStr, 2));
-            Exit;
-          end;
-        '@':
-          begin
-            Result := ProcessParamsFile(Copy(pStr, 2));
-            Exit;
-          end;
-        '#':
-          begin
-            Result := True;
-            Exit;
-          end;
-      end;
-    end;
-
-    fOpts.BeginResults('D2X_Param', rpParam);
-    if pStr = '-' then
-      Result := fOpts.ProcessInput
-    else
-    begin
-      Result := fOpts.ProcessFile(pStr);
-      if not Result then
-      begin
-        lPath := ExtractFilePath(pStr);
-        lFile := ExtractFileName(pStr);
-        fOpts.BeginResults('D2X_Dir', rpDir);
-        Result := fOpts.ProcessDirectory(lPath, lFile);
-        fOpts.EndResults(ExcludeTrailingPathDelimiter(lPath), rpDir);
-        if fOpts.Recurse then
-          Result := fOpts.RecurseDirectory(lPath, lFile, True) or Result;
-      end;
-    end;
-    fOpts.EndResults(pFrom + '-' + IntToStr(pIdx), rpParam);
-  except
-    on E: Exception do
-      Log('EXCEPTION (%s) processing "%s" : %s', [E.ClassName, pStr, E.Message]);
-  end;
-end;
-
-function TD2XRunOptions.ProcessParamsFile(pFileOrExtn: string): Boolean;
-var
-  lSL: TStringList;
-  i: Integer;
-  lFile: ID2XFile;
-begin
-  lSL := nil;
-  lFile := nil;
-  Result := True;
-  try
-    lSL := TStringList.Create;
-    lFile := fOpts.ConfigFileOrExtn(pFileOrExtn);
-    lSL.LoadFromStream(lFile.ReadFrom.BaseStream);
-    for i := 0 to lSL.Count - 1 do
-      Result := ProcessParam(lSL[i], lFile.Description, i + 1) and Result;
-  finally
-    DisposeOf(lFile);
-    FreeAndNil(lSL);
-  end;
 end;
 
 end.
