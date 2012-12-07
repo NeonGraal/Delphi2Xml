@@ -109,6 +109,7 @@ type
     procedure TestEndProcessing;
     procedure TestRecurse;
     procedure TestDefines;
+    procedure TestGlobal;
   end;
 
   TestTD2XOptionsAll = class(TOptionsTestCase)
@@ -966,6 +967,14 @@ begin
   fOpts.EndResults('Param', rpParam);
   fOpts.EndResults('Run', rpRun);
   CheckLog('', 'End Results');
+end;
+
+procedure TestTD2XOptions.TestGlobal;
+begin
+  fFact.SetGlobalName('Global');
+  Check(fOpts.ProcessParam('Testing.Test*.pas', 'Process Xml'), 'Return Value');
+  CheckLog(UNIT_PROCESSING, 'Process Param');
+  CheckFile('Global\Testing.TestUnit.pas.xml', TESTFILE_UNIT);
 end;
 
 procedure TestTD2XOptions.TestProcessDirectory;

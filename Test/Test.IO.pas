@@ -56,6 +56,8 @@ type
     fBaseDirs: TDictionary<string, TATestDir>;
     fOutputFiles: TDictionary<string, string>;
 
+    fValidator: TD2XSingleParam<string>.TspValidator;
+
     procedure InitFiles;
 
     procedure StoreOutput(pFile, pOutput: string);
@@ -554,13 +556,16 @@ begin
 end;
 
 procedure TTestFactory.SetGlobalName(const pName: string);
+var
+  lRes: Boolean;
 begin
-
+  if Assigned(fValidator) then
+    lRes := fValidator(pName);
 end;
 
 procedure TTestFactory.SetGlobalValidator(pValidator: TD2XSingleParam<string>.TspValidator);
 begin
-
+  fValidator := pValidator;
 end;
 
 function TTestFactory.SimpleFile(pFile: string): ID2XFile;
