@@ -89,7 +89,8 @@ type
     fFact: TTestFactory;
     fOpts: TTestOptions;
 
-    procedure CheckFile(pFile: string);
+    procedure CheckFile(pMethod, pFile: string);
+    procedure CheckFiles(pMethod: string);
     procedure CheckErrorLog(pExpected: string);
   protected
     procedure Invoke(AMethod: TTestMethod); override;
@@ -106,13 +107,7 @@ type
     procedure TestWriteDefines;
 
     procedure TestProcessXml;
-
-    procedure TestProcessXmlPerFile;
-    procedure TestProcessXmlPerWildcard;
-    procedure TestProcessXmlPerSubDir;
-    procedure TestProcessXmlPerDir;
-    procedure TestProcessXmlPerParam;
-    procedure TestProcessXmlPerRun;
+    procedure TestProcessXmlUses;
   end;
 
   TestTD2XOptions = class(TOptionsTestCase)
@@ -254,72 +249,6 @@ const
   DEFINED_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Use these Defines: ' +
     'CONDITIONALEXPRESSIONS, CPU32, MSWINDOWS, UNICODE, VER230';
 {$ENDIF}
-  TESTFILE_DIR = '<?xml version="1.0"?> ' +
-    '<D2X_File parseMode="Full" fileName="Config\Testing.TestDir.pas" lastToken="end.">' +
-    'Testing.TestDir</D2X_File>';
-  TESTFILE_SUBDIR = '<?xml version="1.0"?> ' +
-    '<D2X_File parseMode="Full" fileName="Config\Test\Testing.TestSubDir.pas" lastToken="end.">'
-    + 'Testing.TestSubDir</D2X_File>';
-  TESTFILE_UNIT = '<?xml version="1.0"?> ' +
-    '<D2X_File parseMode="Full" fileName="Testing.TestUnit.pas" ' +
-    'lastToken=";{$ELSE}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}end.">Testing.TestUnitSystem.Classes</D2X_File>';
-  TESTFILE_PROGRAM = '<?xml version="1.0"?> ' +
-    '<D2X_File parseMode="Full" file="''Testing.TestUnit.pas''" fileName="Testing.TestProgram.dpr" '
-    + 'lastToken=";beginend.">Testing.TestProgramTesting.TestUnit</D2X_File>';
-  TESTFILE_INPUT = '<?xml version="1.0"?> <D2X_File parseMode="Full" fileName="(Input)" />';
-  TESTFILE_DEF = '**** CONDITIONALEXPRESSIONS CPU386 MSWINDOWS ' +
-    'TEST TEST1 TEST2 TEST3 TEST4 TEST5 TEST6 UNICODE VER230 WIN32';
-  TESTFILE_XML = '<?xml version="1.0"?> ' +
-    '<D2X_File parseMode="Full" fileName="Testing.TestUnit.pas"> <ParseFile> <UnitFile> ' +
-    '<MainUnitName> <UnitName lastToken="Testing.TestUnit" /> </MainUnitName> ' +
-    '<InterfaceSection> <UsesClause> <UsedUnitsList> <UsedUnitName> ' +
-    '<UnitName lastToken="System.Classes" /> </UsedUnitName> </UsedUnitsList> ' +
-    '<IncludeFile filename="TEST.INC" msgAt="68,0" /> ' +
-    '<D2X_notSuppMsg msgAt="88,0">Currently not supported {$D+}</D2X_notSuppMsg> ' +
-    '</UsesClause> </InterfaceSection> <ImplementationSection> ' +
-    '<UsesClause lastToken=";{$ELSE}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}"> <UsedUnitsList> ' +
-    '<UsedUnitName> <UnitName lastToken="System.SysUtils" /> </UsedUnitName> ' +
-    '</UsedUnitsList> </UsesClause> </ImplementationSection> ' +
-    '<InitializationSection lastToken="end" /> </UnitFile> </ParseFile> </D2X_File>';
-  TESTFILE_XML_WILDCARD = '<?xml version="1.0"?> ' +
-    '<D2X_Pattern parseMode="Full" fileName="Pattern-TestingTestpas"> ' +
-    '<D2X_File fileName="Testing.TestUnit.pas"> <ParseFile> <UnitFile> <MainUnitName> ' +
-    '<UnitName lastToken="Testing.TestUnit" /> </MainUnitName> <InterfaceSection> ' +
-    '<UsesClause> <UsedUnitsList> <UsedUnitName> <UnitName lastToken="System.Classes" /> ' +
-    '</UsedUnitName> </UsedUnitsList> <IncludeFile filename="TEST.INC" msgAt="68,0" /> ' +
-    '<D2X_notSuppMsg msgAt="88,0">Currently not supported {$D+}</D2X_notSuppMsg> ' +
-    '</UsesClause> </InterfaceSection> <ImplementationSection> ' +
-    '<UsesClause lastToken=";{$ELSE}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}"> <UsedUnitsList> ' +
-    '<UsedUnitName> <UnitName lastToken="System.SysUtils" /> </UsedUnitName> ' +
-    '</UsedUnitsList> </UsesClause> </ImplementationSection> ' +
-    '<InitializationSection lastToken="end" /> </UnitFile> </ParseFile> </D2X_File> </D2X_Pattern>';
-  TESTFILE_XML_DIR = '<?xml version="1.0"?> <D2X_Dir parseMode="Full" fileName="."> ' +
-    '<D2X_Pattern fileName="Pattern-TestingTestpas"> ' +
-    '<D2X_File fileName="Testing.TestUnit.pas"> <ParseFile> <UnitFile> <MainUnitName> ' +
-    '<UnitName lastToken="Testing.TestUnit" /> </MainUnitName> <InterfaceSection> ' +
-    '<UsesClause> <UsedUnitsList> <UsedUnitName> <UnitName lastToken="System.Classes" /> ' +
-    '</UsedUnitName> </UsedUnitsList> <IncludeFile filename="TEST.INC" msgAt="68,0" /> ' +
-    '<D2X_notSuppMsg msgAt="88,0">Currently not supported {$D+}</D2X_notSuppMsg> ' +
-    '</UsesClause> </InterfaceSection> <ImplementationSection> ' +
-    '<UsesClause lastToken=";{$ELSE}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}"> <UsedUnitsList> ' +
-    '<UsedUnitName> <UnitName lastToken="System.SysUtils" /> </UsedUnitName> ' +
-    '</UsedUnitsList> </UsesClause> </ImplementationSection> ' +
-    '<InitializationSection lastToken="end" /> </UnitFile> </ParseFile> </D2X_File> ' +
-    '</D2X_Pattern> </D2X_Dir>';
-  TESTFILE_XML_PARAM = '<?xml version="1.0"?> ' +
-    '<D2X_Param parseMode="Full" fileName="XmlPerParam"> <D2X_Dir fileName="."> ' +
-    '<D2X_Pattern fileName="Pattern-TestingTestpas"> ' +
-    '<D2X_File fileName="Testing.TestUnit.pas"> <ParseFile> <UnitFile> <MainUnitName> ' +
-    '<UnitName lastToken="Testing.TestUnit" /> </MainUnitName> <InterfaceSection> ' +
-    '<UsesClause> <UsedUnitsList> <UsedUnitName> <UnitName lastToken="System.Classes" /> ' +
-    '</UsedUnitName> </UsedUnitsList> <IncludeFile filename="TEST.INC" msgAt="68,0" /> ' +
-    '<D2X_notSuppMsg msgAt="88,0">Currently not supported {$D+}</D2X_notSuppMsg> ' +
-    '</UsesClause> </InterfaceSection> <ImplementationSection> ' +
-    '<UsesClause lastToken=";{$ELSE}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}"> <UsedUnitsList> ' +
-    '<UsedUnitName> <UnitName lastToken="System.SysUtils" /> </UsedUnitName> ' +
-    '</UsedUnitsList> </UsesClause> </ImplementationSection> ' +
-    '<InitializationSection lastToken="end" /> </UnitFile> </ParseFile> </D2X_File> </D2X_Pattern> </D2X_Dir> </D2X_Param>';
-
   { TestTD2XOptionEnums }
 
 procedure TestTD2XOptionEnums.TestElapsedModeInvalidCreate;
@@ -932,12 +861,12 @@ begin
     CheckEqualsString(pExpected, lErr, 'Error Log containing');
 end;
 
-procedure TOptionsTestCase.CheckFile(pFile: string);
+procedure TOptionsTestCase.CheckFile(pMethod, pFile: string);
 var
   lFile, lExpected: string;
 begin
-  lFile := 'Test\' + TidyFilename(pFile) + '.tst';
-  ForceDirectories(ExtractFilePath(ExtractFilePath(ParamStr(0)) + lFile));
+  lFile := 'Test\' + TidyFilename(pFile) + '-' + pMethod + '.tst';
+  ForceDirectories(ExtractFilePath(ExtractFilePath(ParamStr(0)) + 'Test'));
   if FileExists(lFile) then
     with TStreamReader.Create(lFile) do
       try
@@ -953,17 +882,23 @@ begin
       finally
         Free;
       end;
-  CheckEqualsString(ReduceString(lExpected), ReduceString(fFact.CheckOutput(pFile)), pFile);
+  CheckEqualsString(ReduceString(lExpected), ReduceString(fFact.CheckOutput(pFile)),
+    pFile + '-' + pMethod);
 end;
 
-procedure TOptionsTestCase.Invoke(AMethod: TTestMethod);
+procedure TOptionsTestCase.CheckFiles(pMethod: string);
 var
   lF: string;
 begin
+  for lF in fFact.CheckFiles do
+    CheckFile(pMethod, lF);
+end;
+
+procedure TOptionsTestCase.Invoke(AMethod: TTestMethod);
+begin
   inherited;
 
-  for lF in fFact.CheckFiles do
-    CheckFile(lF);
+  CheckFiles(FTestName);
 end;
 
 procedure TOptionsTestCase.SetUp;
@@ -1155,78 +1090,79 @@ end;
 
 procedure TestTD2XOptionsSpecific.TestProcessXml;
 begin
-  Check(fOpts.ProcessOption('!!'), 'Return Value 1');
-  Check(fOpts.ProcessOption('E!'), 'Return Value 2');
-  Check(fOpts.ProcessOption('X'), 'Return Value 3');
-  Check(fOpts.ProcessOption('F'), 'Return Value 4');
-  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Return Value 5');
-  CheckLog(BOTH_PROCESSING, 'Processing Xml');
+  Check(fOpts.ProcessOption('!!'), 'Option 1');
+  Check(fOpts.ProcessOption('E!'), 'Option 2');
+  Check(fOpts.ProcessOption('X:'), 'Option 3');
+  Check(fOpts.ProcessOption('F'), 'Option 4');
+
+  Check(fOpts.ProcessOption('PD'), 'Option per Dir');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Dir');
+  CheckLog(BOTH_PROCESSING, 'Processing Xml per Dir');
+  CheckFiles('TestProcessXmlPerDir');
+
+  Check(fOpts.ProcessOption('PF'), 'Option per File');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per File');
+  CheckLog(BOTH_PROCESSING, 'Processing Xml per File');
+  CheckFiles('TestProcessXmlPerFile');
+
+  Check(fOpts.ProcessOption('PP'), 'Option per Param');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per FilParam');
+  CheckLog(BOTH_PROCESSING, 'Processing Xml per Param');
+  CheckFiles('TestProcessXmlPerParam');
+
+  Check(fOpts.ProcessOption('PR'), 'Option per Run');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Run');
+  CheckLog(BOTH_PROCESSING, 'Processing Xml per Run');
+  CheckFiles('TestProcessXmlPerRun');
+
+  Check(fOpts.ProcessOption('PS'), 'Option per SubDir');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per SubDir');
+  CheckLog(BOTH_PROCESSING, 'Processing Xml per SubDir');
+  CheckFiles('TestProcessXmlPerSubDir');
+
+  Check(fOpts.ProcessOption('PW'), 'Option per Wildcard');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Wildcard');
+  CheckLog(BOTH_PROCESSING, 'Processing Xml per Wildcard');
+  CheckFiles('TestProcessXmlPerWildcard');
 end;
 
-procedure TestTD2XOptionsSpecific.TestProcessXmlPerDir;
+procedure TestTD2XOptionsSpecific.TestProcessXmlUses;
 begin
-  Check(fOpts.ProcessOption('!!'), 'Return Value 1');
-  Check(fOpts.ProcessOption('E!'), 'Return Value 2');
-  Check(fOpts.ProcessOption('X'), 'Return Value 3');
-  Check(fOpts.ProcessOption('PD'), 'Return Value 4');
-  Check(fOpts.ProcessOption('F'), 'Return Value 4');
-  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Return Value 5');
-  CheckLog(BOTH_PROCESSING, 'Processing Xml');
-end;
+  Check(fOpts.ProcessOption('!!'), 'Option 1');
+  Check(fOpts.ProcessOption('E!'), 'Option 2');
+  Check(fOpts.ProcessOption('MU'), 'Option 3');
+  Check(fOpts.ProcessOption('X:'), 'Option 4');
+  Check(fOpts.ProcessOption('F'), 'Option 5');
 
-procedure TestTD2XOptionsSpecific.TestProcessXmlPerFile;
-begin
-  Check(fOpts.ProcessOption('!!'), 'Return Value 1');
-  Check(fOpts.ProcessOption('E!'), 'Return Value 2');
-  Check(fOpts.ProcessOption('X'), 'Return Value 3');
-  Check(fOpts.ProcessOption('PF'), 'Return Value 4');
-  Check(fOpts.ProcessOption('F'), 'Return Value 4');
-  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Return Value 5');
-  CheckLog(BOTH_PROCESSING, 'Processing Xml');
-end;
+  Check(fOpts.ProcessOption('PD'), 'Option per Dir');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Dir');
+  CheckLog(BOTH_PROCESSING, 'Processing Xml per Dir');
+  CheckFiles('TestProcessXmlUsesPerDir');
 
-procedure TestTD2XOptionsSpecific.TestProcessXmlPerParam;
-begin
-  Check(fOpts.ProcessOption('!!'), 'Return Value 1');
-  Check(fOpts.ProcessOption('E!'), 'Return Value 2');
-  Check(fOpts.ProcessOption('X'), 'Return Value 3');
-  Check(fOpts.ProcessOption('PP'), 'Return Value 4');
-  Check(fOpts.ProcessOption('F'), 'Return Value 4');
-  Check(fOpts.ProcessParam('Testing.Test*', 'XmlPerParam'), 'Return Value 5');
-  CheckLog(BOTH_PROCESSING, 'Processing Xml');
-end;
+  Check(fOpts.ProcessOption('PF'), 'Option per File');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per File');
+  CheckLog(BOTH_PROCESSING, 'Processing Xml per File');
+  CheckFiles('TestProcessXmlUsesPerFile');
 
-procedure TestTD2XOptionsSpecific.TestProcessXmlPerRun;
-begin
-  Check(fOpts.ProcessOption('!!'), 'Return Value 1');
-  Check(fOpts.ProcessOption('E!'), 'Return Value 2');
-  Check(fOpts.ProcessOption('X'), 'Return Value 3');
-  Check(fOpts.ProcessOption('PR'), 'Return Value 4');
-  Check(fOpts.ProcessOption('F'), 'Return Value 4');
-  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Return Value 5');
-  CheckLog(BOTH_PROCESSING, 'Processing Xml');
-end;
+  Check(fOpts.ProcessOption('PP'), 'Option per Param');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per FilParam');
+  CheckLog(BOTH_PROCESSING, 'Processing Xml per Param');
+  CheckFiles('TestProcessXmlUsesPerParam');
 
-procedure TestTD2XOptionsSpecific.TestProcessXmlPerSubDir;
-begin
-  Check(fOpts.ProcessOption('!!'), 'Return Value 1');
-  Check(fOpts.ProcessOption('E!'), 'Return Value 2');
-  Check(fOpts.ProcessOption('X'), 'Return Value 3');
-  Check(fOpts.ProcessOption('PS'), 'Return Value 4');
-  Check(fOpts.ProcessOption('F'), 'Return Value 4');
-  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Return Value 5');
-  CheckLog(BOTH_PROCESSING, 'Processing Xml');
-end;
+  Check(fOpts.ProcessOption('PR'), 'Option per Run');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Run');
+  CheckLog(BOTH_PROCESSING, 'Processing Xml per Run');
+  CheckFiles('TestProcessXmlUsesPerRun');
 
-procedure TestTD2XOptionsSpecific.TestProcessXmlPerWildcard;
-begin
-  Check(fOpts.ProcessOption('!!'), 'Return Value 1');
-  Check(fOpts.ProcessOption('E!'), 'Return Value 2');
-  Check(fOpts.ProcessOption('X'), 'Return Value 3');
-  Check(fOpts.ProcessOption('PW'), 'Return Value 4');
-  Check(fOpts.ProcessOption('F'), 'Return Value 4');
-  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Return Value 5');
-  CheckLog(BOTH_PROCESSING, 'Processing Xml');
+  Check(fOpts.ProcessOption('PS'), 'Option per SubDir');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per SubDir');
+  CheckLog(BOTH_PROCESSING, 'Processing Xml per SubDir');
+  CheckFiles('TestProcessXmlUsesPerSubDir');
+
+  Check(fOpts.ProcessOption('PW'), 'Option per Wildcard');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Wildcard');
+  CheckLog(BOTH_PROCESSING, 'Processing Xml per Wildcard');
+  CheckFiles('TestProcessXmlUsesPerWildcard');
 end;
 
 procedure TestTD2XOptionsSpecific.TestWriteDefines;
