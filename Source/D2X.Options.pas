@@ -22,7 +22,6 @@ type
 
   TD2XOptions = class(TD2XLogger)
   strict private
-    fParams: TD2XParams;
     fProcs: TObjectList<TD2XProcessor>;
 
     fProgramDir: string;
@@ -80,6 +79,7 @@ type
     function MakeFileRef(pVal: TD2XSingleParam<string>; pSuffix: string = ''): TD2XFileRef;
 
   protected
+    fParams: TD2XParams;
     function GetDefines: TStringList;
 
   public

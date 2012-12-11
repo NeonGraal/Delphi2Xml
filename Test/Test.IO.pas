@@ -56,6 +56,7 @@ type
     fBaseDirs: TDictionary<string, TATestDir>;
     fOutputFiles: TDictionary<string, string>;
 
+    fGlobalName: String;
     fValidator: TD2XSingleParam<string>.TspValidator;
 
     procedure InitFiles;
@@ -76,7 +77,10 @@ type
     procedure SetGlobalValidator(pValidator: TD2XSingleParam<string>.TspValidator);
     procedure RegisterParams(pParams: TD2XParams);
 
+    function CheckFiles: TArray<string>;
     function CheckOutput(pFile: string): string;
+
+    property GlobalName: string read fGlobalName write SetGlobalName;
   end;
 
   TTestFile = class(TTestIO, ID2XFile)
@@ -460,6 +464,11 @@ begin
   Result := TTestFile.Create(pFileOrDir, lInput > '', lInput, Self);
 end;
 
+function TTestFactory.CheckFiles: TArray<string>;
+begin
+  Result := fOutputFiles.Keys.ToArray;
+end;
+
 function TTestFactory.CheckOutput(pFile: string): string;
 begin
   if fOutputFiles.TryGetValue(pFile, Result) then
@@ -530,7 +539,7 @@ begin
   fConfigFiles.Add('File.Extn', '');
   fConfigFiles.Add('.skip', '');
 
-  fBaseFiles.Add('Testing.Test*.pas', '');
+  fBaseFiles.Add('Testing.Test*', '');
   fBaseFiles.Add('Testing.TestUnit.pas', TESTING_UNIT);
   fBaseFiles.Add('Testing.TestProgram.dpr', TESTING_PROGRAM);
   fBaseFiles.Add('Config\Testing.TestDir.pas', 'unit Testing.TestDir; end.');
@@ -559,6 +568,7 @@ procedure TTestFactory.SetGlobalName(const pName: string);
 var
   lRes: Boolean;
 begin
+  fGlobalName := pName;
   if Assigned(fValidator) then
     lRes := fValidator(pName);
 end;

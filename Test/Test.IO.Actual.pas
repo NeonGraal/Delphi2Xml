@@ -88,11 +88,11 @@ begin
 
   lExpected := 'This is a test text file written at ' + FormatDateTime('dddddd tt', now);
 
-  fFile := TD2XFileStream.Create('Test\TestOut.txt');
+  fFile := TD2XFileStream.Create('Test\OutTest.txt');
   fFile.WriteTo.Write(lExpected);
   fFile.Free;
 
-  fFile := TD2XFileStream.Create('Test\TestOut.txt');
+  fFile := TD2XFileStream.Create('Test\OutTest.txt');
   CheckReader(lExpected, 'Write To', fFile.ReadFrom);
 end;
 
@@ -102,7 +102,7 @@ procedure TestTD2XDirPath.SetUp;
 begin
   inherited;
 
-  fDir := TD2XDirPath.Create('Config');
+  fDir := TD2XDirPath.Create('Test');
 end;
 
 procedure TestTD2XDirPath.TearDown;
@@ -114,7 +114,7 @@ end;
 
 procedure TestTD2XDirPath.TestDescription;
 begin
-  CheckEqualsString('Config\', fDir.Description);
+  CheckEqualsString('Test\', fDir.Description);
 end;
 
 procedure TestTD2XDirPath.TestExists;
@@ -125,15 +125,15 @@ end;
 procedure TestTD2XDirPath.TestDirs;
 begin
   CheckTrue(fDir.FirstDir, 'First Dir');
-  CheckEqualsString('Config\Test', fDir.Current, 'First Dir Current');
+  CheckEqualsString('Test\DirTest', fDir.Current, 'First Dir Current');
   CheckFalse(fDir.Next, 'First Dir Next');
   fDir.Close;
 end;
 
 procedure TestTD2XDirPath.TestFiles;
 begin
-  CheckTrue(fDir.FirstFile('*.pas'), 'First File');
-  CheckEqualsString('Config\Testing.TestDir.pas', fDir.Current, 'First File Current');
+  CheckTrue(fDir.FirstFile('File*.txt'), 'First File');
+  CheckEqualsString('Test\FileTest.txt', fDir.Current, 'First File Current');
   CheckFalse(fDir.Next, 'First File Next');
   fDir.Close;
 end;

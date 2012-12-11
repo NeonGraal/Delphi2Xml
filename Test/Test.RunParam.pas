@@ -114,8 +114,8 @@ procedure TestTD2XRunParam.TestProcessParamPasFiles;
 begin
   Check(ParseOption('-!!'), 'Return Value 1');
   Check(ParseOption('-E!'), 'Return Value 2');
-  Check(ParseOption('Testing.Test*.pas'), 'Return Value 3');
-  CheckBuilder(UNIT_PROCESSING, 'Processing Pas files');
+  Check(ParseOption('Testing.Test*'), 'Return Value 3');
+  CheckBuilder(BOTH_PROCESSING, 'Processing Pas files');
 end;
 
 initialization

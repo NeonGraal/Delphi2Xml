@@ -15,6 +15,7 @@ uses
   System.StrUtils,
   System.SysUtils,
   Test.Global,
+  Test.IO,
   Test.Param,
   Test.Utils,
   TestFramework;
@@ -1504,7 +1505,7 @@ begin
   fDefP := TD2XDefinesParam.CreateDefines('T', 'Test',
     function(pFile: string): ID2XFile
     begin
-      Result := TD2XFileStream.Create('Config\' + pFile);
+      Result := TTestFile.Create('Config\' + pFile, True, 'Tango'#13#10'Uniform', nil);
     end);
   fFlag := fDefP as ID2XFlag;
   fDefP.Defines.CommaText := 'Alpha,Beta,Gamma';
