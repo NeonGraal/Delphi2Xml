@@ -22,6 +22,7 @@ type
     procedure SetGlobalName(const pName: string);
     procedure SetGlobalValidator(pValidator: TD2XSingleParam<string>.TspValidator);
     procedure RegisterParams(pParams: TD2XParams);
+    function GetNow: string;
 
   private
     fLogBase: TD2XFlaggedStringParam;
@@ -83,6 +84,11 @@ end;
 function TD2XFileOptions.GetGlobalName: string;
 begin
   Result := fGlobalName.Value;
+end;
+
+function TD2XFileOptions.GetNow: string;
+begin
+  Result := FormatDateTime('yyyy-mmm-dd HH:nn:ss.zzz', Now);
 end;
 
 function TD2XFileOptions.GetTimestampFiles: Boolean;

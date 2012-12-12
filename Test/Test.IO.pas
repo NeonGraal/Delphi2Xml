@@ -76,6 +76,7 @@ type
     procedure SetGlobalName(const pName: string);
     procedure SetGlobalValidator(pValidator: TD2XSingleParam<string>.TspValidator);
     procedure RegisterParams(pParams: TD2XParams);
+    function GetNow: string;
 
     function CheckFiles: TArray<string>;
     function CheckOutput(pFile: string): string;
@@ -519,6 +520,11 @@ begin
   inherited;
   if lMsg > '' then
     raise ETestIOException.Create(lMsg);
+end;
+
+function TTestFactory.GetNow: string;
+begin
+  Result := '2011-Nov-11 11:11:11.111';
 end;
 
 procedure TTestFactory.InitFiles;

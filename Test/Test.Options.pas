@@ -869,9 +869,10 @@ end;
 
 procedure TOptionsTestCase.CheckFile(pMethod, pFile: string);
 var
-  lFile, lExpected: string;
+  lExtn, lFile, lExpected: string;
 begin
-  lFile := 'Test\' + TidyFilename(pFile) + '-' + pMethod + '.tst';
+  lExtn := '-' + pMethod + ExtractFileExt(pFile);
+  lFile := 'Test\' + TidyFilename(ChangeFileExt(pFile, '')) + lExtn;
   ForceDirectories(ExtractFilePath(ExtractFilePath(ParamStr(0)) + 'Test'));
   if FileExists(lFile) then
     with TStreamReader.Create(lFile) do

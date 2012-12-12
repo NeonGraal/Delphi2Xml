@@ -43,6 +43,7 @@ type
     procedure SetGlobalName(const pName: String);
     procedure SetGlobalValidator(pValidator: TD2XSingleParam<String>.TspValidator);
     procedure RegisterParams(pParams: TD2XParams);
+    function GetNow: string;
   end;
 
   TD2XFileRef = reference to function: ID2XFile;

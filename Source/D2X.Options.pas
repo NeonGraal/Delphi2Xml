@@ -32,6 +32,7 @@ type
     fVMI: TVirtualMethodInterceptor;
 
     fFilename: string;
+    fCurrentMethod: string;
 
     fXmlHandler: TD2XXmlHandler;
     fDefinesUsedHandler: TD2XDefinesUsedHandler;
@@ -46,8 +47,10 @@ type
     fParserDefines: TD2XDefinesParam;
 
     procedure RemoveProxy;
-    procedure SetProxy;
-    function UseProxy: Boolean;
+    procedure SetBaseProxy;
+    procedure SetMinProxy;
+    procedure SetFullProxy;
+    function UseFullProxy: Boolean;
 
     function IsInternalMethod(pMethod: string): Boolean;
 
@@ -248,14 +251,13 @@ begin
         WriteLine('Filename,Timestamp,Line,Char,Method,Type,Message');
       write(fFilename);
       write(',');
-      write(FormatDateTime('yyyy-mmm-dd HH:nn:ss.zzz', Now));
+      write(fIOFact.GetNow);
       write(',');
       write(pY);
       write(',');
       write(pX);
       write(',');
-      { TODO : Determine current Method name }
-      write(''{fCurrent.Method});
+      write(fCurrentMethod);
       write(',');
       write(pType);
       write(',');
@@ -316,7 +318,6 @@ begin
       if lFile.Exists then
         Result := ProcessStream(pFilename, lFile.ReadFrom)
       else
-        { TODO -oStruan -cTodo : Is thi sthe correct flag to check? }
         if fVerbose.Value then
           Log('Cannot find "%s"', [lFile]);
     finally
@@ -478,16 +479,16 @@ begin
     'Log Not Supported messages');
 
   fProcs.Add(TD2XHandlerProcessor.CreateHandler(lLogErrors,
-    TD2XErrorHandler.CreateError(meError, LogMessage), True));
+      TD2XErrorHandler.CreateError(meError, LogMessage), True));
   fProcs.Add(TD2XHandlerProcessor.CreateHandler(lLogNotSupported,
-    TD2XErrorHandler.CreateError(meNotSupported, LogMessage), True));
+      TD2XErrorHandler.CreateError(meNotSupported, LogMessage), True));
 
   lLogProcessor := TD2XLogProcessor.Create(fVerbose);
   lLogProcessor.JoinLog(Self);
   fProcs.Add(lLogProcessor);
 
   fParams.Add(TD2XParam.Create('?', 'Options', '', 'Show valid options',
-      function(pStr: string): Boolean
+        function(pStr: string): Boolean
     begin
       Result := True;
       fParams.DescribeAll(Self);
@@ -631,7 +632,7 @@ begin
   fIOFact := pFileOpts;
 
   fIOFact.SetGlobalValidator(
-      function(pVal: string): Boolean
+    function(pVal: string): Boolean
     begin
       if Assigned(lWriteXml) then
         lWriteXml.Value := IncludeTrailingPathDelimiter(pVal);
@@ -707,8 +708,10 @@ begin
   lTimer := TStopwatch.StartNew;
   try
     InitParser;
-    if UseProxy then
-      SetProxy;
+    if UseFullProxy then
+      SetFullProxy
+    else
+      SetMinProxy;
 
     Result := False;
     lContent := pStream.ReadToEnd;
@@ -754,7 +757,7 @@ begin
 end;
 
 function TD2XOptions.RecurseDirectory(pDir, pWildCards: string;
-pMainDir: Boolean): Boolean;
+  pMainDir: Boolean): Boolean;
 var
   lPath: ID2XDir;
   lFile: string;
@@ -818,10 +821,9 @@ begin
   end;
 end;
 
-procedure TD2XOptions.SetProxy;
+procedure TD2XOptions.SetFullProxy;
 begin
-  fVMI := TVirtualMethodInterceptor.Create(TObject(fParser).ClassType);
-  fVMI.Proxify(fParser);
+  SetBaseProxy;
   fVMI.OnBefore :=
       procedure(pInst: TObject; pMethod: TRttiMethod; const pArgs: TArray<TValue>;
     out pDoInvoke: Boolean; out pResult: TValue)
@@ -829,6 +831,7 @@ begin
       lP: TD2XProcessor;
     begin
       pDoInvoke := True;
+      fCurrentMethod := pMethod.Name;
       if IsInternalMethod(pMethod.Name) then
         Exit;
       for lP in fProcs do
@@ -853,7 +856,25 @@ begin
     end;
 end;
 
-function TD2XOptions.UseProxy: Boolean;
+procedure TD2XOptions.SetMinProxy;
+begin
+  SetBaseProxy;
+  fVMI.OnBefore :=
+      procedure(pInst: TObject; pMethod: TRttiMethod; const pArgs: TArray<TValue>;
+    out pDoInvoke: Boolean; out pResult: TValue)
+    begin
+      pDoInvoke := True;
+      fCurrentMethod := pMethod.Name;
+    end;
+end;
+
+procedure TD2XOptions.SetBaseProxy;
+begin
+  fVMI := TVirtualMethodInterceptor.Create(TObject(fParser).ClassType);
+  fVMI.Proxify(fParser);
+end;
+
+function TD2XOptions.UseFullProxy: Boolean;
 var
   lP: TD2XProcessor;
 begin
