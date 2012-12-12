@@ -478,6 +478,7 @@ begin
     lFile := pOutput;
     if Assigned(lFile) then
       fXmlDoc.Xml.SaveToStream(lFile.BaseStream);
+    fHasFiles := False;
   end;
 
   fXmlNode := nil;

@@ -3,14 +3,14 @@
 	<ParseFile>
 		<ProgramFile>
 			<MainUnitName>
-				<UnitName lastToken="Testing.TestProgram" />
+				<UnitName>Testing.TestProgram</UnitName>
 			</MainUnitName>
 			<ProgramBlock>
 				<MainUsesClause>
 					<MainUsedUnitStatement>
 						<MainUsedUnitName>
 							<UsedUnitName>
-								<UnitName lastToken="Testing.TestUnit" />
+								<UnitName>Testing.TestUnit</UnitName>
 							</UsedUnitName>
 						</MainUsedUnitName>
 						<MainUsedUnitExpression file="">

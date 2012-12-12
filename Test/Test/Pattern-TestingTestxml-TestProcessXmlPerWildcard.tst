@@ -4,13 +4,13 @@
 		<ParseFile>
 			<UnitFile>
 				<MainUnitName>
-					<UnitName lastToken="Testing.TestUnit" />
+					<UnitName>Testing.TestUnit</UnitName>
 				</MainUnitName>
 				<InterfaceSection>
 					<UsesClause>
 						<UsedUnitsList>
 							<UsedUnitName>
-								<UnitName lastToken="System.Classes" />
+								<UnitName>System.Classes</UnitName>
 							</UsedUnitName>
 						</UsedUnitsList>
 						<IncludeFile filename="TEST.INC" msgAt="68,0" />
@@ -21,7 +21,7 @@
 					<UsesClause lastToken=";{$ELSE}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}">
 						<UsedUnitsList>
 							<UsedUnitName>
-								<UnitName lastToken="System.SysUtils" />
+								<UnitName>System.SysUtils</UnitName>
 							</UsedUnitName>
 						</UsedUnitsList>
 					</UsesClause>
@@ -34,14 +34,14 @@
 		<ParseFile>
 			<ProgramFile>
 				<MainUnitName>
-					<UnitName lastToken="Testing.TestProgram" />
+					<UnitName>Testing.TestProgram</UnitName>
 				</MainUnitName>
 				<ProgramBlock>
 					<MainUsesClause>
 						<MainUsedUnitStatement>
 							<MainUsedUnitName>
 								<UsedUnitName>
-									<UnitName lastToken="Testing.TestUnit" />
+									<UnitName>Testing.TestUnit</UnitName>
 								</UsedUnitName>
 							</MainUsedUnitName>
 							<MainUsedUnitExpression file="">

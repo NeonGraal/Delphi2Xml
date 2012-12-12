@@ -542,8 +542,8 @@ begin
   fBaseFiles.Add('Testing.Test*', '');
   fBaseFiles.Add('Testing.TestUnit.pas', TESTING_UNIT);
   fBaseFiles.Add('Testing.TestProgram.dpr', TESTING_PROGRAM);
-  fBaseFiles.Add('Config\Testing.TestDir.pas', 'unit Testing.TestDir; end.');
-  fBaseFiles.Add('Config\Test\Testing.TestSubDir.pas', 'unit Testing.TestSubDir; end.');
+  fBaseFiles.Add('Config\Testing.TestDir.pas', 'unit Testing.TestDir; interface implementation end.');
+  fBaseFiles.Add('Config\Test\Testing.TestSubDir.pas', 'unit Testing.TestSubDir; interface implementation end.');
 
   fBaseDirs.Add('', TATestDir.Create(['Config', 'Test'], ['Testing.TestUnit.pas',
         'Testing.TestProgram.dpr']));
@@ -563,7 +563,7 @@ procedure TTestFactory.RegisterParams(pParams: TD2XParams);
 begin
 
 end;
-
+{$HINTS OFF}
 procedure TTestFactory.SetGlobalName(const pName: string);
 var
   lRes: Boolean;
@@ -572,7 +572,7 @@ begin
   if Assigned(fValidator) then
     lRes := fValidator(pName);
 end;
-
+{$HINTS ON}
 procedure TTestFactory.SetGlobalValidator(pValidator: TD2XSingleParam<string>.TspValidator);
 begin
   fValidator := pValidator;

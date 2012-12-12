@@ -100,10 +100,15 @@ type
   end;
 
   TestTD2XOptionsSpecific = class(TOptionsTestCase)
+  public
+    procedure SetUp; override;
   published
-    procedure TestCountChildren;
     procedure TestNotSupported;
     procedure TestLogErrors;
+
+    procedure TestCountChildren;
+    procedure TestDefinesUsed;
+    procedure TestLoadSkipped;
     procedure TestWriteDefines;
 
     procedure TestProcessXml;
@@ -228,6 +233,7 @@ const
   STREAM_PROCESSING = 'Processing (Stream) ... done';
   DIRECTORY_PROCESSING = 'Processing Config\Testing.TestDir.pas ... done';
   RECURSE_PROCESSING = 'Processing Config\Test\Testing.TestSubDir.pas ... done';
+  ALL_PROCESSING = BOTH_PROCESSING + ' ' + DIRECTORY_PROCESSING + ' ' + RECURSE_PROCESSING;
   ALTERED_REPORT_OPTIONS =
     'Current option settings: Verbose + Log Errors + Log Not Supp + Final Token + ' +
   //    'Recurse + Timestamp - Global name :Test Config dir :Test\ Log dir :Test\ ' +
@@ -990,7 +996,7 @@ procedure TestTD2XOptions.TestProcessDirectory;
 begin
   Check(fOpts.ProcessDirectory('Config\', 'Testing.Test*'), 'Process Directory');
   CheckLog(DIRECTORY_PROCESSING, 'Process Directory');
-  CheckErrorLog('''Implementation'' expected found ''end''');
+  CheckErrorLog('');
 end;
 
 procedure TestTD2XOptions.TestProcessFile;
@@ -1044,24 +1050,54 @@ procedure TestTD2XOptions.TestRecurseDirectory;
 begin
   Check(fOpts.RecurseDirectory('', 'Testing.Test*', false), 'Recurse Directory');
   CheckLog(DIRECTORY_PROCESSING + ' ' + RECURSE_PROCESSING, 'Recurse Directory');
-  CheckErrorLog('''Implementation'' expected found ''end''');
+  CheckErrorLog('');
 end;
 
 { TestTD2XOptionsSpecific }
 
+procedure TestTD2XOptionsSpecific.SetUp;
+begin
+  inherited;
+
+  fOpts.ProcessOption('!!');
+  fOpts.ProcessOption('R');
+end;
+
 procedure TestTD2XOptionsSpecific.TestCountChildren;
 begin
-  Check(fOpts.ProcessOption('!!'), 'Return Value 1');
   Check(fOpts.ProcessOption('C'), 'Return Value 2');
   fB.Clear;
 
-  Check(fOpts.ProcessFile('Testing.TestUnit.pas'), 'Process Unit');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Count Children'), 'Process Unit');
   CheckLog('', 'Process Unit');
+
+  fOpts.EndProcessing;
+end;
+
+procedure TestTD2XOptionsSpecific.TestDefinesUsed;
+begin
+  Check(fOpts.ProcessOption('U'), 'Return Value 2');
+  fB.Clear;
+
+  Check(fOpts.ProcessParam('Testing.Test*', 'Defines Used'), 'Process Unit');
+  CheckLog('', 'Process Unit');
+
+  fOpts.EndProcessing;
+end;
+
+procedure TestTD2XOptionsSpecific.TestLoadSkipped;
+begin
+  Check(fOpts.ProcessOption('S'), 'Return Value 2');
+  fB.Clear;
+
+  Check(fOpts.ProcessParam('Testing.Test*', 'Load Skipped Methods'), 'Process Unit');
+  CheckLog('', 'Process Unit');
+
+  fOpts.EndProcessing;
 end;
 
 procedure TestTD2XOptionsSpecific.TestLogErrors;
 begin
-  Check(fOpts.ProcessOption('!!'), 'Return Value 1');
   Check(fOpts.ProcessOption('L'), 'Return Value 3');
   fB.Clear;
 
@@ -1075,60 +1111,68 @@ begin
   fS.Position := 0;
   Check(fOpts.ProcessStream('(Stream)', fDS.ReadFrom), 'Process Stream');
   CheckLog('', 'Process Stream');
+
+  fOpts.EndProcessing;
 end;
 
 procedure TestTD2XOptionsSpecific.TestNotSupported;
 begin
-  Check(fOpts.ProcessOption('!!'), 'Return Value 1');
   Check(fOpts.ProcessOption('N'), 'Return Value 3');
   fB.Clear;
 
   Check(fOpts.ProcessFile('Testing.TestUnit.pas'), 'Process Unit');
+
   CheckLog('', 'Process Unit');
   CheckErrorLog('Currently not supported {$D+}');
+
+  fOpts.EndProcessing;
 end;
 
 procedure TestTD2XOptionsSpecific.TestProcessXml;
 begin
-  Check(fOpts.ProcessOption('!!'), 'Option 1');
-  Check(fOpts.ProcessOption('E!'), 'Option 2');
-  Check(fOpts.ProcessOption('X:'), 'Option 3');
-  Check(fOpts.ProcessOption('F'), 'Option 4');
+  Check(fOpts.ProcessOption('E!'), 'Option 3');
+  Check(fOpts.ProcessOption('X:'), 'Option 4');
+  Check(fOpts.ProcessOption('F'), 'Option 5');
 
   Check(fOpts.ProcessOption('PD'), 'Option per Dir');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Dir');
-  CheckLog(BOTH_PROCESSING, 'Processing Xml per Dir');
+  CheckLog(ALL_PROCESSING, 'Processing Xml per Dir');
+  fOpts.EndProcessing;
   CheckFiles('TestProcessXmlPerDir');
 
   Check(fOpts.ProcessOption('PF'), 'Option per File');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per File');
-  CheckLog(BOTH_PROCESSING, 'Processing Xml per File');
+  CheckLog(ALL_PROCESSING, 'Processing Xml per File');
+  fOpts.EndProcessing;
   CheckFiles('TestProcessXmlPerFile');
 
   Check(fOpts.ProcessOption('PP'), 'Option per Param');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per FilParam');
-  CheckLog(BOTH_PROCESSING, 'Processing Xml per Param');
+  CheckLog(ALL_PROCESSING, 'Processing Xml per Param');
+  fOpts.EndProcessing;
   CheckFiles('TestProcessXmlPerParam');
 
   Check(fOpts.ProcessOption('PR'), 'Option per Run');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Run');
-  CheckLog(BOTH_PROCESSING, 'Processing Xml per Run');
+  CheckLog(ALL_PROCESSING, 'Processing Xml per Run');
+  fOpts.EndProcessing;
   CheckFiles('TestProcessXmlPerRun');
 
   Check(fOpts.ProcessOption('PS'), 'Option per SubDir');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per SubDir');
-  CheckLog(BOTH_PROCESSING, 'Processing Xml per SubDir');
+  CheckLog(ALL_PROCESSING, 'Processing Xml per SubDir');
+  fOpts.EndProcessing;
   CheckFiles('TestProcessXmlPerSubDir');
 
   Check(fOpts.ProcessOption('PW'), 'Option per Wildcard');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Wildcard');
-  CheckLog(BOTH_PROCESSING, 'Processing Xml per Wildcard');
+  CheckLog(ALL_PROCESSING, 'Processing Xml per Wildcard');
+  fOpts.EndProcessing;
   CheckFiles('TestProcessXmlPerWildcard');
 end;
 
 procedure TestTD2XOptionsSpecific.TestProcessXmlUses;
 begin
-  Check(fOpts.ProcessOption('!!'), 'Option 1');
   Check(fOpts.ProcessOption('E!'), 'Option 2');
   Check(fOpts.ProcessOption('MU'), 'Option 3');
   Check(fOpts.ProcessOption('X:'), 'Option 4');
@@ -1136,43 +1180,50 @@ begin
 
   Check(fOpts.ProcessOption('PD'), 'Option per Dir');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Dir');
-  CheckLog(BOTH_PROCESSING, 'Processing Xml per Dir');
+  CheckLog(ALL_PROCESSING, 'Processing Xml per Dir');
+  fOpts.EndProcessing;
   CheckFiles('TestProcessXmlUsesPerDir');
 
   Check(fOpts.ProcessOption('PF'), 'Option per File');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per File');
-  CheckLog(BOTH_PROCESSING, 'Processing Xml per File');
+  CheckLog(ALL_PROCESSING, 'Processing Xml per File');
+  fOpts.EndProcessing;
   CheckFiles('TestProcessXmlUsesPerFile');
 
   Check(fOpts.ProcessOption('PP'), 'Option per Param');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per FilParam');
-  CheckLog(BOTH_PROCESSING, 'Processing Xml per Param');
+  CheckLog(ALL_PROCESSING, 'Processing Xml per Param');
+  fOpts.EndProcessing;
   CheckFiles('TestProcessXmlUsesPerParam');
 
   Check(fOpts.ProcessOption('PR'), 'Option per Run');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Run');
-  CheckLog(BOTH_PROCESSING, 'Processing Xml per Run');
+  CheckLog(ALL_PROCESSING, 'Processing Xml per Run');
+  fOpts.EndProcessing;
   CheckFiles('TestProcessXmlUsesPerRun');
 
   Check(fOpts.ProcessOption('PS'), 'Option per SubDir');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per SubDir');
-  CheckLog(BOTH_PROCESSING, 'Processing Xml per SubDir');
+  CheckLog(ALL_PROCESSING, 'Processing Xml per SubDir');
+  fOpts.EndProcessing;
   CheckFiles('TestProcessXmlUsesPerSubDir');
 
   Check(fOpts.ProcessOption('PW'), 'Option per Wildcard');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Wildcard');
-  CheckLog(BOTH_PROCESSING, 'Processing Xml per Wildcard');
+  CheckLog(ALL_PROCESSING, 'Processing Xml per Wildcard');
+  fOpts.EndProcessing;
   CheckFiles('TestProcessXmlUsesPerWildcard');
 end;
 
 procedure TestTD2XOptionsSpecific.TestWriteDefines;
 begin
-  Check(fOpts.ProcessOption('!!'), 'Return Value 1');
   Check(fOpts.ProcessOption('W'), 'Return Value 2');
   fB.Clear;
 
-  Check(fOpts.ProcessFile('Testing.TestUnit.pas'), 'Process Unit');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Write Defines'), 'Process Unit');
   CheckLog('', 'Process Unit');
+
+  fOpts.EndProcessing;
 end;
 
 { TTestOptions }

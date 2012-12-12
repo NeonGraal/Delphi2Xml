@@ -41,6 +41,7 @@ type
     constructor Create;
     destructor Destroy; override;
 
+    procedure UnitName; override;
     procedure UsedUnitName; override;
     procedure MainUnitName; override;
     procedure MainUsedUnitExpression; override;
@@ -1670,7 +1671,6 @@ procedure TD2XDefinesParser.MainUnitName;
 begin
   fLastTokens := '';
   inherited;
-  DoAddText;
 end;
 
 procedure TD2XDefinesParser.MainUsedUnitExpression;
@@ -1730,11 +1730,16 @@ begin
   end;
 end;
 
+procedure TD2XDefinesParser.UnitName;
+begin
+  inherited;
+  DoAddText;
+end;
+
 procedure TD2XDefinesParser.UsedUnitName;
 begin
   fLastTokens := '';
   inherited;
-  DoAddText;
 end;
 
 { TD2XUsedParser }

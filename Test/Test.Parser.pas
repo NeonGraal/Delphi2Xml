@@ -71,6 +71,7 @@ type
   published
     procedure TestUsedUnitName;
     procedure TestMainUnitName;
+    procedure TestMainUsedUnit;
     procedure TestMainUsedUnitExpression;
   end;
 
@@ -276,7 +277,7 @@ begin
   CheckAttribute('', '', 'Blank');
 end;
 
-procedure TestTD2XFullParser.TestMainUsedUnitExpression;
+procedure TestTD2XFullParser.TestMainUsedUnit;
 var
   pContents: string;
   pFilename: string;
@@ -286,8 +287,22 @@ begin
 
   FD2XFullParser.ProcessString(pFilename, pContents);
 
-  CheckText('Test2', 'Used Unit Name');
+  CheckText('Test2', 'Main Used File Name');
   CheckAttribute('', '', 'Blank');
+end;
+
+procedure TestTD2XFullParser.TestMainUsedUnitExpression;
+var
+  pContents: string;
+  pFilename: string;
+begin
+  pFilename := 'TestMainUsedUnitExpression';
+  pContents := 'program Test; uses Test2 in ''Test2.pas''; begin end.';
+
+  FD2XFullParser.ProcessString(pFilename, pContents);
+
+  CheckText('Test2', 'Used Unit Name');
+  CheckAttribute('file', '''Test2.pas''', 'Blank');
 end;
 
 procedure TestTD2XFullParser.TestUsedUnitName;

@@ -24,7 +24,9 @@
 				</D2X_File>
 				<D2X_File fileName="Testing.TestProgram.dpr">
 					<ParseFile>
-						<MainUnitName>Testing.TestProgram</MainUnitName>
+						<MainUnitName>
+							<UnitName>Testing.TestProgram</UnitName>
+						</MainUnitName>
 						<ProgramBlock lastToken="beginend">
 							<MainUsedUnitStatement>
 								<UsedUnitName>
@@ -37,5 +39,32 @@
 				</D2X_File>
 			</D2X_Pattern>
 		</D2X_Dir>
+		<D2X_Dir fileName="Config">
+			<D2X_Pattern fileName="ConfigPattern-TestingTest">
+				<D2X_File fileName="Config\Testing.TestDir.pas">
+					<ParseFile lastToken="end.">
+						<MainUnitName>
+							<UnitName>Testing.TestDir</UnitName>
+						</MainUnitName>
+						<InterfaceSection lastToken="interface" />
+						<ImplementationSection lastToken="implementation" />
+					</ParseFile>
+				</D2X_File>
+			</D2X_Pattern>
+			<D2X_SubDir fileName="Config\Test">
+				<D2X_Pattern fileName="Config\TestPattern-TestingTest">
+					<D2X_File fileName="Config\Test\Testing.TestSubDir.pas">
+						<ParseFile lastToken="end.">
+							<MainUnitName>
+								<UnitName>Testing.TestSubDir</UnitName>
+							</MainUnitName>
+							<InterfaceSection lastToken="interface" />
+							<ImplementationSection lastToken="implementation" />
+						</ParseFile>
+					</D2X_File>
+				</D2X_Pattern>
+			</D2X_SubDir>
+		</D2X_Dir>
+		<D2X_Dir fileName="Test" />
 	</D2X_Param>
 </D2X_Run>
