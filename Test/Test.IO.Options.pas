@@ -40,6 +40,10 @@ type
     procedure TestBaseFile;
     procedure TestBaseDir;
     procedure TestSimpleFile;
+    procedure TestGetNow;
+
+    procedure TestFull;
+    procedure TestFullBase;
 
   end;
 
@@ -194,6 +198,81 @@ begin
   fParams.ForCode('G').Parse('GGlobal');
   lDS := fFileOpts.ConfigFileOrExtn(pExtn);
   CheckIO(lDS, 'In\Global.Extn', 'Input Global .Extn');
+end;
+
+procedure TestTD2XFileOptions.TestFull;
+var
+  lD, lSD: ID2XDir;
+begin
+  lSD := nil;
+  lD := fFileOpts.BaseDir('Test');
+  try
+    CheckEqualsString('Test\', lD.Description, 'Dir Description');
+
+    CheckTrue(lD.FirstFile('File*.txt'), 'First File');
+    try
+      CheckEqualsString('Test\FileTest.txt', lD.Current, 'First File Name');
+
+      CheckFalse(lD.Next, 'Next File');
+    finally
+      lD.Close;
+    end;
+
+    CheckTrue(lD.FirstDir, 'First Dir');
+    try
+      CheckEqualsString('Test\DirTest', lD.Current, 'First Dir Name');
+      lSD := fFileOpts.BaseDir(lD.Current);
+      CheckEqualsString('Test\DirTest\', lSD.Description);
+
+      CheckFalse(lD.Next, 'Next Dir');
+    finally
+      lD.Close;
+    end;
+  finally
+    DisposeOf(lSD);
+    DisposeOf(lD);
+  end;
+end;
+
+procedure TestTD2XFileOptions.TestFullBase;
+var
+  lD, lSD: ID2XDir;
+begin
+  fParams.ForCode('B').Parse('B:Test');
+
+  lD := fFileOpts.BaseDir('DirTest');
+  try
+    CheckEqualsString('Test\DirTest\', lD.Description, 'Dir Description');
+
+    CheckTrue(lD.FirstFile('*.txt'), 'First File');
+    try
+      CheckEqualsString('DirTest\DirFileTest.txt', lD.Current, 'First File Name');
+
+      CheckFalse(lD.Next, 'Next File');
+    finally
+      lD.Close;
+    end;
+
+    CheckTrue(lD.FirstDir, 'First Dir');
+    try
+      CheckEqualsString('DirTest\SubDirTest', lD.Current, 'First Dir Name');
+      lSD := fFileOpts.BaseDir(lD.Current);
+      CheckEqualsString('Test\DirTest\SubDirTest\', lSD.Description, 'First Dir Description');
+
+      CheckFalse(lD.Next, 'Next Dir');
+    finally
+      lD.Close;
+    end;
+  finally
+    DisposeOf(lSD);
+    DisposeOf(lD);
+  end;
+end;
+
+procedure TestTD2XFileOptions.TestGetNow;
+begin
+  CheckEqualsString(FormatDateTime('yyyy-mmm-dd HH:nn:ss.zzz', Now), fFileOpts.GetNow,
+    'Get Now');
 end;
 
 procedure TestTD2XFileOptions.TestGobalName;

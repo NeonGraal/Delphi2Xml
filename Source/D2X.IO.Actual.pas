@@ -27,13 +27,13 @@ type
 
   TD2XDirPath = class(TD2XInterfaced, ID2XDir)
   private
-    fPath: string;
+    fBase, fPath: string;
     fSR: TSearchRec;
     fDirSearch: Boolean;
 
     function SkipNonDirs: Boolean;
   public
-    constructor Create(pPath: string);
+    constructor Create(pBase, pPath: string);
     destructor Destroy; override;
 
     function Description: string;
@@ -96,8 +96,10 @@ begin
   FindClose(fSR);
 end;
 
-constructor TD2XDirPath.Create(pPath: string);
+constructor TD2XDirPath.Create(pBase, pPath: string);
 begin
+  if pBase > '' then
+    fBase := IncludeTrailingPathDelimiter(pBase);
   if pPath > '' then
     fPath := IncludeTrailingPathDelimiter(pPath);
 end;
@@ -109,7 +111,7 @@ end;
 
 function TD2XDirPath.Description: string;
 begin
-  Result := fPath;
+  Result := fBase + fPath;
 end;
 
 destructor TD2XDirPath.Destroy;
@@ -120,14 +122,14 @@ end;
 
 function TD2XDirPath.Exists: Boolean;
 begin
-  Result := DirectoryExists(fPath);
+  Result := DirectoryExists(fBase + fPath);
 end;
 
 {$WARN SYMBOL_PLATFORM OFF}
 
 function TD2XDirPath.FirstDir: Boolean;
 begin
-  Result := FindFirst(fPath + '*', faAnyFile - faNormal - faTemporary, fSR) = 0;
+  Result := FindFirst(fBase + fPath + '*', faAnyFile - faNormal - faTemporary, fSR) = 0;
   fDirSearch := True;
   if Result then
     Result := SkipNonDirs;
@@ -137,7 +139,7 @@ end;
 function TD2XDirPath.FirstFile(pWildcard: string): Boolean;
 begin
 
-  Result := FindFirst(fPath + pWildcard, faAnyFile - faDirectory, fSR) = 0;
+  Result := FindFirst(fBase + fPath + pWildcard, faAnyFile - faDirectory, fSR) = 0;
   fDirSearch := False;
 end;
 

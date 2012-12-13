@@ -11,7 +11,7 @@ uses
 type
   TD2XParseMode = (pmFull, pmUses);
 
-  TD2XElapsedMode = (emNone, emQuiet, emTotal, emProcessing);
+  TD2XElapsedMode = (emNone, emTotal, emDir, emFile, emProcessing, emQuiet);
 
   TD2XResultPer = (rpFile, rpWildcard, rpSubDir, rpDir, rpParam, rpRun);
 

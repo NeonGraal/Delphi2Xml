@@ -102,7 +102,7 @@ procedure TestTD2XDirPath.SetUp;
 begin
   inherited;
 
-  fDir := TD2XDirPath.Create('Test');
+  fDir := TD2XDirPath.Create('', 'Test');
 end;
 
 procedure TestTD2XDirPath.TearDown;

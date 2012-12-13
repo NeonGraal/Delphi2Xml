@@ -151,14 +151,11 @@ end;
 destructor TD2XOptions.Destroy;
 begin
   fDuration.Stop;
-  case fElapsedMode.Value of
-    emNone:
-      ;
-    emQuiet:
-      Log('Processing finished!', []);
+  if fElapsedMode.Value = emQuiet then
+    Log('Processing finished!', [])
   else
-    Log('Total processing time %0.3f', [fDuration.Elapsed.TotalSeconds]);
-  end;
+    if fElapsedMode.Value > emNone then
+      Log('Total processing time %0.3f', [fDuration.Elapsed.TotalSeconds]);
 
   RemoveProxy;
   FreeAndNil(fParser);
@@ -286,14 +283,22 @@ function TD2XOptions.ProcessDirectory(pDir, pWildCards: string): Boolean;
 var
   lPath: ID2XDir;
   lFile: string;
+  lTimer: TStopwatch;
 begin
   Result := False;
+  lTimer := TStopwatch.Create;
 
   lPath := fIOFact.BaseDir(pDir);
   try
     for lFile in SplitString(pWildCards, ',') do
       if lPath.FirstFile(lFile) then
         try
+          if not lTimer.IsRunning then
+          begin
+            if fElapsedMode.Value >= emDir then
+              Log('Processing %s ... ', [pDir], fElapsedMode.Value > emDir);
+            lTimer.Start;
+          end;
           BeginResults('D2X_Pattern', rpWildcard);
           repeat
             Result := ProcessFile(lPath.Current) or Result;
@@ -303,6 +308,19 @@ begin
           lPath.Close;
         end;
   finally
+    if lTimer.IsRunning then
+    begin
+      lTimer.Stop;
+      case fElapsedMode.Value of
+        emDir:
+          Log('%0.3f', [lTimer.Elapsed.TotalSeconds]);
+        emFile, emProcessing:
+          Log('Processed %s in %0.3f', [pDir, lTimer.Elapsed.TotalSeconds]);
+        emQuiet:
+          Log('Processed %s', [pDir]);
+      end;
+
+    end;
     DisposeOf(lPath);
   end;
 end;
@@ -655,8 +673,8 @@ begin
     'Set Result per (F[ile], S[ubdir], D[ir], W[ildcard], P[aram], R[un])', rpFile,
     TD2X.CnvEnum<TD2XResultPer>, TD2X.ToLabel<TD2XResultPer>, nil);
   fElapsedMode := TD2XSingleParam<TD2XElapsedMode>.CreateParam('E', 'Show elapsed', '<mode>',
-    'Set Elapsed time display to be (N[one], Q[uiet], T[otal], P[rocessing])', emQuiet,
-    TD2X.CnvEnum<TD2XElapsedMode>, TD2X.ToLabel<TD2XElapsedMode>, nil);
+    'Set Elapsed time display to be (N[one], T[otal], D[ir], F[ile], P[rocessing], [Q]uiet)',
+    emQuiet, TD2X.CnvEnum<TD2XElapsedMode>, TD2X.ToLabel<TD2XElapsedMode>, nil);
 
   fXmlHandler := TD2XXmlHandler.CreateXml(
     function: Boolean
@@ -703,7 +721,7 @@ var
   lContent: string;
   lP: TD2XProcessor;
 begin
-  if fElapsedMode.Value <> emNone then
+  if fElapsedMode.Value >= emFile then
     Log('Processing %s ... ', [pFilename], False);
   lTimer := TStopwatch.StartNew;
   try
@@ -745,12 +763,10 @@ begin
   finally
     lTimer.Stop;
     case fElapsedMode.Value of
-      emNone:
-        ;
+      emFile, emProcessing:
+        Log('%0.3f', [lTimer.Elapsed.TotalSeconds]);
       emQuiet:
         Log('done', []);
-    else
-      Log('%0.3f', [lTimer.Elapsed.TotalSeconds]);
     end;
 
   end;
@@ -787,29 +803,6 @@ begin
   finally
     DisposeOf(lPath);
   end;
-  {
-   if System.SysUtils.FindFirst(lPath + '*', faAnyFile - faNormal - faTemporary, lFF) = 0 then
-   try
-   repeat
-   if (lFF.Name <> '.') and (lFF.Name <> '..') and ((lFF.Attr and faDirectory) <> 0) then
-   begin
-   lFile := IncludeTrailingPathDelimiter(pDir + lFF.Name);
-   if pMainDir then
-   BeginResults('D2X_Dir', rpDir)
-   else
-   BeginResults('D2X_SubDir', rpSubDir);
-   Result := ProcessDirectory(lFile, pWildCards) or Result;
-   if not pMainDir then
-   EndResults(ExcludeTrailingPathDelimiter(lFile), rpSubDir);
-   Result := RecurseDirectory(lFile, pWildCards, False) or Result;
-   if pMainDir then
-   EndResults(ExcludeTrailingPathDelimiter(lFile), rpDir);
-   end;
-   until System.SysUtils.FindNext(lFF) <> 0;
-   finally
-   System.SysUtils.FindClose(lFF);
-   end;
-  }
 end;
 
 procedure TD2XOptions.RemoveProxy;

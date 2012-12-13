@@ -29,6 +29,8 @@ type
     function GetStartDefines: TStringList;
 
   protected
+    fKeepTokens: Boolean;
+
     procedure NextToken; override;
 
     procedure DoAddAttribute(pName, pValue: string); overload;
@@ -52,6 +54,7 @@ type
     procedure ProcessString(pFilename, pContents: string);
 
     property LastTokens: string read fLastTokens write fLastTokens;
+    property KeepTokens: Boolean read fKeepTokens;
     property StartDefines: TStringList read GetStartDefines;
 
     property OnProgress: TD2XProgressEvent read fOnProgress write fOnProgress;
@@ -1621,6 +1624,7 @@ begin
   fLength := 0;
   fProcessed := 0;
   fOnProgress := nil;
+  fKeepTokens := False;
 end;
 
 destructor TD2XDefinesParser.Destroy;
@@ -1676,8 +1680,13 @@ end;
 procedure TD2XDefinesParser.MainUsedUnitExpression;
 begin
   fLastTokens := '';
-  inherited;
-  DoAddAttribute('file');
+  fKeepTokens := true;
+  try
+    inherited;
+    DoAddAttribute('file');
+  finally
+    fKeepTokens := False;
+  end;
 end;
 
 procedure TD2XDefinesParser.NextToken;

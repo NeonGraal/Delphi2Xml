@@ -1,1 +1,1 @@
-Delphi2Xml -g:SkipXml @All.prm
+Delphi2Xml -gSkipXml @All.prm

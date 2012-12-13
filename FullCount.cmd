@@ -1,1 +1,1 @@
-Delphi2Xml -g:FullXml -s- @All.prm
+Delphi2Xml -gFullXml -s- @All.prm

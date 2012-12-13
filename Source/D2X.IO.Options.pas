@@ -99,9 +99,9 @@ end;
 function TD2XFileOptions.BaseDir(pFileOrDir: string): ID2XDir;
 begin
   if fInputBase.FlagValue then
-    Result := TD2XDirPath.Create(fInputBase.Value + pFileOrDir)
+    Result := TD2XDirPath.Create(fInputBase.Value, pFileOrDir)
   else
-    Result := TD2XDirPath.Create(pFileOrDir);
+    Result := TD2XDirPath.Create('', pFileOrDir);
 end;
 
 function TD2XFileOptions.BaseFile(pFileOrDir: string): ID2XFile;

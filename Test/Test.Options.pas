@@ -29,7 +29,7 @@ const
   INPUT_PROCESSING = 'Processing (Input) ... done';
   UNIT_PROCESSING = 'Processing Testing.TestUnit.pas ... done';
   PROGRAM_PROCESSING = 'Processing Testing.TestProgram.dpr ... done';
-  BOTH_PROCESSING = UNIT_PROCESSING + ' ' + PROGRAM_PROCESSING;
+  BOTH_PROCESSING = 'Processing ... ' + UNIT_PROCESSING + ' ' + PROGRAM_PROCESSING + ' Processed';
   EXPECTED_SHOW_OPTIONS = 'Usage: %s [ Option | @Params | mFilename | Wildcard ] ... ' +
     'Options: Default Description ? Show valid options ' +
     '! Reset all options to defaults @<file> Report/Output Current options ' +
@@ -43,7 +43,7 @@ const
   //    'B[+-]:<dir> -(.\) Use <dir> as a base for all Input files ' +
     'M<mode> Full Set Parsing mode (F[ull], U[ses]) ' +
     'P<per> File Set Result per (F[ile], S[ubdir], D[ir], W[ildcard], P[aram], R[un]) ' +
-    'E<mode> Quiet Set Elapsed time display to be (N[one], Q[uiet], T[otal], P[rocessing]) ' +
+    'E<mode> Quiet Set Elapsed time display to be (N[one], T[otal], D[ir], F[ile], P[rocessing], [Q]uiet) ' +
     'X[+-]:<dir> :Xml\ Generate XML files into current or given <dir> ' +
     'W[+-]:<dir> -(Defines\) Generate Final Defines files into current or given <dir> ' +
     'U[+-]:<f/e> :.used Report Defines Used into <f/e> ' +
@@ -231,8 +231,8 @@ type
 
 const
   STREAM_PROCESSING = 'Processing (Stream) ... done';
-  DIRECTORY_PROCESSING = 'Processing Config\Testing.TestDir.pas ... done';
-  RECURSE_PROCESSING = 'Processing Config\Test\Testing.TestSubDir.pas ... done';
+  DIRECTORY_PROCESSING = 'Processing Config ... Processing Config\Testing.TestDir.pas ... done Processed Config';
+  RECURSE_PROCESSING = 'Processing Config\Test ... Processing Config\Test\Testing.TestSubDir.pas ... done Processed Config\Test';
   ALL_PROCESSING = BOTH_PROCESSING + ' ' + DIRECTORY_PROCESSING + ' ' + RECURSE_PROCESSING;
   ALTERED_REPORT_OPTIONS =
     'Current option settings: Verbose + Log Errors + Log Not Supp + Final Token + ' +
@@ -995,7 +995,7 @@ end;
 
 procedure TestTD2XOptions.TestProcessDirectory;
 begin
-  Check(fOpts.ProcessDirectory('Config\', 'Testing.Test*'), 'Process Directory');
+  Check(fOpts.ProcessDirectory('Config', 'Testing.Test*'), 'Process Directory');
   CheckLog(DIRECTORY_PROCESSING, 'Process Directory');
   CheckErrorLog('');
 end;

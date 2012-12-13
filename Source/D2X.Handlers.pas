@@ -460,8 +460,8 @@ procedure TD2XXmlHandler.EndMethod(pMethod: string);
 begin
   if Assigned(fXmlNode) then
   begin
-    if Assigned(fFinalToken) and Assigned(fParser) and fFinalToken and
-      (Length(fParser.LastTokens) > 1) then
+    if Assigned(fFinalToken) and fFinalToken and Assigned(fParser) and
+      not fParser.KeepTokens and (Length(fParser.LastTokens) > 1) then
       AddAttr('lastToken');
 
     fXmlNode.Xml;

@@ -1,1 +1,1 @@
-Delphi2Xml -g:Defines -x- -w @All.prm
+Delphi2Xml -gDefines -x- -w @All.prm
