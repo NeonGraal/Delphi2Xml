@@ -155,7 +155,7 @@ begin
     Log('Processing finished!', [])
   else
     if fElapsedMode.Value > emNone then
-      Log('Total processing time %0.3f', [fDuration.Elapsed.TotalSeconds]);
+      Log('Total processing time %0.3f', [fIOFact.GetDuration(fDuration)]);
 
   RemoveProxy;
   FreeAndNil(fParser);
@@ -313,9 +313,9 @@ begin
       lTimer.Stop;
       case fElapsedMode.Value of
         emDir:
-          Log('%0.3f', [lTimer.Elapsed.TotalSeconds]);
+          Log('%0.3f', [fIOFact.GetDuration(lTimer)]);
         emFile, emProcessing:
-          Log('Processed %s in %0.3f', [pDir, lTimer.Elapsed.TotalSeconds]);
+          Log('Processed %s in %0.3f', [pDir, fIOFact.GetDuration(lTimer)]);
         emQuiet:
           Log('Processed %s', [pDir]);
       end;
@@ -639,6 +639,16 @@ begin
     for lP in fProcs do
       lP.SetParser(fParser);
   end;
+
+  if fElapsedMode.Value = emProcessing then
+  begin
+    fParser.OnProgress := procedure(pProgress: Integer)
+      begin
+        Log('%3d%%'#8#8#8#8, [pProgress], False);
+      end;
+  end
+  else
+    fParser.OnProgress := nil;
 end;
 
 procedure TD2XOptions.InitProcessors(pFileOpts: ID2XIOFactory);
@@ -764,7 +774,7 @@ begin
     lTimer.Stop;
     case fElapsedMode.Value of
       emFile, emProcessing:
-        Log('%0.3f', [lTimer.Elapsed.TotalSeconds]);
+        Log('%0.3f', [fIOFact.GetDuration(lTimer)]);
       emQuiet:
         Log('done', []);
     end;

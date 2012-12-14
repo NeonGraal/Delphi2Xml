@@ -6,6 +6,7 @@ uses
   D2X,
   D2X.Param,
   System.Classes,
+  System.Diagnostics,
   System.SysUtils;
 
 type
@@ -44,6 +45,7 @@ type
     procedure SetGlobalValidator(pValidator: TD2XSingleParam<String>.TspValidator);
     procedure RegisterParams(pParams: TD2XParams);
     function GetNow: string;
+    function GetDuration(pWatch: TStopwatch): Double;
   end;
 
   TD2XFileRef = reference to function: ID2XFile;

@@ -8,6 +8,7 @@ uses
   D2X.Param,
   D2X.Params,
   System.Classes,
+  System.Diagnostics,
   System.SysUtils;
 
 type
@@ -23,6 +24,7 @@ type
     procedure SetGlobalValidator(pValidator: TD2XSingleParam<string>.TspValidator);
     procedure RegisterParams(pParams: TD2XParams);
     function GetNow: string;
+    function GetDuration(pWatch: TStopwatch): Double;
 
   private
     fLogBase: TD2XFlaggedStringParam;
@@ -80,6 +82,11 @@ begin
 end;
 
 { TD2XFileOptions }
+
+function TD2XFileOptions.GetDuration(pWatch: TStopwatch): Double;
+begin
+  Result := pWatch.Elapsed.TotalSeconds;
+end;
 
 function TD2XFileOptions.GetGlobalName: string;
 begin

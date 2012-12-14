@@ -29,7 +29,8 @@ const
   INPUT_PROCESSING = 'Processing (Input) ... done';
   UNIT_PROCESSING = 'Processing Testing.TestUnit.pas ... done';
   PROGRAM_PROCESSING = 'Processing Testing.TestProgram.dpr ... done';
-  BOTH_PROCESSING = 'Processing ... ' + UNIT_PROCESSING + ' ' + PROGRAM_PROCESSING + ' Processed';
+  BOTH_PROCESSING = 'Processing ... ' + UNIT_PROCESSING + ' ' + PROGRAM_PROCESSING +
+    ' Processed';
   EXPECTED_SHOW_OPTIONS = 'Usage: %s [ Option | @Params | mFilename | Wildcard ] ... ' +
     'Options: Default Description ? Show valid options ' +
     '! Reset all options to defaults @<file> Report/Output Current options ' +
@@ -43,8 +44,8 @@ const
   //    'B[+-]:<dir> -(.\) Use <dir> as a base for all Input files ' +
     'M<mode> Full Set Parsing mode (F[ull], U[ses]) ' +
     'P<per> File Set Result per (F[ile], S[ubdir], D[ir], W[ildcard], P[aram], R[un]) ' +
-    'E<mode> Quiet Set Elapsed time display to be (N[one], T[otal], D[ir], F[ile], P[rocessing], [Q]uiet) ' +
-    'X[+-]:<dir> :Xml\ Generate XML files into current or given <dir> ' +
+    'E<mode> Quiet Set Elapsed time display to be (N[one], T[otal], D[ir], F[ile], P[rocessing], [Q]uiet) '
+    + 'X[+-]:<dir> :Xml\ Generate XML files into current or given <dir> ' +
     'W[+-]:<dir> -(Defines\) Generate Final Defines files into current or given <dir> ' +
     'U[+-]:<f/e> :.used Report Defines Used into <f/e> ' +
     'C[+-]:<f/e> :.cnt Report Min/Max Children into <f/e> ' +
@@ -68,6 +69,7 @@ uses
   D2X.Params,
   System.StrUtils,
   System.SysUtils,
+  System.Types,
   Test.Param,
   Test.Utils,
   Winapi.Windows;
@@ -105,6 +107,7 @@ type
   published
     procedure TestNotSupported;
     procedure TestLogErrors;
+    procedure TestElapsedMode;
 
     procedure TestCountChildren;
     procedure TestDefinesUsed;
@@ -231,8 +234,10 @@ type
 
 const
   STREAM_PROCESSING = 'Processing (Stream) ... done';
-  DIRECTORY_PROCESSING = 'Processing Config ... Processing Config\Testing.TestDir.pas ... done Processed Config';
-  RECURSE_PROCESSING = 'Processing Config\Test ... Processing Config\Test\Testing.TestSubDir.pas ... done Processed Config\Test';
+  DIRECTORY_PROCESSING =
+    'Processing Config ... Processing Config\Testing.TestDir.pas ... done Processed Config';
+  RECURSE_PROCESSING =
+    'Processing Config\Test ... Processing Config\Test\Testing.TestSubDir.pas ... done Processed Config\Test';
   ALL_PROCESSING = BOTH_PROCESSING + ' ' + DIRECTORY_PROCESSING + ' ' + RECURSE_PROCESSING;
   ALTERED_REPORT_OPTIONS =
     'Current option settings: Verbose + Log Errors + Log Not Supp + Final Token + ' +
@@ -1084,6 +1089,130 @@ begin
   CheckLog('', 'Process Unit');
 
   fOpts.EndProcessing;
+end;
+
+procedure TestTD2XOptionsSpecific.TestElapsedMode;
+  function PJ(pA: array of string): string;
+  var
+    lS, lSep: string;
+  begin
+    Result := '';
+    lSep := '';
+    for lS in pA do
+      if lS > '' then
+      begin
+        Result := Result + lSep + lS;
+        lSep := ' ';
+      end;
+  end;
+  function PB(pS: string): string;
+  begin
+    Result := PJ(['Processing', pS, '...']);
+  end;
+  function PE(pS: string): string;
+  begin
+    Result := PJ(['Processed', pS, 'in']);
+  end;
+  function PF(pS: string): string;
+  begin
+    Result := pS + ' 1.234';
+  end;
+  function PP(pS: string; pPs: array of integer): string;
+  var
+    lI: integer;
+  begin
+    Result := pS + ' ';
+    for lI in pPs do
+      Result := Result + Format('%3d%%%%'#8#8#8#8, [lI]);
+    Result := Result + '1.234';
+  end;
+  function PD(pDir: string; pFiles: array of string): string;
+  var
+    lA: array of string;
+    i: integer;
+  begin
+    SetLength(lA, Length(pFiles) + 2);
+    lA[0] := PB(pDir);
+    for i := 0 to High(pFiles) do
+      if pDir > '' then
+        lA[i + 1] := PF(PB(pDir + '\' + pFiles[i]))
+      else
+        lA[i + 1] := PF(PB(pFiles[i]));
+    lA[High(lA)] := PF(PE(pDir));
+    Result := PJ(lA);
+  end;
+  function PDP(pDir: string; pFiles: array of string;
+    pPercs: array of TIntegerDynArray): string;
+  var
+    lA: array of string;
+    i: integer;
+  begin
+    SetLength(lA, Length(pFiles) + 2);
+    lA[0] := PB(pDir);
+    for i := 0 to High(pFiles) do
+      if pDir > '' then
+        lA[i + 1] := PP(PB(pDir + '\' + pFiles[i]), pPercs[i])
+      else
+        lA[i + 1] := PP(PB(pFiles[i]), pPercs[i]);
+    lA[High(lA)] := PF(PE(pDir));
+    Result := ReduceString(PJ(lA));
+  end;
+  procedure SA(var pA: TIntegerDynArray; pS: array of Integer);
+  var
+    i: integer;
+  begin
+    SetLength(pA, Length(pS));
+    for i := 0 to High(pS) do
+      pA[i] := pS[i];
+  end;
+
+var
+  lP: array of TIntegerDynArray;
+  lC: array of TIntegerDynArray;
+  lT: array of TIntegerDynArray;
+
+begin
+  Check(fOpts.ProcessOption('EQ'), 'Return Value 1');
+  fB.Clear;
+  Check(fOpts.ProcessParam('Testing.Test*', 'Count Children'), 'Process Units');
+  fOpts.EndProcessing;
+  CheckLog(ALL_PROCESSING, 'Elapsed Quiet');
+
+  Check(fOpts.ProcessOption('ER'), 'Return Value 1');
+  fB.Clear;
+  Check(fOpts.ProcessParam('Testing.Test*', 'Count Children'), 'Process Units');
+  fOpts.EndProcessing;
+  CheckLog(ALL_PROCESSING, 'Elapsed Run');
+
+  Check(fOpts.ProcessOption('ED'), 'Return Value 1');
+  fB.Clear;
+  Check(fOpts.ProcessParam('Testing.Test*', 'Count Children'), 'Process Units');
+  fOpts.EndProcessing;
+  CheckLog(PJ([PF(PB('')), PF(PB('Config')), PF(PB('Config\Test'))]), 'Elapsed Dir');
+
+  Check(fOpts.ProcessOption('EF'), 'Return Value 1');
+  fB.Clear;
+  Check(fOpts.ProcessParam('Testing.Test*', 'Count Children'), 'Process Units');
+  fOpts.EndProcessing;
+  CheckLog(PJ([PD('', ['Testing.TestUnit.pas', 'Testing.TestProgram.dpr']),
+        PD('Config', ['Testing.TestDir.pas']), PD('Config\Test', ['Testing.TestSubDir.pas'])]),
+    'Elapsed File');
+
+  Check(fOpts.ProcessOption('EP'), 'Return Value 1');
+  fB.Clear;
+  Check(fOpts.ProcessParam('Testing.Test*', 'Count Children'), 'Process Units');
+  fOpts.EndProcessing;
+  SetLength(lP, 2);
+  SA(lP[0], [1, 3, 6, 9, 10, 12, 13, 15, 31, 32, 34, 37, 47, 54, 65, 75, 98, 99, 100]);
+  SA(lP[1], [7, 17, 18, 30, 31, 37, 46, 47, 56, 60, 86, 87, 94, 98, 100]);
+  SetLength(lC, 1);
+  SA(lC[0], [7, 23, 25, 39, 41, 60, 90, 98, 100]);
+  SetLength(lT, 1);
+  SA(lT[0], [7, 22, 24, 42, 44, 62, 90, 98, 100]);
+  CheckLog(PJ([PDP('', ['Testing.TestUnit.pas', 'Testing.TestProgram.dpr'], lP),
+        PDP('Config', ['Testing.TestDir.pas'], lC),
+        PDP('Config\Test', ['Testing.TestSubDir.pas'], lT)]),
+    'Elapsed Processing');
 end;
 
 procedure TestTD2XOptionsSpecific.TestLoadSkipped;

@@ -1734,6 +1734,8 @@ begin
     lMS.Write(PChar(pContents)^, lMS.Size);
 
     Run(pFilename, lMS);
+    if Assigned(fOnProgress) and (fProcessed < 100) then
+      fOnProgress(100);
   finally
     lMS.Free;
   end;

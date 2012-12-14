@@ -7,6 +7,7 @@ uses
   D2X.IO,
   D2X.Param,
   System.Classes,
+  System.Diagnostics,
   System.Generics.Collections,
   System.SysUtils,
   System.Types;
@@ -77,6 +78,7 @@ type
     procedure SetGlobalValidator(pValidator: TD2XSingleParam<string>.TspValidator);
     procedure RegisterParams(pParams: TD2XParams);
     function GetNow: string;
+    function GetDuration(pWatch: TStopwatch): Double;
 
     function CheckFiles: TArray<string>;
     function CheckOutput(pFile: string): string;
@@ -520,6 +522,11 @@ begin
   inherited;
   if lMsg > '' then
     raise ETestIOException.Create(lMsg);
+end;
+
+function TTestFactory.GetDuration(pWatch: TStopwatch): Double;
+begin
+  Result := 1.234;
 end;
 
 function TTestFactory.GetNow: string;
