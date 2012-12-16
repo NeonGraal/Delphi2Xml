@@ -43,7 +43,7 @@ type
     procedure TestProcessParamInput;
   end;
 
-{ TTestRunParam }
+  { TTestRunParam }
 
 function TTestRunParam.GetDefines: TStringList;
 begin

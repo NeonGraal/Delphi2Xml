@@ -82,7 +82,7 @@ begin
   except
     on E: Exception do
       Log('EXCEPTION (%s) processing %s@%d "%s" : %s', [E.ClassName, pFrom, pIdx, pStr,
-        E.Message]);
+          E.Message]);
   end;
 end;
 

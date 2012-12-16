@@ -57,7 +57,7 @@ type
     fBaseDirs: TDictionary<string, TATestDir>;
     fOutputFiles: TDictionary<string, string>;
 
-    fGlobalName: String;
+    fGlobalName: string;
     fValidator: TD2XSingleParam<string>.TspValidator;
 
     procedure InitFiles;
@@ -194,7 +194,7 @@ procedure TestID2XFile.TestWriteTo;
 begin
   with fFile.WriteTo do
   begin
-    Write('Testing');
+    write('Testing');
     Flush;
   end;
   CheckEqualsString('Testing', fFile.Written, 'Write To');
@@ -555,8 +555,10 @@ begin
   fBaseFiles.Add('Testing.Test*', '');
   fBaseFiles.Add('Testing.TestUnit.pas', TESTING_UNIT);
   fBaseFiles.Add('Testing.TestProgram.dpr', TESTING_PROGRAM);
-  fBaseFiles.Add('Config\Testing.TestDir.pas', 'unit Testing.TestDir; interface implementation end.');
-  fBaseFiles.Add('Config\Test\Testing.TestSubDir.pas', 'unit Testing.TestSubDir; interface implementation end.');
+  fBaseFiles.Add('Config\Testing.TestDir.pas',
+    'unit Testing.TestDir; interface implementation end.');
+  fBaseFiles.Add('Config\Test\Testing.TestSubDir.pas',
+    'unit Testing.TestSubDir; interface implementation end.');
 
   fBaseDirs.Add('', TATestDir.Create(['Config', 'Test'], ['Testing.TestUnit.pas',
         'Testing.TestProgram.dpr']));
@@ -577,6 +579,7 @@ begin
 
 end;
 {$HINTS OFF}
+
 procedure TTestFactory.SetGlobalName(const pName: string);
 var
   lRes: Boolean;
@@ -586,6 +589,7 @@ begin
     lRes := fValidator(pName);
 end;
 {$HINTS ON}
+
 procedure TTestFactory.SetGlobalValidator(pValidator: TD2XSingleParam<string>.TspValidator);
 begin
   fValidator := pValidator;

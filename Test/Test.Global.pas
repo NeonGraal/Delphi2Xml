@@ -671,15 +671,8 @@ begin
 end;
 
 procedure TStringTestCase.TearDown;
-var
-  lDS: TD2XInterfaced;
 begin
-  if Assigned(fDS) then
-  begin
-    lDS := fDS as TD2XInterfaced;
-    fDS := nil;
-    lDS.Free;
-  end;
+  DisposeOf(fDS);
   FreeAndNil(fW);
   FreeAndNil(fS);
   FreeAndNil(fL);

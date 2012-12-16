@@ -9,6 +9,7 @@ uses
   D2X.IO,
   D2X.IO.Options,
   D2X.Param,
+  System.Diagnostics,
   System.SysUtils,
   Test.Param,
   TestFramework;
@@ -41,6 +42,7 @@ type
     procedure TestBaseDir;
     procedure TestSimpleFile;
     procedure TestGetNow;
+    procedure TestGetDuration;
 
     procedure TestFull;
     procedure TestFullBase;
@@ -267,6 +269,16 @@ begin
     DisposeOf(lSD);
     DisposeOf(lD);
   end;
+end;
+
+procedure TestTD2XFileOptions.TestGetDuration;
+var
+  lW: TStopWatch;
+begin
+  lW := TStopwatch.StartNew;
+  Sleep(1234);
+  lW.Stop;
+  CheckEquals(lW.Elapsed.TotalSeconds, fFileOpts.GetDuration(lW), 'Duration seconds');
 end;
 
 procedure TestTD2XFileOptions.TestGetNow;

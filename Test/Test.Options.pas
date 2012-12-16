@@ -125,6 +125,7 @@ type
     procedure TestBeginResults;
     procedure TestEndResults;
     procedure TestProcessStream;
+    procedure TestProcessStreamError;
     procedure TestProcessInput;
     procedure TestProcessFile;
     procedure TestProcessDirectory;
@@ -1035,16 +1036,19 @@ end;
 
 procedure TestTD2XOptions.TestProcessStream;
 begin
+  fS.WriteString('program Testing.TestProgram; uses TestUnit in ''TestUnit.pas''; begin end.');
+  fS.Position := 0;
+  Check(fOpts.ProcessStream('(Stream)', fDS.ReadFrom), 'Process Stream');
+  CheckLog(STREAM_PROCESSING, 'Process Stream');
+end;
+
+procedure TestTD2XOptions.TestProcessStreamError;
+begin
   fS.WriteString('program ');
   fS.Position := 0;
   CheckFalse(fOpts.ProcessStream('(Stream)', fDS.ReadFrom), 'Process Stream');
   CheckLog(STREAM_PROCESSING, 'Process Stream');
   CheckErrorLog('(ESyntaxError)''Identifier'' expected found ''end of file''');
-
-  fS.WriteString('Testing.Program; uses TestUnit in ''TestUnit.pas''; begin end.');
-  fS.Position := 0;
-  Check(fOpts.ProcessStream('(Stream)', fDS.ReadFrom), 'Process Stream');
-  CheckLog(STREAM_PROCESSING, 'Process Stream');
 end;
 
 procedure TestTD2XOptions.TestRecurse;
@@ -1157,7 +1161,7 @@ procedure TestTD2XOptionsSpecific.TestElapsedMode;
     lA[High(lA)] := PF(PE(pDir));
     Result := ReduceString(PJ(lA));
   end;
-  procedure SA(var pA: TIntegerDynArray; pS: array of Integer);
+  procedure SA(var pA: TIntegerDynArray; pS: array of integer);
   var
     i: integer;
   begin
@@ -1210,9 +1214,8 @@ begin
   SetLength(lT, 1);
   SA(lT[0], [7, 22, 24, 42, 44, 62, 90, 98, 100]);
   CheckLog(PJ([PDP('', ['Testing.TestUnit.pas', 'Testing.TestProgram.dpr'], lP),
-        PDP('Config', ['Testing.TestDir.pas'], lC),
-        PDP('Config\Test', ['Testing.TestSubDir.pas'], lT)]),
-    'Elapsed Processing');
+        PDP('Config', ['Testing.TestDir.pas'], lC), PDP('Config\Test',
+          ['Testing.TestSubDir.pas'], lT)]), 'Elapsed Processing');
 end;
 
 procedure TestTD2XOptionsSpecific.TestLoadSkipped;
