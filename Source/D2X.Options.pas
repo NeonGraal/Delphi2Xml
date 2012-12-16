@@ -466,7 +466,7 @@ begin
     raise ED2XOptionsException.Create('Invalid option: ' + pOpt)
   else
   begin
-    lPrm := fParams.ForCode(Copy(pOpt, 1, 1));
+    lPrm := fParams.ForCode(pOpt);
     if Assigned(lPrm) then
       if lPrm.Parse(pOpt) then
         Result := True
@@ -531,7 +531,7 @@ begin
       if pStr > '' then
         if StartsText('-', pStr) and (Length(pStr) > 1) then
         begin
-          lPrm := fParams.ForCode(Copy(pStr, 2, 1));
+          lPrm := fParams.ForCode(Copy(pStr, 2, Length(pStr)));
           if Assigned(lPrm) then
             lPrm.Report(Self)
           else
@@ -564,6 +564,7 @@ var
   lDefinesUsed: TD2XFlaggedStringParam;
   lSkipMethods: TD2XFlaggedStringParam;
   lCountChildren: TD2XFlaggedStringParam;
+  lCountDefines: TD2XFlaggedStringParam;
 
   function NilFileRef: TD2XFileRef;
   begin
@@ -579,8 +580,10 @@ begin
     'Report Defines Used into <f/e>', '.used', True, ConvertExtn, nil, nil);
   lSkipMethods := TD2XFlaggedStringParam.CreateFlagStr('S', 'Skipped Methods', '<f/e>',
     'Load Skipped Methods from <f/e>', '.skip', True, ConvertFile, nil, nil);
-  lCountChildren := TD2XFlaggedStringParam.CreateFlagStr('C', 'Count Children', '<f/e>',
-    'Report Min/Max Children into <f/e>', '.cnt', True, ConvertExtn, nil, nil);
+  lCountChildren := TD2XFlaggedStringParam.CreateFlagStr('CC', 'Count Children', '<f/e>',
+    'Report Min/Max Children into <f/e>', '.chld', True, ConvertExtn, nil, nil);
+  lCountDefines := TD2XFlaggedStringParam.CreateFlagStr('CD', 'Count Defines', '<f/e>',
+    'Report Defines Used into <f/e>', '.defs', True, ConvertExtn, nil, nil);
 
   lParserDefinesHandler := TD2XParserDefinesHandler.CreateDefines(fParserDefines.Defines);
 
@@ -591,12 +594,15 @@ begin
     begin
       Result := fIOFact.ConfigFileOrExtn(lSkipMethods.Value);
     end).SetProcessingOutput(MakeFileRef(lSkipMethods, '.log')));
-  fProcs.Add(TD2XHandlerProcessor.CreateClass(lCountChildren, TD2XCountHandler)
+  fProcs.Add(TD2XHandlerProcessor.CreateClass(lCountChildren, TD2XCountChildrenHandler)
     .SetFileInput(NilFileRef()).SetFileOutput(NilFileRef())
     .SetProcessingOutput(MakeFileRef(lCountChildren)));
+  fProcs.Add(TD2XHandlerProcessor.CreateClass(lCountDefines, TD2XCountDefinesHandler)
+    .SetFileOutput(NilFileRef()).SetProcessingOutput(MakeFileRef(lCountDefines)));
   fProcs.Add(TD2XHandlerProcessor.CreateHandler(fParserDefines, lParserDefinesHandler, True));
 
-  fParams.AddRange([lDefinesUsed, lCountChildren, lSkipMethods, fParserDefines]);
+  fParams.AddRange([lDefinesUsed, lCountChildren, lCountDefines, lSkipMethods,
+    fParserDefines]);
 end;
 
 procedure TD2XOptions.InitParser;

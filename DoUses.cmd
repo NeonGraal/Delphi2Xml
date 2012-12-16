@@ -1,1 +1,1 @@
-Delphi2Xml -eP -mUses -pDir @All.prm
+Delphi2Xml -mUses -pDir @All.prm

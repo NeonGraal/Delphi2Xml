@@ -48,7 +48,8 @@ const
     + 'X[+-]:<dir> :Xml\ Generate XML files into current or given <dir> ' +
     'W[+-]:<dir> -(Defines\) Generate Final Defines files into current or given <dir> ' +
     'U[+-]:<f/e> :.used Report Defines Used into <f/e> ' +
-    'C[+-]:<f/e> :.cnt Report Min/Max Children into <f/e> ' +
+    'CC[+-]:<f/e> :.chld Report Min/Max Children into <f/e> ' +
+    'CD[+-]:<f/e> :.defs Report Defines Used into <f/e> ' +
     'S[+-]:<f/e> :.skip Load Skipped Methods from <f/e> ' +
     'D[+-!:]<def> Add(+), Remove(-), Clear(!) or Load(:) Defines ' +
     'Definitions: <f/e> If value begins with "." is appended to global name to give file name';
@@ -58,7 +59,7 @@ const
   //    'Log dir :Log\ Base dir -(.\) Parse mode Full Results per File Show elapsed Quiet ' +
     'Recurse - Parse mode Full Results per File Show elapsed Quiet ' +
     'Generate XML :Xml\ Write Defines -(Defines\) Defines Used :.used ' +
-    'Count Children :.cnt Skipped Methods :.skip ';
+    'Count Children :.chld Count Defines :.defs Skipped Methods :.skip ';
   DEFAULT_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Use default Defines';
 
 implementation
@@ -110,6 +111,7 @@ type
     procedure TestElapsedMode;
 
     procedure TestCountChildren;
+    procedure TestCountDefines;
     procedure TestDefinesUsed;
     procedure TestLoadSkipped;
     procedure TestWriteDefines;
@@ -147,12 +149,18 @@ type
   published
     procedure TestParseOptionA;
     //    procedure TestParseOptionB;
-    procedure TestParseOptionC;
-    procedure TestParseOptionCBlank;
-    procedure TestParseOptionCExtn;
-    procedure TestParseOptionCOff;
-    procedure TestParseOptionCOn;
-    procedure TestParseOptionCFile;
+    procedure TestParseOptionCC;
+    procedure TestParseOptionCCBlank;
+    procedure TestParseOptionCCExtn;
+    procedure TestParseOptionCCOff;
+    procedure TestParseOptionCCOn;
+    procedure TestParseOptionCCFile;
+    procedure TestParseOptionCD;
+    procedure TestParseOptionCDBlank;
+    procedure TestParseOptionCDExtn;
+    procedure TestParseOptionCDOff;
+    procedure TestParseOptionCDOn;
+    procedure TestParseOptionCDFile;
     procedure TestParseOptionD;
     procedure TestParseOptionDAdd;
     procedure TestParseOptionDDelete;
@@ -246,13 +254,14 @@ const
   //    'Base dir :Test\ Parse mode Full Results per File Show elapsed Quiet ' +
     'Recurse + Parse mode Full Results per File Show elapsed Quiet ' +
     'Generate XML :Test\ Write Defines :Test\ Defines Used :.Test Count Children :.Test ' +
-    'Skipped Methods :Test.skip Use these Defines: Tango, Uniform';
+    'Count Defines :.Test Skipped Methods :Test.skip Use these Defines: Tango, Uniform';
   ZERO_REPORT_OPTIONS =
     'Current option settings: Verbose - Log Errors - Log Not Supp - Final Token - ' +
   //    'Recurse - Timestamp - Global name Config dir - Log dir - Base dir - ' +
   //    'Parse mode Full Results per File Show elapsed None Generate XML - ' +
     'Recurse - Parse mode Full Results per File Show elapsed None Generate XML - ' +
-    'Write Defines - Defines Used - Count Children - Skipped Methods - Use default Defines';
+    'Write Defines - Defines Used - Count Children - Count Defines - Skipped Methods - ' +
+    'Use default Defines';
   EMPTY_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Use NO Defines';
 {$IFDEF WIN32}
   DEFINED_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Use these Defines: ' +
@@ -400,11 +409,16 @@ end;
 
 procedure TestTD2XOptionsGeneral.SetAllOptions;
 var
-  C: Char;
+  C, C1: Char;
 begin
   for C := 'A' to 'Z' do
+  begin
     if not fOpts.ProcessOption(C + ':Test') then
       fOpts.ProcessOption(C + '+');
+    for C1 := 'A' to 'Z' do
+      if not fOpts.ProcessOption(C + C1 + ':Test') then
+        fOpts.ProcessOption(C + C1 + '+');
+  end;
   fOpts.ProcessOption('T-');
   fB.Clear;
 end;
@@ -541,34 +555,64 @@ begin
   CheckUnknown('A');
 end;
 
-procedure TestTD2XOptionsAll.TestParseOptionC;
+procedure TestTD2XOptionsAll.TestParseOptionCC;
 begin
-  CheckSimple('C', 'Count Children :.cnt');
+  CheckSimple('CC', 'Count Children :.chld');
 end;
 
-procedure TestTD2XOptionsAll.TestParseOptionCBlank;
+procedure TestTD2XOptionsAll.TestParseOptionCCBlank;
 begin
-  CheckSimple('C:', 'Count Children :.cnt');
+  CheckSimple('CC:', 'Count Children :.chld');
 end;
 
-procedure TestTD2XOptionsAll.TestParseOptionCExtn;
+procedure TestTD2XOptionsAll.TestParseOptionCCExtn;
 begin
-  CheckSimple('C:Extn', 'Count Children :.Extn');
+  CheckSimple('CC:Extn', 'Count Children :.Extn');
 end;
 
-procedure TestTD2XOptionsAll.TestParseOptionCOff;
+procedure TestTD2XOptionsAll.TestParseOptionCCOff;
 begin
-  CheckSimple('C-', 'Count Children -(.cnt)');
+  CheckSimple('CC-', 'Count Children -(.chld)');
 end;
 
-procedure TestTD2XOptionsAll.TestParseOptionCOn;
+procedure TestTD2XOptionsAll.TestParseOptionCCOn;
 begin
-  CheckSimple('C+', 'Count Children :.cnt');
+  CheckSimple('CC+', 'Count Children :.chld');
 end;
 
-procedure TestTD2XOptionsAll.TestParseOptionCFile;
+procedure TestTD2XOptionsAll.TestParseOptionCCFile;
 begin
-  CheckSimple('C:File.Extn', 'Count Children :File.Extn');
+  CheckSimple('CC:File.Extn', 'Count Children :File.Extn');
+end;
+
+procedure TestTD2XOptionsAll.TestParseOptionCD;
+begin
+  CheckSimple('CD', 'Count Defines :.defs');
+end;
+
+procedure TestTD2XOptionsAll.TestParseOptionCDBlank;
+begin
+  CheckSimple('CD:', 'Count Defines :.defs');
+end;
+
+procedure TestTD2XOptionsAll.TestParseOptionCDExtn;
+begin
+  CheckSimple('CD:Extn', 'Count Defines :.Extn');
+end;
+
+procedure TestTD2XOptionsAll.TestParseOptionCDOff;
+begin
+  CheckSimple('CD-', 'Count Defines -(.defs)');
+end;
+
+procedure TestTD2XOptionsAll.TestParseOptionCDOn;
+begin
+  CheckSimple('CD+', 'Count Defines :.defs');
+end;
+
+procedure TestTD2XOptionsAll.TestParseOptionCDFile;
+begin
+  CheckSimple('CD:File.Extn', 'Count Defines :File.Extn');
 end;
 
 procedure TestTD2XOptionsAll.TestParseOptionD;
@@ -1075,10 +1119,21 @@ end;
 
 procedure TestTD2XOptionsSpecific.TestCountChildren;
 begin
-  Check(fOpts.ProcessOption('C'), 'Return Value 2');
+  Check(fOpts.ProcessOption('CC'), 'Return Value 2');
   fB.Clear;
 
   Check(fOpts.ProcessParam('Testing.Test*', 'Count Children'), 'Process Unit');
+  CheckLog('', 'Process Unit');
+
+  fOpts.EndProcessing;
+end;
+
+procedure TestTD2XOptionsSpecific.TestCountDefines;
+begin
+  Check(fOpts.ProcessOption('CD'), 'Return Value 2');
+  fB.Clear;
+
+  Check(fOpts.ProcessParam('Testing.Test*', 'Count Defines'), 'Process Unit');
   CheckLog('', 'Process Unit');
 
   fOpts.EndProcessing;

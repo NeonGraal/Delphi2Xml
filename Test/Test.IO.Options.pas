@@ -275,7 +275,7 @@ procedure TestTD2XFileOptions.TestGetDuration;
 var
   lW: TStopWatch;
 begin
-  lW := TStopwatch.StartNew;
+  lW := TStopWatch.StartNew;
   Sleep(1234);
   lW.Stop;
   CheckEquals(lW.Elapsed.TotalSeconds, fFileOpts.GetDuration(lW), 'Duration seconds');

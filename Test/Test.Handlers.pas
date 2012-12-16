@@ -37,9 +37,9 @@ uses
   TestFramework;
 
 type
-  TestTD2XCountHandler = class(TStringTestCase)
+  TestTD2XCountChildrenHandler = class(TStringTestCase)
   strict private
-    fHndlr: TD2XCountHandler;
+    fHndlr: TD2XCountChildrenHandler;
   public
     procedure SetUp; override;
     procedure TearDown; override;
@@ -51,6 +51,21 @@ type
     procedure TestEndFile;
     procedure TestBeginMethod;
     procedure TestEndMethod;
+
+    procedure TestProcessing;
+  end;
+
+  TestTD2XCountDefinesHandler = class(TParserTestCase)
+  strict private
+    fHndlr: TD2XCountDefinesHandler;
+  public
+    procedure SetUp; override;
+    procedure TearDown; override;
+  published
+    procedure TestDescription;
+    procedure TestUseProxy;
+    procedure TestEndProcessing;
+    procedure TestEndFile;
 
     procedure TestProcessing;
   end;
@@ -187,23 +202,23 @@ begin
   Result := nil;
 end;
 
-{ TestTD2XCountHandler }
+{ TestTD2XCountChildrenHandler }
 
-procedure TestTD2XCountHandler.SetUp;
+procedure TestTD2XCountChildrenHandler.SetUp;
 begin
   inherited;
 
-  fHndlr := TD2XCountHandler.Create;
+  fHndlr := TD2XCountChildrenHandler.Create;
 end;
 
-procedure TestTD2XCountHandler.TearDown;
+procedure TestTD2XCountChildrenHandler.TearDown;
 begin
   FreeAndNil(fHndlr);
 
   inherited;
 end;
 
-procedure TestTD2XCountHandler.TestProcessing;
+procedure TestTD2XCountChildrenHandler.TestProcessing;
 begin
   fHndlr.BeginFile('', NilReader);
   fHndlr.BeginMethod('Alpha');
@@ -223,12 +238,12 @@ begin
   CheckStream('Alpha=2,2', 'Processing');
 end;
 
-procedure TestTD2XCountHandler.TestUseProxy;
+procedure TestTD2XCountChildrenHandler.TestUseProxy;
 begin
   CheckTrue(fHndlr.UseProxy, 'Uses proxy');
 end;
 
-procedure TestTD2XCountHandler.TestBeginFile;
+procedure TestTD2XCountChildrenHandler.TestBeginFile;
 var
   lCalled: Boolean;
 begin
@@ -245,7 +260,7 @@ begin
   CheckStream('', 'Begin File');
 end;
 
-procedure TestTD2XCountHandler.TestEndFile;
+procedure TestTD2XCountChildrenHandler.TestEndFile;
 var
   lCalled: Boolean;
 begin
@@ -262,7 +277,7 @@ begin
   CheckStream('', 'End File');
 end;
 
-procedure TestTD2XCountHandler.TestBeginMethod;
+procedure TestTD2XCountChildrenHandler.TestBeginMethod;
 var
   pMethod: string;
 begin
@@ -273,12 +288,12 @@ begin
   CheckStream('', 'Begin Method');
 end;
 
-procedure TestTD2XCountHandler.TestDescription;
+procedure TestTD2XCountChildrenHandler.TestDescription;
 begin
   CheckEqualsString('Count Children', fHndlr.Description, 'Description');
 end;
 
-procedure TestTD2XCountHandler.TestEndMethod;
+procedure TestTD2XCountChildrenHandler.TestEndMethod;
 var
   pMethod: string;
 begin
@@ -289,7 +304,7 @@ begin
   CheckStream('', 'End Method');
 end;
 
-procedure TestTD2XCountHandler.TestEndProcessing;
+procedure TestTD2XCountChildrenHandler.TestEndProcessing;
 var
   lCalled: Boolean;
 begin
@@ -687,9 +702,11 @@ end;
 procedure TestTD2XDefinesUsedHandler.TestDefineUsed;
 begin
   fHndlr.DefineUsed('Test');
+  fHndlr.DefineUsed(' Test');
+  fHndlr.DefineUsed('Test ');
 
   fHndlr.EndProcessing(FileWriterRef(fDS));
-  CheckStream('Test=1', 'Define Used');
+  CheckStream('Test=3', 'Define Used');
 end;
 
 procedure TestTD2XDefinesUsedHandler.TestDescription;
@@ -894,10 +911,103 @@ begin
   end;
 end;
 
+{ TestTD2XCountDefinesHandler }
+
+procedure TestTD2XCountDefinesHandler.SetUp;
+begin
+  inherited;
+
+  fHndlr := TD2XCountDefinesHandler.Create;
+end;
+
+procedure TestTD2XCountDefinesHandler.TearDown;
+begin
+  FreeAndNil(fHndlr);
+
+  inherited;
+end;
+
+procedure TestTD2XCountDefinesHandler.TestDescription;
+begin
+  CheckEqualsString('Count Defines', fHndlr.Description, 'Description');
+end;
+
+procedure TestTD2XCountDefinesHandler.TestEndFile;
+var
+  lCalled: Boolean;
+begin
+  lCalled := False;
+
+  fHndlr.InitParser(fParser);
+  fParser.GetLexerDefines(fParser.StartDefines);
+
+  fHndlr.EndFile('',
+    function: TStreamWriter
+    begin
+      Result := nil;
+      lCalled := True;
+    end);
+
+  Check(lCalled, 'Stream Creator called');
+  CheckStream('', 'End File');
+end;
+
+procedure TestTD2XCountDefinesHandler.TestEndProcessing;
+var
+  lCalled: Boolean;
+begin
+  lCalled := False;
+
+  StartExpectingException(EAssertionFailed);
+  try
+    fHndlr.InitParser(fParser);
+    fParser.GetLexerDefines(fParser.StartDefines);
+
+    fHndlr.EndProcessing(
+      function: TStreamWriter
+      begin
+        Result := nil;
+        lCalled := True;
+      end);
+  except
+    on E: EAssertionFailed do
+    begin
+      CheckTrue(lCalled, 'Stream Creator called');
+      CheckTrue(StartsText('Need a Stream', E.Message), 'Exception message');
+      raise;
+    end;
+  end;
+end;
+
+procedure TestTD2XCountDefinesHandler.TestProcessing;
+begin
+  fHndlr.InitParser(fParser);
+  fParser.GetLexerDefines(fParser.StartDefines);
+
+  fParser.Lexer.AddDefine('Test');
+  fParser.Lexer.AddDefine('Alpha');
+
+  fHndlr.EndFile('', NilWriter);
+
+  fHndlr.EndProcessing(
+    function: TStreamWriter
+    begin
+      Result := fDS.WriteTo;
+    end);
+
+  CheckStream('Alpha=1 Test=1', 'Processing');
+end;
+
+procedure TestTD2XCountDefinesHandler.TestUseProxy;
+begin
+  CheckTrue(fHndlr.UseProxy, 'Uses proxy');
+end;
+
 initialization
 
 // Register any test cases with the test runner
-RegisterTests('Handlers', [TestTD2XCountHandler.Suite, TestTD2XDefinesUsedHandler.Suite,
+RegisterTests('Handlers', [TestTD2XCountChildrenHandler.Suite,
+  TestTD2XCountDefinesHandler.Suite, TestTD2XDefinesUsedHandler.Suite,
   TestTD2XParserDefinesHandler.Suite, TestTD2XErrorHandler.Suite, TestTD2XSkipHandler.Suite,
   TestTD2XWriteDefinesHandler.Suite, TestTD2XXmlHandler.Suite]);
 

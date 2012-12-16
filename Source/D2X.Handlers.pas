@@ -19,7 +19,7 @@ type
     Children: Integer;
   end;
 
-  TD2XCountHandler = class(TD2XHandler)
+  TD2XCountChildrenHandler = class(TD2XHandler)
   private
     fCurrent: TMethodCount;
     fStack: TStack<TMethodCount>;
@@ -43,6 +43,22 @@ type
 
     procedure BeginMethod(pMethod: string); override;
     procedure EndMethod(pMethod: string); override;
+  end;
+
+  TD2XCountDefinesHandler = class(TD2XParserHandler)
+  private
+    fDefines: TStrIntDict;
+
+  public
+    constructor Create; override;
+    destructor Destroy; override;
+
+    function Description: string; override;
+    function UseProxy: Boolean; override;
+
+    procedure EndProcessing(pOutput: TStreamWriterRef); override;
+
+    procedure EndFile(pFile: string; pOutput: TStreamWriterRef); override;
   end;
 
   TD2XDefinesUsedHandler = class(TD2XHandler)
@@ -177,9 +193,9 @@ begin
   Result := IntToStr(pPair.Value);
 end;
 
-{ TD2XCountHandler }
+{ TD2XCountChildrenHandler }
 
-procedure TD2XCountHandler.BeginFile(pFile: string; pInput: TStreamReaderRef);
+procedure TD2XCountChildrenHandler.BeginFile(pFile: string; pInput: TStreamReaderRef);
 begin
   fCurrent.Method := '';
   fCurrent.Children := 0;
@@ -187,7 +203,7 @@ begin
   pInput;
 end;
 
-constructor TD2XCountHandler.Create;
+constructor TD2XCountChildrenHandler.Create;
 begin
   inherited;
 
@@ -196,12 +212,12 @@ begin
   fMinChildren := TStrIntDict.Create;
 end;
 
-function TD2XCountHandler.Description: string;
+function TD2XCountChildrenHandler.Description: string;
 begin
   Result := 'Count Children';
 end;
 
-destructor TD2XCountHandler.Destroy;
+destructor TD2XCountChildrenHandler.Destroy;
 begin
   FreeAndNil(fMinChildren);
   FreeAndNil(fMaxChildren);
@@ -210,7 +226,7 @@ begin
   inherited;
 end;
 
-procedure TD2XCountHandler.BeginMethod(pMethod: string);
+procedure TD2XCountChildrenHandler.BeginMethod(pMethod: string);
 begin
   Assert(Assigned(fStack), 'Begin Method called out of order');
 
@@ -220,7 +236,7 @@ begin
   fCurrent.Children := 0;
 end;
 
-procedure TD2XCountHandler.EndMethod(pMethod: string);
+procedure TD2XCountChildrenHandler.EndMethod(pMethod: string);
 var
   lVal: Integer;
 begin
@@ -254,18 +270,18 @@ begin
   end;
 end;
 
-procedure TD2XCountHandler.EndFile(pFile: string; pOutput: TStreamWriterRef);
+procedure TD2XCountChildrenHandler.EndFile(pFile: string; pOutput: TStreamWriterRef);
 begin
   FreeAndNil(fStack);
   pOutput;
 end;
 
-procedure TD2XCountHandler.EndProcessing(pOutput: TStreamWriterRef);
+procedure TD2XCountChildrenHandler.EndProcessing(pOutput: TStreamWriterRef);
 begin
   OutputStrIntDict(fMaxChildren, pOutput, MinMaxPairLog);
 end;
 
-function TD2XCountHandler.MinMaxPairLog(pPair: TStrIntPair): string;
+function TD2XCountChildrenHandler.MinMaxPairLog(pPair: TStrIntPair): string;
 var
   lMin: Integer;
 begin
@@ -275,7 +291,7 @@ begin
     Result := '0,' + IntToStr(pPair.Value);
 end;
 
-function TD2XCountHandler.UseProxy: Boolean;
+function TD2XCountChildrenHandler.UseProxy: Boolean;
 begin
   Result := True;
 end;
@@ -586,6 +602,7 @@ procedure TD2XDefinesUsedHandler.DefineUsed(pDef: string);
 var
   lVal: Integer;
 begin
+  pDef := Trim(pDef);
   if fDefinesDict.TryGetValue(pDef, lVal) then
     fDefinesDict[pDef] := lVal + 1
   else
@@ -700,6 +717,58 @@ end;
 function TD2XErrorHandler.UseProxy: Boolean;
 begin
   Result := False;
+end;
+
+{ TD2XCountDefinesHandler }
+
+constructor TD2XCountDefinesHandler.Create;
+begin
+  inherited;
+
+  fDefines := TStrIntDict.Create;
+end;
+
+function TD2XCountDefinesHandler.Description: string;
+begin
+  Result := 'Count Defines';
+end;
+
+destructor TD2XCountDefinesHandler.Destroy;
+begin
+  FreeAndNil(fDefines);
+
+  inherited;
+end;
+
+procedure TD2XCountDefinesHandler.EndFile(pFile: string; pOutput: TStreamWriterRef);
+var
+  lSL: TStringList;
+  lS: string;
+  lVal: Integer;
+begin
+  lSL := TStringList.Create;
+  try
+    fParser.GetLexerDefines(lSL);
+    for lS in lSL do
+      if fParser.StartDefines.IndexOf(lS) < 0 then
+        if fDefines.TryGetValue(lS, lVal) then
+          fDefines.AddOrSetValue(lS, lVal + 1)
+        else
+          fDefines.AddOrSetValue(lS, 1);
+  finally
+    lSL.Free;
+  end;
+  pOutput;
+end;
+
+procedure TD2XCountDefinesHandler.EndProcessing(pOutput: TStreamWriterRef);
+begin
+  OutputStrIntDict(fDefines, pOutput, PairToStr);
+end;
+
+function TD2XCountDefinesHandler.UseProxy: Boolean;
+begin
+  Result := True;
 end;
 
 end.
