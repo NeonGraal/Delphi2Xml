@@ -985,6 +985,9 @@ begin
   fParser.GetLexerDefines(fParser.StartDefines);
 
   fParser.Lexer.AddDefine('Test');
+  fParser.Lexer.AddDefine(' Test');
+  fParser.Lexer.AddDefine('Test ');
+  fParser.Lexer.AddDefine(' Test ');
   fParser.Lexer.AddDefine('Alpha');
 
   fHndlr.EndFile('', NilWriter);
@@ -995,7 +998,7 @@ begin
       Result := fDS.WriteTo;
     end);
 
-  CheckStream('Alpha=1 Test=1', 'Processing');
+  CheckStream('Alpha=1 Test=4', 'Processing');
 end;
 
 procedure TestTD2XCountDefinesHandler.TestUseProxy;

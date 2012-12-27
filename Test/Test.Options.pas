@@ -166,7 +166,8 @@ type
     procedure TestParseOptionDDelete;
     procedure TestParseOptionDClear;
     procedure TestParseOptionDEmpty;
-    procedure TestParseOptionDLoad;
+    procedure TestParseOptionDAddLoad;
+    procedure TestParseOptionDClearLoad;
     procedure TestParseOptionDMany;
     procedure TestParseOptionE;
     procedure TestParseOptionEValue;
@@ -254,7 +255,7 @@ const
   //    'Base dir :Test\ Parse mode Full Results per File Show elapsed Quiet ' +
     'Recurse + Parse mode Full Results per File Show elapsed Quiet ' +
     'Generate XML :Test\ Write Defines :Test\ Defines Used :.Test Count Children :.Test ' +
-    'Count Defines :.Test Skipped Methods :Test.skip Use these Defines: Tango, Uniform';
+    'Count Defines :.Test Skipped Methods :Test.skip Use these Defines: TANGO, UNIFORM, VICTOR';
   ZERO_REPORT_OPTIONS =
     'Current option settings: Verbose - Log Errors - Log Not Supp - Final Token - ' +
   //    'Recurse - Timestamp - Global name Config dir - Log dir - Base dir - ' +
@@ -428,7 +429,7 @@ begin
   SetAllOptions;
 
   Check(fOpts.ProcessOption('@'), 'Return Value');
-  CheckLog(ALTERED_REPORT_OPTIONS, 'Report Options');
+  CheckLog(ALTERED_REPORT_OPTIONS, 'Altered Report Options');
 end;
 
 procedure TestTD2XOptionsGeneral.TestReportOptionsDefault;
@@ -492,13 +493,13 @@ begin
   SetAllOptions;
 
   Check(fOpts.ProcessOption('@'), 'Return Value 1');
-  CheckLog(ALTERED_REPORT_OPTIONS, 'Report Options');
+  CheckLog(ALTERED_REPORT_OPTIONS, 'Altered Report Options');
 
   Check(fOpts.ProcessOption('!'), 'Return Value 2');
 
   fB.Clear;
   Check(fOpts.ProcessOption('@'), 'Return Value 3');
-  CheckLog(DEFAULT_REPORT_OPTIONS, 'Report Options');
+  CheckLog(DEFAULT_REPORT_OPTIONS, 'Default Report Options');
 end;
 
 procedure TestTD2XOptionsGeneral.TestShowOptions;
@@ -512,13 +513,13 @@ begin
   SetAllOptions;
 
   Check(fOpts.ProcessOption('@'), 'Return Value 1');
-  CheckLog(ALTERED_REPORT_OPTIONS, 'Report Options');
+  CheckLog(ALTERED_REPORT_OPTIONS, 'Altered Report Options');
 
   Check(fOpts.ProcessOption('!!'), 'Return Value 2');
 
   fB.Clear;
   Check(fOpts.ProcessOption('@'), 'Return Value 3');
-  CheckLog(ZERO_REPORT_OPTIONS, 'Report Options');
+  CheckLog(ZERO_REPORT_OPTIONS, 'Zero Report Options');
 end;
 
 { TestTD2XRunOptsAll }
@@ -527,7 +528,7 @@ procedure TestTD2XOptionsAll.SetUp;
 begin
   inherited;
 
-  fOpts.Defines.CommaText := 'Alpha,Beta,Gamma';
+  fOpts.Defines.CommaText := 'ALPHA,BETA,GAMMA';
 end;
 
 procedure TestTD2XOptionsAll.CheckInvalid(pOpt, pExp: string);
@@ -622,7 +623,7 @@ end;
 
 procedure TestTD2XOptionsAll.TestParseOptionDAdd;
 begin
-  CheckSimple('D+Value', 'Use these Defines: Alpha, Beta, Gamma, Value');
+  CheckSimple('D+Value', 'Use these Defines: ALPHA, BETA, GAMMA, VALUE');
 end;
 
 procedure TestTD2XOptionsAll.TestParseOptionDClear;
@@ -630,9 +631,14 @@ begin
   CheckSimple('D!', 'Use default Defines');
 end;
 
+procedure TestTD2XOptionsAll.TestParseOptionDClearLoad;
+begin
+  CheckSimple('D:Test', 'Use these Defines: TANGO, UNIFORM, VICTOR');
+end;
+
 procedure TestTD2XOptionsAll.TestParseOptionDDelete;
 begin
-  CheckSimple('D-Beta', 'Use these Defines: Alpha, Gamma');
+  CheckSimple('D-Beta', 'Use these Defines: ALPHA, GAMMA');
 end;
 
 procedure TestTD2XOptionsAll.TestParseOptionDEmpty;
@@ -640,9 +646,9 @@ begin
   CheckSimple('D:', 'Use NO Defines');
 end;
 
-procedure TestTD2XOptionsAll.TestParseOptionDLoad;
+procedure TestTD2XOptionsAll.TestParseOptionDAddLoad;
 begin
-  CheckSimple('D:Test', 'Use these Defines: Tango, Uniform');
+  CheckSimple('D~Test', 'Use these Defines: ALPHA, BETA, GAMMA, TANGO, UNIFORM, VICTOR');
 end;
 
 procedure TestTD2XOptionsAll.TestParseOptionDMany;
@@ -650,7 +656,7 @@ begin
   Check(fOpts.ProcessOption('D+Value1'), 'ReturnValue1');
   Check(fOpts.ProcessOption('D+Value2'), 'ReturnValue2');
   fOpts.ProcessOption('@-D');
-  CheckLog('Use these Defines: Alpha, Beta, Gamma, Value1, Value2', 'Report Options');
+  CheckLog('Use these Defines: ALPHA, BETA, GAMMA, VALUE1, VALUE2', 'Report Options');
 end;
 
 procedure TestTD2XOptionsAll.TestParseOptionE;

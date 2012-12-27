@@ -1508,7 +1508,7 @@ begin
       Result := TTestFile.Create('Config\' + pFile, True, 'Tango'#13#10'Uniform', nil);
     end);
   fFlag := fDefP as ID2XFlag;
-  fDefP.Defines.CommaText := 'Alpha,Beta,Gamma';
+  fDefP.Defines.CommaText := 'ALPHA,BETA,GAMMA';
 end;
 
 procedure TestTD2XDefinesParam.TearDown;
@@ -1585,22 +1585,37 @@ begin
   fDefP.Value := True;
   CheckEquals(True, ID2XFlag(fDefP).Flag, 'Flag Set');
   fDefP.Report(fLog);
-  CheckLog('Use these Defines: Alpha, Beta, Gamma', 'Report simple values');
+  CheckLog('Use these Defines: ALPHA, BETA, GAMMA', 'Report simple values');
 
   Check(fDefP.Parse('T+Test'), 'Parse right code with value');
   CheckEquals(True, fDefP.Value, 'Flag Set');
   fDefP.Report(fLog);
-  CheckLog('Use these Defines: Alpha, Beta, Gamma, Test', 'Report new values');
+  CheckLog('Use these Defines: ALPHA, BETA, GAMMA, TEST', 'Report new values');
+
+  Check(fDefP.Parse('T+Test1,Test2'), 'Parse right code with value');
+  CheckEquals(True, fDefP.Value, 'Flag Set');
+  fDefP.Report(fLog);
+  CheckLog('Use these Defines: ALPHA, BETA, GAMMA, TEST, TEST1, TEST2', 'Report new values');
 
   Check(fDefP.Parse('T-Beta'), 'Parse right code with Flag off');
   CheckEquals(True, fDefP.Value, 'Flag Set');
   fDefP.Report(fLog);
-  CheckLog('Use these Defines: Alpha, Gamma, Test', 'Report new values');
+  CheckLog('Use these Defines: ALPHA, GAMMA, TEST, TEST1, TEST2', 'Report new values');
+
+  Check(fDefP.Parse('T-Test,Test1'), 'Parse right code with Flag off');
+  CheckEquals(True, fDefP.Value, 'Flag Set');
+  fDefP.Report(fLog);
+  CheckLog('Use these Defines: ALPHA, GAMMA, TEST2', 'Report new values');
+
+  Check(fDefP.Parse('T~Test'), 'Parse right code with no value');
+  CheckEquals(True, fDefP.Value, 'Flag Set');
+  fDefP.Report(fLog);
+  CheckLog('Use these Defines: ALPHA, GAMMA, TANGO, TEST2, UNIFORM', 'Report new values');
 
   Check(fDefP.Parse('T:Test'), 'Parse right code with no value');
   CheckEquals(True, fDefP.Value, 'Flag Set');
   fDefP.Report(fLog);
-  CheckLog('Use these Defines: Tango, Uniform', 'Report new values');
+  CheckLog('Use these Defines: TANGO, UNIFORM', 'Report new values');
 end;
 
 procedure TestTD2XDefinesParam.TestReport;
@@ -1610,7 +1625,7 @@ begin
 
   fDefP.Value := True;
   fDefP.Report(fLog);
-  CheckLog('Use these Defines: Alpha, Beta, Gamma', 'Report Blank value on');
+  CheckLog('Use these Defines: ALPHA, BETA, GAMMA', 'Report Blank value on');
 end;
 
 procedure TestTD2XDefinesParam.TestReset;

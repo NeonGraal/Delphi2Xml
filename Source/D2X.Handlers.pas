@@ -98,6 +98,7 @@ type
   TD2XParserDefinesHandler = class(TD2XParserHandler)
   private
     fDefines: TStringList;
+    fInitOnce: Boolean;
 
     procedure InitDefines;
 
@@ -651,6 +652,7 @@ begin
   Create;
 
   fDefines := pDefines;
+  fInitOnce := True;
 end;
 
 function TD2XParserDefinesHandler.Description: string;
@@ -661,8 +663,11 @@ end;
 procedure TD2XParserDefinesHandler.InitDefines;
 begin
   fParser.Lexer.InitDefines;
-  if Assigned(fDefines) then
+  if Assigned(fDefines) and fInitOnce then
+  begin
     fParser.Lexer.GetDefines(fDefines);
+    fInitOnce := False;
+  end;
 end;
 
 procedure TD2XParserDefinesHandler.InitParser(pParser: TD2XDefinesParser);
@@ -743,18 +748,21 @@ end;
 procedure TD2XCountDefinesHandler.EndFile(pFile: string; pOutput: TStreamWriterRef);
 var
   lSL: TStringList;
-  lS: string;
+  lS, lT: string;
   lVal: Integer;
 begin
   lSL := TStringList.Create;
   try
     fParser.GetLexerDefines(lSL);
     for lS in lSL do
-      if fParser.StartDefines.IndexOf(lS) < 0 then
-        if fDefines.TryGetValue(lS, lVal) then
-          fDefines.AddOrSetValue(lS, lVal + 1)
+    begin
+      lT := Trim(lS);
+      if fParser.StartDefines.IndexOf(lT) < 0 then
+        if fDefines.TryGetValue(lT, lVal) then
+          fDefines.AddOrSetValue(lT, lVal + 1)
         else
-          fDefines.AddOrSetValue(lS, 1);
+          fDefines.AddOrSetValue(lT, 1);
+    end;
   finally
     lSL.Free;
   end;

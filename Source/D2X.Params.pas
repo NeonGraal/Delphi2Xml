@@ -111,6 +111,10 @@ type
     function ConvertDefines(pStr: string; pDflt: Boolean; out pVal: Boolean): Boolean;
     function FormatDefines(pVal: Boolean): string;
 
+    procedure IncludeDefine(pDef: string);
+    function RemoveDefine(pDef: string): Boolean;
+    procedure LoadDefines(pName: string);
+
     function GetFlag: Boolean;
     procedure SetFlag(pVal: Boolean);
 
@@ -358,8 +362,6 @@ function TD2XDefinesParam.ConvertDefines(pStr: string; pDflt: Boolean;
   out pVal: Boolean): Boolean;
 var
   lStr: string;
-  lIdx: Integer;
-  lS: ID2XFile;
 begin
   Result := False;
   if (pStr = '!') or (pStr = ':') then
@@ -372,36 +374,25 @@ begin
     if Length(pStr) > 1 then
     begin
       lStr := System.Copy(pStr, 2, Length(pStr));
+      Result := True;
+      pVal := True;
       case pStr[1] of
         '+':
-          begin
-            Result := True;
-            pVal := True;
-            if fDefines.IndexOf(lStr) < 0 then
-              fDefines.Add(lStr);
-          end;
+          IncludeDefine(lStr);
         '-':
-          begin
-            Result := True;
-            lIdx := fDefines.IndexOf(lStr);
-            if lIdx >= 0 then
-            begin
-              fDefines.Delete(lIdx);
-              pVal := True;
-            end;
-          end;
+          pVal := RemoveDefine(lStr);
         ':':
           begin
-            Result := True;
-            pVal := True;
-            lS := fDefinesFileName(MakeFileName(lStr, '.def'));
-            if Assigned(lS) then
-              try
-                fDefines.LoadFromStream(lS.ReadFrom.BaseStream);
-              finally
-                DisposeOf(lS);
-              end;
+            fDefines.Clear;
+            LoadDefines(MakeFileName(lStr, '.def'));
           end;
+        '~':
+          LoadDefines(MakeFileName(lStr, '.def'));
+      else
+        begin
+          Result := False;
+          pVal := False;
+        end;
       end;
     end;
 end;
@@ -443,16 +434,72 @@ begin
   Result := fValue;
 end;
 
-procedure TD2XDefinesParam.Output(pSL: TStringList);
+procedure TD2XDefinesParam.IncludeDefine(pDef: string);
 var
+  lSL: TStringList;
   lS: string;
+begin
+  lSL := TStringList.Create;
+  try
+    lSL.CommaText := UpperCase(pDef);
+    for lS in lSL do
+      if fDefines.IndexOf(lS) < 0 then
+        fDefines.Add(lS);
+  finally
+    FreeAndNil(lSL);
+  end;
+end;
+
+procedure TD2XDefinesParam.LoadDefines(pName: string);
+var
+  lF: ID2XFile;
+  lSL: TStringList;
+  lS: string;
+begin
+  lF := fDefinesFileName(pName);
+  if Assigned(lF) then
+    try
+      lSL := TStringList.Create;
+      lSL.LoadFromStream(lF.ReadFrom.BaseStream);
+      for lS in lSL do
+        IncludeDefine(lS);
+    finally
+      FreeAndNil(lSL);
+      DisposeOf(lF);
+    end;
+end;
+
+procedure TD2XDefinesParam.Output(pSL: TStringList);
 begin
   if Value then
   begin
     pSL.Add('-D:');
     fDefines.Sort;
-    for lS in fDefines do
-      pSL.Add('-D+' + lS);
+    pSL.Add('-D+' + fDefines.CommaText);
+  end;
+end;
+
+function TD2XDefinesParam.RemoveDefine(pDef: string): Boolean;
+var
+  lIdx: Integer;
+  lSL: TStringList;
+  lS: string;
+begin
+  Result := False;
+  lSL := TStringList.Create;
+  try
+    lSL.CommaText := UpperCase(pDef);
+    for lS in lSL do
+    begin
+      lIdx := fDefines.IndexOf(lS);
+      if lIdx >= 0 then
+      begin
+        fDefines.Delete(lIdx);
+        Result := True;
+      end;
+    end;
+  finally
+    FreeAndNil(lSL);
   end;
 end;
 
