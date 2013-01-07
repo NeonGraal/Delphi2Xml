@@ -1565,67 +1565,72 @@ procedure TestTD2XDefinesParam.TestParse;
 begin
   CheckEquals(False, fDefP.Value, 'Default Value Set');
   fDefP.Report(fLog);
-  CheckLog('Use default Defines', 'Report Default value');
+  CheckLog('Use default Test', 'Report Default value');
 
   CheckFalse(fDefP.Parse('T'), 'Parse right code with No value');
   CheckEquals(False, fDefP.Value, 'Blank Flag Set');
   fDefP.Report(fLog);
-  CheckLog('Use default Defines', 'Report Default value');
+  CheckLog('Use default Test', 'Report Default value');
 
   CheckFalse(fDefP.Parse('T-'), 'Parse right code with Flag off');
   CheckEquals(False, fDefP.Value, 'Flag Off');
   fDefP.Report(fLog);
-  CheckLog('Use default Defines', 'Report Default value');
+  CheckLog('Use default Test', 'Report Default value');
 
   CheckFalse(fDefP.Parse('T+'), 'Parse right code with Flag on');
   CheckEquals(False, fDefP.Value, 'Flag On');
   fDefP.Report(fLog);
-  CheckLog('Use default Defines', 'Report Default value');
+  CheckLog('Use default Test', 'Report Default value');
 
   fDefP.Value := True;
   CheckEquals(True, ID2XFlag(fDefP).Flag, 'Flag Set');
   fDefP.Report(fLog);
-  CheckLog('Use these Defines: ALPHA, BETA, GAMMA', 'Report simple values');
+  CheckLog('Use these Test: ALPHA, BETA, GAMMA', 'Report simple values');
 
-  Check(fDefP.Parse('T+Test'), 'Parse right code with value');
+  Check(fDefP.Parse('T+Test'), 'Parse right code add value');
   CheckEquals(True, fDefP.Value, 'Flag Set');
   fDefP.Report(fLog);
-  CheckLog('Use these Defines: ALPHA, BETA, GAMMA, TEST', 'Report new values');
+  CheckLog('Use these Test: ALPHA, BETA, GAMMA, TEST', 'Report add value');
 
-  Check(fDefP.Parse('T+Test1,Test2'), 'Parse right code with value');
+  Check(fDefP.Parse('T+Test1,Test2'), 'Parse right code add values');
   CheckEquals(True, fDefP.Value, 'Flag Set');
   fDefP.Report(fLog);
-  CheckLog('Use these Defines: ALPHA, BETA, GAMMA, TEST, TEST1, TEST2', 'Report new values');
+  CheckLog('Use these Test: ALPHA, BETA, GAMMA, TEST, TEST1, TEST2', 'Report add values');
 
-  Check(fDefP.Parse('T-Beta'), 'Parse right code with Flag off');
+  Check(fDefP.Parse('T-Beta'), 'Parse right code remove value');
   CheckEquals(True, fDefP.Value, 'Flag Set');
   fDefP.Report(fLog);
-  CheckLog('Use these Defines: ALPHA, GAMMA, TEST, TEST1, TEST2', 'Report new values');
+  CheckLog('Use these Test: ALPHA, GAMMA, TEST, TEST1, TEST2', 'Report remove value');
 
-  Check(fDefP.Parse('T-Test,Test1'), 'Parse right code with Flag off');
+  Check(fDefP.Parse('T-Test,Test1'), 'Parse right code remove values');
   CheckEquals(True, fDefP.Value, 'Flag Set');
   fDefP.Report(fLog);
-  CheckLog('Use these Defines: ALPHA, GAMMA, TEST2', 'Report new values');
+  CheckLog('Use these Test: ALPHA, GAMMA, TEST2', 'Report remove values');
 
-  Check(fDefP.Parse('T~Test'), 'Parse right code with no value');
+  Check(fDefP.Parse('T+~Test'), 'Parse right code add file');
   CheckEquals(True, fDefP.Value, 'Flag Set');
   fDefP.Report(fLog);
-  CheckLog('Use these Defines: ALPHA, GAMMA, TANGO, TEST2, UNIFORM', 'Report new values');
+  CheckLog('Use these Test: ALPHA, GAMMA, TANGO, TEST2, UNIFORM', 'Report add file');
 
-  Check(fDefP.Parse('T:Test'), 'Parse right code with no value');
+  Check(fDefP.Parse('T-~Test'), 'Parse right code remove file');
   CheckEquals(True, fDefP.Value, 'Flag Set');
   fDefP.Report(fLog);
-  CheckLog('Use these Defines: TANGO, UNIFORM', 'Report new values');
+  CheckLog('Use these Test: ALPHA, GAMMA, TEST2', 'Report remove file');
+
+  Check(fDefP.Parse('T:Test'), 'Parse right code set file');
+  CheckEquals(True, fDefP.Value, 'Flag Set');
+  fDefP.Report(fLog);
+  CheckLog('Use these Test: TANGO, UNIFORM', 'Report set file');
 end;
 
 procedure TestTD2XDefinesParam.TestReport;
 begin
   fDefP.Report(fLog);
-  CheckLog('Use default Defines', 'Report Default Value');
+  CheckLog('Use default Test', 'Report Default Value');
 
   fDefP.Value := True;
   fDefP.Report(fLog);
-  CheckLog('Use these Defines: ALPHA, BETA, GAMMA', 'Report Blank value on');
+  CheckLog('Use these Test: ALPHA, BETA, GAMMA', 'Report Blank value on');
 end;
 
 procedure TestTD2XDefinesParam.TestReset;

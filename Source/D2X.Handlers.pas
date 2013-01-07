@@ -115,6 +115,19 @@ type
     procedure BeginFile(pFile: string; pInput: TStreamReaderRef); override;
   end;
 
+  TD2XHeldDefinesHandler = class(TD2XParserHandler)
+  private
+    fDefines: TStringList;
+
+  public
+    constructor CreateDefines(pDefines: TStringList);
+
+    function Description: string; override;
+    function UseProxy: Boolean; override;
+
+    procedure BeginFile(pFile: string; pInput: TStreamReaderRef); override;
+  end;
+
   TD2XSkipHandler = class(TD2XHandler)
   private
     fSkippedMethods: TStrIntDict;
@@ -777,6 +790,30 @@ end;
 function TD2XCountDefinesHandler.UseProxy: Boolean;
 begin
   Result := True;
+end;
+
+{ TD2XHeldDefinesHandler }
+
+procedure TD2XHeldDefinesHandler.BeginFile(pFile: string; pInput: TStreamReaderRef);
+begin
+  fParser.HeldDefines.Assign(fDefines);
+end;
+
+constructor TD2XHeldDefinesHandler.CreateDefines(pDefines: TStringList);
+begin
+  Create;
+
+  fDefines := pDefines;
+end;
+
+function TD2XHeldDefinesHandler.Description: string;
+begin
+  Result := 'Held Defines';
+end;
+
+function TD2XHeldDefinesHandler.UseProxy: Boolean;
+begin
+  Result := False;
 end;
 
 end.

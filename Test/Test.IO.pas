@@ -545,7 +545,7 @@ const
   TESTING_PROGRAM = 'program Testing.TestProgram; ' +
     'uses Testing.TestUnit in ''Testing.TestUnit.pas''; begin end.';
 begin
-  fConfigFiles.Add('Test.def', 'Uniform,Victor'#13#10'Tango');
+  fConfigFiles.Add('Test.def', 'Uniform'#13#10'Victor'#13#10'Tango');
   fConfigFiles.Add('Test.prm', '-@'#13#10'-@Test.out');
   fConfigFiles.Add('File', '');
   fConfigFiles.Add('.Extn', '');

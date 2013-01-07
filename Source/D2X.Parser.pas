@@ -22,11 +22,13 @@ type
     fProcessed: Byte;
     fLastTokens: string;
     fStartDefines: TStringList;
+    fHeldDefines: TStringList;
     FAddAttribute: TD2XAddAttributeEvent;
     FAddText: TD2XAddTextEvent;
     fOnProgress: TD2XProgressEvent;
 
     function GetStartDefines: TStringList;
+    function GetHeldDefines: TStringList;
 
   protected
     fKeepTokens: Boolean;
@@ -38,6 +40,8 @@ type
 
     procedure DoAddText(pText: string); overload;
     procedure DoAddText; overload;
+
+    procedure HandlePtUndefDirect(Sender: TmwBasePasLex); override;
 
   public
     constructor Create;
@@ -55,7 +59,9 @@ type
 
     property LastTokens: string read fLastTokens write fLastTokens;
     property KeepTokens: Boolean read fKeepTokens;
+
     property StartDefines: TStringList read GetStartDefines;
+    property HeldDefines: TStringList read GetHeldDefines;
 
     property OnProgress: TD2XProgressEvent read fOnProgress write fOnProgress;
 
@@ -1621,6 +1627,7 @@ begin
   inherited;
 
   fStartDefines := nil;
+  fHeldDefines := nil;
   fLength := 0;
   fProcessed := 0;
   fOnProgress := nil;
@@ -1629,6 +1636,7 @@ end;
 
 destructor TD2XDefinesParser.Destroy;
 begin
+  FreeAndNil(fHeldDefines);
   FreeAndNil(fStartDefines);
 
   inherited;
@@ -1658,17 +1666,46 @@ begin
     FAddAttribute(pName, pValue);
 end;
 
+function TD2XDefinesParser.GetHeldDefines: TStringList;
+begin
+  if not Assigned(fHeldDefines) then
+  begin
+    fHeldDefines := TStringList.Create;
+    fHeldDefines.Sorted := True;
+  end;
+
+  Result := fHeldDefines;
+end;
+
 procedure TD2XDefinesParser.GetLexerDefines(pDefs: TStringList);
 begin
   Lexer.GetDefines(pDefs);
+  pDefs.Sorted := True;
 end;
 
 function TD2XDefinesParser.GetStartDefines: TStringList;
 begin
   if not Assigned(fStartDefines) then
+  begin
     fStartDefines := TStringList.Create;
+    fStartDefines.Sorted := True;
+  end;
 
   Result := fStartDefines;
+end;
+
+procedure TD2XDefinesParser.HandlePtUndefDirect(Sender: TmwBasePasLex);
+var
+  lS: string;
+begin
+  if Assigned(fHeldDefines) then
+  begin
+    lS := UpperCase(Lexer.DirectiveParam);
+    if fHeldDefines.IndexOf(lS) >= 0 then
+      Lexer.AddDefine(lS);
+  end;
+
+  inherited;
 end;
 
 procedure TD2XDefinesParser.MainUnitName;
@@ -1712,11 +1749,15 @@ procedure TD2XDefinesParser.ParseFile;
 var
   lS: string;
 begin
-  if Assigned(fStartDefines) then
+  if Assigned(fStartDefines) or Assigned(fHeldDefines) then
   begin
     Lexer.ClearDefines;
-    for lS in fStartDefines do
-      Lexer.AddDefine(lS);
+    if Assigned(fHeldDefines) then
+      for lS in fHeldDefines do
+        Lexer.AddDefine(lS);
+    if Assigned(fStartDefines) then
+      for lS in fStartDefines do
+        Lexer.AddDefine(lS);
   end;
 
   inherited;

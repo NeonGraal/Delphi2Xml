@@ -45,6 +45,10 @@ type
     fResultPer: TD2XSingleParam<TD2XResultPer>;
     fElapsedMode: TD2XSingleParam<TD2XElapsedMode>;
     fParserDefines: TD2XDefinesParam;
+    fHeldDefines: TD2XDefinesParam;
+
+    fLastType, fLastMsg: string;
+    fLastX, fLastY: Integer;
 
     procedure RemoveProxy;
     procedure SetBaseProxy;
@@ -83,7 +87,8 @@ type
 
   protected
     fParams: TD2XParams;
-    function GetDefines: TStringList;
+    function GetParserDefines: TStringList;
+    function GetHeldDefines: TStringList;
 
   public
     constructor Create; override;
@@ -196,7 +201,12 @@ begin
   end;
 end;
 
-function TD2XOptions.GetDefines: TStringList;
+function TD2XOptions.GetHeldDefines: TStringList;
+begin
+  Result := fHeldDefines.Defines;
+end;
+
+function TD2XOptions.GetParserDefines: TStringList;
 begin
   Result := fParserDefines.Defines;
 end;
@@ -239,34 +249,42 @@ var
   lExists: Boolean;
   lDS: TD2XInterfaced;
 begin
-  lErrFile := fIOFact.LogFileOrExtn('.err');
-  try
-    lExists := lErrFile.Exists;
-    with lErrFile.WriteTo(True) do
-    begin
-      if not lExists then
-        WriteLine('Filename,Timestamp,Line,Char,Method,Type,Message');
-      write(fFilename);
-      write(',');
-      write(fIOFact.GetNow);
-      write(',');
-      write(pY);
-      write(',');
-      write(pX);
-      write(',');
-      write(fCurrentMethod);
-      write(',');
-      write(pType);
-      write(',');
-      WriteLine(pMsg);
+  if ((pX = 0) and (pY = 0) and ((fLastType <> pType) or (fLastMsg <> pMsg))) or (fLastX <> pX)
+    or (fLastY <> pY) then
+  begin
+    lErrFile := fIOFact.LogFileOrExtn('.err');
+    try
+      lExists := lErrFile.Exists;
+      with lErrFile.WriteTo(True) do
+      begin
+        if not lExists then
+          WriteLine('Filename,Timestamp,Line,Char,Method,Type,Message');
+        write(fFilename);
+        write(',');
+        write(fIOFact.GetNow);
+        write(',');
+        write(pY);
+        write(',');
+        write(pX);
+        write(',');
+        write(fCurrentMethod);
+        write(',');
+        write(pType);
+        write(',');
+        WriteLine(pMsg);
+      end;
+    finally
+      if Assigned(lErrFile) then
+      begin
+        lDS := lErrFile as TD2XInterfaced;
+        lErrFile := nil;
+        lDS.Free;
+      end;
     end;
-  finally
-    if Assigned(lErrFile) then
-    begin
-      lDS := lErrFile as TD2XInterfaced;
-      lErrFile := nil;
-      lDS.Free;
-    end;
+    fLastType := pType;
+    fLastMsg := pMsg;
+    fLastX := pX;
+    fLastY := pY;
   end;
 end;
 
@@ -333,13 +351,18 @@ begin
   lFile := fIOFact.BaseFile(pFilename);
   if Assigned(lFile) then
     try
-      if lFile.Exists then
-        Result := ProcessStream(pFilename, lFile.ReadFrom)
-      else
-        if fVerbose.Value then
-          Log('Cannot find "%s"', [lFile]);
-    finally
-      DisposeOf(lFile);
+      try
+        if lFile.Exists then
+          Result := ProcessStream(pFilename, lFile.ReadFrom)
+        else
+          if fVerbose.Value then
+            Log('Cannot find "%s"', [lFile]);
+      finally
+        DisposeOf(lFile);
+      end;
+    except
+      on e: Exception do
+        LogMessage('EXCEPTION', '(' + e.ClassName + ')' + e.Message, 0, 0);
     end;
 end;
 
@@ -560,6 +583,7 @@ end;
 procedure TD2XOptions.InitOtherProcessors;
 var
   lParserDefinesHandler: TD2XParserDefinesHandler;
+  lHeldDefinesHandler: TD2XHeldDefinesHandler;
 
   lDefinesUsed: TD2XFlaggedStringParam;
   lSkipMethods: TD2XFlaggedStringParam;
@@ -576,6 +600,8 @@ var
 
 begin
   fParserDefines := TD2XDefinesParam.CreateDefines('D', 'Defines', ConfigFileOrExtn);
+  fHeldDefines := TD2XDefinesParam.CreateDefines('H', 'Held Defines', ConfigFileOrExtn);
+
   lDefinesUsed := TD2XFlaggedStringParam.CreateFlagStr('U', 'Defines Used', '<f/e>',
     'Report Defines Used into <f/e>', '.used', True, ConvertExtn, nil, nil);
   lSkipMethods := TD2XFlaggedStringParam.CreateFlagStr('S', 'Skipped Methods', '<f/e>',
@@ -586,6 +612,7 @@ begin
     'Report Defines Used into <f/e>', '.defs', True, ConvertExtn, nil, nil);
 
   lParserDefinesHandler := TD2XParserDefinesHandler.CreateDefines(fParserDefines.Defines);
+  lHeldDefinesHandler := TD2XHeldDefinesHandler.CreateDefines(fHeldDefines.Defines);
 
   fProcs.Add(TD2XHandlerProcessor.CreateHandler(lDefinesUsed, fDefinesUsedHandler, True)
     .SetProcessingOutput(MakeFileRef(lDefinesUsed)));
@@ -600,9 +627,10 @@ begin
   fProcs.Add(TD2XHandlerProcessor.CreateClass(lCountDefines, TD2XCountDefinesHandler)
     .SetFileOutput(NilFileRef()).SetProcessingOutput(MakeFileRef(lCountDefines)));
   fProcs.Add(TD2XHandlerProcessor.CreateHandler(fParserDefines, lParserDefinesHandler, True));
+  fProcs.Add(TD2XHandlerProcessor.CreateHandler(fHeldDefines, lHeldDefinesHandler, True));
 
   fParams.AddRange([lDefinesUsed, lCountChildren, lCountDefines, lSkipMethods,
-    fParserDefines]);
+    fParserDefines, fHeldDefines]);
 end;
 
 procedure TD2XOptions.InitParser;
@@ -761,12 +789,17 @@ begin
       lP.BeginFile(pFilename);
 
     try
+      fLastType := '~';
+      fLastMsg := '~';
+      fLastX := -2;
+      fLastY := -2;
+
       fParser.ProcessString(pFilename, lContent);
       Result := True;
     except
-      on E: Exception do
+      on e: Exception do
       begin
-        LogParser('EXCEPTION', '(' + E.ClassName + ')' + E.Message);
+        LogParser('EXCEPTION', '(' + e.ClassName + ')' + e.Message);
 
         fXmlHandler.RollbackTo('D2X_File');
       end;

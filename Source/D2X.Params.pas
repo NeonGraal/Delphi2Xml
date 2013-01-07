@@ -104,6 +104,9 @@ type
     procedure Reset; override;
     procedure Zero; override;
 
+  private type
+    TDefineProc = procedure(pDef: string) of object;
+
   private
     fDefines: TStringList;
     fDefinesFileName: TD2XNamedStreamRef;
@@ -112,8 +115,13 @@ type
     function FormatDefines(pVal: Boolean): string;
 
     procedure IncludeDefine(pDef: string);
-    function RemoveDefine(pDef: string): Boolean;
-    procedure LoadDefines(pName: string);
+    procedure RemoveDefine(pDef: string);
+
+    procedure IncludeDefines(pDefs: string);
+    procedure RemoveDefines(pDefs: string);
+
+    procedure ProcessDefines(pDefs: string; pFunc: TDefineProc);
+    procedure LoadDefines(pName: string; pFunc: TDefineProc);
 
     function GetFlag: Boolean;
     procedure SetFlag(pVal: Boolean);
@@ -378,16 +386,14 @@ begin
       pVal := True;
       case pStr[1] of
         '+':
-          IncludeDefine(lStr);
+          IncludeDefines(lStr);
         '-':
-          pVal := RemoveDefine(lStr);
+          RemoveDefines(lStr);
         ':':
           begin
             fDefines.Clear;
-            LoadDefines(MakeFileName(lStr, '.def'));
+            LoadDefines(MakeFileName(lStr, '.def'), IncludeDefine);
           end;
-        '~':
-          LoadDefines(MakeFileName(lStr, '.def'));
       else
         begin
           Result := False;
@@ -435,22 +441,18 @@ begin
 end;
 
 procedure TD2XDefinesParam.IncludeDefine(pDef: string);
-var
-  lSL: TStringList;
-  lS: string;
 begin
-  lSL := TStringList.Create;
-  try
-    lSL.CommaText := UpperCase(pDef);
-    for lS in lSL do
-      if fDefines.IndexOf(lS) < 0 then
-        fDefines.Add(lS);
-  finally
-    FreeAndNil(lSL);
-  end;
+  pDef := UpperCase(pDef);
+  if fDefines.IndexOf(pDef) < 0 then
+    fDefines.Add(pDef);
 end;
 
-procedure TD2XDefinesParam.LoadDefines(pName: string);
+procedure TD2XDefinesParam.IncludeDefines(pDefs: string);
+begin
+  ProcessDefines(pDefs, IncludeDefine);
+end;
+
+procedure TD2XDefinesParam.LoadDefines(pName: string; pFunc: TDefineProc);
 var
   lF: ID2XFile;
   lSL: TStringList;
@@ -462,7 +464,7 @@ begin
       lSL := TStringList.Create;
       lSL.LoadFromStream(lF.ReadFrom.BaseStream);
       for lS in lSL do
-        IncludeDefine(lS);
+        pFunc(lS);
     finally
       FreeAndNil(lSL);
       DisposeOf(lF);
@@ -473,34 +475,43 @@ procedure TD2XDefinesParam.Output(pSL: TStringList);
 begin
   if Value then
   begin
-    pSL.Add('-D:');
+    pSL.Add('-' + fCode + ':');
     fDefines.Sort;
-    pSL.Add('-D+' + fDefines.CommaText);
+    pSL.Add('-' + fCode + '+' + fDefines.CommaText);
   end;
 end;
 
-function TD2XDefinesParam.RemoveDefine(pDef: string): Boolean;
+procedure TD2XDefinesParam.ProcessDefines(pDefs: string; pFunc: TDefineProc);
 var
-  lIdx: Integer;
   lSL: TStringList;
   lS: string;
 begin
-  Result := False;
-  lSL := TStringList.Create;
-  try
-    lSL.CommaText := UpperCase(pDef);
-    for lS in lSL do
-    begin
-      lIdx := fDefines.IndexOf(lS);
-      if lIdx >= 0 then
-      begin
-        fDefines.Delete(lIdx);
-        Result := True;
-      end;
+  if StartsText('~', pDefs) then
+    LoadDefines(Copy(pDefs, 2, Length(pDefs)), pFunc)
+  else begin
+    lSL := TStringList.Create;
+    try
+      lSL.CommaText := pDefs;
+      for lS in lSL do
+        pFunc(lS);
+    finally
+      FreeAndNil(lSL);
     end;
-  finally
-    FreeAndNil(lSL);
   end;
+end;
+
+procedure TD2XDefinesParam.RemoveDefine(pDef: string);
+var
+  lIdx: Integer;
+begin
+  lIdx := fDefines.IndexOf(UpperCase(pDef));
+  if lIdx >= 0 then
+    fDefines.Delete(lIdx);
+end;
+
+procedure TD2XDefinesParam.RemoveDefines(pDefs: string);
+begin
+  ProcessDefines(pDefs, RemoveDefine);
 end;
 
 procedure TD2XDefinesParam.Report(pL: ID2XLogger);
@@ -517,10 +528,10 @@ var
 begin
   if Value then
     if fDefines.Count < 1 then
-      pL.Log('Use NO Defines', [])
+      pL.Log('Use NO %s', [fLabel])
     else
     begin
-      pL.Log('Use these Defines:', []);
+      pL.Log('Use these %s:', [fLabel]);
       w := 0;
       fDefines.Sort;
       for lS in fDefines do
@@ -541,7 +552,7 @@ begin
       pL.Log('', []);
     end
   else
-    pL.Log('Use default Defines', []);
+    pL.Log('Use default %s', [fLabel]);
 end;
 
 procedure TD2XDefinesParam.Reset;

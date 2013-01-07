@@ -1,5 +1,7 @@
--d+CPU32,standalone_propertyunits,interface,implementation
+-d+CPU32,interface,implementation
+-h+standalone_propertyunits
 -t
 -r
+-f-
 -b:..\V6\3.6\Main\V6
 *.dp?,*.inc,*.pas

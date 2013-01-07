@@ -46,6 +46,8 @@ type
     procedure TestParseFile;
 
     procedure TestGetLexerDefines;
+    procedure TestStartDefines;
+    procedure TestHoldDefines;
     procedure TestProcessString;
   end;
 
@@ -110,6 +112,19 @@ begin
   end;
 end;
 
+procedure TestTD2XDefinesParser.TestHoldDefines;
+var
+  pContents: string;
+  pFilename: string;
+begin
+  FD2XDefinesParser.HeldDefines.CommaText := 'HELLO,TEST,VALUE';
+  pFilename := 'TestProcessString';
+  pContents := 'unit Test; {$UNDEF TEST} end.';
+
+  FD2XDefinesParser.ProcessString(pFilename, pContents);
+  CheckDefines('HELLO,TEST,VALUE', 'Current');
+end;
+
 procedure TestTD2XDefinesParser.TestMainUnitName;
 var
   pContents: string;
@@ -163,6 +178,19 @@ begin
 
   FD2XDefinesParser.ProcessString(pFilename, pContents);
   CheckDefines('HELLO', 'Current');
+end;
+
+procedure TestTD2XDefinesParser.TestStartDefines;
+var
+  pContents: string;
+  pFilename: string;
+begin
+  FD2XDefinesParser.StartDefines.CommaText := 'HELLO,TEST,VALUE';
+  pFilename := 'TestProcessString';
+  pContents := 'unit Test; {$UNDEF TEST} end.';
+
+  FD2XDefinesParser.ProcessString(pFilename, pContents);
+  CheckDefines('HELLO,VALUE', 'Current');
 end;
 
 procedure TestTD2XDefinesParser.TestUsedUnitName;

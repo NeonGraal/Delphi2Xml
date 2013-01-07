@@ -115,6 +115,21 @@ type
     procedure TestBeginFile;
   end;
 
+  TestTD2XHeldDefinesHandler = class(TParserTestCase)
+  strict private
+    fHndlr: TD2XHeldDefinesHandler;
+    fDefs: TStringList;
+  public
+    procedure SetUp; override;
+    procedure TearDown; override;
+  published
+    procedure TestDescription;
+    procedure TestUseProxy;
+    procedure TestInit;
+    procedure TestCopy;
+    procedure TestBeginFile;
+  end;
+
   TestTD2XSkipHandler = class(TStringTestCase)
   strict private
     fHndlr: TD2XSkipHandler;
@@ -1006,13 +1021,90 @@ begin
   CheckTrue(fHndlr.UseProxy, 'Uses proxy');
 end;
 
+{ TestTD2XHeldDefinesHandler }
+
+procedure TestTD2XHeldDefinesHandler.SetUp;
+begin
+  inherited;
+
+  fDefs := TStringList.Create;
+  fDefs.Sorted := True;
+
+  fHndlr := TD2XHeldDefinesHandler.CreateDefines(fDefs);
+end;
+
+procedure TestTD2XHeldDefinesHandler.TearDown;
+begin
+  FreeAndNil(fHndlr);
+  FreeAndNil(fDefs);
+
+  inherited;
+end;
+
+procedure TestTD2XHeldDefinesHandler.TestBeginFile;
+begin
+  fHndlr.InitParser(fParser);
+
+  fHndlr.BeginFile('', nil);
+  CheckList('', 'Begin File', fParser.HeldDefines);
+
+  fDefs.CommaText := 'Test';
+  fHndlr.BeginFile('', nil);
+  CheckList('Test', 'Test Define', fParser.HeldDefines);
+
+  fDefs.CommaText := '';
+  fHndlr.BeginFile('', nil);
+  CheckList('', 'Cleared Defines', fParser.HeldDefines);
+end;
+
+procedure TestTD2XHeldDefinesHandler.TestCopy;
+var
+  pFrom: TD2XHeldDefinesHandler;
+begin
+  pFrom := nil;
+
+  fHndlr.Copy(pFrom);
+  try
+    pFrom := TD2XHeldDefinesHandler.Create;
+
+    pFrom.InitParser(fParser);
+
+    CheckFalse(Assigned(TTestParserHandler(fHndlr).Parser), 'Parser not set');
+
+    fHndlr.Copy(pFrom);
+
+    Check(fParser = TTestParserHandler(fHndlr).Parser, 'Parser set');
+  finally
+    pFrom.Free;
+  end;
+end;
+
+procedure TestTD2XHeldDefinesHandler.TestDescription;
+begin
+  CheckEqualsString('Held Defines', fHndlr.Description, 'Description');
+end;
+
+procedure TestTD2XHeldDefinesHandler.TestInit;
+begin
+  fHndlr.InitParser(fParser);
+
+  CheckTrue(Assigned(TTestParserHandler(fHndlr).Parser), 'Parse Mode set');
+  Check(fParser = TTestParserHandler(fHndlr).Parser, 'Parser set');
+end;
+
+procedure TestTD2XHeldDefinesHandler.TestUseProxy;
+begin
+  CheckFalse(fHndlr.UseProxy, 'Uses proxy');
+end;
+
 initialization
 
 // Register any test cases with the test runner
 RegisterTests('Handlers', [TestTD2XCountChildrenHandler.Suite,
   TestTD2XCountDefinesHandler.Suite, TestTD2XDefinesUsedHandler.Suite,
-  TestTD2XParserDefinesHandler.Suite, TestTD2XErrorHandler.Suite, TestTD2XSkipHandler.Suite,
-  TestTD2XWriteDefinesHandler.Suite, TestTD2XXmlHandler.Suite]);
+  TestTD2XParserDefinesHandler.Suite, TestTD2XHeldDefinesHandler.Suite,
+  TestTD2XErrorHandler.Suite, TestTD2XSkipHandler.Suite, TestTD2XWriteDefinesHandler.Suite,
+  TestTD2XXmlHandler.Suite]);
 
 InitStringListLoad;
 

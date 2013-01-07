@@ -16,10 +16,10 @@ uses
 type
   TTestRunParam = class(TD2XRunParam)
   private
-    function GetDefines: TStringList;
+    function GetParserDefines: TStringList;
 
   public
-    property Defines: TStringList read GetDefines;
+    property ParserDefines: TStringList read GetParserDefines;
 
   end;
 
@@ -45,9 +45,9 @@ type
 
   { TTestRunParam }
 
-function TTestRunParam.GetDefines: TStringList;
+function TTestRunParam.GetParserDefines: TStringList;
 begin
-  Result := TTestOptions(fOpts).Defines;
+  Result := TTestOptions(fOpts).ParserDefines;
 end;
 
 { TestTD2XRunParam }
