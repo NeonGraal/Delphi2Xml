@@ -1,4 +1,5 @@
--d+CPU32
+-d+CPU32,Interface,Implementation,Dummy
+-h+Standalone_PropertyUnits
 -f-
 -t
 *.dp?,*.inc,*.pas
