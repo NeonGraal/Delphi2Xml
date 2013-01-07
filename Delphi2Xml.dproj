@@ -47,6 +47,10 @@
 		</PropertyGroup>
 		<Import Condition="'$(Base)'!='' And Exists('CastaliaParser.optset')" Project="CastaliaParser.optset"/>
 		<PropertyGroup Condition="'$(Base)'!=''">
+			<BRCC_Defines>FASTMM;$(BRCC_Defines)</BRCC_Defines>
+			<DCC_OutputDependencies>true</DCC_OutputDependencies>
+			<DCC_OutputXMLDocumentation>true</DCC_OutputXMLDocumentation>
+			<DCC_Define>FASTMM;$(DCC_Define)</DCC_Define>
 			<Manifest_File>None</Manifest_File>
 			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0</VerInfo_Keys>
 			<VerInfo_Locale>5129</VerInfo_Locale>
@@ -93,6 +97,8 @@
 			<DelphiCompile Include="$(MainSource)">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
+			<DCCReference Include="FastMM4\FastMM4.pas"/>
+			<DCCReference Include="FastMM4\FastMM4Messages.pas"/>
 			<DCCReference Include="Source\D2X.pas"/>
 			<DCCReference Include="Source\D2X.Handler.pas"/>
 			<DCCReference Include="Source\D2X.Handlers.pas"/>

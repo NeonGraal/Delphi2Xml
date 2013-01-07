@@ -2,9 +2,7 @@
 <D2X_File parseMode="Full" fileName="Config\Test\Testing.TestSubDir.pas">
 	<ParseFile>
 		<UnitFile>
-			<MainUnitName>
-				<UnitName>Testing.TestSubDir</UnitName>
-			</MainUnitName>
+			<MainUnitName>Testing.TestSubDir</MainUnitName>
 			<InterfaceSection lastToken="interface" />
 			<ImplementationSection lastToken="implementation" />
 			<InitializationSection lastToken="end" />

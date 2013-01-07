@@ -43,6 +43,7 @@ type
     procedure TestUsedUnitName;
     procedure TestMainUnitName;
     procedure TestMainUsedUnitExpression;
+    procedure TestContainsExpression;
     procedure TestParseFile;
 
     procedure TestGetLexerDefines;
@@ -89,6 +90,20 @@ procedure TestTD2XDefinesParser.TearDown;
 begin
   FD2XDefinesParser.Free;
   FD2XDefinesParser := nil;
+end;
+
+procedure TestTD2XDefinesParser.TestContainsExpression;
+var
+  pContents: string;
+  pFilename: string;
+begin
+  pFilename := 'TestContainsExpression';
+  pContents := 'package Test; contains Test2 in ''Test2.pas''; end.';
+
+  FD2XDefinesParser.ProcessString(pFilename, pContents);
+
+  CheckText('Test2', 'Main Used Unit Name');
+  CheckAttribute('file', '''Test2.pas''', 'Blank');
 end;
 
 procedure TestTD2XDefinesParser.TestGetLexerDefines;

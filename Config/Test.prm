@@ -1,8 +1,7 @@
-#m:Uses
-#f-
--x:XmlTest
-#p:Dir
--d+DUMMY
--d+CPU32
+-d+CPU32,interface,implementation
+-h+standalone_propertyunits
+-t
 -r
-*.dp?,*.inc,*.pas
+-f-
+-b:..\V6\3.6\Main\V6
+Source\V6.BL.EVAProp.DesignGlazingunitFill.inc

@@ -339,8 +339,7 @@ const
     'Use default Held Defines';
 {$ELSE}
   DEFINED_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Use these Defines: ' +
-    'CONDITIONALEXPRESSIONS, CPU32, MSWINDOWS, UNICODE, VER230 ' +
-    'Use default Held Defines';
+    'CONDITIONALEXPRESSIONS, CPU32, MSWINDOWS, UNICODE, VER230 ' + 'Use default Held Defines';
 {$ENDIF}
   { TestTD2XOptionEnums }
 
@@ -696,11 +695,11 @@ end;
 
 procedure TOptionsTestCase.CheckFile(pMethod, pFile: string);
 var
-  lExtn, lFile, lExpected: string;
+  lExtn, lFile, lExpected, lOutput: string;
 begin
   lExtn := '-' + pMethod + ExtractFileExt(pFile);
   lFile := 'Test\' + TidyFilename(ChangeFileExt(pFile, '')) + lExtn;
-  ForceDirectories(ExtractFilePath(ExtractFilePath(ParamStr(0)) + 'Test'));
+  ForceDirectories(ExtractFilePath(ParamStr(0)) + 'Test');
   if FileExists(lFile) then
     with TStreamReader.Create(lFile) do
       try
@@ -716,8 +715,19 @@ begin
       finally
         Free;
       end;
-  CheckEqualsString(ReduceString(lExpected), ReduceString(fFact.CheckOutput(pFile)),
-    ExtractFileName(lFile));
+  lOutput := fFact.CheckOutput(pFile);
+  if ReduceString(lExpected) <> ReduceString(lOutput) then
+  begin
+    ForceDirectories(ExtractFilePath(ParamStr(0)) + 'Actual');
+    with TStreamWriter.Create('Actual\' + ExtractFileName(lFile)) do
+    try
+      WriteLine(lOutput);
+    finally
+      Free;
+    end;
+  end;
+
+  CheckEqualsString(ReduceString(lExpected), ReduceString(lOutput), ExtractFileName(lFile));
 end;
 
 procedure TOptionsTestCase.CheckFiles(pMethod: string);
@@ -1568,12 +1578,14 @@ end;
 
 procedure TestTD2XOptionsParseHeldDefines.TestParseOptionHAddLoad;
 begin
-  CheckSimple('H+~Test.def', 'Use these Held Defines: ALPHA, BETA, GAMMA, TANGO, UNIFORM, VICTOR');
+  CheckSimple('H+~Test.def',
+    'Use these Held Defines: ALPHA, BETA, GAMMA, TANGO, UNIFORM, VICTOR');
 end;
 
 procedure TestTD2XOptionsParseHeldDefines.TestParseOptionHAddMany;
 begin
-  CheckSimple('H+Test1,Test2', 'Use these Held Defines: ALPHA, BETA, GAMMA, TEST1, TEST2, UNIFORM');
+  CheckSimple('H+Test1,Test2',
+    'Use these Held Defines: ALPHA, BETA, GAMMA, TEST1, TEST2, UNIFORM');
 end;
 
 procedure TestTD2XOptionsParseHeldDefines.TestParseOptionHClear;

@@ -76,7 +76,7 @@ end;
 
 function TD2XFileStream.ReadFrom: TStreamReader;
 begin
-  fSR := TStreamReader.Create(fFilename);
+  fSR := TStreamReader.Create(fFilename, TEncoding.ANSI, True);
   Result := fSR;
 end;
 

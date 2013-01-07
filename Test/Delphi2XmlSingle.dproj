@@ -82,7 +82,7 @@
 			<BCC_SourceDebuggingOn>true</BCC_SourceDebuggingOn>
 			<BCC_DebugLineNumbers>true</BCC_DebugLineNumbers>
 			<VerInfo_Locale>1033</VerInfo_Locale>
-			<Debugger_RunParams>gui</Debugger_RunParams>
+			<Debugger_RunParams></Debugger_RunParams>
 			<DCC_RemoteDebug>false</DCC_RemoteDebug>
 		</PropertyGroup>
 		<Import Condition="'$(Base)'!='' And Exists('Warnings.optset')" Project="Warnings.optset"/>
@@ -90,6 +90,8 @@
 			<DelphiCompile Include="$(MainSource)">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
+			<DCCReference Include="..\FastMM4\FastMM4.pas"/>
+			<DCCReference Include="..\FastMM4\FastMM4Messages.pas"/>
 			<DCCReference Include="Test.Options.pas"/>
 			<None Include="Profiling\Delphi2XmlSingle.aqt"/>
 			<BuildConfiguration Include="Base">

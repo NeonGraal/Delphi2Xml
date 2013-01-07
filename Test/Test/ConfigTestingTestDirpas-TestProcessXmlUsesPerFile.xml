@@ -1,9 +1,7 @@
 <?xml version="1.0"?>
 <D2X_File parseMode="Uses" fileName="Config\Testing.TestDir.pas">
 	<ParseFile lastToken="end.">
-		<MainUnitName>
-			<UnitName>Testing.TestDir</UnitName>
-		</MainUnitName>
+		<MainUnitName>Testing.TestDir</MainUnitName>
 		<InterfaceSection lastToken="interface" />
 		<ImplementationSection lastToken="implementation" />
 	</ParseFile>

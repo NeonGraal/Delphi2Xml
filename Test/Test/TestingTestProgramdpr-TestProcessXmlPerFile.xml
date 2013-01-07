@@ -2,16 +2,12 @@
 <D2X_File parseMode="Full" fileName="Testing.TestProgram.dpr">
 	<ParseFile>
 		<ProgramFile>
-			<MainUnitName>
-				<UnitName>Testing.TestProgram</UnitName>
-			</MainUnitName>
+			<MainUnitName>Testing.TestProgram</MainUnitName>
 			<ProgramBlock>
 				<MainUsesClause>
 					<MainUsedUnitStatement>
 						<MainUsedUnitName>
-							<UsedUnitName>
-								<UnitName>Testing.TestUnit</UnitName>
-							</UsedUnitName>
+							<UsedUnitName>Testing.TestUnit</UsedUnitName>
 						</MainUsedUnitName>
 						<MainUsedUnitExpression file="'Testing.TestUnit.pas'">
 							<ConstantExpression>

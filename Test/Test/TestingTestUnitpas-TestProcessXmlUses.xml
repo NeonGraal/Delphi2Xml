@@ -2,15 +2,11 @@
 <D2X_File parseMode="Uses" fileName="Testing.TestUnit.pas">
 	<ParseFile>
 		<UnitFile>
-			<MainUnitName>
-				<UnitName>Testing.TestUnit</UnitName>
-			</MainUnitName>
+			<MainUnitName>Testing.TestUnit</MainUnitName>
 			<InterfaceSection>
 				<UsesClause>
 					<UsedUnitsList>
-						<UsedUnitName>
-							<UnitName>System.Classes</UnitName>
-						</UsedUnitName>
+						<UsedUnitName>System.Classes</UsedUnitName>
 					</UsedUnitsList>
 					<IncludeFile filename="TEST.INC" msgAt="68,0" />
 					<D2X_notSuppMsg msgAt="88,0">Currently not supported {$D+}</D2X_notSuppMsg>
@@ -19,9 +15,7 @@
 			<ImplementationSection>
 				<UsesClause lastToken=";{$ELSE}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}">
 					<UsedUnitsList>
-						<UsedUnitName>
-							<UnitName>System.SysUtils</UnitName>
-						</UsedUnitName>
+						<UsedUnitName>System.SysUtils</UsedUnitName>
 					</UsedUnitsList>
 				</UsesClause>
 			</ImplementationSection>

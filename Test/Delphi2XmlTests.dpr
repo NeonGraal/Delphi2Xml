@@ -3,11 +3,12 @@ program Delphi2XmlTests;
 {$APPTYPE CONSOLE}
 
 uses
-  FastMM4,
+  FastMM4 in '..\FastMM4\FastMM4.pas',
   GuiTestRunner,
   TextTestRunner,
   System.StrUtils,
   Winapi.Windows,
+  FastMM4Messages in '..\FastMM4\FastMM4Messages.pas',
   D2X in '..\Source\D2X.pas',
   D2X.Handler in '..\Source\D2X.Handler.pas',
   D2X.Handlers in '..\Source\D2X.Handlers.pas',

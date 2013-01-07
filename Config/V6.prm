@@ -1,5 +1,5 @@
--d+CPU32,interface,implementation
--h+standalone_propertyunits
+-d+CPU32,Interface,Implementation,Dummy
+-h+Standalone_PropertyUnits
 -t
 -r
 -f-

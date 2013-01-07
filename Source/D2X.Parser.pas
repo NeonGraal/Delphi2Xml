@@ -43,14 +43,18 @@ type
 
     procedure HandlePtUndefDirect(Sender: TmwBasePasLex); override;
 
+    procedure UnitName; override;
+    procedure UsedUnitName; override;
+    procedure MainUsedUnitExpression; override;
+    procedure ContainsExpression; override;
+
   public
     constructor Create;
     destructor Destroy; override;
 
-    procedure UnitName; override;
-    procedure UsedUnitName; override;
+    procedure ContainsIdentifier; override;
+    procedure ContainsStatement; override;
     procedure MainUnitName; override;
-    procedure MainUsedUnitExpression; override;
 
     procedure ParseFile; override;
     procedure GetLexerDefines(pDefs: TStringList);
@@ -77,15 +81,17 @@ type
 
     procedure ReadToFileEnd;
     procedure ReadTo(pSym: TptTokenKind);
+
+  protected
+    procedure ProgramBlock; override;
+
   public
     procedure InterfaceSection; override;
     procedure ImplementationSection; override;
-    procedure ProgramBlock; override;
-    procedure MainUsedUnitStatement; override;
-
-    procedure UsedUnitName; override;
     procedure MainUnitName; override;
-    procedure MainUsedUnitExpression; override;
+    procedure MainUsedUnitStatement; override;
+    procedure UsedUnitName; override;
+
 
     property CurrentSection: string read fCurrentSection;
   end;
@@ -324,7 +330,6 @@ type
     procedure TypeSection; override;
     procedure UnitFile; override;
     procedure UnitId; override;
-    procedure UnitName; override;
     procedure UsedUnitName; override;
     procedure UsedUnitsList; override;
     procedure UsesClause; override;
@@ -1490,11 +1495,6 @@ begin
   inherited;
 end;
 
-procedure TD2XFullParser.UnitName;
-begin
-  inherited;
-end;
-
 procedure TD2XFullParser.UsedUnitName;
 begin
   inherited;
@@ -1621,6 +1621,29 @@ begin
 end;
 
 { TD2XDefinesParser }
+
+procedure TD2XDefinesParser.ContainsExpression;
+begin
+  fLastTokens := '';
+  fKeepTokens := true;
+  try
+    inherited;
+    DoAddAttribute('file');
+  finally
+    fKeepTokens := False;
+  end;
+end;
+
+procedure TD2XDefinesParser.ContainsIdentifier;
+begin
+  fLastTokens := '';
+  inherited;
+end;
+
+procedure TD2XDefinesParser.ContainsStatement;
+begin
+  inherited;
+end;
 
 constructor TD2XDefinesParser.Create;
 begin
@@ -1817,11 +1840,6 @@ begin
 end;
 
 procedure TD2XUsesParser.MainUnitName;
-begin
-  inherited;
-end;
-
-procedure TD2XUsesParser.MainUsedUnitExpression;
 begin
   inherited;
 end;
