@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<D2X_File parseMode="Full" fileName="(Stream)">
+  <ParseFile>
+    <ProgramFile>
+      <MainUnitName>Testing.TestProgram</MainUnitName>
+      <ProgramBlock>
+        <MainUsesClause>
+          <MainUsedUnitStatement>
+            <MainUsedUnitName>
+              <UsedUnitName>TestUnit</UsedUnitName>
+            </MainUsedUnitName>
+            <MainUsedUnitExpression file="'TestUnit.pas'">
+              <ConstantExpression>
+                <Expression>
+                  <SimpleExpression>
+                    <Term>
+                      <Factor>
+                        <CharString />
+                      </Factor>
+                    </Term>
+                  </SimpleExpression>
+                </Expression>
+              </ConstantExpression>
+            </MainUsedUnitExpression>
+          </MainUsedUnitStatement>
+        </MainUsesClause>
+        <Block>
+          <CompoundStatement lastToken="end">
+            <StatementList />
+          </CompoundStatement>
+        </Block>
+      </ProgramBlock>
+    </ProgramFile>
+  </ParseFile>
+</D2X_File>
+

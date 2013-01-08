@@ -1,94 +1,99 @@
 <?xml version="1.0"?>
 <D2X_Param parseMode="Full" fileName="Process Xml">
-	<D2X_Dir fileName=".">
-		<D2X_Pattern fileName="Pattern-TestingTest">
-			<D2X_File fileName="Testing.TestUnit.pas">
-				<ParseFile>
-					<UnitFile>
-						<MainUnitName>Testing.TestUnit</MainUnitName>
-						<InterfaceSection>
-							<UsesClause>
-								<UsedUnitsList>
-									<UsedUnitName>System.Classes</UsedUnitName>
-								</UsedUnitsList>
-								<IncludeFile filename="TEST.INC" msgAt="68,0" />
-								<D2X_notSuppMsg msgAt="88,0">Currently not supported {$D+}</D2X_notSuppMsg>
-							</UsesClause>
-						</InterfaceSection>
-						<ImplementationSection>
-							<UsesClause lastToken=";{$ELSE}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}">
-								<UsedUnitsList>
-									<UsedUnitName>System.SysUtils</UsedUnitName>
-								</UsedUnitsList>
-							</UsesClause>
-						</ImplementationSection>
-						<InitializationSection lastToken="end" />
-					</UnitFile>
-				</ParseFile>
-			</D2X_File>
-			<D2X_File fileName="Testing.TestProgram.dpr">
-				<ParseFile>
-					<ProgramFile>
-						<MainUnitName>Testing.TestProgram</MainUnitName>
-						<ProgramBlock>
-							<MainUsesClause>
-								<MainUsedUnitStatement>
-									<MainUsedUnitName>
-										<UsedUnitName>Testing.TestUnit</UsedUnitName>
-									</MainUsedUnitName>
-									<MainUsedUnitExpression file="'Testing.TestUnit.pas'">
-										<ConstantExpression>
-											<Expression>
-												<SimpleExpression>
-													<Term>
-														<Factor>
-															<CharString />
-														</Factor>
-													</Term>
-												</SimpleExpression>
-											</Expression>
-										</ConstantExpression>
-									</MainUsedUnitExpression>
-								</MainUsedUnitStatement>
-							</MainUsesClause>
-							<Block>
-								<CompoundStatement lastToken="end">
-									<StatementList />
-								</CompoundStatement>
-							</Block>
-						</ProgramBlock>
-					</ProgramFile>
-				</ParseFile>
-			</D2X_File>
-		</D2X_Pattern>
-	</D2X_Dir>
-	<D2X_Dir fileName="Config">
-		<D2X_Pattern fileName="ConfigPattern-TestingTest">
-			<D2X_File fileName="Config\Testing.TestDir.pas">
-				<ParseFile>
-					<UnitFile>
-						<MainUnitName>Testing.TestDir</MainUnitName>
-						<InterfaceSection lastToken="interface" />
-						<ImplementationSection lastToken="implementation" />
-						<InitializationSection lastToken="end" />
-					</UnitFile>
-				</ParseFile>
-			</D2X_File>
-		</D2X_Pattern>
-		<D2X_SubDir fileName="Config\Test">
-			<D2X_Pattern fileName="Config\TestPattern-TestingTest">
-				<D2X_File fileName="Config\Test\Testing.TestSubDir.pas">
-					<ParseFile>
-						<UnitFile>
-							<MainUnitName>Testing.TestSubDir</MainUnitName>
-							<InterfaceSection lastToken="interface" />
-							<ImplementationSection lastToken="implementation" />
-							<InitializationSection lastToken="end" />
-						</UnitFile>
-					</ParseFile>
-				</D2X_File>
-			</D2X_Pattern>
-		</D2X_SubDir>
-	</D2X_Dir>
-	<D2X_Dir fileName="Test" />
+  <D2X_Dir fileName="(Base)">
+    <D2X_SubDir fileName="(Dir)">
+      <D2X_Pattern fileName="Pattern-TestingTest">
+        <D2X_File fileName="Testing.TestUnit.pas">
+          <ParseFile>
+            <UnitFile>
+              <MainUnitName>Testing.TestUnit</MainUnitName>
+              <InterfaceSection>
+                <UsesClause>
+                  <UsedUnitsList>
+                    <UsedUnitName>System.Classes</UsedUnitName>
+                  </UsedUnitsList>
+                  <IncludeFile filename="TEST.INC" msgAt="68,0" />
+                  <D2X_notSuppMsg msgAt="88,0">Currently not supported {$D+}</D2X_notSuppMsg>
+                </UsesClause>
+              </InterfaceSection>
+              <ImplementationSection>
+                <UsesClause lastToken=";{$ELSE}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}">
+                  <UsedUnitsList>
+                    <UsedUnitName>System.SysUtils</UsedUnitName>
+                  </UsedUnitsList>
+                </UsesClause>
+              </ImplementationSection>
+              <InitializationSection lastToken="end" />
+            </UnitFile>
+          </ParseFile>
+        </D2X_File>
+        <D2X_File fileName="Testing.TestProgram.dpr">
+          <ParseFile>
+            <ProgramFile>
+              <MainUnitName>Testing.TestProgram</MainUnitName>
+              <ProgramBlock>
+                <MainUsesClause>
+                  <MainUsedUnitStatement>
+                    <MainUsedUnitName>
+                      <UsedUnitName>Testing.TestUnit</UsedUnitName>
+                    </MainUsedUnitName>
+                    <MainUsedUnitExpression file="'Testing.TestUnit.pas'">
+                      <ConstantExpression>
+                        <Expression>
+                          <SimpleExpression>
+                            <Term>
+                              <Factor>
+                                <CharString />
+                              </Factor>
+                            </Term>
+                          </SimpleExpression>
+                        </Expression>
+                      </ConstantExpression>
+                    </MainUsedUnitExpression>
+                  </MainUsedUnitStatement>
+                </MainUsesClause>
+                <Block>
+                  <CompoundStatement lastToken="end">
+                    <StatementList />
+                  </CompoundStatement>
+                </Block>
+              </ProgramBlock>
+            </ProgramFile>
+          </ParseFile>
+        </D2X_File>
+      </D2X_Pattern>
+    </D2X_SubDir>
+  </D2X_Dir>
+  <D2X_Dir fileName="Config">
+    <D2X_SubDir fileName="Config">
+      <D2X_Pattern fileName="ConfigPattern-TestingTest">
+        <D2X_File fileName="Config\Testing.TestDir.pas">
+          <ParseFile>
+            <UnitFile>
+              <MainUnitName>Testing.TestDir</MainUnitName>
+              <InterfaceSection lastToken="interface" />
+              <ImplementationSection lastToken="implementation" />
+              <InitializationSection lastToken="end" />
+            </UnitFile>
+          </ParseFile>
+        </D2X_File>
+      </D2X_Pattern>
+    </D2X_SubDir>
+    <D2X_SubDir fileName="Config\Test">
+      <D2X_Pattern fileName="Config\TestPattern-TestingTest">
+        <D2X_File fileName="Config\Test\Testing.TestSubDir.pas">
+          <ParseFile>
+            <UnitFile>
+              <MainUnitName>Testing.TestSubDir</MainUnitName>
+              <InterfaceSection lastToken="interface" />
+              <ImplementationSection lastToken="implementation" />
+              <InitializationSection lastToken="end" />
+            </UnitFile>
+          </ParseFile>
+        </D2X_File>
+      </D2X_Pattern>
+    </D2X_SubDir>
+  </D2X_Dir>
+  <D2X_Dir fileName="Test" />
 </D2X_Param>
+

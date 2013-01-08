@@ -795,8 +795,9 @@ begin
   CheckEqualsString('A', TidyFilename('A*'), 'Star');
   CheckEqualsString('A', TidyFilename('A.'), 'Dot');
   CheckEqualsString('A', TidyFilename('A?'), 'Query');
+  CheckEqualsString('A-B', TidyFilename('A\B'), 'Path');
   CheckEqualsString('A', TidyFilename('A...'), 'Many');
-  CheckEqualsString('ABCDEF', TidyFilename('A?*B..?C?*?D***.E????*F'), 'Complex');
+  CheckEqualsString('A-B-CD-EF', TidyFilename('A?\*B.\.?C?*?D*\*.E???*F'), 'Complex');
 end;
 
 { TD2XTestStream }

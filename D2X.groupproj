@@ -60,13 +60,13 @@
 		<ItemGroup Condition="'$(BuildGroup)'=='Main'">
 			<BuildGroupProject Include="Delphi2Xml.dproj">
 				<ProjectGuid>{6E37D02E-DA75-4738-A36D-AF7DF792751A}</ProjectGuid>
-				<Configurations>Debug;Release</Configurations>
+				<Configurations>Debug</Configurations>
 				<Platforms>Win32</Platforms>
 				<Enabled>True</Enabled>
 			</BuildGroupProject>
 			<BuildGroupProject Include="Test\Delphi2XmlTests.dproj">
 				<ProjectGuid>{65072D3B-889E-416A-9CD4-25B389C2E9D2}</ProjectGuid>
-				<Configurations>Console;Debug;Gui</Configurations>
+				<Configurations>Gui</Configurations>
 				<Platforms>Win32</Platforms>
 				<Enabled>True</Enabled>
 			</BuildGroupProject>

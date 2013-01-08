@@ -315,6 +315,7 @@ begin
           begin
             if fElapsedMode.Value >= emDir then
               Log('Processing %s ... ', [pDir], fElapsedMode.Value > emDir);
+            BeginResults('D2X_SubDir', rpSubDir);
             lTimer.Start;
           end;
           BeginResults('D2X_Pattern', rpWildcard);
@@ -329,6 +330,10 @@ begin
     if lTimer.IsRunning then
     begin
       lTimer.Stop;
+      if ExcludeTrailingPathDelimiter(pDir) = '' then
+      EndResults('(Dir)', rpSubDir)
+      else
+      EndResults(ExcludeTrailingPathDelimiter(pDir), rpSubDir);
       case fElapsedMode.Value of
         emDir:
           Log('%0.3f', [fIOFact.GetDuration(lTimer)]);
@@ -469,12 +474,15 @@ begin
       lFile := ExtractFileName(pParam);
       BeginResults('D2X_Dir', rpDir);
       Result := ProcessDirectory(lPath, lFile);
-      EndResults(ExcludeTrailingPathDelimiter(lPath), rpDir);
+      if ExcludeTrailingPathDelimiter(lPath) = '' then
+        EndResults('(Base)', rpDir)
+      else
+        EndResults(ExcludeTrailingPathDelimiter(lPath), rpDir);
       if Recurse then
         Result := RecurseDirectory(lPath, lFile, True) or Result;
     end;
   end;
-  EndResults(pFrom, rpParam);
+  EndResults(TidyFilename(pFrom), rpParam);
 end;
 
 function TD2XOptions.ProcessOption(pOpt: string): Boolean;
@@ -605,7 +613,7 @@ begin
   lDefinesUsed := TD2XFlaggedStringParam.CreateFlagStr('U', 'Defines Used', '<f/e>',
     'Report Defines Used into <f/e>', '.used', True, ConvertExtn, nil, nil);
   lSkipMethods := TD2XFlaggedStringParam.CreateFlagStr('S', 'Skipped Methods', '<f/e>',
-    'Load Skipped Methods from <f/e>', '.skip', True, ConvertFile, nil, nil);
+    'Load Skipped Methods from <f/e>', '.skip', False, ConvertFile, nil, nil);
   lCountChildren := TD2XFlaggedStringParam.CreateFlagStr('CC', 'Count Children', '<f/e>',
     'Report Min/Max Children into <f/e>', '.chld', True, ConvertExtn, nil, nil);
   lCountDefines := TD2XFlaggedStringParam.CreateFlagStr('CD', 'Count Defines', '<f/e>',
@@ -836,12 +844,8 @@ begin
         repeat
           lFile := lPath.Current;
           if pMainDir then
-            BeginResults('D2X_Dir', rpDir)
-          else
-            BeginResults('D2X_SubDir', rpSubDir);
+            BeginResults('D2X_Dir', rpDir);
           Result := ProcessDirectory(lFile, pWildCards) or Result;
-          if not pMainDir then
-            EndResults(ExcludeTrailingPathDelimiter(lFile), rpSubDir);
           Result := RecurseDirectory(lFile, pWildCards, False) or Result;
           if pMainDir then
             EndResults(ExcludeTrailingPathDelimiter(lFile), rpDir);

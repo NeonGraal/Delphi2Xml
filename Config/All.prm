@@ -2,7 +2,7 @@
 -h+Standalone_PropertyUnits
 -f-
 -t
-*.dp?,*.inc,*.pas
 -r
+*.dp?,*.inc,*.pas
 -b:..\V6\3.6\Main
 *.dp?,*.inc,*.pas

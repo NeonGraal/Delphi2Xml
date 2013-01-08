@@ -114,7 +114,7 @@ end;
 function TidyFilename(pFilename: string): string;
 begin
   Result := ReplaceStr(ReplaceStr(ReplaceStr(ReplaceStr(pFilename, '*', ''), '.', ''), '?',
-      ''), '\', '');
+      ''), '\', '-');
 end;
 
 { TD2X }

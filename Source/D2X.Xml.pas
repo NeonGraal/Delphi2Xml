@@ -166,6 +166,7 @@ begin
       FreeAndNil(lW);
     end;
 
+  fXml.Position := 0;
   Result := fXml;
 end;
 

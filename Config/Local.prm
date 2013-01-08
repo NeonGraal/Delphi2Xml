@@ -1,4 +1,5 @@
 -d+CPU32
 -f-
 -t
+-r
 *.dp?,*.inc,*.pas

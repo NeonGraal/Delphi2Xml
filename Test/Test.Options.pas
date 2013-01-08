@@ -51,7 +51,7 @@ const
     'U[+-]:<f/e> :.used Report Defines Used into <f/e> ' +
     'CC[+-]:<f/e> :.chld Report Min/Max Children into <f/e> ' +
     'CD[+-]:<f/e> :.defs Report Defines Used into <f/e> ' +
-    'S[+-]:<f/e> :.skip Load Skipped Methods from <f/e> ' +
+    'S[+-]:<f/e> -(.skip) Load Skipped Methods from <f/e> ' +
     'D[+-!:]<def> Add(+), Remove(-), Clear(!) or Load(:) Defines ' +
     'H[+-!:]<def> Add(+), Remove(-), Clear(!) or Load(:) Held Defines ' +
     'Definitions: <f/e> If value begins with "." is appended to global name to give file name';
@@ -61,7 +61,7 @@ const
   //    'Log dir :Log\ Base dir -(.\) Parse mode Full Results per File Show elapsed Quiet ' +
     'Recurse - Parse mode Full Results per File Show elapsed Quiet ' +
     'Generate XML :Xml\ Write Defines -(Defines\) Defines Used :.used ' +
-    'Count Children :.chld Count Defines :.defs Skipped Methods :.skip ';
+    'Count Children :.chld Count Defines :.defs Skipped Methods -(.skip) ';
   DEFAULT_REPORT_OPTIONS = BASE_REPORT_OPTIONS +
     'Use default Defines Use default Held Defines';
 
@@ -720,11 +720,11 @@ begin
   begin
     ForceDirectories(ExtractFilePath(ParamStr(0)) + 'Actual');
     with TStreamWriter.Create('Actual\' + ExtractFileName(lFile)) do
-    try
-      WriteLine(lOutput);
-    finally
-      Free;
-    end;
+      try
+        WriteLine(lOutput);
+      finally
+        Free;
+      end;
   end;
 
   CheckEqualsString(ReduceString(lExpected), ReduceString(lOutput), ExtractFileName(lFile));
