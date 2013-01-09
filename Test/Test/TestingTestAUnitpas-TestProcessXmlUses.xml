@@ -2,7 +2,7 @@
 <D2X_File parseMode="Uses" fileName="Testing.TestUnit.pas">
 	<ParseFile>
 		<UnitFile>
-			<MainUnitName>Testing.TestUnit</MainUnitName>
+			<MainUnitName group="Testing.Test">Testing.TestUnit</MainUnitName>
 			<InterfaceSection>
 				<UsesClause>
 					<UsedUnitsList>

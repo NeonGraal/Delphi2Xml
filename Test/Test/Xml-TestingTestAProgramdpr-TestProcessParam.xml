@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<D2X_File parseMode="Full" fileName="(Stream)">
+<D2X_File parseMode="Full" fileName="Testing.Test.AProgram.dpr">
   <ParseFile>
     <ProgramFile>
       <MainUnitName group="Testing.Test">Testing.Test.AProgram</MainUnitName>

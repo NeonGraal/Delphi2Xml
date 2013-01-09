@@ -1,15 +1,15 @@
 <?xml version="1.0"?>
-<D2X_File parseMode="Full" fileName="Testing.TestUnit.pas">
+<D2X_File parseMode="Full" fileName="Testing.Test.AUnit.pas">
   <ParseFile>
     <UnitFile>
-      <MainUnitName>Testing.TestUnit</MainUnitName>
+      <MainUnitName group="Testing.Test">Testing.Test.AUnit</MainUnitName>
       <InterfaceSection>
         <UsesClause>
           <UsedUnitsList>
             <UsedUnitName>System.Classes</UsedUnitName>
           </UsedUnitsList>
-          <IncludeFile filename="TEST.INC" msgAt="68,0" />
-          <D2X_notSuppMsg msgAt="88,0">Currently not supported {$D+}</D2X_notSuppMsg>
+          <IncludeFile filename="TEST.INC" msgAt="70,0" />
+          <D2X_notSuppMsg msgAt="90,0">Currently not supported {$D+}</D2X_notSuppMsg>
         </UsesClause>
       </InterfaceSection>
       <ImplementationSection>

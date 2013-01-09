@@ -15,11 +15,11 @@
 			<xsl:text> [color=green]
 </xsl:text>
 		</xsl:for-each>
-		<xsl:for-each select="//ImplementationSection/UsedUnitName[key('main', .)]">
+		<!-- xsl:for-each select="//ImplementationSection/UsedUnitName[key('main', .)]">
 			<xsl:value-of select="translate(concat(../../MainUnitName, '  -&gt; ', .), '.', '_')" />
 			<xsl:text> [color=blue]
 </xsl:text>
-		</xsl:for-each>
+		</xsl:for-each -->
 		<xsl:for-each select="//ContainsStatement[key('main', ConstantIdentifier)]">
 			<xsl:value-of select="translate(concat(../MainUnitName, '  -&gt; ', ContainsIdentifier), '.', '_')" />
 			<xsl:text> [color=yellow]

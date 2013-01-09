@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<D2X_Dir parseMode="Uses" fileName="(Base)">
+  <D2X_SubDir fileName="(Dir)">
+    <D2X_Pattern fileName="Pattern-TestingTest">
+      <D2X_File fileName="Testing.Test.AUnit.pas">
+        <ParseFile lastToken="end.">
+          <MainUnitName group="Testing.Test">Testing.Test.AUnit</MainUnitName>
+          <InterfaceSection>
+            <UsedUnitName>System.Classes</UsedUnitName>
+            <IncludeFile filename="TEST.INC" msgAt="70,0" />
+            <D2X_notSuppMsg msgAt="90,0">Currently not supported {$D+}</D2X_notSuppMsg>
+          </InterfaceSection>
+          <ImplementationSection lastToken=";{$ELSE}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}">
+            <UsedUnitName>System.SysUtils</UsedUnitName>
+          </ImplementationSection>
+        </ParseFile>
+      </D2X_File>
+      <D2X_File fileName="Testing.Test.AProgram.dpr">
+        <ParseFile lastToken="beginend.">
+          <MainUnitName group="Testing.Test">Testing.Test.AProgram</MainUnitName>
+          <MainUsedUnitStatement file="'Testing.Test.AUnit.pas'">
+            <UsedUnitName group="Testing.Test">Testing.Test.AUnit</UsedUnitName>
+          </MainUsedUnitStatement>
+        </ParseFile>
+      </D2X_File>
+    </D2X_Pattern>
+  </D2X_SubDir>
+</D2X_Dir>
+

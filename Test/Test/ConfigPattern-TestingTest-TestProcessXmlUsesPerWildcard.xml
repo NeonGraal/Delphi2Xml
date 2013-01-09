@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <D2X_Pattern parseMode="Uses" fileName="ConfigPattern-TestingTest">
-  <D2X_File fileName="Config\Testing.TestDir.pas">
+  <D2X_File fileName="Config\Testing.Test.Dir.pas">
     <ParseFile lastToken="end.">
-      <MainUnitName>Testing.TestDir</MainUnitName>
+      <MainUnitName group="Testing.Test">Testing.Test.Dir</MainUnitName>
       <InterfaceSection lastToken="interface" />
       <ImplementationSection lastToken="implementation" />
     </ParseFile>

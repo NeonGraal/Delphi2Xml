@@ -49,7 +49,7 @@ procedure TestTD2XFileStream.SetUp;
 begin
   inherited;
 
-  fFile := TD2XFileStream.Create('Testing.TestUnit.pas');
+  fFile := TD2XFileStream.Create('Testing.Test.AUnit.pas');
 end;
 
 procedure TestTD2XFileStream.TearDown;
@@ -61,7 +61,7 @@ end;
 
 procedure TestTD2XFileStream.TestDescription;
 begin
-  CheckEqualsString('Testing.TestUnit.pas', fFile.Description, 'Description');
+  CheckEqualsString('Testing.Test.AUnit.pas', fFile.Description, 'Description');
 end;
 
 procedure TestTD2XFileStream.TestExists;
@@ -71,7 +71,7 @@ end;
 
 procedure TestTD2XFileStream.TestReadFrom;
 const
-  EXPECTED_FILE = 'unit Testing.TestUnit; interface uses System.Classes; {$DEFINE TEST} ' +
+  EXPECTED_FILE = 'unit Testing.Test.AUnit; interface uses System.Classes; {$DEFINE TEST} ' +
     '{$INCLUDE Test.inc} {$D+} implementation uses System.SysUtils; {$IFDEF TEST} ' +
     '{$DEFINE TEST1} {$ELSE} {$DEFINE TEST2} {$ENDIF} {$IFNDEF TEST} {$DEFINE TEST3} ' +
     '{$ENDIF} {$IFOPT D+} {$DEFINE TEST6} {$ENDIF} {$IF Defined(TEST)} {$DEFINE TEST4} ' +

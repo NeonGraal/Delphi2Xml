@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<D2X_File parseMode="Uses" fileName="Testing.TestProgram.dpr">
-	<ParseFile lastToken="beginend.">
-		<MainUnitName>Testing.TestProgram</MainUnitName>
-		<MainUsedUnitStatement file="'Testing.TestUnit.pas'">
-			<UsedUnitName>Testing.TestUnit</UsedUnitName>
-		</MainUsedUnitStatement>
-	</ParseFile>
-</D2X_File>

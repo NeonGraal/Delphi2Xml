@@ -1,8 +1,9 @@
 <?xml version="1.0"?>
-<D2X_File parseMode="Uses" fileName="Config\Test\Testing.TestSubDir.pas">
-	<ParseFile lastToken="end.">
-		<MainUnitName>Testing.TestSubDir</MainUnitName>
-		<InterfaceSection lastToken="interface" />
-		<ImplementationSection lastToken="implementation" />
-	</ParseFile>
+<D2X_File parseMode="Uses" fileName="Config\Test\Testing.Test.SubDir.pas">
+  <ParseFile lastToken="end.">
+    <MainUnitName group="Testing.Test">Testing.Test.SubDir</MainUnitName>
+    <InterfaceSection lastToken="interface" />
+    <ImplementationSection lastToken="implementation" />
+  </ParseFile>
 </D2X_File>
+

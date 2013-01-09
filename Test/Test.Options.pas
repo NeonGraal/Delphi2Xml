@@ -28,8 +28,8 @@ type
 
 const
   INPUT_PROCESSING = 'Processing (Input) ... done';
-  UNIT_PROCESSING = 'Processing Testing.TestUnit.pas ... done';
-  PROGRAM_PROCESSING = 'Processing Testing.TestProgram.dpr ... done';
+  UNIT_PROCESSING = 'Processing Testing.Test.AUnit.pas ... done';
+  PROGRAM_PROCESSING = 'Processing Testing.Test.AProgram.dpr ... done';
   BOTH_PROCESSING = 'Processing ... ' + UNIT_PROCESSING + ' ' + PROGRAM_PROCESSING +
     ' Processed';
   EXPECTED_SHOW_OPTIONS = 'Usage: %s [ Option | @Params | mFilename | Wildcard ] ... ' +
@@ -313,9 +313,9 @@ type
 const
   STREAM_PROCESSING = 'Processing (Stream) ... done';
   DIRECTORY_PROCESSING =
-    'Processing Config ... Processing Config\Testing.TestDir.pas ... done Processed Config';
+    'Processing Config ... Processing Config\Testing.Test.Dir.pas ... done Processed Config';
   RECURSE_PROCESSING =
-    'Processing Config\Test ... Processing Config\Test\Testing.TestSubDir.pas ... done Processed Config\Test';
+    'Processing Config\Test ... Processing Config\Test\Testing.Test.SubDir.pas ... done Processed Config\Test';
   ALL_PROCESSING = BOTH_PROCESSING + ' ' + DIRECTORY_PROCESSING + ' ' + RECURSE_PROCESSING;
   ALTERED_REPORT_OPTIONS =
     'Current option settings: Verbose + Log Errors + Log Not Supp + Final Token + ' +
@@ -844,10 +844,10 @@ end;
 
 procedure TestTD2XOptions.TestProcessFile;
 begin
-  Check(fOpts.ProcessFile('Testing.TestUnit.pas'), 'Process Unit');
+  Check(fOpts.ProcessFile('Testing.Test.AUnit.pas'), 'Process Unit');
   CheckLog(UNIT_PROCESSING, 'Process Unit');
 
-  Check(fOpts.ProcessFile('Testing.TestProgram.dpr'), 'Process Program');
+  Check(fOpts.ProcessFile('Testing.Test.AProgram.dpr'), 'Process Program');
   CheckLog(PROGRAM_PROCESSING, 'Process Program');
 end;
 
@@ -872,7 +872,7 @@ end;
 
 procedure TestTD2XOptions.TestProcessStream;
 begin
-  fS.WriteString('program Testing.TestProgram; uses TestUnit in ''TestUnit.pas''; begin end.');
+  fS.WriteString('program Testing.Test.AProgram; uses Testing.Test.AUnit in ''Testing.Test.AUnit.pas''; begin end.');
   fS.Position := 0;
   Check(fOpts.ProcessStream('(Stream)', fDS.ReadFrom), 'Process Stream');
   CheckLog(STREAM_PROCESSING, 'Process Stream');
@@ -1045,8 +1045,8 @@ begin
   fB.Clear;
   Check(fOpts.ProcessParam('Testing.Test*', 'Count Children'), 'Process Units');
   fOpts.EndProcessing;
-  CheckLog(PJ([PD('', ['Testing.TestUnit.pas', 'Testing.TestProgram.dpr']),
-        PD('Config', ['Testing.TestDir.pas']), PD('Config\Test', ['Testing.TestSubDir.pas'])]),
+  CheckLog(PJ([PD('', ['Testing.Test.AUnit.pas', 'Testing.Test.AProgram.dpr']),
+        PD('Config', ['Testing.Test.Dir.pas']), PD('Config\Test', ['Testing.Test.SubDir.pas'])]),
     'Elapsed File');
 
   Check(fOpts.ProcessOption('EP'), 'Return Value 1');
@@ -1054,15 +1054,15 @@ begin
   Check(fOpts.ProcessParam('Testing.Test*', 'Count Children'), 'Process Units');
   fOpts.EndProcessing;
   SetLength(lP, 2);
-  SA(lP[0], [1, 3, 6, 9, 10, 12, 13, 15, 31, 32, 34, 37, 47, 54, 65, 75, 98, 99, 100]);
-  SA(lP[1], [7, 17, 18, 30, 31, 37, 46, 47, 56, 60, 86, 87, 94, 98, 100]);
+  SA(lP[0], [1, 3, 4, 5, 6, 9, 11, 13, 15, 31, 33, 35, 37, 48, 54, 65, 75, 98, 99, 100]);
+  SA(lP[1], [7, 15, 17, 21, 22, 30, 31, 37, 45, 46, 51, 52, 57, 60, 87, 88, 94, 98, 100]);
   SetLength(lC, 1);
-  SA(lC[0], [7, 23, 25, 39, 41, 60, 90, 98, 100]);
+  SA(lC[0], [7, 23, 25, 32, 34, 40, 42, 61, 90, 98, 100]);
   SetLength(lT, 1);
-  SA(lT[0], [7, 22, 24, 42, 44, 62, 90, 98, 100]);
-  CheckLog(PJ([PDP('', ['Testing.TestUnit.pas', 'Testing.TestProgram.dpr'], lP),
-        PDP('Config', ['Testing.TestDir.pas'], lC), PDP('Config\Test',
-          ['Testing.TestSubDir.pas'], lT)]), 'Elapsed Processing');
+  SA(lT[0], [7, 21, 23, 30, 32, 43, 45, 63, 90, 98, 100]);
+  CheckLog(PJ([PDP('', ['Testing.Test.AUnit.pas', 'Testing.Test.AProgram.dpr'], lP),
+        PDP('Config', ['Testing.Test.Dir.pas'], lC), PDP('Config\Test',
+          ['Testing.Test.SubDir.pas'], lT)]), 'Elapsed Processing');
 end;
 
 procedure TestTD2XOptionsSpecific.TestLoadSkipped;
@@ -1100,7 +1100,7 @@ begin
   Check(fOpts.ProcessOption('N'), 'Return Value 3');
   fB.Clear;
 
-  Check(fOpts.ProcessFile('Testing.TestUnit.pas'), 'Process Unit');
+  Check(fOpts.ProcessFile('Testing.Test.AUnit.pas'), 'Process Unit');
 
   CheckLog('', 'Process Unit');
   CheckErrorLog('Currently not supported {$D+}');

@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<D2X_Dir parseMode="Full" fileName="(Base)">
+  <D2X_SubDir fileName="(Dir)">
+    <D2X_Pattern fileName="Pattern-TestingTest">
+      <D2X_File fileName="Testing.Test.AUnit.pas">
+        <ParseFile>
+          <UnitFile>
+            <MainUnitName group="Testing.Test">Testing.Test.AUnit</MainUnitName>
+            <InterfaceSection>
+              <UsesClause>
+                <UsedUnitsList>
+                  <UsedUnitName>System.Classes</UsedUnitName>
+                </UsedUnitsList>
+                <IncludeFile filename="TEST.INC" msgAt="70,0" />
+                <D2X_notSuppMsg msgAt="90,0">Currently not supported {$D+}</D2X_notSuppMsg>
+              </UsesClause>
+            </InterfaceSection>
+            <ImplementationSection>
+              <UsesClause lastToken=";{$ELSE}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}">
+                <UsedUnitsList>
+                  <UsedUnitName>System.SysUtils</UsedUnitName>
+                </UsedUnitsList>
+              </UsesClause>
+            </ImplementationSection>
+            <InitializationSection lastToken="end" />
+          </UnitFile>
+        </ParseFile>
+      </D2X_File>
+      <D2X_File fileName="Testing.Test.AProgram.dpr">
+        <ParseFile>
+          <ProgramFile>
+            <MainUnitName group="Testing.Test">Testing.Test.AProgram</MainUnitName>
+            <ProgramBlock>
+              <MainUsesClause>
+                <MainUsedUnitStatement>
+                  <MainUsedUnitName>
+                    <UsedUnitName group="Testing.Test">Testing.Test.AUnit</UsedUnitName>
+                  </MainUsedUnitName>
+                  <MainUsedUnitExpression file="'Testing.Test.AUnit.pas'">
+                    <ConstantExpression>
+                      <Expression>
+                        <SimpleExpression>
+                          <Term>
+                            <Factor>
+                              <CharString />
+                            </Factor>
+                          </Term>
+                        </SimpleExpression>
+                      </Expression>
+                    </ConstantExpression>
+                  </MainUsedUnitExpression>
+                </MainUsedUnitStatement>
+              </MainUsesClause>
+              <Block>
+                <CompoundStatement lastToken="end">
+                  <StatementList />
+                </CompoundStatement>
+              </Block>
+            </ProgramBlock>
+          </ProgramFile>
+        </ParseFile>
+      </D2X_File>
+    </D2X_Pattern>
+  </D2X_SubDir>
+</D2X_Dir>
+

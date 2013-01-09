@@ -536,14 +536,14 @@ end;
 
 procedure TTestFactory.InitFiles;
 const
-  TESTING_UNIT = 'unit Testing.TestUnit; interface uses System.Classes;' +
+  TESTING_UNIT = 'unit Testing.Test.AUnit; interface uses System.Classes;' +
     '{$DEFINE TEST} {$INCLUDE Test.inc} {$D+}' + 'implementation uses System.SysUtils;' +
     '{$IFDEF TEST}{$DEFINE TEST1}{$ELSE}{$DEFINE TEST2}{$ENDIF}' +
     '{$IFNDEF TEST}{$DEFINE TEST3}{$ENDIF}' + '{$IFOPT D+}{$DEFINE TEST6}{$ENDIF}' +
     '{$IF Defined(TEST)}{$DEFINE TEST4}{$ELSEIF Defined(TEST1)}{$DEFINE TEST5}{$ENDIF}' +
     'end.';
-  TESTING_PROGRAM = 'program Testing.TestProgram; ' +
-    'uses Testing.TestUnit in ''Testing.TestUnit.pas''; begin end.';
+  TESTING_PROGRAM = 'program Testing.Test.AProgram; ' +
+    'uses Testing.Test.AUnit in ''Testing.Test.AUnit.pas''; begin end.';
 begin
   fConfigFiles.Add('Test.def', 'Uniform'#13#10'Victor'#13#10'Tango');
   fConfigFiles.Add('Test.prm', '-@'#13#10'-@Test.out');
@@ -553,17 +553,17 @@ begin
   fConfigFiles.Add('.skip', '');
 
   fBaseFiles.Add('Testing.Test*', '');
-  fBaseFiles.Add('Testing.TestUnit.pas', TESTING_UNIT);
-  fBaseFiles.Add('Testing.TestProgram.dpr', TESTING_PROGRAM);
-  fBaseFiles.Add('Config\Testing.TestDir.pas',
-    'unit Testing.TestDir; interface implementation end.');
-  fBaseFiles.Add('Config\Test\Testing.TestSubDir.pas',
-    'unit Testing.TestSubDir; interface implementation end.');
+  fBaseFiles.Add('Testing.Test.AUnit.pas', TESTING_UNIT);
+  fBaseFiles.Add('Testing.Test.AProgram.dpr', TESTING_PROGRAM);
+  fBaseFiles.Add('Config\Testing.Test.Dir.pas',
+    'unit Testing.Test.Dir; interface implementation end.');
+  fBaseFiles.Add('Config\Test\Testing.Test.SubDir.pas',
+    'unit Testing.Test.SubDir; interface implementation end.');
 
-  fBaseDirs.Add('', TATestDir.Create(['Config', 'Test'], ['Testing.TestUnit.pas',
-        'Testing.TestProgram.dpr']));
-  fBaseDirs.Add('Config', TATestDir.Create(['Test'], ['Testing.TestDir.pas']));
-  fBaseDirs.Add('Config\Test', TATestDir.Create([], ['Testing.TestSubDir.pas']));
+  fBaseDirs.Add('', TATestDir.Create(['Config', 'Test'], ['Testing.Test.AUnit.pas',
+        'Testing.Test.AProgram.dpr']));
+  fBaseDirs.Add('Config', TATestDir.Create(['Test'], ['Testing.Test.Dir.pas']));
+  fBaseDirs.Add('Config\Test', TATestDir.Create([], ['Testing.Test.SubDir.pas']));
   fBaseDirs.Add('Test', TATestDir.Create([], []));
 end;
 

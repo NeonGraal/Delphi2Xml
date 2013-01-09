@@ -6,7 +6,7 @@
 				<D2X_File fileName="Testing.TestUnit.pas">
 					<ParseFile lastToken="end.">
 						<MainUnitName>
-							<UnitName>Testing.TestUnit</UnitName>
+							<UnitName group="Testing.Test">Testing.TestUnit</UnitName>
 						</MainUnitName>
 						<InterfaceSection>
 							<UsedUnitName>

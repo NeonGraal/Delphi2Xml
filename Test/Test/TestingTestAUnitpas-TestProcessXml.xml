@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
-<D2X_File parseMode="Full" fileName="Testing.TestUnit.pas">
+<D2X_File parseMode="Full" fileName="Testing.Test.AUnit.pas">
 	<ParseFile>
 		<UnitFile>
-			<MainUnitName>Testing.TestUnit</MainUnitName>
+			<MainUnitName group="Testing.Test">Testing.Test.AUnit</MainUnitName>
 			<InterfaceSection>
 				<UsesClause>
 					<UsedUnitsList>

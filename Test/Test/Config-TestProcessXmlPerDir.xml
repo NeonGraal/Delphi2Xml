@@ -2,10 +2,10 @@
 <D2X_Dir parseMode="Full" fileName="Config">
   <D2X_SubDir fileName="Config">
     <D2X_Pattern fileName="ConfigPattern-TestingTest">
-      <D2X_File fileName="Config\Testing.TestDir.pas">
+      <D2X_File fileName="Config\Testing.Test.Dir.pas">
         <ParseFile>
           <UnitFile>
-            <MainUnitName>Testing.TestDir</MainUnitName>
+            <MainUnitName group="Testing.Test">Testing.Test.Dir</MainUnitName>
             <InterfaceSection lastToken="interface" />
             <ImplementationSection lastToken="implementation" />
             <InitializationSection lastToken="end" />
@@ -16,10 +16,10 @@
   </D2X_SubDir>
   <D2X_SubDir fileName="Config\Test">
     <D2X_Pattern fileName="Config\TestPattern-TestingTest">
-      <D2X_File fileName="Config\Test\Testing.TestSubDir.pas">
+      <D2X_File fileName="Config\Test\Testing.Test.SubDir.pas">
         <ParseFile>
           <UnitFile>
-            <MainUnitName>Testing.TestSubDir</MainUnitName>
+            <MainUnitName group="Testing.Test">Testing.Test.SubDir</MainUnitName>
             <InterfaceSection lastToken="interface" />
             <ImplementationSection lastToken="implementation" />
             <InitializationSection lastToken="end" />
