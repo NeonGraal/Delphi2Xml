@@ -2,11 +2,11 @@
 <D2X_SubDir parseMode="Uses" fileName="Config\Test">
   <D2X_Pattern fileName="Config\TestPattern-TestingTest">
     <D2X_File fileName="Config\Test\Testing.Test.SubDir.pas">
-      <ParseFile lastToken="end.">
+      <UnitFile lastToken="end.">
         <MainUnitName group="Testing.Test">Testing.Test.SubDir</MainUnitName>
         <InterfaceSection lastToken="interface" />
         <ImplementationSection lastToken="implementation" />
-      </ParseFile>
+      </UnitFile>
     </D2X_File>
   </D2X_Pattern>
 </D2X_SubDir>

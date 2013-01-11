@@ -1,23 +1,19 @@
 <?xml version="1.0"?>
 <D2X_File parseMode="Full" fileName="Testing.Test.AProgram.dpr">
-  <ParseFile>
-    <ProgramFile>
-      <MainUnitName group="Testing.Test">Testing.Test.AProgram</MainUnitName>
-      <ProgramBlock>
-        <MainUsesClause>
-          <MainUsedUnitStatement file="'Testing.Test.AUnit.pas'">
-            <MainUsedUnitName>
-              <UsedUnitName group="Testing.Test">Testing.Test.AUnit</UsedUnitName>
-            </MainUsedUnitName>
-          </MainUsedUnitStatement>
-        </MainUsesClause>
-        <Block>
-          <CompoundStatement lastToken="end">
-            <StatementList />
-          </CompoundStatement>
-        </Block>
-      </ProgramBlock>
-    </ProgramFile>
-  </ParseFile>
+  <ProgramFile>
+    <MainUnitName group="Testing.Test">Testing.Test.AProgram</MainUnitName>
+    <ProgramBlock>
+      <MainUsedUnitStatement file="'Testing.Test.AUnit.pas'">
+        <MainUsedUnitName>
+          <UsedUnitName group="Testing.Test">Testing.Test.AUnit</UsedUnitName>
+        </MainUsedUnitName>
+      </MainUsedUnitStatement>
+      <Block>
+        <CompoundStatement lastToken="end">
+          <StatementList />
+        </CompoundStatement>
+      </Block>
+    </ProgramBlock>
+  </ProgramFile>
 </D2X_File>
 

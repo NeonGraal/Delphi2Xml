@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <D2X_File parseMode="Uses" fileName="Testing.Test.AProgram.dpr">
-  <ParseFile lastToken="beginend.">
+  <ProgramFile lastToken="beginend.">
     <MainUnitName group="Testing.Test">Testing.Test.AProgram</MainUnitName>
     <MainUsedUnitStatement file="'Testing.Test.AUnit.pas'">
       <UsedUnitName group="Testing.Test">Testing.Test.AUnit</UsedUnitName>
     </MainUsedUnitStatement>
-  </ParseFile>
+  </ProgramFile>
 </D2X_File>
 

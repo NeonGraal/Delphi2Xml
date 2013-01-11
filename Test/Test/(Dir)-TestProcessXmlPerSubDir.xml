@@ -2,62 +2,48 @@
 <D2X_SubDir parseMode="Full" fileName="(Dir)">
   <D2X_Pattern fileName="Pattern-TestingTest">
     <D2X_File fileName="Testing.Test.AUnit.pas">
-      <ParseFile>
-        <UnitFile>
-          <MainUnitName group="Testing.Test">Testing.Test.AUnit</MainUnitName>
-          <InterfaceSection>
-            <UsesClause>
-              <UsedUnitsList>
-                <UsedUnitName>System.Classes</UsedUnitName>
-              </UsedUnitsList>
-              <IncludeFile filename="TEST.INC" msgAt="70,0" />
-              <D2X_notSuppMsg msgAt="90,0">Currently not supported {$D+}</D2X_notSuppMsg>
-            </UsesClause>
-          </InterfaceSection>
-          <ImplementationSection>
-            <UsesClause lastToken=";{$ELSE}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}">
-              <UsedUnitsList>
-                <UsedUnitName>System.SysUtils</UsedUnitName>
-              </UsedUnitsList>
-            </UsesClause>
-          </ImplementationSection>
-          <InitializationSection lastToken="end" />
-        </UnitFile>
-      </ParseFile>
+      <UnitFile>
+        <MainUnitName group="Testing.Test">Testing.Test.AUnit</MainUnitName>
+        <InterfaceSection>
+          <UsedUnitsList>
+            <UsedUnitName>System.Classes</UsedUnitName>
+          </UsedUnitsList>
+          <IncludeFile filename="TEST.INC" msgAt="70,0" />
+          <D2X_notSuppMsg msgAt="90,0">Currently not supported {$D+}</D2X_notSuppMsg>
+        </InterfaceSection>
+        <ImplementationSection lastToken=";{$ELSE}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}">
+          <UsedUnitsList>
+            <UsedUnitName>System.SysUtils</UsedUnitName>
+          </UsedUnitsList>
+        </ImplementationSection>
+        <InitializationSection lastToken="end" />
+      </UnitFile>
     </D2X_File>
     <D2X_File fileName="Testing.Test.AProgram.dpr">
-      <ParseFile>
-        <ProgramFile>
-          <MainUnitName group="Testing.Test">Testing.Test.AProgram</MainUnitName>
-          <ProgramBlock>
-            <MainUsesClause>
-              <MainUsedUnitStatement file="'Testing.Test.AUnit.pas'">
-                <MainUsedUnitName>
-                  <UsedUnitName group="Testing.Test">Testing.Test.AUnit</UsedUnitName>
-                </MainUsedUnitName>
-              </MainUsedUnitStatement>
-            </MainUsesClause>
-            <Block>
-              <CompoundStatement lastToken="end">
-                <StatementList />
-              </CompoundStatement>
-            </Block>
-          </ProgramBlock>
-        </ProgramFile>
-      </ParseFile>
+      <ProgramFile>
+        <MainUnitName group="Testing.Test">Testing.Test.AProgram</MainUnitName>
+        <ProgramBlock>
+          <MainUsedUnitStatement file="'Testing.Test.AUnit.pas'">
+            <MainUsedUnitName>
+              <UsedUnitName group="Testing.Test">Testing.Test.AUnit</UsedUnitName>
+            </MainUsedUnitName>
+          </MainUsedUnitStatement>
+          <Block>
+            <CompoundStatement lastToken="end">
+              <StatementList />
+            </CompoundStatement>
+          </Block>
+        </ProgramBlock>
+      </ProgramFile>
     </D2X_File>
     <D2X_File fileName="Testing.Test.APackage.dpk">
-      <ParseFile>
-        <PackageFile lastToken=";end.">
-          <MainUnitName group="Testing.Test">Testing.Test.APackage</MainUnitName>
-          <ContainsClause>
-            <ContainsStatement>
-              <ContainsIdentifier group="Testing.Test">Testing.Test.AUnit</ContainsIdentifier>
-              <ContainsExpression file="'Testing.Test.AUnit.pas'" />
-            </ContainsStatement>
-          </ContainsClause>
-        </PackageFile>
-      </ParseFile>
+      <PackageFile lastToken=";end.">
+        <MainUnitName group="Testing.Test">Testing.Test.APackage</MainUnitName>
+        <ContainsStatement>
+          <ContainsIdentifier group="Testing.Test">Testing.Test.AUnit</ContainsIdentifier>
+          <ContainsExpression file="'Testing.Test.AUnit.pas'" />
+        </ContainsStatement>
+      </PackageFile>
     </D2X_File>
   </D2X_Pattern>
 </D2X_SubDir>

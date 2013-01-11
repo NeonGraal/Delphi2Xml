@@ -1,12 +1,10 @@
 <?xml version="1.0"?>
 <D2X_File parseMode="Full" fileName="Config\Testing.Test.Dir.pas">
-  <ParseFile>
-    <UnitFile>
-      <MainUnitName group="Testing.Test">Testing.Test.Dir</MainUnitName>
-      <InterfaceSection lastToken="interface" />
-      <ImplementationSection lastToken="implementation" />
-      <InitializationSection lastToken="end" />
-    </UnitFile>
-  </ParseFile>
+  <UnitFile>
+    <MainUnitName group="Testing.Test">Testing.Test.Dir</MainUnitName>
+    <InterfaceSection lastToken="interface" />
+    <ImplementationSection lastToken="implementation" />
+    <InitializationSection lastToken="end" />
+  </UnitFile>
 </D2X_File>
 

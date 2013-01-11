@@ -47,6 +47,7 @@ type
 
     procedure HandlePtUndefDirect(Sender: TmwBasePasLex); override;
 
+    procedure ParseFile; override;
     procedure UnitName; override;
     procedure UsedUnitName; override;
     procedure MainUsedUnitExpression; override;
@@ -60,7 +61,6 @@ type
     procedure ContainsStatement; override;
     procedure MainUnitName; override;
 
-    procedure ParseFile; override;
     procedure GetLexerDefines(pDefs: TStringList);
 
     procedure ProcessString(pFilename, pContents: string);
@@ -91,6 +91,10 @@ type
     procedure ProgramBlock; override;
 
   public
+    procedure ProgramFile; override;
+    procedure PackageFile; override;
+    procedure UnitFile; override;
+
     procedure InterfaceSection; override;
     procedure ImplementationSection; override;
     procedure MainUnitName; override;
@@ -148,7 +152,6 @@ type
     procedure ConstructorHeading; override;
     procedure ConstructorName; override;
     procedure ConstSection; override;
-    procedure ContainsClause; override;
     procedure ContainsExpression; override;
     procedure ContainsIdentifier; override;
     procedure ContainsStatement; override;
@@ -181,7 +184,6 @@ type
     procedure ExceptionVariable; override;
     procedure ExplicitType; override; // !! changed spelling to "Explicit"
     procedure ExportedHeading; override;
-    procedure ExportsClause; override;
     procedure ExportsElement; override;
     procedure Expression; override;
     procedure ExpressionList; override;
@@ -227,7 +229,6 @@ type
     procedure MainUnitName; override;
     procedure MainUsedUnitName; override;
     procedure MainUsedUnitStatement; override;
-    procedure MainUsesClause; override;
     procedure MultiplicativeOperator; override;
     procedure NewFormalParameterType; override;
     procedure Number; override;
@@ -255,7 +256,6 @@ type
     procedure ParameterFormal; override;
     procedure ParameterName; override;
     procedure ParameterNameList; override;
-    procedure ParseFile; override;
     procedure PointerType; override;
     procedure ProceduralDirective; override;
     procedure ProceduralType; override;
@@ -283,7 +283,6 @@ type
     procedure RecordVariant; override;
     procedure RelativeOperator; override;
     procedure RepeatStatement; override;
-    procedure RequiresClause; override;
     procedure RequiresIdentifier; override;
     procedure ResolutionInterfaceName; override;
     procedure ResourceDeclaration; override;
@@ -337,7 +336,6 @@ type
     procedure UnitId; override;
     procedure UsedUnitName; override;
     procedure UsedUnitsList; override;
-    procedure UsesClause; override;
     procedure VarAbsolute; override;
     procedure VarEqual; override;
     procedure VarDeclaration; override;
@@ -596,11 +594,6 @@ begin
   inherited;
 end;
 
-procedure TD2XFullParser.ContainsClause;
-begin
-  inherited;
-end;
-
 procedure TD2XFullParser.ContainsExpression;
 begin
   inherited;
@@ -742,11 +735,6 @@ begin
 end;
 
 procedure TD2XFullParser.ExportedHeading;
-begin
-  inherited;
-end;
-
-procedure TD2XFullParser.ExportsClause;
 begin
   inherited;
 end;
@@ -976,11 +964,6 @@ begin
   inherited;
 end;
 
-procedure TD2XFullParser.MainUsesClause;
-begin
-  inherited;
-end;
-
 procedure TD2XFullParser.MultiplicativeOperator;
 begin
   inherited;
@@ -1116,11 +1099,6 @@ begin
   inherited;
 end;
 
-procedure TD2XFullParser.ParseFile;
-begin
-  inherited;
-end;
-
 procedure TD2XFullParser.PointerType;
 begin
   inherited;
@@ -1252,11 +1230,6 @@ begin
 end;
 
 procedure TD2XFullParser.RepeatStatement;
-begin
-  inherited;
-end;
-
-procedure TD2XFullParser.RequiresClause;
 begin
   inherited;
 end;
@@ -1502,11 +1475,6 @@ begin
 end;
 
 procedure TD2XFullParser.UsedUnitsList;
-begin
-  inherited;
-end;
-
-procedure TD2XFullParser.UsesClause;
 begin
   inherited;
 end;
@@ -1866,15 +1834,23 @@ begin
   inherited;
 end;
 
+procedure TD2XUsesParser.PackageFile;
+begin
+  inherited;
+end;
+
 procedure TD2XUsesParser.ProgramBlock;
 begin
   if TokenID = ptUses then
-  begin
     MainUsesClause;
-  end;
 
   ReadToFileEnd;
   NextToken;
+end;
+
+procedure TD2XUsesParser.ProgramFile;
+begin
+  inherited;
 end;
 
 procedure TD2XUsesParser.ReadTo(pSym: TptTokenKind);
@@ -1893,6 +1869,11 @@ begin
     fLastTokens := '';
     NextToken;
   end;
+end;
+
+procedure TD2XUsesParser.UnitFile;
+begin
+  inherited;
 end;
 
 procedure TD2XUsesParser.UsedUnitName;

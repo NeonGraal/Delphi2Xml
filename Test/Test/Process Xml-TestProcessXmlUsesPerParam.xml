@@ -4,7 +4,7 @@
     <D2X_SubDir fileName="(Dir)">
       <D2X_Pattern fileName="Pattern-TestingTest">
         <D2X_File fileName="Testing.Test.AUnit.pas">
-          <ParseFile lastToken="end.">
+          <UnitFile lastToken="end.">
             <MainUnitName group="Testing.Test">Testing.Test.AUnit</MainUnitName>
             <InterfaceSection>
               <UsedUnitName>System.Classes</UsedUnitName>
@@ -14,24 +14,24 @@
             <ImplementationSection lastToken=";{$ELSE}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}">
               <UsedUnitName>System.SysUtils</UsedUnitName>
             </ImplementationSection>
-          </ParseFile>
+          </UnitFile>
         </D2X_File>
         <D2X_File fileName="Testing.Test.AProgram.dpr">
-          <ParseFile lastToken="beginend.">
+          <ProgramFile lastToken="beginend.">
             <MainUnitName group="Testing.Test">Testing.Test.AProgram</MainUnitName>
             <MainUsedUnitStatement file="'Testing.Test.AUnit.pas'">
               <UsedUnitName group="Testing.Test">Testing.Test.AUnit</UsedUnitName>
             </MainUsedUnitStatement>
-          </ParseFile>
+          </ProgramFile>
         </D2X_File>
         <D2X_File fileName="Testing.Test.APackage.dpk">
-          <ParseFile lastToken=";end.">
+          <PackageFile lastToken=";end.">
             <MainUnitName group="Testing.Test">Testing.Test.APackage</MainUnitName>
             <ContainsStatement>
               <ContainsIdentifier group="Testing.Test">Testing.Test.AUnit</ContainsIdentifier>
               <ContainsExpression file="'Testing.Test.AUnit.pas'" />
             </ContainsStatement>
-          </ParseFile>
+          </PackageFile>
         </D2X_File>
       </D2X_Pattern>
     </D2X_SubDir>
@@ -40,22 +40,22 @@
     <D2X_SubDir fileName="Config">
       <D2X_Pattern fileName="ConfigPattern-TestingTest">
         <D2X_File fileName="Config\Testing.Test.Dir.pas">
-          <ParseFile lastToken="end.">
+          <UnitFile lastToken="end.">
             <MainUnitName group="Testing.Test">Testing.Test.Dir</MainUnitName>
             <InterfaceSection lastToken="interface" />
             <ImplementationSection lastToken="implementation" />
-          </ParseFile>
+          </UnitFile>
         </D2X_File>
       </D2X_Pattern>
     </D2X_SubDir>
     <D2X_SubDir fileName="Config\Test">
       <D2X_Pattern fileName="Config\TestPattern-TestingTest">
         <D2X_File fileName="Config\Test\Testing.Test.SubDir.pas">
-          <ParseFile lastToken="end.">
+          <UnitFile lastToken="end.">
             <MainUnitName group="Testing.Test">Testing.Test.SubDir</MainUnitName>
             <InterfaceSection lastToken="interface" />
             <ImplementationSection lastToken="implementation" />
-          </ParseFile>
+          </UnitFile>
         </D2X_File>
       </D2X_Pattern>
     </D2X_SubDir>

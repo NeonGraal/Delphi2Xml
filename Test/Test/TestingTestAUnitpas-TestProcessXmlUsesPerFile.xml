@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <D2X_File parseMode="Uses" fileName="Testing.Test.AUnit.pas">
-  <ParseFile lastToken="end.">
+  <UnitFile lastToken="end.">
     <MainUnitName group="Testing.Test">Testing.Test.AUnit</MainUnitName>
     <InterfaceSection>
       <UsedUnitName>System.Classes</UsedUnitName>
@@ -10,6 +10,6 @@
     <ImplementationSection lastToken=";{$ELSE}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}">
       <UsedUnitName>System.SysUtils</UsedUnitName>
     </ImplementationSection>
-  </ParseFile>
+  </UnitFile>
 </D2X_File>
 
