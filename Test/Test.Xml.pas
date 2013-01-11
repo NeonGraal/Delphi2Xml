@@ -55,6 +55,7 @@ type
     procedure TestAddChild;
     procedure TestAddAttribute;
     procedure TestHasChildNodes;
+    procedure TestTrimChildren;
   end;
 
   TestTD2XmlAttribute = class(TD2XmlElementTestCase)
@@ -80,8 +81,8 @@ type
     procedure TestAddAttribute;
     procedure TestAddAttributes;
     procedure TestHasChildNodes;
+    procedure TestTrimChildren;
   end;
-  // Test methods for class TD2XmlDoc
 
   TestTD2XmlDoc = class(TD2XmlTestCase)
   strict private
@@ -163,6 +164,16 @@ begin
   FD2XmlNode.AddChild('Child1');
   ReturnValue := FD2XmlNode.HasChildNodes;
   CheckFalse(ReturnValue, 'Never child Nodes');
+end;
+
+procedure TestTD2XmlNode.TestTrimChildren;
+var
+  ReturnValue: Boolean;
+begin
+  FD2XmlNode.TrimChildren('Child');
+
+  ReturnValue := FD2XmlNode.HasChildNodes;
+  CheckFalse(ReturnValue, 'No child Nodes');
 end;
 
 { TestTD2XmlAttribute }
@@ -296,6 +307,35 @@ begin
   ReturnValue := FD2XmlElement.Xml;
 
   CheckDoc('<Test>Value</Test>', 'Simple Node', ReturnValue);
+end;
+
+procedure TestTD2XmlElement.TestTrimChildren;
+var
+  ReturnValue: Boolean;
+begin
+  FD2XmlElement.TrimChildren('Child');
+  ReturnValue := FD2XmlElement.HasChildNodes;
+  CheckFalse(ReturnValue, 'No child Nodes');
+
+  FD2XmlElement.AddChild('Child1');
+  FD2XmlElement.TrimChildren('Child');
+  ReturnValue := FD2XmlElement.HasChildNodes;
+  Check(ReturnValue, 'Still has child Node');
+
+  FD2XmlElement.TrimChildren('Child1');
+  ReturnValue := FD2XmlElement.HasChildNodes;
+  CheckFalse(ReturnValue, 'No child Nodes again');
+
+  FD2XmlElement.AddChild('Child1');
+  FD2XmlElement.AddChild('Child2');
+
+  FD2XmlElement.TrimChildren('Child2');
+  ReturnValue := FD2XmlElement.HasChildNodes;
+  Check(ReturnValue, 'Still has child Nodes again');
+
+  FD2XmlElement.TrimChildren('Child1');
+  ReturnValue := FD2XmlElement.HasChildNodes;
+  CheckFalse(ReturnValue, 'No child Nodes finally');
 end;
 
 { TestTD2XmlDoc }

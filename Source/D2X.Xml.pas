@@ -34,12 +34,12 @@ type
     function AddChild(pTag: string): TD2XmlNode; virtual;
     function AddAttribute(pTag: string): TD2XmlNode; virtual;
     function HasChildNodes: Boolean; virtual;
+    procedure TrimChildren(pElement: string); virtual;
 
     property ParentNode: TD2XmlNode read fParent;
     property LocalName: string read fTag;
     property Text: string read fText write fText;
     property Xml: TStringStream read GetXml;
-
   end;
 
   TD2XmlAttribute = class(TD2XmlNode)
@@ -64,6 +64,7 @@ type
     function AddChild(pTag: string): TD2XmlNode; override;
     function AddAttribute(pTag: string): TD2XmlNode; override;
     function HasChildNodes: Boolean; override;
+    procedure TrimChildren(pElement: string); override;
   end;
 
   TD2XmlDoc = class(TD2XmlElement)
@@ -180,6 +181,11 @@ begin
 
 end;
 
+procedure TD2XmlNode.TrimChildren(pElement: string);
+begin
+
+end;
+
 { TD2XmlElement }
 
 function TD2XmlElement.AddAttribute(pTag: string): TD2XmlNode;
@@ -275,6 +281,17 @@ begin
   end
   else
     pW.Write(fText);
+end;
+
+procedure TD2XmlElement.TrimChildren(pElement: string);
+var
+  i: Integer;
+begin
+  Assert(Assigned(fChildren), 'TrimChildren called after Xml Generated');
+
+  for i := fChildren.Count - 1 downto 0 do
+    if fChildren[i].LocalName = pElement then
+      fChildren.Delete(i);
 end;
 
 { TD2XmlAttribute }

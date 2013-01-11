@@ -188,6 +188,7 @@ type
 
     procedure AddAttr(pName: string; pValue: string = '');
     procedure AddText(pText: string = '');
+    procedure TrimChildren(pElement: string);
 
     procedure RollbackTo(pNodeName: string);
 
@@ -549,6 +550,12 @@ begin
 
   if Assigned(lCurrNode) then
     fXmlNode := lCurrNode;
+end;
+
+procedure TD2XXmlHandler.TrimChildren(pElement: string);
+begin
+  if Assigned(fXmlNode) then
+    fXmlNode.TrimChildren(pElement);
 end;
 
 function TD2XXmlHandler.UseProxy: Boolean;

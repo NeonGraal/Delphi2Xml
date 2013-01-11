@@ -30,8 +30,9 @@ const
   INPUT_PROCESSING = 'Processing (Input) ... done';
   UNIT_PROCESSING = 'Processing Testing.Test.AUnit.pas ... done';
   PROGRAM_PROCESSING = 'Processing Testing.Test.AProgram.dpr ... done';
-  BOTH_PROCESSING = 'Processing ... ' + UNIT_PROCESSING + ' ' + PROGRAM_PROCESSING +
-    ' Processed';
+  PACKAGE_PROCESSING = 'Processing Testing.Test.APackage.dpk ... done';
+  BOTH_PROCESSING = 'Processing ... ' + UNIT_PROCESSING + ' ' + PROGRAM_PROCESSING + ' ' +
+    PACKAGE_PROCESSING + ' Processed';
   EXPECTED_SHOW_OPTIONS = 'Usage: %s [ Option | @Params | mFilename | Wildcard ] ... ' +
     'Options: Default Description ? Show valid options ' +
     '! Reset all options to defaults @<file> Report/Output Current options ' +
@@ -95,7 +96,7 @@ type
     fFact: TTestFactory;
     fOpts: TTestOptions;
 
-    procedure CheckFile(pMethod, pFile: string);
+    function CheckFile(pMethod, pFile: string): string;
     procedure CheckFiles(pMethod: string);
     procedure CheckErrorLog(pExpected: string);
   protected
@@ -123,9 +124,25 @@ type
     procedure TestDefinesUsed;
     procedure TestLoadSkipped;
     procedure TestWriteDefines;
+  end;
 
-    procedure TestProcessXml;
-    procedure TestProcessXmlUses;
+  TestTD2XOptionsXmlPer = class(TOptionsTestCase)
+  public
+    procedure SetUp; override;
+  published
+    procedure TestProcessXmlPerDir;
+    procedure TestProcessXmlPerFile;
+    procedure TestProcessXmlPerParam;
+    procedure TestProcessXmlPerRun;
+    procedure TestProcessXmlPerSubDir;
+    procedure TestProcessXmlPerWildcard;
+
+    procedure TestProcessXmlUsesPerDir;
+    procedure TestProcessXmlUsesPerFile;
+    procedure TestProcessXmlUsesPerParam;
+    procedure TestProcessXmlUsesPerRun;
+    procedure TestProcessXmlUsesPerSubDir;
+    procedure TestProcessXmlUsesPerWildcard;
   end;
 
   TestTD2XOptions = class(TOptionsTestCase)
@@ -693,12 +710,14 @@ begin
     CheckEqualsString(pExpected, lErr, 'Error Log containing');
 end;
 
-procedure TOptionsTestCase.CheckFile(pMethod, pFile: string);
+function TOptionsTestCase.CheckFile(pMethod, pFile: string): string;
 var
   lExtn, lFile, lExpected, lOutput: string;
 begin
   lExtn := '-' + pMethod + ExtractFileExt(pFile);
   lFile := 'Test\' + TidyFilename(ChangeFileExt(pFile, '')) + lExtn;
+  Result := ' ' + ExtractFileName(lFile);
+
   ForceDirectories(ExtractFilePath(ParamStr(0)) + 'Test');
   if FileExists(lFile) then
     with TStreamReader.Create(lFile) do
@@ -716,7 +735,13 @@ begin
         Free;
       end;
   lOutput := fFact.CheckOutput(pFile);
-  if ReduceString(lExpected) <> ReduceString(lOutput) then
+  if ReduceString(lExpected) = ReduceString(lOutput) then
+  begin
+    Result := '';
+    if FileExists('Actual\' + ExtractFileName(lFile)) then
+      System.SysUtils.DeleteFile('Actual\' + ExtractFileName(lFile));
+  end
+  else
   begin
     ForceDirectories(ExtractFilePath(ParamStr(0)) + 'Actual');
     with TStreamWriter.Create('Actual\' + ExtractFileName(lFile)) do
@@ -726,16 +751,17 @@ begin
         Free;
       end;
   end;
-
-  CheckEqualsString(ReduceString(lExpected), ReduceString(lOutput), ExtractFileName(lFile));
 end;
 
 procedure TOptionsTestCase.CheckFiles(pMethod: string);
 var
-  lF: string;
+  lRes, lF: string;
 begin
+  lRes := '';
   for lF in fFact.CheckFiles do
-    CheckFile(pMethod, lF);
+    lRes := lRes + CheckFile(pMethod, lF);
+
+  CheckEqualsString('', lRes, 'Errored File checks for ' + pMethod);
 end;
 
 procedure TOptionsTestCase.Invoke(AMethod: TTestMethod);
@@ -872,7 +898,8 @@ end;
 
 procedure TestTD2XOptions.TestProcessStream;
 begin
-  fS.WriteString('program Testing.Test.AProgram; uses Testing.Test.AUnit in ''Testing.Test.AUnit.pas''; begin end.');
+  fS.WriteString
+    ('program Testing.Test.AProgram; uses Testing.Test.AUnit in ''Testing.Test.AUnit.pas''; begin end.');
   fS.Position := 0;
   Check(fOpts.ProcessStream('(Stream)', fDS.ReadFrom), 'Process Stream');
   CheckLog(STREAM_PROCESSING, 'Process Stream');
@@ -1045,24 +1072,25 @@ begin
   fB.Clear;
   Check(fOpts.ProcessParam('Testing.Test*', 'Count Children'), 'Process Units');
   fOpts.EndProcessing;
-  CheckLog(PJ([PD('', ['Testing.Test.AUnit.pas', 'Testing.Test.AProgram.dpr']),
-        PD('Config', ['Testing.Test.Dir.pas']), PD('Config\Test', ['Testing.Test.SubDir.pas'])]),
-    'Elapsed File');
+  CheckLog(PJ([PD('', ['Testing.Test.AUnit.pas', 'Testing.Test.AProgram.dpr',
+            'Testing.Test.APackage.dpk']), PD('Config', ['Testing.Test.Dir.pas']),
+        PD('Config\Test', ['Testing.Test.SubDir.pas'])]), 'Elapsed File');
 
   Check(fOpts.ProcessOption('EP'), 'Return Value 1');
   fB.Clear;
   Check(fOpts.ProcessParam('Testing.Test*', 'Count Children'), 'Process Units');
   fOpts.EndProcessing;
-  SetLength(lP, 2);
+  SetLength(lP, 3);
   SA(lP[0], [1, 3, 4, 5, 6, 9, 11, 13, 15, 31, 33, 35, 37, 48, 54, 65, 75, 98, 99, 100]);
   SA(lP[1], [7, 15, 17, 21, 22, 30, 31, 37, 45, 46, 51, 52, 57, 60, 87, 88, 94, 98, 100]);
+  SA(lP[2], [7, 16, 17, 21, 22, 31, 32, 42, 51, 52, 56, 57, 63, 66, 93, 94, 98, 100]);
   SetLength(lC, 1);
   SA(lC[0], [7, 23, 25, 32, 34, 40, 42, 61, 90, 98, 100]);
   SetLength(lT, 1);
   SA(lT[0], [7, 21, 23, 30, 32, 43, 45, 63, 90, 98, 100]);
-  CheckLog(PJ([PDP('', ['Testing.Test.AUnit.pas', 'Testing.Test.AProgram.dpr'], lP),
-        PDP('Config', ['Testing.Test.Dir.pas'], lC), PDP('Config\Test',
-          ['Testing.Test.SubDir.pas'], lT)]), 'Elapsed Processing');
+  CheckLog(PJ([PDP('', ['Testing.Test.AUnit.pas', 'Testing.Test.AProgram.dpr',
+            'Testing.Test.APackage.dpk'], lP), PDP('Config', ['Testing.Test.Dir.pas'], lC),
+        PDP('Config\Test', ['Testing.Test.SubDir.pas'], lT)]), 'Elapsed Processing');
 end;
 
 procedure TestTD2XOptionsSpecific.TestLoadSkipped;
@@ -1106,93 +1134,6 @@ begin
   CheckErrorLog('Currently not supported {$D+}');
 
   fOpts.EndProcessing;
-end;
-
-procedure TestTD2XOptionsSpecific.TestProcessXml;
-begin
-  Check(fOpts.ProcessOption('E!'), 'Option 3');
-  Check(fOpts.ProcessOption('X:'), 'Option 4');
-  Check(fOpts.ProcessOption('F'), 'Option 5');
-
-  Check(fOpts.ProcessOption('PD'), 'Option per Dir');
-  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Dir');
-  CheckLog(ALL_PROCESSING, 'Processing Xml per Dir');
-  fOpts.EndProcessing;
-  CheckFiles('TestProcessXmlPerDir');
-
-  Check(fOpts.ProcessOption('PF'), 'Option per File');
-  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per File');
-  CheckLog(ALL_PROCESSING, 'Processing Xml per File');
-  fOpts.EndProcessing;
-  CheckFiles('TestProcessXmlPerFile');
-
-  Check(fOpts.ProcessOption('PP'), 'Option per Param');
-  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per FilParam');
-  CheckLog(ALL_PROCESSING, 'Processing Xml per Param');
-  fOpts.EndProcessing;
-  CheckFiles('TestProcessXmlPerParam');
-
-  Check(fOpts.ProcessOption('PR'), 'Option per Run');
-  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Run');
-  CheckLog(ALL_PROCESSING, 'Processing Xml per Run');
-  fOpts.EndProcessing;
-  CheckFiles('TestProcessXmlPerRun');
-
-  Check(fOpts.ProcessOption('PS'), 'Option per SubDir');
-  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per SubDir');
-  CheckLog(ALL_PROCESSING, 'Processing Xml per SubDir');
-  fOpts.EndProcessing;
-  CheckFiles('TestProcessXmlPerSubDir');
-
-  Check(fOpts.ProcessOption('PW'), 'Option per Wildcard');
-  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Wildcard');
-  CheckLog(ALL_PROCESSING, 'Processing Xml per Wildcard');
-  fOpts.EndProcessing;
-  CheckFiles('TestProcessXmlPerWildcard');
-end;
-
-procedure TestTD2XOptionsSpecific.TestProcessXmlUses;
-begin
-  Check(fOpts.ProcessOption('E!'), 'Option 2');
-  Check(fOpts.ProcessOption('MU'), 'Option 3');
-  Check(fOpts.ProcessOption('X:'), 'Option 4');
-  Check(fOpts.ProcessOption('F'), 'Option 5');
-
-  Check(fOpts.ProcessOption('PD'), 'Option per Dir');
-  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Dir');
-  CheckLog(ALL_PROCESSING, 'Processing Xml per Dir');
-  fOpts.EndProcessing;
-  CheckFiles('TestProcessXmlUsesPerDir');
-
-  Check(fOpts.ProcessOption('PF'), 'Option per File');
-  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per File');
-  CheckLog(ALL_PROCESSING, 'Processing Xml per File');
-  fOpts.EndProcessing;
-  CheckFiles('TestProcessXmlUsesPerFile');
-
-  Check(fOpts.ProcessOption('PP'), 'Option per Param');
-  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per FilParam');
-  CheckLog(ALL_PROCESSING, 'Processing Xml per Param');
-  fOpts.EndProcessing;
-  CheckFiles('TestProcessXmlUsesPerParam');
-
-  Check(fOpts.ProcessOption('PR'), 'Option per Run');
-  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Run');
-  CheckLog(ALL_PROCESSING, 'Processing Xml per Run');
-  fOpts.EndProcessing;
-  CheckFiles('TestProcessXmlUsesPerRun');
-
-  Check(fOpts.ProcessOption('PS'), 'Option per SubDir');
-  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per SubDir');
-  CheckLog(ALL_PROCESSING, 'Processing Xml per SubDir');
-  fOpts.EndProcessing;
-  CheckFiles('TestProcessXmlUsesPerSubDir');
-
-  Check(fOpts.ProcessOption('PW'), 'Option per Wildcard');
-  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Wildcard');
-  CheckLog(ALL_PROCESSING, 'Processing Xml per Wildcard');
-  fOpts.EndProcessing;
-  CheckFiles('TestProcessXmlUsesPerWildcard');
 end;
 
 procedure TestTD2XOptionsSpecific.TestWriteDefines;
@@ -1632,6 +1573,144 @@ begin
   CheckLog('Use these Held Defines: ALPHA, BETA, GAMMA, VALUE3', 'Report Options');
 end;
 
+{ TestTD2XOptionsXmlPer }
+
+procedure TestTD2XOptionsXmlPer.SetUp;
+begin
+  inherited;
+
+  fOpts.ProcessOption('!!');
+  fOpts.ProcessOption('R');
+  fOpts.ProcessOption('E!');
+  fOpts.ProcessOption('F');
+end;
+
+procedure TestTD2XOptionsXmlPer.TestProcessXmlPerDir;
+begin
+  fOpts.ProcessOption('X:');
+  fOpts.ProcessOption('PD');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Dir');
+  CheckLog(ALL_PROCESSING, 'Processing Xml per Dir');
+  fOpts.EndProcessing;
+  CheckFiles('TestProcessXmlPerDir');
+end;
+
+procedure TestTD2XOptionsXmlPer.TestProcessXmlPerFile;
+begin
+  fOpts.ProcessOption('X:');
+  fOpts.ProcessOption('PF');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per File');
+  CheckLog(ALL_PROCESSING, 'Processing Xml per File');
+  fOpts.EndProcessing;
+  CheckFiles('TestProcessXmlPerFile');
+end;
+
+procedure TestTD2XOptionsXmlPer.TestProcessXmlPerParam;
+begin
+  fOpts.ProcessOption('X:');
+  fOpts.ProcessOption('PP');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per FilParam');
+  CheckLog(ALL_PROCESSING, 'Processing Xml per Param');
+  fOpts.EndProcessing;
+  CheckFiles('TestProcessXmlPerParam');
+end;
+
+procedure TestTD2XOptionsXmlPer.TestProcessXmlPerRun;
+begin
+  fOpts.ProcessOption('X:');
+  fOpts.ProcessOption('PR');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Run');
+  CheckLog(ALL_PROCESSING, 'Processing Xml per Run');
+  fOpts.EndProcessing;
+  CheckFiles('TestProcessXmlPerRun');
+end;
+
+procedure TestTD2XOptionsXmlPer.TestProcessXmlPerSubDir;
+begin
+  fOpts.ProcessOption('X:');
+  fOpts.ProcessOption('PS');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per SubDir');
+  CheckLog(ALL_PROCESSING, 'Processing Xml per SubDir');
+  fOpts.EndProcessing;
+  CheckFiles('TestProcessXmlPerSubDir');
+end;
+
+procedure TestTD2XOptionsXmlPer.TestProcessXmlPerWildcard;
+begin
+  fOpts.ProcessOption('X:');
+  fOpts.ProcessOption('PW');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Wildcard');
+  CheckLog(ALL_PROCESSING, 'Processing Xml per Wildcard');
+  fOpts.EndProcessing;
+  CheckFiles('TestProcessXmlPerWildcard');
+end;
+
+procedure TestTD2XOptionsXmlPer.TestProcessXmlUsesPerDir;
+begin
+  fOpts.ProcessOption('MU');
+  fOpts.ProcessOption('X:');
+  fOpts.ProcessOption('PD');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Dir');
+  CheckLog(ALL_PROCESSING, 'Processing Xml per Dir');
+  fOpts.EndProcessing;
+  CheckFiles('TestProcessXmlUsesPerDir');
+end;
+
+procedure TestTD2XOptionsXmlPer.TestProcessXmlUsesPerFile;
+begin
+  fOpts.ProcessOption('MU');
+  fOpts.ProcessOption('X:');
+  fOpts.ProcessOption('PF');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per File');
+  CheckLog(ALL_PROCESSING, 'Processing Xml per File');
+  fOpts.EndProcessing;
+  CheckFiles('TestProcessXmlUsesPerFile');
+end;
+
+procedure TestTD2XOptionsXmlPer.TestProcessXmlUsesPerParam;
+begin
+  fOpts.ProcessOption('MU');
+  fOpts.ProcessOption('X:');
+  fOpts.ProcessOption('PP');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per FilParam');
+  CheckLog(ALL_PROCESSING, 'Processing Xml per Param');
+  fOpts.EndProcessing;
+  CheckFiles('TestProcessXmlUsesPerParam');
+end;
+
+procedure TestTD2XOptionsXmlPer.TestProcessXmlUsesPerRun;
+begin
+  fOpts.ProcessOption('MU');
+  fOpts.ProcessOption('X:');
+  fOpts.ProcessOption('PR');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Run');
+  CheckLog(ALL_PROCESSING, 'Processing Xml per Run');
+  fOpts.EndProcessing;
+  CheckFiles('TestProcessXmlUsesPerRun');
+end;
+
+procedure TestTD2XOptionsXmlPer.TestProcessXmlUsesPerSubDir;
+begin
+  fOpts.ProcessOption('MU');
+  fOpts.ProcessOption('X:');
+  fOpts.ProcessOption('PS');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per SubDir');
+  CheckLog(ALL_PROCESSING, 'Processing Xml per SubDir');
+  fOpts.EndProcessing;
+  CheckFiles('TestProcessXmlUsesPerSubDir');
+end;
+
+procedure TestTD2XOptionsXmlPer.TestProcessXmlUsesPerWildcard;
+begin
+  fOpts.ProcessOption('MU');
+  fOpts.ProcessOption('X:');
+  fOpts.ProcessOption('PW');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Wildcard');
+  CheckLog(ALL_PROCESSING, 'Processing Xml per Wildcard');
+  fOpts.EndProcessing;
+  CheckFiles('TestProcessXmlUsesPerWildcard');
+end;
+
 initialization
 
 RegisterTests('Options', [TestTD2XOptionEnums.Suite, TestTD2XOptions.Suite,
@@ -1641,6 +1720,6 @@ RegisterTests('Options', [TestTD2XOptionEnums.Suite, TestTD2XOptions.Suite,
     TestTD2XOptionsParseDefines.Suite, TestTD2XOptionsParseHeldDefines.Suite,
     TestTD2XOptionsParseSkippedMethods.Suite, TestTD2XOptionsParseDefinesUsed.Suite,
     TestTD2XOptionsParseWriteDefines.Suite, TestTD2XOptionsParseWriteXml.Suite,
-    TestTD2XOptionsGeneral.Suite, TestTD2XOptionsSpecific.Suite]);
+    TestTD2XOptionsGeneral.Suite, TestTD2XOptionsSpecific.Suite, TestTD2XOptionsXmlPer.Suite]);
 
 end.

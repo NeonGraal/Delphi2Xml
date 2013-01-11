@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<D2X_File parseMode="Full" fileName="Testing.Test.APackage.dpk">
+  <ParseFile>
+    <PackageFile lastToken=";end.">
+      <MainUnitName group="Testing.Test">Testing.Test.APackage</MainUnitName>
+      <ContainsClause>
+        <ContainsStatement>
+          <ContainsIdentifier group="Testing.Test">Testing.Test.AUnit</ContainsIdentifier>
+          <ContainsExpression file="'Testing.Test.AUnit.pas'" />
+        </ContainsStatement>
+      </ContainsClause>
+    </PackageFile>
+  </ParseFile>
+</D2X_File>
+

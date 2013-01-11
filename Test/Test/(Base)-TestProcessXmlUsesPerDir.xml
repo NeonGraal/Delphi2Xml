@@ -23,6 +23,15 @@
           </MainUsedUnitStatement>
         </ParseFile>
       </D2X_File>
+      <D2X_File fileName="Testing.Test.APackage.dpk">
+        <ParseFile lastToken=";end.">
+          <MainUnitName group="Testing.Test">Testing.Test.APackage</MainUnitName>
+          <ContainsStatement>
+            <ContainsIdentifier group="Testing.Test">Testing.Test.AUnit</ContainsIdentifier>
+            <ContainsExpression file="'Testing.Test.AUnit.pas'" />
+          </ContainsStatement>
+        </ParseFile>
+      </D2X_File>
     </D2X_Pattern>
   </D2X_SubDir>
 </D2X_Dir>

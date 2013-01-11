@@ -34,23 +34,10 @@
                 <MainUnitName group="Testing.Test">Testing.Test.AProgram</MainUnitName>
                 <ProgramBlock>
                   <MainUsesClause>
-                    <MainUsedUnitStatement>
+                    <MainUsedUnitStatement file="'Testing.Test.AUnit.pas'">
                       <MainUsedUnitName>
                         <UsedUnitName group="Testing.Test">Testing.Test.AUnit</UsedUnitName>
                       </MainUsedUnitName>
-                      <MainUsedUnitExpression file="'Testing.Test.AUnit.pas'">
-                        <ConstantExpression>
-                          <Expression>
-                            <SimpleExpression>
-                              <Term>
-                                <Factor>
-                                  <CharString />
-                                </Factor>
-                              </Term>
-                            </SimpleExpression>
-                          </Expression>
-                        </ConstantExpression>
-                      </MainUsedUnitExpression>
                     </MainUsedUnitStatement>
                   </MainUsesClause>
                   <Block>
@@ -60,6 +47,19 @@
                   </Block>
                 </ProgramBlock>
               </ProgramFile>
+            </ParseFile>
+          </D2X_File>
+          <D2X_File fileName="Testing.Test.APackage.dpk">
+            <ParseFile>
+              <PackageFile lastToken=";end.">
+                <MainUnitName group="Testing.Test">Testing.Test.APackage</MainUnitName>
+                <ContainsClause>
+                  <ContainsStatement>
+                    <ContainsIdentifier group="Testing.Test">Testing.Test.AUnit</ContainsIdentifier>
+                    <ContainsExpression file="'Testing.Test.AUnit.pas'" />
+                  </ContainsStatement>
+                </ContainsClause>
+              </PackageFile>
             </ParseFile>
           </D2X_File>
         </D2X_Pattern>

@@ -15,6 +15,7 @@ type
   TD2XAddAttributeEvent = reference to procedure(pName, pValue: string);
   TD2XAddTextEvent = reference to procedure(pText: string);
   TD2XProgressEvent = reference to procedure(pProgress: Integer);
+  TD2XTrimChildrenEvent = reference to procedure(pElement: string);
 
   TD2XDefinesParser = class(TD2XParser)
   private
@@ -26,6 +27,7 @@ type
     FAddAttribute: TD2XAddAttributeEvent;
     FAddText: TD2XAddTextEvent;
     fOnProgress: TD2XProgressEvent;
+    fTrimChildren: TD2XTrimChildrenEvent;
 
     function GetStartDefines: TStringList;
     function GetHeldDefines: TStringList;
@@ -40,6 +42,8 @@ type
 
     procedure DoAddText(pText: string); overload;
     procedure DoAddText; overload;
+
+    procedure DoTrimChildren(pElement: string);
 
     procedure HandlePtUndefDirect(Sender: TmwBasePasLex); override;
 
@@ -71,6 +75,7 @@ type
 
     property AddAttribute: TD2XAddAttributeEvent read FAddAttribute write FAddAttribute;
     property AddText: TD2XAddTextEvent read FAddText write FAddText;
+    property TrimChildren: TD2XTrimChildrenEvent read fTrimChildren write fTrimChildren;
   end;
 
   TD2XDefinesParserClass = class of TD2XDefinesParser;
@@ -91,6 +96,7 @@ type
     procedure MainUnitName; override;
     procedure MainUsedUnitStatement; override;
     procedure UsedUnitName; override;
+    procedure ContainsExpression; override;
 
 
     property CurrentSection: string read fCurrentSection;
@@ -219,7 +225,6 @@ type
     procedure LabelId; override;
     procedure LibraryFile; override;
     procedure MainUnitName; override;
-    procedure MainUsedUnitExpression; override;
     procedure MainUsedUnitName; override;
     procedure MainUsedUnitStatement; override;
     procedure MainUsesClause; override;
@@ -961,11 +966,6 @@ begin
   inherited;
 end;
 
-procedure TD2XFullParser.MainUsedUnitExpression;
-begin
-  inherited;
-end;
-
 procedure TD2XFullParser.MainUsedUnitName;
 begin
   inherited;
@@ -1630,6 +1630,7 @@ begin
   try
     inherited;
     DoAddAttribute('file');
+    DoTrimChildren('ConstantExpression');
   finally
     fKeepTokens := False;
   end;
@@ -1682,6 +1683,12 @@ procedure TD2XDefinesParser.DoAddText;
 begin
   DoAddText(fLastTokens);
   fLastTokens := '';
+end;
+
+procedure TD2XDefinesParser.DoTrimChildren(pElement: string);
+begin
+  if Assigned(fTrimChildren) then
+    FTrimChildren(pElement);
 end;
 
 procedure TD2XDefinesParser.DoAddAttribute(pName, pValue: string);
@@ -1745,6 +1752,7 @@ begin
   try
     inherited;
     DoAddAttribute('file');
+    DoTrimChildren('ConstantExpression');
   finally
     fKeepTokens := False;
   end;
@@ -1822,6 +1830,11 @@ begin
 end;
 
 { TD2XUsedParser }
+
+procedure TD2XUsesParser.ContainsExpression;
+begin
+  inherited;
+end;
 
 procedure TD2XUsesParser.ImplementationSection;
 begin

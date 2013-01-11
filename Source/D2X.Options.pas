@@ -665,6 +665,7 @@ begin
     fParser.OnMessage := ParserMessage;
     fParser.AddAttribute := fXmlHandler.AddAttr;
     fParser.AddText := fXmlHandler.AddText;
+    fParser.TrimChildren := fXmlHandler.TrimChildren;
 
     fParser.Lexer.OnIncludeDirect := LexerOnInclude;
     // fParser.Lexer.OnDefineDirect := LexerOnDefine;
