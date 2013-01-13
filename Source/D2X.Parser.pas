@@ -227,7 +227,6 @@ type
     procedure LabelId; override;
     procedure LibraryFile; override;
     procedure MainUnitName; override;
-    procedure MainUsedUnitName; override;
     procedure MainUsedUnitStatement; override;
     procedure MultiplicativeOperator; override;
     procedure NewFormalParameterType; override;
@@ -950,11 +949,6 @@ begin
 end;
 
 procedure TD2XFullParser.MainUnitName;
-begin
-  inherited;
-end;
-
-procedure TD2XFullParser.MainUsedUnitName;
 begin
   inherited;
 end;

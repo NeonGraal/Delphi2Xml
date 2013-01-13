@@ -24,9 +24,7 @@
         <MainUnitName group="Testing.Test">Testing.Test.AProgram</MainUnitName>
         <ProgramBlock>
           <MainUsedUnitStatement file="'Testing.Test.AUnit.pas'">
-            <MainUsedUnitName>
-              <UsedUnitName group="Testing.Test">Testing.Test.AUnit</UsedUnitName>
-            </MainUsedUnitName>
+            <UsedUnitName group="Testing.Test">Testing.Test.AUnit</UsedUnitName>
           </MainUsedUnitStatement>
           <Block>
             <CompoundStatement lastToken="end">

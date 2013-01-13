@@ -7,7 +7,6 @@ Expression=1,1
 Factor=1,1
 ImplementationSection=0,1
 InterfaceSection=0,1
-MainUsedUnitName=1,1
 MainUsedUnitStatement=2,2
 PackageFile=2,2
 ProgramBlock=2,2
