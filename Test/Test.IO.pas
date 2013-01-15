@@ -76,6 +76,7 @@ type
 
     procedure SetGlobalName(const pName: string);
     procedure SetGlobalValidator(pValidator: TD2XSingleParam<string>.TspValidator);
+    procedure SetTimestampFlag(pFlag: ID2XFlag);
     procedure RegisterParams(pParams: TD2XParams);
     function GetNow: string;
     function GetDuration(pWatch: TStopwatch): Double;
@@ -596,6 +597,11 @@ end;
 procedure TTestFactory.SetGlobalValidator(pValidator: TD2XSingleParam<string>.TspValidator);
 begin
   fValidator := pValidator;
+end;
+
+procedure TTestFactory.SetTimestampFlag(pFlag: ID2XFlag);
+begin
+
 end;
 
 function TTestFactory.SimpleFile(pFile: string): ID2XFile;

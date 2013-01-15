@@ -712,6 +712,9 @@ begin
       Result := True;
     end);
 
+//  fTimestampFiles := TD2XBooleanParam.CreateBool('T', 'Timestamp',
+//    'Timestamp global output files');
+
   fRecurse := TD2XBooleanParam.CreateBool('R', 'Recurse', 'Recurse into subdirectories');
   fParseMode := TD2XSingleParam<TD2XParseMode>.CreateParam('M', 'Parse mode', '<mode>',
     'Set Parsing mode (F[ull], U[ses])', pmFull, TD2X.CnvEnum<TD2XParseMode>,

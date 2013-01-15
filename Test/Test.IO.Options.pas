@@ -26,6 +26,8 @@ type
   private
     fFileOpts: TD2XFileOptionsTest;
     fValidatorCalled: Boolean;
+    fTimeBool: TD2XBoolFlag;
+    fTimeFlag: ID2XFlag;
 
     procedure CheckIO(var pDS: ID2XIO; pExp, pLabel: string);
     procedure CheckValidator(pLabel: string);
@@ -77,14 +79,19 @@ procedure TestTD2XFileOptions.SetUp;
 begin
   inherited;
 
+  fTimeBool := TD2XBoolFlag.Create;
+  fTimeFlag := fTimeBool;
+
   fFileOpts := TD2XFileOptionsTest.Create;
   fFileOpts.SetGlobalValidator(TestValidator);
+  fFileOpts.SetTimestampFlag(fTimeFlag);
   fFileOpts.RegisterParams(fParams);
 end;
 
 procedure TestTD2XFileOptions.TearDown;
 begin
   FreeAndNil(fFileOpts);
+  FreeAndNil(fTimeFlag);
 
   inherited;
 end;
@@ -381,13 +388,12 @@ end;
 
 procedure TestTD2XFileOptions.TestTimestampFiles;
 var
-  lGlobal, lTimestamp: TD2XParam;
+  lGlobal: TD2XParam;
   pExtn: string;
   lDS: ID2XIO;
 begin
   pExtn := '.Extn';
   lGlobal := fParams.ForCode('G');
-  lTimestamp := fParams.ForCode('T');
 
   CheckFalse(fFileOpts.TimestampFiles, 'Timestamp Files Default');
 
@@ -402,7 +408,7 @@ begin
   lDS := fFileOpts.LogFileOrExtn(pExtn);
   CheckIO(lDS, 'Log\Global.Extn', 'Default Timestamp Global Extn');
 
-  lTimestamp.Parse('T+');
+  fTimeFlag.Flag := True;
   CheckTrue(fFileOpts.TimestampFiles, 'Timestamp Files On');
 
   lDS := fFileOpts.LogFileOrExtn('File.Extn');
@@ -416,7 +422,7 @@ begin
   lDS := fFileOpts.LogFileOrExtn(pExtn);
   CheckIO(lDS, 'Log\Global' + fFileOpts.OutputTimestamp + '.Extn', 'On Timestamp Global Extn');
 
-  lTimestamp.Parse('T-');
+  fTimeFlag.Flag := False;
   CheckFalse(fFileOpts.TimestampFiles, 'Timestamp Files Off');
 
   lDS := fFileOpts.LogFileOrExtn('File.Extn');
@@ -430,7 +436,7 @@ begin
   lDS := fFileOpts.LogFileOrExtn(pExtn);
   CheckIO(lDS, 'Log\Global.Extn', 'Off Timestamp Global Extn');
 
-  lTimestamp.Parse('T');
+  fTimeFlag.Flag := True;
   CheckTrue(fFileOpts.TimestampFiles, 'Timestamp Files');
 
   lDS := fFileOpts.LogFileOrExtn('File.Extn');

@@ -22,6 +22,7 @@ type
 
     procedure SetGlobalName(const pName: string);
     procedure SetGlobalValidator(pValidator: TD2XSingleParam<string>.TspValidator);
+    procedure SetTimestampFlag(pFlag: ID2XFlag);
     procedure RegisterParams(pParams: TD2XParams);
     function GetNow: string;
     function GetDuration(pWatch: TStopwatch): Double;
@@ -31,7 +32,7 @@ type
     fConfigBase: TD2XFlaggedStringParam;
     fInputBase: TD2XFlaggedStringParam;
     fGlobalName: TD2XStringParam;
-    fTimestampFiles: TD2XBooleanParam;
+    fTimestampFiles: ID2XFlag;
 
     function GetGlobalName: string;
 
@@ -100,7 +101,7 @@ end;
 
 function TD2XFileOptions.GetTimestampFiles: Boolean;
 begin
-  Result := fTimestampFiles.Value;
+  Result := fTimestampFiles.Flag;
 end;
 
 function TD2XFileOptions.BaseDir(pFileOrDir: string): ID2XDir;
@@ -141,12 +142,12 @@ function TD2XFileOptions.LogFileOrExtn(pFileOrExtn: string): ID2XFile;
     lExtn: string;
   begin
     if StartsText('.', pFileOrExtn) then
-      if fTimestampFiles.Value then
+      if fTimestampFiles.Flag then
         Result := ChangeFileExt(fGlobalName.Value, fOutputTimestamp + pFileOrExtn)
       else
         Result := ChangeFileExt(fGlobalName.Value, pFileOrExtn)
     else
-      if fTimestampFiles.Value then
+      if fTimestampFiles.Flag then
       begin
         lExtn := ExtractFileExt(pFileOrExtn);
         Result := ChangeFileExt(pFileOrExtn, fOutputTimestamp + lExtn);
@@ -164,7 +165,6 @@ end;
 
 procedure TD2XFileOptions.RegisterParams(pParams: TD2XParams);
 begin
-  pParams.Add(fTimestampFiles);
   pParams.Add(fGlobalName);
   pParams.Add(fConfigBase);
   pParams.Add(fLogBase);
@@ -194,10 +194,13 @@ begin
       else
         pVal := pStr;
     end, pValidator);
-  fTimestampFiles := TD2XBooleanParam.CreateBool('T', 'Timestamp',
-    'Timestamp global output files');
 
   fOutputTimestamp := FormatDateTime('-HH-mm', Now);
+end;
+
+procedure TD2XFileOptions.SetTimestampFlag(pFlag: ID2XFlag);
+begin
+  fTimestampFiles := pFlag;
 end;
 
 function TD2XFileOptions.SimpleFile(pFile: string): ID2XFile;

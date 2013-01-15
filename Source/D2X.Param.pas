@@ -100,11 +100,29 @@ type
     procedure SetFlag(pVal: Boolean);
   end;
 
+  TD2XFlagDefine = record
+    FlagCode: Char;
+    FlagLabel, FlagDescr: String;
+    FlagDefault: Boolean;
+  end;
+
+  TD2XFlagDefines = array of TD2XFlagDefine;
+
+function FlagDef(pCode: Char; pLabel, pDescr: String; pDefault: Boolean = False): TD2XFlagDefine;
+
 implementation
 
 uses
   System.Generics.Defaults,
   System.StrUtils;
+
+function FlagDef(pCode: Char; pLabel, pDescr: String; pDefault: Boolean = False): TD2XFlagDefine;
+begin
+  Result.FlagCode := pCode;
+  Result.FlagLabel := pLabel;
+  Result.FlagDescr := pDescr;
+  Result.FlagDefault := pDefault;
+end;
 
 { TD2XParam }
 

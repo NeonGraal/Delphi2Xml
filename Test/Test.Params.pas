@@ -40,6 +40,7 @@ type
     procedure TestParse;
     procedure TestDescribe;
     procedure TestReport;
+    procedure TestOutput;
     procedure TestToString;
     procedure TestIsDefault;
   end;
@@ -61,24 +62,6 @@ type
     procedure TestReportAll;
     procedure TestResetAll;
     procedure TestZeroAll;
-  end;
-
-  TestTD2XResettableParam = class(TTestCase)
-  strict private
-    fPrm: TD2XResettableParam;
-
-    function TstParser(pStr: string): Boolean;
-    procedure TstSetter;
-
-  public
-    procedure SetUp; override;
-    procedure TearDown; override;
-
-  published
-    procedure TestInvalidCreate;
-
-    procedure TestReset;
-    procedure TestZero;
   end;
 
   TestTD2XSingleParam = class(TLoggerTestCase)
@@ -117,6 +100,30 @@ type
 
   end;
 
+  TestTD2XFlagsParam = class(TLoggerTestCase)
+  strict private
+    fFlagsP: TD2XFlagsParam;
+
+    function TstParser(pStr: string): Boolean;
+
+  public
+    procedure SetUp; override;
+    procedure TearDown; override;
+
+  published
+    procedure TestInvalidCreate;
+    procedure TestInvalidCreateFlags;
+
+    procedure TestParse;
+    procedure TestReset;
+    procedure TestZero;
+    procedure TestDescribe;
+    procedure TestReport;
+    procedure TestOutput;
+    procedure TestToString;
+    procedure TestIsDefault;
+  end;
+
   TestTD2XBooleanParam = class(TFlagParamTestCase)
   strict private
     fBoolP: TD2XBooleanParam;
@@ -133,6 +140,7 @@ type
     procedure TestZero;
     procedure TestDescribe;
     procedure TestReport;
+    procedure TestOutput;
     procedure TestValue;
     procedure TestToString;
     procedure TestIsDefault;
@@ -157,6 +165,7 @@ type
     procedure TestZero;
     procedure TestDescribe;
     procedure TestReport;
+    procedure TestOutput;
     procedure TestValue;
     procedure TestToString;
     procedure TestIsDefault;
@@ -221,6 +230,7 @@ type
     procedure TestZero;
     procedure TestDescribe;
     procedure TestReport;
+    procedure TestOutput;
     procedure TestFlag;
     procedure TestValue;
     procedure TestToString;
@@ -244,6 +254,7 @@ type
     procedure TestZero;
     procedure TestDescribe;
     procedure TestReport;
+    procedure TestOutput;
     procedure TestValue;
     procedure TestToString;
     procedure TestIsDefault;
@@ -570,6 +581,16 @@ begin
   Check(fBoolP.IsDefault, 'Check is Default');
 end;
 
+procedure TestTD2XBooleanParam.TestOutput;
+begin
+  fBoolP.Output(fL);
+  CheckList('', 'Output Default Value');
+
+  fBoolP.Value := True;
+  fBoolP.Output(fL);
+  CheckList('-T+', 'Output True Value');
+end;
+
 procedure TestTD2XBooleanParam.TestParse;
 begin
   CheckFalse(fBoolP.Parse('A'), 'Parse wrong code');
@@ -588,6 +609,10 @@ procedure TestTD2XBooleanParam.TestReport;
 begin
   fBoolP.Report(fLog);
   CheckLog('Test -', 'Report Default Value');
+
+  fBoolP.Value := True;
+  fBoolP.Report(fLog);
+  CheckLog('Test +', 'Report True Value');
 end;
 
 procedure TestTD2XBooleanParam.TestReset;
@@ -721,6 +746,16 @@ begin
 
   fStrP.Reset;
   Check(fStrP.IsDefault, 'Check is Default');
+end;
+
+procedure TestTD2XStringParam.TestOutput;
+begin
+  fStrP.Output(fL);
+  CheckList('', 'Output Default Value');
+
+  fStrP.Value := 'Simple';
+  fStrP.Output(fL);
+  CheckList('-TSimple', 'Output Simple Value');
 end;
 
 procedure TestTD2XStringParam.TestParse;
@@ -862,6 +897,14 @@ begin
   fPrm := TD2XParam.Create('T', 'Test', '', '', TstParser);
 
   Check(fPrm.IsDefault, 'Default true');
+end;
+
+procedure TestTD2XParam.TestOutput;
+begin
+  fPrm := TD2XParam.Create('T', 'Test', '', '', TstParser);
+
+  fPrm.Output(fL);
+  CheckList('', 'Output');
 end;
 
 procedure TestTD2XParam.TestParse;
@@ -1303,6 +1346,24 @@ begin
 
 end;
 
+procedure TestTD2XFlaggedStringParam.TestOutput;
+begin
+  fFlagP.Output(fL);
+  CheckList('', 'Output Default Value');
+
+  fFlagP.Value := '';
+  fFlagP.Output(fL);
+  CheckList('-T-', 'Output Blank value off');
+
+  ID2XFlag(fFlagP).Flag := True;
+  fFlagP.Output(fL);
+  CheckList('-T+', 'Output Blank value on');
+
+  fFlagP.Value := 'Simple';
+  fFlagP.Output(fL);
+  CheckList('-T:Simple', 'Output Simple Value on');
+end;
+
 procedure TestTD2XFlaggedStringParam.TestParse;
 begin
   CheckEqualsString('Tst', fFlagP.Value, 'Default Value Set');
@@ -1417,76 +1478,6 @@ begin
   CheckEquals(False, ID2XFlag(fFlagP).Flag, 'Flag Zeroed');
 end;
 
-{ TestTD2XResettableParam }
-
-procedure TestTD2XResettableParam.SetUp;
-begin
-  inherited;
-
-  fPrm := nil;
-end;
-
-procedure TestTD2XResettableParam.TearDown;
-begin
-  FreeAndNil(fPrm);
-
-  inherited;
-end;
-
-procedure TestTD2XResettableParam.TestInvalidCreate;
-begin
-  StartExpectingException(EInvalidParam);
-  try
-    TD2XResettableParam.Create('', '', '', '', TstParser);
-  except
-    on E: EInvalidParam do
-    begin
-      CheckEqualsString('Need to use correct constructor', E.Message, 'Exception message');
-      raise;
-    end;
-  end;
-end;
-
-procedure TestTD2XResettableParam.TestReset;
-var
-  lCalledResetter: Boolean;
-begin
-  fPrm := TD2XResettableParam.CreateReset('T', 'Test', '', '', TstParser,
-    procedure
-    begin
-      lCalledResetter := True;
-    end, TstSetter);
-
-  lCalledResetter := False;
-  fPrm.Reset;
-  Check(lCalledResetter, 'Called resetter');
-end;
-
-procedure TestTD2XResettableParam.TestZero;
-var
-  lCalledZeroer: Boolean;
-begin
-  fPrm := TD2XResettableParam.CreateReset('T', 'Test', '', '', TstParser, TstSetter,
-    procedure
-    begin
-      lCalledZeroer := True;
-    end);
-
-  lCalledZeroer := False;
-  fPrm.Zero;
-  Check(lCalledZeroer, 'Called zeroer');
-end;
-
-function TestTD2XResettableParam.TstParser(pStr: string): Boolean;
-begin
-  Result := True;
-end;
-
-procedure TestTD2XResettableParam.TstSetter;
-begin
-  //  fCalledResetter := True;
-end;
-
 { TestFlagParam }
 
 procedure TFlagParamTestCase.SetUp;
@@ -1559,6 +1550,16 @@ begin
 
   fDefP.Reset;
   Check(fDefP.IsDefault, 'Check is Default');
+end;
+
+procedure TestTD2XDefinesParam.TestOutput;
+begin
+  fDefP.Output(fL);
+  CheckList('', 'Report Default Value');
+
+  fDefP.Value := True;
+  fDefP.Output(fL);
+  CheckList('-T: -T+ALPHA,BETA,GAMMA', 'Report Blank value on');
 end;
 
 procedure TestTD2XDefinesParam.TestParse;
@@ -1689,11 +1690,172 @@ begin
   Result := Self.fFormatter(pVal);
 end;
 
+{ TestTD2XFlagsParam }
+
+procedure TestTD2XFlagsParam.SetUp;
+var
+  lFlags: TD2XFlagDefines;
+begin
+  inherited;
+
+  SetLength(lFlags, 2);
+  lFlags[0] := FlagDef('1', 'Test1', 'Test Flag 1');
+  lFlags[1] := FlagDef('2', 'Test2', 'Test Flag 2', True);
+
+  fFlagsP := TD2XFlagsParam.CreateFlags(lFlags);
+end;
+
+procedure TestTD2XFlagsParam.TearDown;
+begin
+  FreeAndNil(fFlagsP);
+
+  inherited;
+end;
+
+procedure TestTD2XFlagsParam.TestDescribe;
+begin
+  fFlagsP.Describe(fLog);
+  CheckLog('F[+Code*-Code*|:[+|-]Label[+|-],] Flags Code Label Def Description ' +
+    '1 Test1 - Test Flag 1 2 Test2 + Test Flag 2', 'Describe Param');
+end;
+
+procedure TestTD2XFlagsParam.TestInvalidCreate;
+begin
+  StartExpectingException(EInvalidParam);
+  try
+    TD2XFlagsParam.Create('', '', '', '', nil);
+  except
+    on E: EInvalidParam do
+    begin
+      CheckEqualsString('Need to use correct constructor', E.Message, 'Exception message');
+      raise;
+    end;
+  end;
+end;
+
+procedure TestTD2XFlagsParam.TestInvalidCreateFlags;
+begin
+  StartExpectingException(EInvalidParam);
+  try
+    TD2XFlagsParam.CreateFlags(nil);
+  except
+    on E: EInvalidParam do
+    begin
+      CheckEqualsString('Need to initialize some Flags', E.Message, 'Exception message');
+      raise;
+    end;
+  end;
+end;
+
+procedure TestTD2XFlagsParam.TestIsDefault;
+begin
+  Check(fFlagsP.IsDefault, 'Check is Default');
+
+  fFlagsP.ByCode['1'].Flag := True;
+  CheckFalse(fFlagsP.IsDefault, 'Check is not Default');
+
+  fFlagsP.Reset;
+  Check(fFlagsP.IsDefault, 'Check is Default');
+end;
+
+procedure TestTD2XFlagsParam.TestOutput;
+begin
+  fFlagsP.Output(fL);
+  CheckList('-F!', 'Output Default Value');
+
+  fFlagsP.ByCode['1'].Flag := True;
+  fFlagsP.Output(fL);
+  CheckList('-F! -F+1', 'Output True Value');
+
+  fFlagsP.Zero;
+  fFlagsP.Output(fL);
+  CheckList('-F! -F-2', 'Output Zeroed Value');
+end;
+
+procedure TestTD2XFlagsParam.TestParse;
+begin
+  CheckFalse(fFlagsP.Parse('A'), 'Parse wrong code');
+
+  CheckFalse(fFlagsP.Parse('F'), 'Parse right code with No value');
+
+  CheckFalse(fFlagsP.Parse('F?'), 'Parse right code with Bad value');
+
+  Check(fFlagsP.Parse('F+1'), 'Parse right code with True code');
+  CheckEquals(True, fFlagsP.ByCode['1'].Flag, 'Frue Value');
+
+  Check(fFlagsP.Parse('F-12'), 'Parse right code with multiple False codes');
+  CheckEquals(False, fFlagsP.ByCode['1'].Flag, 'False 1 Value');
+  CheckEquals(False, fFlagsP.ByCode['2'].Flag, 'False 2 Value');
+
+  Check(fFlagsP.Parse('F+12'), 'Parse right code with multiple True codes');
+  CheckEquals(True, fFlagsP.ByCode['1'].Flag, 'Frue 1 Value');
+  CheckEquals(True, fFlagsP.ByCode['2'].Flag, 'Frue 2 Value');
+
+  Check(fFlagsP.Parse('F-1'), 'Parse right code with False code');
+  CheckEquals(False, fFlagsP.ByCode['1'].Flag, 'False Value');
+end;
+
+procedure TestTD2XFlagsParam.TestReport;
+begin
+  fFlagsP.Report(fLog);
+  CheckLog('Flags Test1-,Test2+', 'Report Default Value');
+
+  fFlagsP.ByCode['1'].Flag := True;
+  fFlagsP.Report(fLog);
+  CheckLog('Flags Test1+,Test2+', 'Report True Value');
+
+  fFlagsP.Zero;
+  fFlagsP.Report(fLog);
+  CheckLog('Flags Test1-,Test2-', 'Report Zeroed Value');
+end;
+
+procedure TestTD2XFlagsParam.TestReset;
+begin
+  CheckEquals(False, fFlagsP.ByCode['1'].Flag, 'Default Value Set');
+  CheckEquals(True, fFlagsP.ByCode['2'].Flag, 'Default Value Set');
+
+  fFlagsP.ByCode['2'].Flag := False;
+  CheckEquals(False, fFlagsP.ByCode['2'].Flag, 'Set Value');
+
+  fFlagsP.Reset;
+  CheckEquals(False, fFlagsP.ByCode['1'].Flag, 'Value Zeroed');
+  CheckEquals(True, fFlagsP.ByCode['2'].Flag, 'Default Value Set');
+end;
+
+procedure TestTD2XFlagsParam.TestToString;
+begin
+  CheckEqualsString('F+2-1', fFlagsP.ToString, 'Report Default Value');
+
+  fFlagsP.ByCode['1'].Flag := True;
+  CheckEqualsString('F+12', fFlagsP.ToString, 'Report True Value');
+
+  fFlagsP.Zero;
+  CheckEqualsString('F-12', fFlagsP.ToString, 'Report Zeroed Value');
+end;
+
+procedure TestTD2XFlagsParam.TestZero;
+begin
+  CheckEquals(False, fFlagsP.ByCode['1'].Flag, 'Default Value Set');
+  CheckEquals(True, fFlagsP.ByCode['2'].Flag, 'Default Value Set');
+
+  fFlagsP.ByCode['1'].Flag := True;
+  CheckEquals(True, fFlagsP.ByCode['1'].Flag, 'Set Value');
+
+  fFlagsP.Zero;
+  CheckEquals(False, fFlagsP.ByCode['1'].Flag, 'Value Zeroed');
+  CheckEquals(False, fFlagsP.ByCode['2'].Flag, 'Default Value Set');
+end;
+
+function TestTD2XFlagsParam.TstParser(pStr: string): Boolean;
+begin
+  Result := True;
+end;
+
 initialization
 
-RegisterTests('Params', [TestTD2XParam.Suite, TestTD2XResettableParam.Suite,
-  TestTD2XParams.Suite, TestTD2XSingleParam.Suite, TestTD2XBooleanParam.Suite,
-  TestTD2XStringParam.Suite, TestTD2XValidStringParam.Suite, TestTD2XFormatStringParam.Suite,
+RegisterTests('Params', [TestTD2XParam.Suite, TestTD2XParams.Suite, TestTD2XSingleParam.Suite,
+  TestTD2XFlagsParam.Suite, TestTD2XBooleanParam.Suite, TestTD2XStringParam.Suite,
+  TestTD2XValidStringParam.Suite, TestTD2XFormatStringParam.Suite,
   TestTD2XFormatValidStringParam.Suite, TestTD2XFlaggedStringParam.Suite,
   TestTD2XDefinesParam.Suite]);
 

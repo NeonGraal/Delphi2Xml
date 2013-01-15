@@ -211,18 +211,15 @@ type
     procedure TestParseOptionPValue;
   end;
 
-  TestTD2XOptionsParseFlags = class(TOptionsParseTestCase)
+  TestTD2XOptionsParseFlags = class(TOptionsTestCase)
+  protected
+    procedure CheckFlag(pFlag, pDesc: string);
   published
-    procedure TestParseOptionFOff;
-    procedure TestParseOptionFOn;
-    procedure TestParseOptionLOff;
-    procedure TestParseOptionLOn;
-    procedure TestParseOptionNOff;
-    procedure TestParseOptionNOn;
-    procedure TestParseOptionROff;
-    procedure TestParseOptionROn;
-    procedure TestParseOptionVOff;
-    procedure TestParseOptionVOn;
+    procedure TestParseOptionFinal;
+    procedure TestParseOptionLogErrors;
+    procedure TestParseOptionLogNotSupported;
+    procedure TestParseOptionRecurse;
+    procedure TestParseOptionVerbose;
   end;
 
   TestTD2XOptionsParseCountChildren = class(TOptionsParseTestCase)
@@ -1453,54 +1450,42 @@ end;
 
 { TestTD2XOptionsParseFlags }
 
-procedure TestTD2XOptionsParseFlags.TestParseOptionFOff;
+procedure TestTD2XOptionsParseFlags.CheckFlag(pFlag, pDesc: string);
 begin
-  CheckSimple('F-', 'Final Token -');
+  Check(fOpts.ProcessOption('F-' + pFlag), 'F- Return Value');
+  CheckLog('', 'Report Options');
+  fOpts.ProcessOption('@-F' + pFlag);
+  CheckLog(pDesc + ' -', 'Report Options');
+
+  Check(fOpts.ProcessOption('F+' + pFlag ), 'F+ Return Value');
+  CheckLog('', 'Report Options');
+  fOpts.ProcessOption('@-F' + pFlag);
+  CheckLog(pDesc + ' +', 'Report Options');
 end;
 
-procedure TestTD2XOptionsParseFlags.TestParseOptionFOn;
+procedure TestTD2XOptionsParseFlags.TestParseOptionFinal;
 begin
-  CheckSimple('F+', 'Final Token +');
+  CheckFlag('F', 'Final Token');
 end;
 
-procedure TestTD2XOptionsParseFlags.TestParseOptionLOff;
+procedure TestTD2XOptionsParseFlags.TestParseOptionLogErrors;
 begin
-  CheckSimple('L-', 'Log Errors -');
+  CheckFlag('E', 'Log Errors');
 end;
 
-procedure TestTD2XOptionsParseFlags.TestParseOptionLOn;
+procedure TestTD2XOptionsParseFlags.TestParseOptionLogNotSupported;
 begin
-  CheckSimple('L+', 'Log Errors +');
+  CheckFlag('N', 'Log Not Supp');
 end;
 
-procedure TestTD2XOptionsParseFlags.TestParseOptionNOff;
+procedure TestTD2XOptionsParseFlags.TestParseOptionRecurse;
 begin
-  CheckSimple('N-', 'Log Not Supp -');
+  CheckFlag('R', 'Recurse');
 end;
 
-procedure TestTD2XOptionsParseFlags.TestParseOptionNOn;
+procedure TestTD2XOptionsParseFlags.TestParseOptionVerbose;
 begin
-  CheckSimple('N+', 'Log Not Supp +');
-end;
-
-procedure TestTD2XOptionsParseFlags.TestParseOptionROff;
-begin
-  CheckSimple('R-', 'Recurse -');
-end;
-
-procedure TestTD2XOptionsParseFlags.TestParseOptionROn;
-begin
-  CheckSimple('R+', 'Recurse +');
-end;
-
-procedure TestTD2XOptionsParseFlags.TestParseOptionVOff;
-begin
-  CheckSimple('V-', 'Verbose -');
-end;
-
-procedure TestTD2XOptionsParseFlags.TestParseOptionVOn;
-begin
-  CheckSimple('V+', 'Verbose +');
+  CheckFlag('V', 'Verbose');
 end;
 
 { TestTD2XOptionsHeldDefines }
