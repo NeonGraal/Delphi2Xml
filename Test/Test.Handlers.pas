@@ -29,6 +29,7 @@ uses
   D2X,
   D2X.Handlers,
   D2X.IO,
+  D2X.Param,
   D2X.Xml,
   System.Classes,
   System.Generics.Collections,
@@ -167,7 +168,7 @@ type
     property XmlNode: TD2XmlNode read fXmlNode;
 
     property Parser: TD2XDefinesParser read fParser;
-    property FinalToken: TD2XCheckRef read fFinalToken;
+    property FinalToken: ID2XFlag read fFinalToken;
     property ParseMode: TD2XStringRef read fParseMode;
 
   end;
@@ -175,7 +176,7 @@ type
   TestTD2XXmlHandler = class(TParserTestCase)
   strict private
     fHndlr: TTestXmlHandler;
-    fCalledFinalToken: Boolean;
+    fFinalToken: TD2XBoolFlag;
     fCalledParseMode: Boolean;
 
   public
@@ -415,12 +416,10 @@ procedure TestTD2XXmlHandler.SetUp;
 begin
   inherited;
 
-  fHndlr := TTestXmlHandler.CreateXml(
-    function: Boolean
-    begin
-      fCalledFinalToken := True;
-      Result := True;
-    end,
+  fFinalToken := TD2XBoolFlag.Create;
+  ID2XFlag(fFinalToken).Flag := True;
+
+  fHndlr := TTestXmlHandler.CreateXml(fFinalToken,
     function: string
     begin
       fCalledParseMode := True;
@@ -431,6 +430,7 @@ end;
 procedure TestTD2XXmlHandler.TearDown;
 begin
   FreeAndNil(fHndlr);
+  FreeAndNil(fFinalToken);
 
   inherited;
 end;
@@ -480,12 +480,11 @@ var
   pFrom: TD2XXmlHandler;
 begin
   pFrom := nil;
-  fCalledFinalToken := False;
   fCalledParseMode := False;
 
   fHndlr.Copy(pFrom);
   try
-    pFrom := TD2XXmlHandler.CreateXml(nil, nil);
+    pFrom := TD2XXmlHandler.CreateXml(fFinalToken, nil);
 
     pFrom.InitParser(fParser);
 
@@ -528,15 +527,13 @@ end;
 
 procedure TestTD2XXmlHandler.TestInitParser;
 begin
-  fCalledFinalToken := False;
   fCalledParseMode := False;
 
   fHndlr.InitParser(fParser);
 
   Check(fParser = fHndlr.Parser, 'Parser set');
   CheckTrue(Assigned(fHndlr.FinalToken), 'Final Token set');
-  CheckTrue(fHndlr.FinalToken(), 'Final Token correct');
-  CheckTrue(fCalledFinalToken, 'Final Token called');
+  CheckTrue(fHndlr.FinalToken.Flag, 'Final Token correct');
   CheckTrue(Assigned(fHndlr.ParseMode), 'Parse Mode set');
   CheckEqualsString('ParseMode', fHndlr.ParseMode(), 'Parse Mode correct');
   CheckTrue(fCalledParseMode, 'Parse Mode called');

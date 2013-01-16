@@ -1715,7 +1715,7 @@ end;
 procedure TestTD2XFlagsParam.TestDescribe;
 begin
   fFlagsP.Describe(fLog);
-  CheckLog('F[+Code*-Code*|:[+|-]Label[+|-],] Flags Code Label Def Description ' +
+  CheckLog('F[[+|-|Code]*|:[[+|-]Label[+|-],]*] Flags Code Label Def Description ' +
     '1 Test1 - Test Flag 1 2 Test2 + Test Flag 2', 'Describe Param');
 end;
 
@@ -1761,7 +1761,7 @@ end;
 procedure TestTD2XFlagsParam.TestOutput;
 begin
   fFlagsP.Output(fL);
-  CheckList('-F!', 'Output Default Value');
+  CheckList('', 'Output Default Value');
 
   fFlagsP.ByCode['1'].Flag := True;
   fFlagsP.Output(fL);

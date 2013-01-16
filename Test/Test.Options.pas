@@ -36,10 +36,10 @@ const
   EXPECTED_SHOW_OPTIONS = 'Usage: %s [ Option | @Params | mFilename | Wildcard ] ... ' +
     'Options: Default Description ? Show valid options ' +
     '! Reset all options to defaults @<file> Report/Output Current options ' +
-    'V[+|-] - Log all Parser methods called L[+|-] + Log Error messages ' +
-    'N[+|-] - Log Not Supported messages F[+|-] + Record Final Token ' +
-    'R[+|-] - Recurse into subdirectories ' +
-  //    'R[+|-] - Recurse into subdirectories T[+|-] - Timestamp global output files ' +
+    'F[[+|-|Code]*|:[[+|-]Label[+|-],]*] Flags Code Label Def Description ' +
+    'V Verbose - Log all Parser methods called T Timestamp - Timestamp global output files ' +
+    'R Recurse - Recurse into subdirectories N LogNotSupp - Log Not Supported messages ' +
+    'F FinalToken + Record Final Token E LogErrors + Log Error messages ' +
   //    'G<str> Delphi2XmlTests Sets global name ' +
   //    'I[+-]:<dir> :Config\ Use <dir> as a base for all Config files ' +
   //    'O[+-]:<dir> :Log\ Use <dir> as a base for all Log files ' +
@@ -56,11 +56,11 @@ const
     'D[+-!:]<def> Add(+), Remove(-), Clear(!) or Load(:) Defines ' +
     'H[+-!:]<def> Add(+), Remove(-), Clear(!) or Load(:) Held Defines ' +
     'Definitions: <f/e> If value begins with "." is appended to global name to give file name';
-  BASE_REPORT_OPTIONS =
-    'Current option settings: Verbose - Log Errors + Log Not Supp - Final Token + ' +
+  BASE_REPORT_OPTIONS = 'Current option settings: ' +
+    'Flags FinalToken+,LogErrors+,LogNotSupp-,Recurse-,Timestamp-,Verbose- ' +
   //    'Recurse - Timestamp - Global name Delphi2XmlTests Config dir :Config\ ' +
   //    'Log dir :Log\ Base dir -(.\) Parse mode Full Results per File Show elapsed Quiet ' +
-    'Recurse - Parse mode Full Results per File Show elapsed Quiet ' +
+    'Parse mode Full Results per File Show elapsed Quiet ' +
     'Generate XML :Xml\ Write Defines -(Defines\) Defines Used :.used ' +
     'Count Children :.chld Count Defines :.defs Skipped Methods -(.skip) ';
   DEFAULT_REPORT_OPTIONS = BASE_REPORT_OPTIONS +
@@ -178,16 +178,12 @@ type
     //    procedure TestParseOptionG; // Tested in Test.IO.Options
     procedure TestParseOptionH;
     //    procedure TestParseOptionI; // Tested in Test.IO.Options
-    procedure TestParseOptionL;
     procedure TestParseOptionM;
-    procedure TestParseOptionN;
     //    procedure TestParseOptionO; // Tested in Test.IO.Options
     procedure TestParseOptionP;
-    procedure TestParseOptionR;
     procedure TestParseOptionS;
     //    procedure TestParseOptionT; // Tested in Test.IO.Options
     procedure TestParseOptionU;
-    procedure TestParseOptionV;
     procedure TestParseOptionW;
     procedure TestParseOptionX;
   end;
@@ -199,7 +195,11 @@ type
     procedure TestParseOptionA;
     procedure TestParseOptionJ;
     procedure TestParseOptionK;
+    procedure TestParseOptionL;
+    procedure TestParseOptionN;
     procedure TestParseOptionQ;
+    procedure TestParseOptionR;
+    procedure TestParseOptionV;
     procedure TestParseOptionY;
     procedure TestParseOptionZ;
   end;
@@ -219,6 +219,7 @@ type
     procedure TestParseOptionLogErrors;
     procedure TestParseOptionLogNotSupported;
     procedure TestParseOptionRecurse;
+    procedure TestParseOptionTimestamp;
     procedure TestParseOptionVerbose;
   end;
 
@@ -331,19 +332,19 @@ const
   RECURSE_PROCESSING =
     'Processing Config\Test ... Processing Config\Test\Testing.Test.SubDir.pas ... done Processed Config\Test';
   ALL_PROCESSING = BOTH_PROCESSING + ' ' + DIRECTORY_PROCESSING + ' ' + RECURSE_PROCESSING;
-  ALTERED_REPORT_OPTIONS =
-    'Current option settings: Verbose + Log Errors + Log Not Supp + Final Token + ' +
+  ALTERED_REPORT_OPTIONS = 'Current option settings: Flags ' +
+    'FinalToken+,LogErrors+,LogNotSupp+,Recurse+,Timestamp+,Verbose+ ' +
   //    'Recurse + Timestamp - Global name :Test Config dir :Test\ Log dir :Test\ ' +
   //    'Base dir :Test\ Parse mode Full Results per File Show elapsed Quiet ' +
-    'Recurse + Parse mode Full Results per File Show elapsed Quiet ' +
+    'Parse mode Full Results per File Show elapsed Quiet ' +
     'Generate XML :Test\ Write Defines :Test\ Defines Used :.Test ' +
     'Count Children :.Test Count Defines :.Test Skipped Methods :Test.skip ' +
     'Use these Defines: TANGO, UNIFORM, VICTOR Use these Held Defines: TANGO, UNIFORM, VICTOR';
-  ZERO_REPORT_OPTIONS =
-    'Current option settings: Verbose - Log Errors - Log Not Supp - Final Token - ' +
+  ZERO_REPORT_OPTIONS = 'Current option settings: Flags ' +
+    'FinalToken-,LogErrors-,LogNotSupp-,Recurse-,Timestamp-,Verbose- ' +
   //    'Recurse - Timestamp - Global name Config dir - Log dir - Base dir - ' +
   //    'Parse mode Full Results per File Show elapsed None Generate XML - ' +
-    'Recurse - Parse mode Full Results per File Show elapsed None Generate XML - ' +
+    'Parse mode Full Results per File Show elapsed None Generate XML - ' +
     'Write Defines - Defines Used - Count Children - Count Defines - Skipped Methods - ' +
     'Use default Defines Use default Held Defines';
   EMPTY_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Use NO Defines Use default Held Defines';
@@ -636,7 +637,7 @@ end;
 
 procedure TestTD2XOptionsParseAll.TestParseOptionF;
 begin
-  CheckSimple('F', 'Final Token +');
+  CheckInvalid('F', 'Invalid Flags option: F');
 end;
 
 procedure TestTD2XOptionsParseAll.TestParseOptionH;
@@ -644,29 +645,14 @@ begin
   CheckInvalid('H', 'Invalid Held Defines option: H');
 end;
 
-procedure TestTD2XOptionsParseAll.TestParseOptionL;
-begin
-  CheckSimple('L', 'Log Errors +');
-end;
-
 procedure TestTD2XOptionsParseAll.TestParseOptionM;
 begin
   CheckInvalid('M', 'Invalid Parse mode option: M');
 end;
 
-procedure TestTD2XOptionsParseAll.TestParseOptionN;
-begin
-  CheckSimple('N', 'Log Not Supp +');
-end;
-
 procedure TestTD2XOptionsParseAll.TestParseOptionP;
 begin
   CheckInvalid('P', 'Invalid Results per option: P');
-end;
-
-procedure TestTD2XOptionsParseAll.TestParseOptionR;
-begin
-  CheckSimple('R', 'Recurse +');
 end;
 
 procedure TestTD2XOptionsParseAll.TestParseOptionS;
@@ -677,11 +663,6 @@ end;
 procedure TestTD2XOptionsParseAll.TestParseOptionU;
 begin
   CheckSimple('U', 'Defines Used :.used');
-end;
-
-procedure TestTD2XOptionsParseAll.TestParseOptionV;
-begin
-  CheckSimple('V', 'Verbose +');
 end;
 
 procedure TestTD2XOptionsParseAll.TestParseOptionW;
@@ -867,10 +848,10 @@ end;
 
 procedure TestTD2XOptions.TestProcessFile;
 begin
-  Check(fOpts.ProcessFile('Testing.Test.AUnit.pas'), 'Process Unit');
+  Check(fOpts.ProcessFile('Testing.Test.AUnit.pas', True), 'Process Unit');
   CheckLog(UNIT_PROCESSING, 'Process Unit');
 
-  Check(fOpts.ProcessFile('Testing.Test.AProgram.dpr'), 'Process Program');
+  Check(fOpts.ProcessFile('Testing.Test.AProgram.dpr', True), 'Process Program');
   CheckLog(PROGRAM_PROCESSING, 'Process Program');
 end;
 
@@ -930,7 +911,7 @@ begin
   inherited;
 
   fOpts.ProcessOption('!!');
-  fOpts.ProcessOption('R');
+  fOpts.ProcessOption('FR');
 end;
 
 procedure TestTD2XOptionsSpecific.TestCountChildren;
@@ -1103,7 +1084,7 @@ end;
 
 procedure TestTD2XOptionsSpecific.TestLogErrors;
 begin
-  Check(fOpts.ProcessOption('L'), 'Return Value 3');
+  Check(fOpts.ProcessOption('FE'), 'Return Value 3');
   fB.Clear;
 
   fS.WriteString('unit Test; interface procedure A; imp');
@@ -1122,10 +1103,10 @@ end;
 
 procedure TestTD2XOptionsSpecific.TestNotSupported;
 begin
-  Check(fOpts.ProcessOption('N'), 'Return Value 3');
+  Check(fOpts.ProcessOption('FN'), 'Return Value 3');
   fB.Clear;
 
-  Check(fOpts.ProcessFile('Testing.Test.AUnit.pas'), 'Process Unit');
+  Check(fOpts.ProcessFile('Testing.Test.AUnit.pas', True), 'Process Unit');
 
   CheckLog('', 'Process Unit');
   CheckErrorLog('Currently not supported {$D+}');
@@ -1415,9 +1396,29 @@ begin
   CheckUnknown('K');
 end;
 
+procedure TestTD2XOptionsParseUnused.TestParseOptionL;
+begin
+  CheckUnknown('L');
+end;
+
+procedure TestTD2XOptionsParseUnused.TestParseOptionN;
+begin
+  CheckUnknown('N');
+end;
+
 procedure TestTD2XOptionsParseUnused.TestParseOptionQ;
 begin
   CheckUnknown('Q');
+end;
+
+procedure TestTD2XOptionsParseUnused.TestParseOptionR;
+begin
+  CheckUnknown('R');
+end;
+
+procedure TestTD2XOptionsParseUnused.TestParseOptionV;
+begin
+  CheckUnknown('V');
 end;
 
 procedure TestTD2XOptionsParseUnused.TestParseOptionY;
@@ -1455,32 +1456,37 @@ begin
   Check(fOpts.ProcessOption('F-' + pFlag), 'F- Return Value');
   CheckLog('', 'Report Options');
   fOpts.ProcessOption('@-F' + pFlag);
-  CheckLog(pDesc + ' -', 'Report Options');
+  CheckLog('Flags ' + pDesc + '-', 'Report Options');
 
-  Check(fOpts.ProcessOption('F+' + pFlag ), 'F+ Return Value');
+  Check(fOpts.ProcessOption('F+' + pFlag), 'F+ Return Value');
   CheckLog('', 'Report Options');
   fOpts.ProcessOption('@-F' + pFlag);
-  CheckLog(pDesc + ' +', 'Report Options');
+  CheckLog('Flags ' + pDesc + '+', 'Report Options');
 end;
 
 procedure TestTD2XOptionsParseFlags.TestParseOptionFinal;
 begin
-  CheckFlag('F', 'Final Token');
+  CheckFlag('F', 'FinalToken');
 end;
 
 procedure TestTD2XOptionsParseFlags.TestParseOptionLogErrors;
 begin
-  CheckFlag('E', 'Log Errors');
+  CheckFlag('E', 'LogErrors');
 end;
 
 procedure TestTD2XOptionsParseFlags.TestParseOptionLogNotSupported;
 begin
-  CheckFlag('N', 'Log Not Supp');
+  CheckFlag('N', 'LogNotSupp');
 end;
 
 procedure TestTD2XOptionsParseFlags.TestParseOptionRecurse;
 begin
   CheckFlag('R', 'Recurse');
+end;
+
+procedure TestTD2XOptionsParseFlags.TestParseOptionTimestamp;
+begin
+  CheckFlag('T', 'Timestamp');
 end;
 
 procedure TestTD2XOptionsParseFlags.TestParseOptionVerbose;
@@ -1565,9 +1571,8 @@ begin
   inherited;
 
   fOpts.ProcessOption('!!');
-  fOpts.ProcessOption('R');
+  fOpts.ProcessOption('FRF');
   fOpts.ProcessOption('E!');
-  fOpts.ProcessOption('F');
 end;
 
 procedure TestTD2XOptionsXmlPer.TestProcessXmlPerDir;

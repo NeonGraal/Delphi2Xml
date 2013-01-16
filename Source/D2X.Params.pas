@@ -18,7 +18,7 @@ type
     destructor Destroy; override;
 
     procedure Describe(pL: ID2XLogger); override;
-    procedure Report(pL: ID2XLogger); override;
+    procedure Report(pL: ID2XLogger; pStr: String = ''); override;
     procedure Output(pSL: TStringList); override;
     function IsDefault: Boolean; override;
     procedure Zero; override;
@@ -32,7 +32,10 @@ type
     fFlags: TD2XFlagDefines;
     fValues: array of TD2XBoolFlag;
 
-    function GetByCode(pCode: String): ID2XFlag;
+    function IndexCode(pCode: Char): Integer;
+    function IndexLabel(pLabel: String): Integer;
+
+    function GetByCode(pCode: Char): ID2XFlag;
     function GetByLabel(pLabel: String): ID2XFlag;
 
     function ParseFlags(pStr: String): Boolean;
@@ -41,7 +44,7 @@ type
     function ProcessCodes(pStr: String): Boolean;
 
   public
-    property ByCode[pCode: String]: ID2XFlag read GetByCode;
+    property ByCode[pCode: Char]: ID2XFlag read GetByCode;
     property ByLabel[pLabel: String]: ID2XFlag read GetByLabel;
   end;
 
@@ -120,7 +123,7 @@ type
     constructor CreateDefines(pCode, pLabel: String; pDefinesFileName: TD2XNamedStreamRef);
     destructor Destroy; override;
 
-    procedure Report(pL: ID2XLogger); override;
+    procedure Report(pL: ID2XLogger; pStr: String = ''); override;
     procedure Output(pSL: TStringList); override;
     procedure Reset; override;
     procedure Zero; override;
@@ -504,7 +507,7 @@ begin
   ProcessDefines(pDefs, RemoveDefine);
 end;
 
-procedure TD2XDefinesParam.Report(pL: ID2XLogger);
+procedure TD2XDefinesParam.Report(pL: ID2XLogger; pStr: String);
 var
   lS: String;
   w: Integer;
@@ -579,7 +582,7 @@ begin
   if Length(pFlags) < 1 then
     raise EInvalidParam.Create('Need to initialize some Flags');
 
-  inherited Create('F', 'Flags', '[+Code*-Code*|:Label,*!Label,*]', 'Flags', ParseFlags);
+  inherited Create('F', 'Flags', '[[+|-|Code]*|:[[+|-]Label[+|-],]*]', 'Flags', ParseFlags);
 
   SetLength(fFlags, Length(pFlags));
   SetLength(fValues, Length(pFlags));
@@ -614,22 +617,26 @@ begin
   inherited;
 end;
 
-function TD2XFlagsParam.GetByCode(pCode: String): ID2XFlag;
+function TD2XFlagsParam.GetByCode(pCode: Char): ID2XFlag;
 var
   i: Integer;
 begin
-  for i := 0 to High(fFlags) do
-    if pCode = fFlags[i].FlagCode then
-      Result := fValues[i];
+  i := IndexCode(pCode);
+  if i < 0 then
+    Result := nil
+  else
+    Result := fValues[i];
 end;
 
 function TD2XFlagsParam.GetByLabel(pLabel: String): ID2XFlag;
 var
   i: Integer;
 begin
-  for i := 0 to High(fFlags) do
-    if pLabel = fFlags[i].FlagLabel then
-      Result := fValues[i];
+  i := IndexLabel(pLabel);
+  if i < 0 then
+    Result := nil
+  else
+    Result := fValues[i];
 end;
 
 function TD2XFlagsParam.GetFormatted(pDefault: Boolean): String;
@@ -661,6 +668,26 @@ begin
   Result := fSample;
 end;
 
+function TD2XFlagsParam.IndexCode(pCode: Char): Integer;
+var
+  i: Integer;
+begin
+  Result := -1;
+  for i := 0 to High(fFlags) do
+    if pCode = fFlags[i].FlagCode then
+      Result := i;
+end;
+
+function TD2XFlagsParam.IndexLabel(pLabel: String): Integer;
+var
+  i: Integer;
+begin
+  Result := -1;
+  for i := 0 to High(fFlags) do
+    if pLabel = fFlags[i].FlagLabel then
+      Result := i;
+end;
+
 function TD2XFlagsParam.IsDefault: Boolean;
 var
   i: Integer;
@@ -675,24 +702,28 @@ var
   i: Integer;
   lS, lSep: String;
 begin
-  pSL.Add('-F!');
-  lS := '-F';
-  lSep := '+';
-  for i := 0 to High(fFlags) do
-    if not fFlags[i].FlagDefault and (ID2XFlag(fValues[i]).Flag <> fFlags[i].FlagDefault) then
-    begin
-      lS := lS + lSep + fFlags[i].FlagCode;
-      lSep := '';
-    end;
-  lSep := '-';
-  for i := 0 to High(fFlags) do
-    if fFlags[i].FlagDefault and (ID2XFlag(fValues[i]).Flag <> fFlags[i].FlagDefault) then
-    begin
-      lS := lS + lSep + fFlags[i].FlagCode;
-      lSep := '';
-    end;
-  if lS > '-F' then
-    pSL.Add(lS);
+  if not IsDefault then
+  begin
+    pSL.Add('-F!');
+    lS := '-F';
+    lSep := '+';
+    for i := 0 to High(fFlags) do
+      if not fFlags[i].FlagDefault and (ID2XFlag(fValues[i]).Flag <> fFlags[i].FlagDefault)
+      then
+      begin
+        lS := lS + lSep + fFlags[i].FlagCode;
+        lSep := '';
+      end;
+    lSep := '-';
+    for i := 0 to High(fFlags) do
+      if fFlags[i].FlagDefault and (ID2XFlag(fValues[i]).Flag <> fFlags[i].FlagDefault) then
+      begin
+        lS := lS + lSep + fFlags[i].FlagCode;
+        lSep := '';
+      end;
+    if lS > '-F' then
+      pSL.Add(lS);
+  end;
 end;
 
 function TD2XFlagsParam.ParseFlags(pStr: String): Boolean;
@@ -700,7 +731,7 @@ var
   lStr: String;
 begin
   Result := False;
-  if (Length(pStr) > 1 ) and (pStr[1] = '!') then
+  if (Length(pStr) > 0) and (pStr[1] = '!') then
   begin
     Result := True;
     Reset;
@@ -708,7 +739,7 @@ begin
   end
   else
     lStr := pStr;
-  if Length(lStr) > 1 then
+  if Length(lStr) > 0 then
   begin
     if lStr[1] = ':' then
       Result := ProcessLabels(System.Copy(lStr, 2, Length(lStr)))
@@ -776,23 +807,38 @@ begin
   end;
 end;
 
-procedure TD2XFlagsParam.Report(pL: ID2XLogger);
+procedure TD2XFlagsParam.Report(pL: ID2XLogger; pStr: String);
 var
   i: Integer;
-  lS, lSep: String;
+  lSL: TStringList;
 begin
-  lS := '';
-  lSep := '';
-  for i := 0 to High(fFlags) do
-  begin
-    lS := lS + lSep + fFlags[i].FlagLabel;
-    if ID2XFlag(fValues[i]).Flag then
-      lS := lS + '+'
+  lSL := TStringList.Create;
+  try
+    if pStr > '' then
+    begin
+      i := IndexLabel(pStr);
+      if i < 0 then
+        i := IndexCode(pStr[1]);
+      if i >= 0 then
+      begin
+        if ID2XFlag(fValues[i]).Flag then
+          lSL.Add(fFlags[i].FlagLabel + '+')
+        else
+          lSL.Add(fFlags[i].FlagLabel + '-');
+      end;
+    end
     else
-      lS := lS + '-';
-    lSep := ',';
+      for i := 0 to High(fFlags) do
+        if ID2XFlag(fValues[i]).Flag then
+          lSL.Add(fFlags[i].FlagLabel + '+')
+        else
+          lSL.Add(fFlags[i].FlagLabel + '-');
+
+    lSL.Sort;
+    pL.Log(' %-15s %s', [fLabel, lSL.CommaText]);
+  finally
+    lSL.Free;
   end;
-  pL.Log(' %-15s %s', [fLabel, lS]);
 end;
 
 procedure TD2XFlagsParam.Reset;

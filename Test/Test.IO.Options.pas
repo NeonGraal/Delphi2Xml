@@ -91,7 +91,8 @@ end;
 procedure TestTD2XFileOptions.TearDown;
 begin
   FreeAndNil(fFileOpts);
-  FreeAndNil(fTimeFlag);
+  fTimeFlag := nil;
+  FreeAndNil(fTimeBool);
 
   inherited;
 end;

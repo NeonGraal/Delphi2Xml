@@ -83,6 +83,8 @@ end;
 
 constructor TD2XProcessor.Create(pActive: ID2XFlag);
 begin
+  Assert(Assigned(pActive), 'Active Flag must exist');
+
   inherited Create;
 
   fActive := pActive;

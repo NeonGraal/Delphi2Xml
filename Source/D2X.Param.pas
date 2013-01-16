@@ -27,7 +27,7 @@ type
     function IsCode(pStr: string): Boolean;
     function Parse(pStr: string): Boolean;
     procedure Describe(pL: ID2XLogger); virtual;
-    procedure Report(pL: ID2XLogger); virtual;
+    procedure Report(pL: ID2XLogger; pStr: string = ''); virtual;
     procedure Output(pSL: TStringList); virtual;
     function ToString: string; override;
     function IsDefault: Boolean; virtual;
@@ -68,7 +68,7 @@ type
     constructor CreateParam(pCode, pLabel, pSample, pDescr: string; pDefault: T;
       pConverter: TspConverter; pFormatter: TspFormatter; pValidator: TspValidator); virtual;
 
-    procedure Report(pL: ID2XLogger); override;
+    procedure Report(pL: ID2XLogger; pStr: string = ''); override;
     procedure Output(pSL: TStringList); override;
     function IsDefault: Boolean; override;
     procedure Reset; override;
@@ -102,13 +102,14 @@ type
 
   TD2XFlagDefine = record
     FlagCode: Char;
-    FlagLabel, FlagDescr: String;
+    FlagLabel, FlagDescr: string;
     FlagDefault: Boolean;
   end;
 
   TD2XFlagDefines = array of TD2XFlagDefine;
 
-function FlagDef(pCode: Char; pLabel, pDescr: String; pDefault: Boolean = False): TD2XFlagDefine;
+function FlagDef(pCode: Char; pLabel, pDescr: string; pDefault: Boolean = False)
+  : TD2XFlagDefine;
 
 implementation
 
@@ -116,7 +117,8 @@ uses
   System.Generics.Defaults,
   System.StrUtils;
 
-function FlagDef(pCode: Char; pLabel, pDescr: String; pDefault: Boolean = False): TD2XFlagDefine;
+function FlagDef(pCode: Char; pLabel, pDescr: string; pDefault: Boolean = False)
+  : TD2XFlagDefine;
 begin
   Result.FlagCode := pCode;
   Result.FlagLabel := pLabel;
@@ -178,7 +180,7 @@ begin
   Result := IsCode(pStr) and fParser(Copy(pStr, Length(fCode) + 1, Length(pStr)));
 end;
 
-procedure TD2XParam.Report(pL: ID2XLogger);
+procedure TD2XParam.Report(pL: ID2XLogger; pStr: string);
 begin
   //
 end;
@@ -339,7 +341,7 @@ begin
       pSL.Add('-' + ToString);
 end;
 
-procedure TD2XSingleParam<T>.Report(pL: ID2XLogger);
+procedure TD2XSingleParam<T>.Report(pL: ID2XLogger; pStr: string);
 begin
   pL.Log(' %-15s %s', [fLabel, GetFormatted(False)]);
 end;

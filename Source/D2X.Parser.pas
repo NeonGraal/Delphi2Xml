@@ -102,7 +102,6 @@ type
     procedure UsedUnitName; override;
     procedure ContainsExpression; override;
 
-
     property CurrentSection: string read fCurrentSection;
   end;
 
@@ -1650,7 +1649,7 @@ end;
 procedure TD2XDefinesParser.DoTrimChildren(pElement: string);
 begin
   if Assigned(fTrimChildren) then
-    FTrimChildren(pElement);
+    fTrimChildren(pElement);
 end;
 
 procedure TD2XDefinesParser.DoAddAttribute(pName, pValue: string);
@@ -1664,7 +1663,7 @@ begin
   if not Assigned(fHeldDefines) then
   begin
     fHeldDefines := TStringList.Create;
-    fHeldDefines.Sorted := True;
+    fHeldDefines.Sorted := true;
   end;
 
   Result := fHeldDefines;
@@ -1673,7 +1672,7 @@ end;
 procedure TD2XDefinesParser.GetLexerDefines(pDefs: TStringList);
 begin
   Lexer.GetDefines(pDefs);
-  pDefs.Sorted := True;
+  pDefs.Sorted := true;
 end;
 
 function TD2XDefinesParser.GetStartDefines: TStringList;
@@ -1681,7 +1680,7 @@ begin
   if not Assigned(fStartDefines) then
   begin
     fStartDefines := TStringList.Create;
-    fStartDefines.Sorted := True;
+    fStartDefines.Sorted := true;
   end;
 
   Result := fStartDefines;

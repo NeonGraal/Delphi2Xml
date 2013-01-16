@@ -39,8 +39,9 @@ type
 
     fIOFact: ID2XIOFactory;
 
-    fVerbose: TD2XBooleanParam;
-    fRecurse: TD2XBooleanParam;
+    fFlags: TD2XFlagsParam;
+    //    fVerbose: TD2XBooleanParam;
+    //    fRecurse: TD2XBooleanParam;
     fParseMode: TD2XSingleParam<TD2XParseMode>;
     fResultPer: TD2XSingleParam<TD2XResultPer>;
     fElapsedMode: TD2XSingleParam<TD2XElapsedMode>;
@@ -95,6 +96,7 @@ type
     destructor Destroy; override;
 
     procedure InitProcessors(pFileOpts: ID2XIOFactory);
+    procedure InitFlags;
     procedure InitFirstProcessors;
     procedure InitOtherProcessors;
 
@@ -106,7 +108,7 @@ type
 
     function ProcessStream(pFilename: string; pStream: TStreamReader): Boolean;
     function ProcessInput: Boolean;
-    function ProcessFile(pFilename: string): Boolean;
+    function ProcessFile(pFilename: string; pInDir: Boolean): Boolean;
     function ProcessDirectory(pDir, pWildCards: string): Boolean;
     function RecurseDirectory(pDir, pWildCards: string; pMainDir: Boolean): Boolean;
     function ProcessParam(pParam, pFrom: string): Boolean;
@@ -213,7 +215,7 @@ end;
 
 function TD2XOptions.GetRecurse: Boolean;
 begin
-  Result := fRecurse.Value;
+  Result := fFlags.ByLabel['Recurse'].Flag;
 end;
 
 function TD2XOptions.IsInternalMethod(pMethod: string): Boolean;
@@ -320,7 +322,7 @@ begin
           end;
           BeginResults('D2X_Pattern', rpWildcard);
           repeat
-            Result := ProcessFile(lPath.Current) or Result;
+            Result := ProcessFile(lPath.Current, True) or Result;
           until not lPath.Next;
           EndResults(pDir + 'Pattern-' + TidyFilename(lFile), rpWildcard);
         finally
@@ -331,9 +333,9 @@ begin
     begin
       lTimer.Stop;
       if ExcludeTrailingPathDelimiter(pDir) = '' then
-      EndResults('(Dir)', rpSubDir)
+        EndResults('(Dir)', rpSubDir)
       else
-      EndResults(ExcludeTrailingPathDelimiter(pDir), rpSubDir);
+        EndResults(ExcludeTrailingPathDelimiter(pDir), rpSubDir);
       case fElapsedMode.Value of
         emDir:
           Log('%0.3f', [fIOFact.GetDuration(lTimer)]);
@@ -348,7 +350,7 @@ begin
   end;
 end;
 
-function TD2XOptions.ProcessFile(pFilename: string): Boolean;
+function TD2XOptions.ProcessFile(pFilename: string; pInDir: Boolean): Boolean;
 var
   lFile: ID2XFile;
 begin
@@ -360,8 +362,8 @@ begin
         if lFile.Exists then
           Result := ProcessStream(pFilename, lFile.ReadFrom)
         else
-          if fVerbose.Value then
-            Log('Cannot find "%s"', [lFile]);
+          if pInDir then
+            Log('Cannot find "%s"', [lFile.Description]);
       finally
         DisposeOf(lFile);
       end;
@@ -467,7 +469,7 @@ begin
     Result := ProcessInput
   else
   begin
-    Result := ProcessFile(pParam);
+    Result := ProcessFile(pParam, False);
     if not Result then
     begin
       lPath := ExtractFilePath(pParam);
@@ -517,22 +519,14 @@ end;
 
 procedure TD2XOptions.InitFirstProcessors;
 var
-  lLogErrors: TD2XBooleanParam;
-  lLogNotSupported: TD2XBooleanParam;
-
   lLogProcessor: TD2XLogProcessor;
 begin
-  fVerbose := TD2XBooleanParam.CreateBool('V', 'Verbose', 'Log all Parser methods called');
-  lLogErrors := TD2XBooleanParam.CreateBool('L', 'Log Errors', 'Log Error messages', True);
-  lLogNotSupported := TD2XBooleanParam.CreateBool('N', 'Log Not Supp',
-    'Log Not Supported messages');
-
-  fProcs.Add(TD2XHandlerProcessor.CreateHandler(lLogErrors,
+  fProcs.Add(TD2XHandlerProcessor.CreateHandler(fFlags.ByLabel['LogErrors'],
       TD2XErrorHandler.CreateError(meError, LogMessage), True));
-  fProcs.Add(TD2XHandlerProcessor.CreateHandler(lLogNotSupported,
+  fProcs.Add(TD2XHandlerProcessor.CreateHandler(fFlags.ByLabel['LogNotSupp'],
       TD2XErrorHandler.CreateError(meNotSupported, LogMessage), True));
 
-  lLogProcessor := TD2XLogProcessor.Create(fVerbose);
+  lLogProcessor := TD2XLogProcessor.Create(fFlags.ByLabel['Verbose']);
   lLogProcessor.JoinLog(Self);
   fProcs.Add(lLogProcessor);
 
@@ -564,7 +558,12 @@ begin
         begin
           lPrm := fParams.ForCode(Copy(pStr, 2, Length(pStr)));
           if Assigned(lPrm) then
-            lPrm.Report(Self)
+          begin
+            if Length(pStr) > 2 then
+              lPrm.Report(Self, Copy(pStr, 3, Length(pStr)))
+            else
+              lPrm.Report(Self);
+          end
           else
             Log('%s option: %s', ['Unknown', pStr]);
         end
@@ -584,8 +583,21 @@ begin
       else
         fParams.ReportAll(Self);
     end));
+end;
 
-  fParams.AddRange([fVerbose, lLogErrors, lLogNotSupported]);
+procedure TD2XOptions.InitFlags;
+var
+  lFlags: TD2XFlagDefines;
+begin
+  SetLength(lFlags, 6);
+  lFlags[0] := FlagDef('V', 'Verbose', 'Log all Parser methods called');
+  lFlags[1] := FlagDef('T', 'Timestamp', 'Timestamp global output files');
+  lFlags[2] := FlagDef('R', 'Recurse', 'Recurse into subdirectories');
+  lFlags[3] := FlagDef('N', 'LogNotSupp', 'Log Not Supported messages');
+  lFlags[4] := FlagDef('F', 'FinalToken', 'Record Final Token', True);
+  lFlags[5] := FlagDef('E', 'LogErrors', 'Log Error messages', True);
+
+  fFlags := TD2XFlagsParam.CreateFlags(lFlags);
 end;
 
 procedure TD2XOptions.InitOtherProcessors;
@@ -637,8 +649,8 @@ begin
   fProcs.Add(TD2XHandlerProcessor.CreateHandler(fParserDefines, lParserDefinesHandler, True));
   fProcs.Add(TD2XHandlerProcessor.CreateHandler(fHeldDefines, lHeldDefinesHandler, True));
 
-  fParams.AddRange([lDefinesUsed, lCountChildren, lCountDefines, lSkipMethods,
-    fParserDefines, fHeldDefines]);
+  fParams.AddRange([lDefinesUsed, lCountChildren, lCountDefines, lSkipMethods, fParserDefines,
+    fHeldDefines]);
 end;
 
 procedure TD2XOptions.InitParser;
@@ -696,10 +708,11 @@ end;
 
 procedure TD2XOptions.InitProcessors(pFileOpts: ID2XIOFactory);
 var
-  lFinalToken: TD2XBooleanParam;
   lWriteXml: TD2XFlaggedStringParam;
   lWriteDefines: TD2XFlaggedStringParam;
 begin
+  InitFlags;
+
   fIOFact := pFileOpts;
 
   fIOFact.SetGlobalValidator(
@@ -711,11 +724,8 @@ begin
         lWriteDefines.Value := IncludeTrailingPathDelimiter(pVal);
       Result := True;
     end);
+  fIOFact.SetTimestampFlag(fFlags.ByLabel['Timestamp']);
 
-//  fTimestampFiles := TD2XBooleanParam.CreateBool('T', 'Timestamp',
-//    'Timestamp global output files');
-
-  fRecurse := TD2XBooleanParam.CreateBool('R', 'Recurse', 'Recurse into subdirectories');
   fParseMode := TD2XSingleParam<TD2XParseMode>.CreateParam('M', 'Parse mode', '<mode>',
     'Set Parsing mode (F[ull], U[ses])', pmFull, TD2X.CnvEnum<TD2XParseMode>,
     TD2X.ToLabel<TD2XParseMode>,
@@ -732,18 +742,13 @@ begin
     'Set Elapsed time display to be (N[one], T[otal], D[ir], F[ile], P[rocessing], [Q]uiet)',
     emQuiet, TD2X.CnvEnum<TD2XElapsedMode>, TD2X.ToLabel<TD2XElapsedMode>, nil);
 
-  fXmlHandler := TD2XXmlHandler.CreateXml(
-    function: Boolean
-    begin
-      Result := lFinalToken.Value;
-    end,
+  fXmlHandler := TD2XXmlHandler.CreateXml(fFlags.ByLabel['FinalToken'],
     function: string
     begin
       Result := TD2X.ToLabel(fParseMode.Value);
     end);
   fDefinesUsedHandler := TD2XDefinesUsedHandler.Create;
 
-  lFinalToken := TD2XBooleanParam.CreateBool('F', 'Final Token', 'Record Final Token', True);
   lWriteXml := TD2XFlaggedStringParam.CreateFlagStr('X', 'Generate XML', '<dir>',
     'Generate XML files into current or given <dir>', 'Xml\', True, ConvertDir, nil, nil);
   lWriteDefines := TD2XFlaggedStringParam.CreateFlagStr('W', 'Write Defines', '<dir>',
@@ -757,7 +762,7 @@ begin
 
   InitFirstProcessors;
 
-  fParams.AddRange([lFinalToken, fRecurse]);
+  fParams.AddRange([fFlags]);
   fIOFact.RegisterParams(fParams);
   fParams.AddRange([fParseMode, fResultPer, fElapsedMode, lWriteXml, lWriteDefines]);
 

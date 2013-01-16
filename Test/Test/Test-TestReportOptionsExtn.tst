@@ -1,6 +1,5 @@
--V+
--N+
--R+
+-F!
+-F+VTRN
 -X:Test\
 -W:Test\
 -U:.Test

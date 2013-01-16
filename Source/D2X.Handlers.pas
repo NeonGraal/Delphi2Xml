@@ -163,12 +163,12 @@ type
     fXmlDoc: TD2XmlDoc;
     fXmlNode: TD2XmlNode;
 
-    fFinalToken: TD2XCheckRef;
+    fFinalToken: ID2XFlag;
     fParseMode: TD2XStringRef;
 
   public
     constructor Create; override;
-    constructor CreateXml(pFinalToken: TD2XCheckRef; pParseMode: TD2XStringRef);
+    constructor CreateXml(pFinalToken: ID2XFlag; pParseMode: TD2XStringRef);
     destructor Destroy; override;
 
     function Description: string; override;
@@ -460,8 +460,10 @@ begin
   raise EInvalidHandler.Create('Invalid constructor called');
 end;
 
-constructor TD2XXmlHandler.CreateXml(pFinalToken: TD2XCheckRef; pParseMode: TD2XStringRef);
+constructor TD2XXmlHandler.CreateXml(pFinalToken: ID2XFlag; pParseMode: TD2XStringRef);
 begin
+  Assert(Assigned(pFinalToken), 'Final Token Flag must be specified');
+
   inherited Create;
 
   fXmlDoc := nil;
@@ -491,7 +493,7 @@ procedure TD2XXmlHandler.EndMethod(pMethod: string);
 begin
   if Assigned(fXmlNode) then
   begin
-    if Assigned(fFinalToken) and fFinalToken and Assigned(fParser) and
+    if Assigned(fFinalToken) and fFinalToken.Flag and Assigned(fParser) and
       not fParser.KeepTokens and (Length(fParser.LastTokens) > 1) then
       AddAttr('lastToken');
 
