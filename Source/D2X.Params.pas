@@ -48,19 +48,6 @@ type
     property ByLabel[pLabel: String]: ID2XFlag read GetByLabel;
   end;
 
-  TD2XBooleanParam = class(TD2XSingleParam<Boolean>, ID2XFlag)
-  public
-    constructor CreateParam(pCode, pLabel, pSample, pDescr: String; pDefault: Boolean;
-      pConverter: TD2XSingleParam<Boolean>.TspConverter;
-      pFormatter: TD2XSingleParam<Boolean>.TspFormatter;
-      pValidator: TD2XSingleParam<Boolean>.TspValidator); override;
-    constructor CreateBool(pCode, pLabel, pDescr: String; pDefault: Boolean = False);
-
-  private
-    function GetFlag: Boolean;
-    procedure SetFlag(pVal: Boolean);
-  end;
-
   TD2XStringParam = class(TD2XSingleParam<String>)
   public
     constructor CreateParam(pCode, pLabel, pSample, pDescr: String; pDefault: String;
@@ -182,32 +169,6 @@ end;
 function FormatBoolean(pVal: Boolean): String;
 begin
   Result := IfThen(pVal, '+', '-');
-end;
-
-{ TD2XBooleanParam }
-
-constructor TD2XBooleanParam.CreateBool(pCode, pLabel, pDescr: String; pDefault: Boolean);
-begin
-  inherited CreateParam(pCode, pLabel, '[+|-]', pDescr, pDefault, ConvertBoolean,
-    FormatBoolean, nil);
-end;
-
-constructor TD2XBooleanParam.CreateParam(pCode, pLabel, pSample, pDescr: String;
-  pDefault: Boolean; pConverter: TD2XSingleParam<Boolean>.TspConverter;
-  pFormatter: TD2XSingleParam<Boolean>.TspFormatter;
-  pValidator: TD2XSingleParam<Boolean>.TspValidator);
-begin
-  raise EInvalidParam.Create('Need to use correct constructor');
-end;
-
-function TD2XBooleanParam.GetFlag: Boolean;
-begin
-  Result := fValue;
-end;
-
-procedure TD2XBooleanParam.SetFlag(pVal: Boolean);
-begin
-  SetValue(pVal);
 end;
 
 { TD2XStringParam }

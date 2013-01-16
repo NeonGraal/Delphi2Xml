@@ -40,8 +40,6 @@ type
     fIOFact: ID2XIOFactory;
 
     fFlags: TD2XFlagsParam;
-    //    fVerbose: TD2XBooleanParam;
-    //    fRecurse: TD2XBooleanParam;
     fParseMode: TD2XSingleParam<TD2XParseMode>;
     fResultPer: TD2XSingleParam<TD2XResultPer>;
     fElapsedMode: TD2XSingleParam<TD2XElapsedMode>;

@@ -50,6 +50,10 @@ type
     fPs: TD2XParams;
 
     function TstParser(pStr: string): Boolean;
+    function TstFormatter(pVal: Boolean): string;
+    //    TspConverter = reference to function(pStr: string; pDflt: T; out pVal: T): Boolean;
+    //    TspFormatter = reference to function(pVal: T): string;
+    //    TspValidator = reference to function(pVal: T): Boolean;
 
   public
     procedure SetUp; override;
@@ -72,6 +76,9 @@ type
     function FmtBoolProp(pVal: Boolean): string;
 
   published
+    procedure TestInvalidStrCreate;
+    procedure TestInvalidBoolCreate;
+
     procedure TestInvalidAllNil;
     procedure TestInvalidNilConverter;
     procedure TestInvalidNilFormatter;
@@ -122,30 +129,6 @@ type
     procedure TestOutput;
     procedure TestToString;
     procedure TestIsDefault;
-  end;
-
-  TestTD2XBooleanParam = class(TFlagParamTestCase)
-  strict private
-    fBoolP: TD2XBooleanParam;
-
-  public
-    procedure SetUp; override;
-    procedure TearDown; override;
-
-  published
-    procedure TestInvalidCreateReset;
-    procedure TestInvalidCreateParam;
-    procedure TestParse;
-    procedure TestReset;
-    procedure TestZero;
-    procedure TestDescribe;
-    procedure TestReport;
-    procedure TestOutput;
-    procedure TestValue;
-    procedure TestToString;
-    procedure TestIsDefault;
-    procedure TestGetFlag; override;
-    procedure TestSetFlag; override;
   end;
 
   TestTD2XStringParam = class(TLoggerTestCase)
@@ -385,6 +368,20 @@ begin
   end;
 end;
 
+procedure TestTD2XSingleParam.TestInvalidBoolCreate;
+begin
+  StartExpectingException(EInvalidParam);
+  try
+    TD2XSingleParam<Boolean>.Create('', '', '', '', nil);
+  except
+    on E: EInvalidParam do
+    begin
+      CheckEqualsString('Need to use correct constructor', E.Message, 'Exception message');
+      raise;
+    end;
+  end;
+end;
+
 procedure TestTD2XSingleParam.TestInvalidNilConverter;
 begin
   StartExpectingException(EInvalidParam);
@@ -409,6 +406,20 @@ begin
     on E: EInvalidParam do
     begin
       CheckEqualsString('Need a Formatter', E.Message, 'Exception message');
+      raise;
+    end;
+  end;
+end;
+
+procedure TestTD2XSingleParam.TestInvalidStrCreate;
+begin
+  StartExpectingException(EInvalidParam);
+  try
+    TD2XSingleParam<string>.Create('', '', '', '', nil);
+  except
+    on E: EInvalidParam do
+    begin
+      CheckEqualsString('Need to use correct constructor', E.Message, 'Exception message');
       raise;
     end;
   end;
@@ -505,163 +516,6 @@ begin
   finally
     FreeAndNil(lStrP);
   end;
-end;
-
-{ TestTD2XBooleanParam }
-
-procedure TestTD2XBooleanParam.SetUp;
-begin
-  inherited;
-
-  fBoolP := TD2XBooleanParam.CreateBool('T', 'Test', 'Test Boolean Param');
-  fFlag := fBoolP;
-end;
-
-procedure TestTD2XBooleanParam.TearDown;
-begin
-  fFlag := nil;
-  FreeAndNil(fBoolP);
-
-  inherited;
-end;
-
-procedure TestTD2XBooleanParam.TestDescribe;
-begin
-  fBoolP.Describe(fLog);
-  CheckLog('T[+|-] - Test Boolean Param', 'Describe Param');
-end;
-
-procedure TestTD2XBooleanParam.TestGetFlag;
-begin
-  CheckFalse(fFlag.Flag, 'Check is Default');
-
-  fBoolP.Value := True;
-  CheckTrue(fFlag.Flag, 'Check is not Default');
-
-  fBoolP.Reset;
-  CheckFalse(fFlag.Flag, 'Check is Default');
-end;
-
-procedure TestTD2XBooleanParam.TestInvalidCreateParam;
-begin
-  StartExpectingException(EInvalidParam);
-  try
-    TD2XBooleanParam.CreateParam('', '', '', '', False, nil, nil, nil);
-  except
-    on E: EInvalidParam do
-    begin
-      CheckEqualsString('Need to use correct constructor', E.Message, 'Exception message');
-      raise;
-    end;
-  end;
-end;
-
-procedure TestTD2XBooleanParam.TestInvalidCreateReset;
-begin
-  StartExpectingException(EInvalidParam);
-  try
-    TD2XSingleParam<Boolean>.Create('', '', '', '', nil);
-  except
-    on E: EInvalidParam do
-    begin
-      CheckEqualsString('Need to use correct constructor', E.Message, 'Exception message');
-      raise;
-    end;
-  end;
-end;
-
-procedure TestTD2XBooleanParam.TestIsDefault;
-begin
-  Check(fBoolP.IsDefault, 'Check is Default');
-
-  fBoolP.Value := True;
-  CheckFalse(fBoolP.IsDefault, 'Check is not Default');
-
-  fBoolP.Reset;
-  Check(fBoolP.IsDefault, 'Check is Default');
-end;
-
-procedure TestTD2XBooleanParam.TestOutput;
-begin
-  fBoolP.Output(fL);
-  CheckList('', 'Output Default Value');
-
-  fBoolP.Value := True;
-  fBoolP.Output(fL);
-  CheckList('-T+', 'Output True Value');
-end;
-
-procedure TestTD2XBooleanParam.TestParse;
-begin
-  CheckFalse(fBoolP.Parse('A'), 'Parse wrong code');
-
-  Check(fBoolP.Parse('T'), 'Parse right code with No value');
-  CheckEquals(True, fBoolP.Value, 'Blank Value');
-
-  Check(fBoolP.Parse('T0'), 'Parse right code with False value');
-  CheckEquals(False, fBoolP.Value, 'False Value');
-
-  Check(fBoolP.Parse('T+'), 'Parse right code with True value');
-  CheckEquals(True, fBoolP.Value, 'True Value');
-end;
-
-procedure TestTD2XBooleanParam.TestReport;
-begin
-  fBoolP.Report(fLog);
-  CheckLog('Test -', 'Report Default Value');
-
-  fBoolP.Value := True;
-  fBoolP.Report(fLog);
-  CheckLog('Test +', 'Report True Value');
-end;
-
-procedure TestTD2XBooleanParam.TestReset;
-begin
-  CheckEquals(False, fBoolP.Value, 'Default Value Set');
-
-  fBoolP.Value := True;
-  CheckEquals(True, fBoolP.Value, 'Set Value');
-
-  fBoolP.Reset;
-  CheckEquals(False, fBoolP.Value, 'Default Value Reset');
-end;
-
-procedure TestTD2XBooleanParam.TestSetFlag;
-begin
-  CheckFalse(fBoolP.Value, 'Check is Default');
-
-  fFlag.Flag := True;
-  CheckTrue(fBoolP.Value, 'Check is not Default');
-
-  fFlag.Flag := False;
-  CheckFalse(fBoolP.Value, 'Check is Default');
-end;
-
-procedure TestTD2XBooleanParam.TestToString;
-begin
-  CheckEqualsString('T-', fBoolP.ToString, 'Report Default Value');
-
-  fBoolP.Value := True;
-  CheckEqualsString('T+', fBoolP.ToString, 'Report Value');
-end;
-
-procedure TestTD2XBooleanParam.TestValue;
-begin
-  CheckEquals(False, fBoolP.Value, 'Default Value Set');
-
-  fBoolP.Value := True;
-  CheckEquals(True, fBoolP.Value, 'Value Set');
-end;
-
-procedure TestTD2XBooleanParam.TestZero;
-begin
-  CheckEquals(False, fBoolP.Value, 'Default Value Set');
-
-  fBoolP.Value := True;
-  CheckEquals(True, fBoolP.Value, 'Set Value');
-
-  fBoolP.Zero;
-  CheckEquals(False, fBoolP.Value, 'Value Zeroed');
 end;
 
 { TestTD2XStringParam }
@@ -981,7 +835,8 @@ begin
   CheckLog(DESCRIPTION_PREFIX + ' T<tst> Test param' + DESCRIPTION_SUFFIX,
     'Describe One Param');
 
-  fPs.Add(TD2XBooleanParam.CreateBool('B', 'Boolean', 'Boolean param'));
+  fPs.Add(TD2XSingleParam<Boolean>.CreateParam('B', 'Boolean', '[+|-]', 'Boolean param', False,
+    TD2X.CnvDflt<Boolean>, TstFormatter, nil));
   fPs.DescribeAll(fLog);
   CheckLog(DESCRIPTION_PREFIX + ' T<tst> Test param B[+|-] - Boolean param' +
     DESCRIPTION_SUFFIX, 'Describe Two Params');
@@ -995,7 +850,8 @@ begin
   CheckFalse(Assigned(fPs.ForCode('Z')), 'Wrong Code not found with One Param');
   Check(Assigned(fPs.ForCode('T')), 'Code found with One Param');
 
-  fPs.Add(TD2XBooleanParam.CreateBool('B', 'Boolean', 'Boolean param'));
+  fPs.Add(TD2XSingleParam<Boolean>.CreateParam('B', 'Boolean', '[+|-]', 'Boolean param', False,
+    TD2X.CnvDflt<Boolean>, TstFormatter, nil));
   CheckFalse(Assigned(fPs.ForCode('Z')), 'Wrong Code not found with Two Params');
   Check(Assigned(fPs.ForCode('B')), 'Code found with Two Params');
   Check(Assigned(fPs.ForCode('T')), 'Code found with Two Params');
@@ -1003,7 +859,7 @@ end;
 
 procedure TestTD2XParams.TestOutputAll;
 var
-  lBP: TD2XBooleanParam;
+  lBP: TD2XSingleParam<Boolean>;
 begin
   fPs.OutputAll(fL);
   CheckList('', 'Output No Params');
@@ -1012,7 +868,8 @@ begin
   fPs.OutputAll(fL);
   CheckList('', 'Output One Param');
 
-  lBP := TD2XBooleanParam.CreateBool('B', 'Boolean', 'Boolean param');
+  lBP := TD2XSingleParam<Boolean>.CreateParam('B', 'Boolean', '[+|-]', 'Boolean param', False,
+    TD2X.CnvDflt<Boolean>, TstFormatter, nil);
   fPs.Add(lBP);
   fPs.OutputAll(fL);
   CheckList('', 'Output Two Default Params');
@@ -1031,19 +888,21 @@ begin
   fPs.ReportAll(fLog);
   CheckLog(REPORT_HEADING, 'Report One Param');
 
-  fPs.Add(TD2XBooleanParam.CreateBool('B', 'Boolean', 'Boolean param'));
+  fPs.Add(TD2XSingleParam<Boolean>.CreateParam('B', 'Boolean', '[+|-]', 'Boolean param', False,
+    TD2X.CnvDflt<Boolean>, TstFormatter, nil));
   fPs.ReportAll(fLog);
   CheckLog(REPORT_HEADING + ' Boolean -', 'Report Two Params');
 end;
 
 procedure TestTD2XParams.TestResetAll;
 var
-  lBP: TD2XBooleanParam;
+  lBP: TD2XSingleParam<Boolean>;
   lSP: TD2XStringParam;
   lFP: TD2XFlaggedStringParam;
 begin
   fPs.Add(TD2XParam.Create('T', 'Test', '<tst>', 'Testing', TstParser));
-  lBP := TD2XBooleanParam.CreateBool('B', 'Boolean', 'Boolean param');
+  lBP := TD2XSingleParam<Boolean>.CreateParam('B', 'Boolean', '[+|-]', 'Boolean param', False,
+    TD2X.CnvDflt<Boolean>, TstFormatter, nil);
   fPs.Add(lBP);
   lSP := TD2XStringParam.CreateStr('S', 'String', '<str>', 'String param', 'Str', nil, nil);
   fPs.Add(lSP);
@@ -1069,12 +928,13 @@ end;
 
 procedure TestTD2XParams.TestZeroAll;
 var
-  lBP: TD2XBooleanParam;
+  lBP: TD2XSingleParam<Boolean>;
   lSP: TD2XStringParam;
   lFP: TD2XFlaggedStringParam;
 begin
   fPs.Add(TD2XParam.Create('T', 'Test', '<tst>', 'Testing', TstParser));
-  lBP := TD2XBooleanParam.CreateBool('B', 'Boolean', 'Boolean param');
+  lBP := TD2XSingleParam<Boolean>.CreateParam('B', 'Boolean', '[+|-]', 'Boolean param', False,
+    TD2X.CnvDflt<Boolean>, TstFormatter, nil);
   fPs.Add(lBP);
   lSP := TD2XStringParam.CreateStr('S', 'String', '<str>', 'String param', 'Str', nil, nil);
   fPs.Add(lSP);
@@ -1096,6 +956,11 @@ begin
 
   fPs.ReportAll(fLog);
   CheckLog(REPORT_HEADING + ' Boolean - String Flagged -', 'All Params Zeroed');
+end;
+
+function TestTD2XParams.TstFormatter(pVal: Boolean): string;
+begin
+  Result := IfThen(pVal, '+', '-');
 end;
 
 function TestTD2XParams.TstParser(pStr: string): Boolean;
@@ -1854,9 +1719,8 @@ end;
 initialization
 
 RegisterTests('Params', [TestTD2XParam.Suite, TestTD2XParams.Suite, TestTD2XSingleParam.Suite,
-  TestTD2XFlagsParam.Suite, TestTD2XBooleanParam.Suite, TestTD2XStringParam.Suite,
-  TestTD2XValidStringParam.Suite, TestTD2XFormatStringParam.Suite,
-  TestTD2XFormatValidStringParam.Suite, TestTD2XFlaggedStringParam.Suite,
-  TestTD2XDefinesParam.Suite]);
+  TestTD2XFlagsParam.Suite, TestTD2XStringParam.Suite, TestTD2XValidStringParam.Suite,
+  TestTD2XFormatStringParam.Suite, TestTD2XFormatValidStringParam.Suite,
+  TestTD2XFlaggedStringParam.Suite, TestTD2XDefinesParam.Suite]);
 
 end.
