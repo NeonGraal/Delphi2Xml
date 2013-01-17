@@ -35,6 +35,7 @@ type
     procedure SetUp; override;
     procedure TearDown; override;
   published
+    procedure TestDescribeAll;
     procedure TestEndProcessing;
 
     procedure TestProcessParam;
@@ -78,10 +79,16 @@ end;
 
 { TestTD2XRunOptsAll }
 
+procedure TestTD2XRunParam.TestDescribeAll;
+begin
+  fOpts.DescribeAll;
+  CheckLog(EXPECTED_SHOW_OPTIONS, 'Describe All');
+end;
+
 procedure TestTD2XRunParam.TestEndProcessing;
 begin
   fOpts.EndProcessing;
-  CheckBuilder('', 'Nothing');
+  CheckBuilder('Processing finished!', 'End Processing');
 end;
 
 procedure TestTD2XRunParam.TestProcessParam;

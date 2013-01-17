@@ -18,7 +18,6 @@ type
     destructor Destroy; override;
 
     procedure Describe(pL: ID2XLogger); override;
-    procedure Report(pL: ID2XLogger; pStr: String = ''); override;
     procedure Output(pSL: TStringList); override;
     function IsDefault: Boolean; override;
     procedure Zero; override;
@@ -27,6 +26,7 @@ type
   protected
     function GetSample: String; override;
     function GetFormatted(pDefault: Boolean): String; override;
+    function GetReportDetails(pStr: String = ''): String; override;
 
   private
     fFlags: TD2XFlagDefines;
@@ -110,13 +110,15 @@ type
     constructor CreateDefines(pCode, pLabel: String; pDefinesFileName: TD2XNamedStreamRef);
     destructor Destroy; override;
 
-    procedure Report(pL: ID2XLogger; pStr: String = ''); override;
     procedure Output(pSL: TStringList); override;
     procedure Reset; override;
     procedure Zero; override;
 
   private type
     TDefineProc = procedure(pDef: String) of object;
+
+  protected
+    function GetReportDetails(pStr: String = ''): String; override;
 
   private
     fDefines: TStringList;
@@ -393,6 +395,48 @@ begin
   Result := fValue;
 end;
 
+function TD2XDefinesParam.GetReportDetails(pStr: String): String;
+var
+  lS: String;
+  w: Integer;
+  lSW: TStringWriter;
+
+  procedure WriteWidth(pStr: String);
+  begin
+    lSW.Write(pStr);
+    Inc(w, Length(pStr));
+  end;
+
+begin
+  if Value then
+    if fDefines.Count < 1 then
+      Result := 'NONE'
+    else
+      try
+        lSW := TStringWriter.Create;
+        w := 0;
+        fDefines.Sort;
+        for lS in fDefines do
+        begin
+          if w > 0 then
+            if (w + Length(lS)) > 78 then
+            begin
+              lSW.WriteLine(',');
+              w := 0;
+              WriteWidth('                       ');
+            end
+            else
+              WriteWidth(', ');
+          WriteWidth(lS);
+        end;
+        Result := lSW.ToString;
+      finally
+        lSW.Free;
+      end
+  else
+    Result := 'Default';
+end;
+
 procedure TD2XDefinesParam.IncludeDefine(pDef: String);
 begin
   pDef := UpperCase(pDef);
@@ -468,47 +512,6 @@ begin
   ProcessDefines(pDefs, RemoveDefine);
 end;
 
-procedure TD2XDefinesParam.Report(pL: ID2XLogger; pStr: String);
-var
-  lS: String;
-  w: Integer;
-
-  procedure WriteWidth(pStr: String);
-  begin
-    pL.Log('%s', [pStr], False);
-    Inc(w, Length(pStr));
-  end;
-
-begin
-  if Value then
-    if fDefines.Count < 1 then
-      pL.Log('Use NO %s', [fLabel])
-    else
-    begin
-      pL.Log('Use these %s:', [fLabel]);
-      w := 0;
-      fDefines.Sort;
-      for lS in fDefines do
-      begin
-        if w = 0 then
-          WriteWidth('    ')
-        else
-          if (w + Length(lS)) > 78 then
-          begin
-            pL.Log('', []);
-            w := 0;
-            WriteWidth('    ');
-          end
-          else
-            WriteWidth(', ');
-        WriteWidth(lS);
-      end;
-      pL.Log('', []);
-    end
-  else
-    pL.Log('Use default %s', [fLabel]);
-end;
-
 procedure TD2XDefinesParam.Reset;
 begin
   inherited;
@@ -543,7 +546,7 @@ begin
   if Length(pFlags) < 1 then
     raise EInvalidParam.Create('Need to initialize some Flags');
 
-  inherited Create('F', 'Flags', '[[+|-|Code]*|:[[+|-]Label[+|-],]*]', 'Flags', ParseFlags);
+  inherited Create('F', 'Flags', '<codes> | :<labels>', 'Flags', ParseFlags);
 
   SetLength(fFlags, Length(pFlags));
   SetLength(fValues, Length(pFlags));
@@ -560,11 +563,10 @@ procedure TD2XFlagsParam.Describe(pL: ID2XLogger);
 var
   i: Integer;
 begin
-  pL.Log('  %1s%-28s %s', [fCode, GetSample, fDescr]);
-  pL.Log('    %-4s %-15s %-3s %s', ['Code', 'Label', 'Def', 'Description']);
+  pL.Log('  %1s%-31s %s', [fCode, GetSample, fDescr]);
   for i := 0 to High(fFlags) do
     with fFlags[i] do
-      pL.Log('    %-4s %-15s %-3s %s', [FlagCode, FlagLabel, IfThen(FlagDefault, '+', '-'),
+      pL.Log('    %1s %-12s %-15s %s', [FlagCode, FlagLabel, IfThen(FlagDefault, '+', '-'),
           FlagDescr]);
 end;
 
@@ -622,6 +624,40 @@ begin
       Result := Result + lSep + fFlags[i].FlagCode;
       lSep := '';
     end;
+end;
+
+function TD2XFlagsParam.GetReportDetails(pStr: String): String;
+var
+  i: Integer;
+  lSL: TStringList;
+begin
+  lSL := TStringList.Create;
+  try
+    if pStr > '' then
+    begin
+      i := IndexLabel(pStr);
+      if i < 0 then
+        i := IndexCode(pStr[1]);
+      if i >= 0 then
+      begin
+        if ID2XFlag(fValues[i]).Flag then
+          lSL.Add(fFlags[i].FlagLabel + '+')
+        else
+          lSL.Add(fFlags[i].FlagLabel + '-');
+      end;
+    end
+    else
+      for i := 0 to High(fFlags) do
+        if ID2XFlag(fValues[i]).Flag then
+          lSL.Add(fFlags[i].FlagLabel + '+')
+        else
+          lSL.Add(fFlags[i].FlagLabel + '-');
+
+    lSL.Sort;
+    Result := lSL.CommaText;
+  finally
+    lSL.Free;
+  end;
 end;
 
 function TD2XFlagsParam.GetSample: String;
@@ -765,40 +801,6 @@ begin
     end;
   finally
     FreeAndNil(lSL);
-  end;
-end;
-
-procedure TD2XFlagsParam.Report(pL: ID2XLogger; pStr: String);
-var
-  i: Integer;
-  lSL: TStringList;
-begin
-  lSL := TStringList.Create;
-  try
-    if pStr > '' then
-    begin
-      i := IndexLabel(pStr);
-      if i < 0 then
-        i := IndexCode(pStr[1]);
-      if i >= 0 then
-      begin
-        if ID2XFlag(fValues[i]).Flag then
-          lSL.Add(fFlags[i].FlagLabel + '+')
-        else
-          lSL.Add(fFlags[i].FlagLabel + '-');
-      end;
-    end
-    else
-      for i := 0 to High(fFlags) do
-        if ID2XFlag(fValues[i]).Flag then
-          lSL.Add(fFlags[i].FlagLabel + '+')
-        else
-          lSL.Add(fFlags[i].FlagLabel + '-');
-
-    lSL.Sort;
-    pL.Log(' %-15s %s', [fLabel, lSL.CommaText]);
-  finally
-    lSL.Free;
   end;
 end;
 

@@ -113,6 +113,8 @@ type
 
     procedure EndProcessing;
 
+    procedure DescribeAll;
+
     property Recurse: Boolean read GetRecurse;
   end;
 
@@ -153,15 +155,13 @@ begin
   fProcs := TObjectList<TD2XProcessor>.Create;
 end;
 
+procedure TD2XOptions.DescribeAll;
+begin
+  fParams.DescribeAll(Self);
+end;
+
 destructor TD2XOptions.Destroy;
 begin
-  fDuration.Stop;
-  if fElapsedMode.Value = emQuiet then
-    Log('Processing finished!', [])
-  else
-    if fElapsedMode.Value > emNone then
-      Log('Total processing time %0.3f', [fIOFact.GetDuration(fDuration)]);
-
   RemoveProxy;
   FreeAndNil(fParser);
 
@@ -180,6 +180,13 @@ begin
 
   for lP in fProcs do
     lP.EndProcessing;
+
+  fDuration.Stop;
+  if fElapsedMode.Value = emQuiet then
+    Log('Processing finished!', [])
+  else
+    if fElapsedMode.Value > emNone then
+      Log('Total processing time %0.3f', [fIOFact.GetDuration(fDuration)]);
 end;
 
 procedure TD2XOptions.EndResults(pFilename: string; pPer: TD2XResultPer);
@@ -725,7 +732,7 @@ begin
   fIOFact.SetTimestampFlag(fFlags.ByLabel['Timestamp']);
 
   fParseMode := TD2XSingleParam<TD2XParseMode>.CreateParam('M', 'Parse mode', '<mode>',
-    'Set Parsing mode (F[ull], U[ses])', pmFull, TD2X.CnvEnum<TD2XParseMode>,
+    'Parser type (F[ull], U[ses])', pmFull, TD2X.CnvEnum<TD2XParseMode>,
     TD2X.ToLabel<TD2XParseMode>,
     function(pVal: TD2XParseMode): Boolean
     begin
@@ -734,10 +741,10 @@ begin
         fIOFact.SetGlobalName('Uses');
     end);
   fResultPer := TD2XSingleParam<TD2XResultPer>.CreateParam('P', 'Results per', '<per>',
-    'Set Result per (F[ile], S[ubdir], D[ir], W[ildcard], P[aram], R[un])', rpFile,
+    'Result per (F[ile], S[ubdir], D[ir], W[ildcard], P[aram], R[un])', rpFile,
     TD2X.CnvEnum<TD2XResultPer>, TD2X.ToLabel<TD2XResultPer>, nil);
   fElapsedMode := TD2XSingleParam<TD2XElapsedMode>.CreateParam('E', 'Show elapsed', '<mode>',
-    'Set Elapsed time display to be (N[one], T[otal], D[ir], F[ile], P[rocessing], [Q]uiet)',
+    'Elapsed time display (N[one], T[otal], D[ir], F[ile], P[rocessing], [Q]uiet)',
     emQuiet, TD2X.CnvEnum<TD2XElapsedMode>, TD2X.ToLabel<TD2XElapsedMode>, nil);
 
   fXmlHandler := TD2XXmlHandler.CreateXml(fFlags.ByLabel['FinalToken'],

@@ -26,6 +26,8 @@ type
 
     function ProcessParam(pStr: string; pIdx: Integer): Boolean;
 
+    procedure DescribeAll;
+
   end;
 
 implementation
@@ -42,6 +44,11 @@ begin
   inherited Create;
 
   fOpts := TD2XOptions.Create;
+end;
+
+procedure TD2XRunParam.DescribeAll;
+begin
+  fOpts.DescribeAll;
 end;
 
 destructor TD2XRunParam.Destroy;

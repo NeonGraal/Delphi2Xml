@@ -41,17 +41,22 @@ begin
     opts := TD2XRunParam.Create;
     opts.JoinLog(TD2XLogger.Create(sOut));
     opts.InitOptions(TD2XFileOptions.Create);
-    bOk := True;
-    for i := 1 to ParamCount do
-      bOk := opts.ProcessParam(ParamStr(i), i) and bOk;
-    opts.EndProcessing;
-    if not bOk then
-      with TStreamWriter.Create(sOut) do
-        try
-          WriteLine('Errors ocurred processing parameters');
-        finally
-          Free;
-        end;
+    if ParamCount > 0 then
+    begin
+      bOk := True;
+      for i := 1 to ParamCount do
+        bOk := opts.ProcessParam(ParamStr(i), i) and bOk;
+      opts.EndProcessing;
+      if not bOk then
+        with TStreamWriter.Create(sOut) do
+          try
+            WriteLine('Errors ocurred processing parameters');
+          finally
+            Free;
+          end;
+    end
+    else
+      opts.DescribeAll;
   finally
     FreeAndNil(opts);
     FreeAndNil(sOut);

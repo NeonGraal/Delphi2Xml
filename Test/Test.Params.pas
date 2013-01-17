@@ -111,8 +111,6 @@ type
   strict private
     fFlagsP: TD2XFlagsParam;
 
-    function TstParser(pStr: string): Boolean;
-
   public
     procedure SetUp; override;
     procedure TearDown; override;
@@ -824,8 +822,10 @@ procedure TestTD2XParams.TestDescribeAll;
 const
   DESCRIPTION_PREFIX = 'Usage: Delphi2XmlTests ' +
     '[ Option | @Params | mFilename | Wildcard ] ... Options: Default Description';
-  DESCRIPTION_SUFFIX = ' Definitions: ' +
-    '<f/e> If value begins with "." is appended to global name to give file name';
+  DESCRIPTION_SUFFIX = ' Definitions:' +
+    ' <codes> Flag codes, optionally interspersed with "+" or "-"' +
+    ' <labels> Comma list of Flag Labels, each optionally prefixed or suffixed with "+" or "-"'
+    + ' <f/e> If value begins with "." is appended to global name to give file name';
 begin
   fPs.DescribeAll(fLog);
   CheckLog(DESCRIPTION_PREFIX + DESCRIPTION_SUFFIX, 'Describe No Params');
@@ -1431,72 +1431,72 @@ procedure TestTD2XDefinesParam.TestParse;
 begin
   CheckEquals(False, fDefP.Value, 'Default Value Set');
   fDefP.Report(fLog);
-  CheckLog('Use default Test', 'Report Default value');
+  CheckLog('Test Default', 'Report Default value');
 
   CheckFalse(fDefP.Parse('T'), 'Parse right code with No value');
   CheckEquals(False, fDefP.Value, 'Blank Flag Set');
   fDefP.Report(fLog);
-  CheckLog('Use default Test', 'Report Default value');
+  CheckLog('Test Default', 'Report Default value');
 
   CheckFalse(fDefP.Parse('T-'), 'Parse right code with Flag off');
   CheckEquals(False, fDefP.Value, 'Flag Off');
   fDefP.Report(fLog);
-  CheckLog('Use default Test', 'Report Default value');
+  CheckLog('Test Default', 'Report Default value');
 
   CheckFalse(fDefP.Parse('T+'), 'Parse right code with Flag on');
   CheckEquals(False, fDefP.Value, 'Flag On');
   fDefP.Report(fLog);
-  CheckLog('Use default Test', 'Report Default value');
+  CheckLog('Test Default', 'Report Default value');
 
   fDefP.Value := True;
   CheckEquals(True, ID2XFlag(fDefP).Flag, 'Flag Set');
   fDefP.Report(fLog);
-  CheckLog('Use these Test: ALPHA, BETA, GAMMA', 'Report simple values');
+  CheckLog('Test ALPHA, BETA, GAMMA', 'Report simple values');
 
   Check(fDefP.Parse('T+Test'), 'Parse right code add value');
   CheckEquals(True, fDefP.Value, 'Flag Set');
   fDefP.Report(fLog);
-  CheckLog('Use these Test: ALPHA, BETA, GAMMA, TEST', 'Report add value');
+  CheckLog('Test ALPHA, BETA, GAMMA, TEST', 'Report add value');
 
   Check(fDefP.Parse('T+Test1,Test2'), 'Parse right code add values');
   CheckEquals(True, fDefP.Value, 'Flag Set');
   fDefP.Report(fLog);
-  CheckLog('Use these Test: ALPHA, BETA, GAMMA, TEST, TEST1, TEST2', 'Report add values');
+  CheckLog('Test ALPHA, BETA, GAMMA, TEST, TEST1, TEST2', 'Report add values');
 
   Check(fDefP.Parse('T-Beta'), 'Parse right code remove value');
   CheckEquals(True, fDefP.Value, 'Flag Set');
   fDefP.Report(fLog);
-  CheckLog('Use these Test: ALPHA, GAMMA, TEST, TEST1, TEST2', 'Report remove value');
+  CheckLog('Test ALPHA, GAMMA, TEST, TEST1, TEST2', 'Report remove value');
 
   Check(fDefP.Parse('T-Test,Test1'), 'Parse right code remove values');
   CheckEquals(True, fDefP.Value, 'Flag Set');
   fDefP.Report(fLog);
-  CheckLog('Use these Test: ALPHA, GAMMA, TEST2', 'Report remove values');
+  CheckLog('Test ALPHA, GAMMA, TEST2', 'Report remove values');
 
   Check(fDefP.Parse('T+~Test'), 'Parse right code add file');
   CheckEquals(True, fDefP.Value, 'Flag Set');
   fDefP.Report(fLog);
-  CheckLog('Use these Test: ALPHA, GAMMA, TANGO, TEST2, UNIFORM', 'Report add file');
+  CheckLog('Test ALPHA, GAMMA, TANGO, TEST2, UNIFORM', 'Report add file');
 
   Check(fDefP.Parse('T-~Test'), 'Parse right code remove file');
   CheckEquals(True, fDefP.Value, 'Flag Set');
   fDefP.Report(fLog);
-  CheckLog('Use these Test: ALPHA, GAMMA, TEST2', 'Report remove file');
+  CheckLog('Test ALPHA, GAMMA, TEST2', 'Report remove file');
 
   Check(fDefP.Parse('T:Test'), 'Parse right code set file');
   CheckEquals(True, fDefP.Value, 'Flag Set');
   fDefP.Report(fLog);
-  CheckLog('Use these Test: TANGO, UNIFORM', 'Report set file');
+  CheckLog('Test TANGO, UNIFORM', 'Report set file');
 end;
 
 procedure TestTD2XDefinesParam.TestReport;
 begin
   fDefP.Report(fLog);
-  CheckLog('Use default Test', 'Report Default Value');
+  CheckLog('Test Default', 'Report Default Value');
 
   fDefP.Value := True;
   fDefP.Report(fLog);
-  CheckLog('Use these Test: ALPHA, BETA, GAMMA', 'Report Blank value on');
+  CheckLog('Test ALPHA, BETA, GAMMA', 'Report Blank value on');
 end;
 
 procedure TestTD2XDefinesParam.TestReset;
@@ -1580,8 +1580,8 @@ end;
 procedure TestTD2XFlagsParam.TestDescribe;
 begin
   fFlagsP.Describe(fLog);
-  CheckLog('F[[+|-|Code]*|:[[+|-]Label[+|-],]*] Flags Code Label Def Description ' +
-    '1 Test1 - Test Flag 1 2 Test2 + Test Flag 2', 'Describe Param');
+  CheckLog('F<codes> | :<labels> Flags 1 Test1 - Test Flag 1 2 Test2 + Test Flag 2',
+    'Describe Param');
 end;
 
 procedure TestTD2XFlagsParam.TestInvalidCreate;
@@ -1709,11 +1709,6 @@ begin
   fFlagsP.Zero;
   CheckEquals(False, fFlagsP.ByCode['1'].Flag, 'Value Zeroed');
   CheckEquals(False, fFlagsP.ByCode['2'].Flag, 'Default Value Set');
-end;
-
-function TestTD2XFlagsParam.TstParser(pStr: string): Boolean;
-begin
-  Result := True;
 end;
 
 initialization

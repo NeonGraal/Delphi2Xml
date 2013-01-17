@@ -34,9 +34,8 @@ const
   BOTH_PROCESSING = 'Processing ... ' + UNIT_PROCESSING + ' ' + PROGRAM_PROCESSING + ' ' +
     PACKAGE_PROCESSING + ' Processed';
   EXPECTED_SHOW_OPTIONS = 'Usage: %s [ Option | @Params | mFilename | Wildcard ] ... ' +
-    'Options: Default Description ? Show valid options ' +
-    '! Reset all options to defaults @<file> Report/Output Current options ' +
-    'F[[+|-|Code]*|:[[+|-]Label[+|-],]*] Flags Code Label Def Description ' +
+    'Options: Default Description ? Show valid options ! Reset all options to defaults ' +
+    '@<file> Report/Output Current options F<codes> | :<labels> Flags ' +
     'V Verbose - Log all Parser methods called T Timestamp - Timestamp global output files ' +
     'R Recurse - Recurse into subdirectories N LogNotSupp - Log Not Supported messages ' +
     'F FinalToken + Record Final Token E LogErrors + Log Error messages ' +
@@ -44,9 +43,9 @@ const
   //    'I[+-]:<dir> :Config\ Use <dir> as a base for all Config files ' +
   //    'O[+-]:<dir> :Log\ Use <dir> as a base for all Log files ' +
   //    'B[+-]:<dir> -(.\) Use <dir> as a base for all Input files ' +
-    'M<mode> Full Set Parsing mode (F[ull], U[ses]) ' +
-    'P<per> File Set Result per (F[ile], S[ubdir], D[ir], W[ildcard], P[aram], R[un]) ' +
-    'E<mode> Quiet Set Elapsed time display to be (N[one], T[otal], D[ir], F[ile], P[rocessing], [Q]uiet) '
+    'M<mode> Full Parser type (F[ull], U[ses]) ' +
+    'P<per> File Result per (F[ile], S[ubdir], D[ir], W[ildcard], P[aram], R[un]) ' +
+    'E<mode> Quiet Elapsed time display (N[one], T[otal], D[ir], F[ile], P[rocessing], [Q]uiet) '
     + 'X[+-]:<dir> :Xml\ Generate XML files into current or given <dir> ' +
     'W[+-]:<dir> -(Defines\) Generate Final Defines files into current or given <dir> ' +
     'U[+-]:<f/e> :.used Report Defines Used into <f/e> ' +
@@ -55,7 +54,9 @@ const
     'S[+-]:<f/e> -(.skip) Load Skipped Methods from <f/e> ' +
     'D[+-!:]<def> Add(+), Remove(-), Clear(!) or Load(:) Defines ' +
     'H[+-!:]<def> Add(+), Remove(-), Clear(!) or Load(:) Held Defines ' +
-    'Definitions: <f/e> If value begins with "." is appended to global name to give file name';
+    'Definitions: <codes> Flag codes, optionally interspersed with "+" or "-"' +
+    ' <labels> Comma list of Flag Labels, each optionally prefixed or suffixed with "+" or "-"'
+    + ' <f/e> If value begins with "." is appended to global name to give file name';
   BASE_REPORT_OPTIONS = 'Current option settings: ' +
     'Flags FinalToken+,LogErrors+,LogNotSupp-,Recurse-,Timestamp-,Verbose- ' +
   //    'Recurse - Timestamp - Global name Delphi2XmlTests Config dir :Config\ ' +
@@ -63,8 +64,7 @@ const
     'Parse mode Full Results per File Show elapsed Quiet ' +
     'Generate XML :Xml\ Write Defines -(Defines\) Defines Used :.used ' +
     'Count Children :.chld Count Defines :.defs Skipped Methods -(.skip) ';
-  DEFAULT_REPORT_OPTIONS = BASE_REPORT_OPTIONS +
-    'Use default Defines Use default Held Defines';
+  DEFAULT_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Defines Default Held Defines Default';
 
 implementation
 
@@ -109,6 +109,12 @@ type
   TOptionsParseTestCase = class(TOptionsTestCase)
   protected
     procedure CheckSimple(pOpt, pExp: string);
+  end;
+
+  TOptionsParseDefinesTestCase = class(TOptionsParseTestCase)
+  protected
+    fCode, fLabel: string;
+    procedure CheckDefines(pParam, pResult: string);
   end;
 
   TestTD2XOptionsSpecific = class(TOptionsTestCase)
@@ -158,6 +164,7 @@ type
     procedure TestProcessDirectory;
     procedure TestRecurseDirectory;
     procedure TestProcessParam;
+    procedure TestDescribeAll;
     procedure TestEndProcessing;
     procedure TestRecurse;
     procedure TestParserDefines;
@@ -241,7 +248,7 @@ type
     procedure TestParseOptionCDFile;
   end;
 
-  TestTD2XOptionsParseDefines = class(TOptionsParseTestCase)
+  TestTD2XOptionsParseDefines = class(TOptionsParseDefinesTestCase)
   public
     procedure SetUp; override;
   published
@@ -257,7 +264,7 @@ type
     procedure TestParseOptionDMany;
   end;
 
-  TestTD2XOptionsParseHeldDefines = class(TOptionsParseTestCase)
+  TestTD2XOptionsParseHeldDefines = class(TOptionsParseDefinesTestCase)
   public
     procedure SetUp; override;
   published
@@ -331,7 +338,9 @@ const
     'Processing Config ... Processing Config\Testing.Test.Dir.pas ... done Processed Config';
   RECURSE_PROCESSING =
     'Processing Config\Test ... Processing Config\Test\Testing.Test.SubDir.pas ... done Processed Config\Test';
-  ALL_PROCESSING = BOTH_PROCESSING + ' ' + DIRECTORY_PROCESSING + ' ' + RECURSE_PROCESSING;
+  FULLDIR_PROCESSING = DIRECTORY_PROCESSING + ' ' + RECURSE_PROCESSING;
+  END_PROCESSING = ' Processing finished!';
+  ALL_PROCESSING = BOTH_PROCESSING + ' ' + FULLDIR_PROCESSING;
   ALTERED_REPORT_OPTIONS = 'Current option settings: Flags ' +
     'FinalToken+,LogErrors+,LogNotSupp+,Recurse+,Timestamp+,Verbose+ ' +
   //    'Recurse + Timestamp - Global name :Test Config dir :Test\ Log dir :Test\ ' +
@@ -339,22 +348,22 @@ const
     'Parse mode Full Results per File Show elapsed Quiet ' +
     'Generate XML :Test\ Write Defines :Test\ Defines Used :.Test ' +
     'Count Children :.Test Count Defines :.Test Skipped Methods :Test.skip ' +
-    'Use these Defines: TANGO, UNIFORM, VICTOR Use these Held Defines: TANGO, UNIFORM, VICTOR';
+    'Defines TANGO, UNIFORM, VICTOR Held Defines TANGO, UNIFORM, VICTOR';
   ZERO_REPORT_OPTIONS = 'Current option settings: Flags ' +
     'FinalToken-,LogErrors-,LogNotSupp-,Recurse-,Timestamp-,Verbose- ' +
   //    'Recurse - Timestamp - Global name Config dir - Log dir - Base dir - ' +
   //    'Parse mode Full Results per File Show elapsed None Generate XML - ' +
     'Parse mode Full Results per File Show elapsed None Generate XML - ' +
     'Write Defines - Defines Used - Count Children - Count Defines - Skipped Methods - ' +
-    'Use default Defines Use default Held Defines';
-  EMPTY_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Use NO Defines Use default Held Defines';
+    'Defines Default Held Defines Default';
+  EMPTY_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Defines NONE Held Defines Default';
 {$IFDEF WIN32}
-  DEFINED_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Use these Defines: ' +
+  DEFINED_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Defines ' +
     'CONDITIONALEXPRESSIONS, CPU32, CPU386, MSWINDOWS, UNICODE, VER230, WIN32 ' +
-    'Use default Held Defines';
+    'Held Defines Default';
 {$ELSE}
-  DEFINED_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Use these Defines: ' +
-    'CONDITIONALEXPRESSIONS, CPU32, MSWINDOWS, UNICODE, VER230 ' + 'Use default Held Defines';
+  DEFINED_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Defines ' +
+    'CONDITIONALEXPRESSIONS, CPU32, MSWINDOWS, UNICODE, VER230 ' + 'Held Defines Default';
 {$ENDIF}
   { TestTD2XOptionEnums }
 
@@ -799,10 +808,16 @@ begin
   DisposeOf(ReturnValue);
 end;
 
+procedure TestTD2XOptions.TestDescribeAll;
+begin
+  fOpts.DescribeAll;
+  CheckLog(EXPECTED_SHOW_OPTIONS, 'Describe All');
+end;
+
 procedure TestTD2XOptions.TestEndProcessing;
 begin
   fOpts.EndProcessing;
-  CheckLog('', 'End Processing');
+  CheckLog('Processing finished!', 'End Processing');
 end;
 
 procedure TestTD2XOptions.TestEndResults;
@@ -973,6 +988,10 @@ procedure TestTD2XOptionsSpecific.TestElapsedMode;
   begin
     Result := pS + ' 1.234';
   end;
+  function PT(pA: array of string): string;
+  begin
+    Result := PJ([PJ(pA), PF('Total processing time')]);
+  end;
   function PP(pS: string; pPs: array of integer): string;
   var
     lI: integer;
@@ -1032,25 +1051,25 @@ begin
   fB.Clear;
   Check(fOpts.ProcessParam('Testing.Test*', 'Count Children'), 'Process Units');
   fOpts.EndProcessing;
-  CheckLog(ALL_PROCESSING, 'Elapsed Quiet');
+  CheckLog(ALL_PROCESSING + END_PROCESSING, 'Elapsed Quiet');
 
   Check(fOpts.ProcessOption('ER'), 'Return Value 1');
   fB.Clear;
   Check(fOpts.ProcessParam('Testing.Test*', 'Count Children'), 'Process Units');
   fOpts.EndProcessing;
-  CheckLog(ALL_PROCESSING, 'Elapsed Run');
+  CheckLog(ALL_PROCESSING + END_PROCESSING, 'Elapsed Run');
 
   Check(fOpts.ProcessOption('ED'), 'Return Value 1');
   fB.Clear;
   Check(fOpts.ProcessParam('Testing.Test*', 'Count Children'), 'Process Units');
   fOpts.EndProcessing;
-  CheckLog(PJ([PF(PB('')), PF(PB('Config')), PF(PB('Config\Test'))]), 'Elapsed Dir');
+  CheckLog(PT([PF(PB('')), PF(PB('Config')), PF(PB('Config\Test'))]), 'Elapsed Dir');
 
   Check(fOpts.ProcessOption('EF'), 'Return Value 1');
   fB.Clear;
   Check(fOpts.ProcessParam('Testing.Test*', 'Count Children'), 'Process Units');
   fOpts.EndProcessing;
-  CheckLog(PJ([PD('', ['Testing.Test.AUnit.pas', 'Testing.Test.AProgram.dpr',
+  CheckLog(PT([PD('', ['Testing.Test.AUnit.pas', 'Testing.Test.AProgram.dpr',
             'Testing.Test.APackage.dpk']), PD('Config', ['Testing.Test.Dir.pas']),
         PD('Config\Test', ['Testing.Test.SubDir.pas'])]), 'Elapsed File');
 
@@ -1066,7 +1085,7 @@ begin
   SA(lC[0], [7, 23, 25, 32, 34, 40, 42, 61, 90, 98, 100]);
   SetLength(lT, 1);
   SA(lT[0], [7, 21, 23, 30, 32, 43, 45, 63, 90, 98, 100]);
-  CheckLog(PJ([PDP('', ['Testing.Test.AUnit.pas', 'Testing.Test.AProgram.dpr',
+  CheckLog(PT([PDP('', ['Testing.Test.AUnit.pas', 'Testing.Test.AProgram.dpr',
             'Testing.Test.APackage.dpk'], lP), PDP('Config', ['Testing.Test.Dir.pas'], lC),
         PDP('Config\Test', ['Testing.Test.SubDir.pas'], lT)]), 'Elapsed Processing');
 end;
@@ -1258,51 +1277,54 @@ begin
   inherited;
 
   fOpts.ParserDefines.CommaText := 'ALPHA,BETA,GAMMA,UNIFORM';
+
+  fCode := 'D';
+  fLabel := 'Defines ';
 end;
 
 procedure TestTD2XOptionsParseDefines.TestParseOptionDAdd;
 begin
-  CheckSimple('D+Value', 'Use these Defines: ALPHA, BETA, GAMMA, UNIFORM, VALUE');
+  CheckDefines('+Value', 'ALPHA, BETA, GAMMA, UNIFORM, VALUE');
 end;
 
 procedure TestTD2XOptionsParseDefines.TestParseOptionDAddLoad;
 begin
-  CheckSimple('D+~Test.def', 'Use these Defines: ALPHA, BETA, GAMMA, TANGO, UNIFORM, VICTOR');
+  CheckDefines('+~Test.def', 'ALPHA, BETA, GAMMA, TANGO, UNIFORM, VICTOR');
 end;
 
 procedure TestTD2XOptionsParseDefines.TestParseOptionDAddMany;
 begin
-  CheckSimple('D+Test1,Test2', 'Use these Defines: ALPHA, BETA, GAMMA, TEST1, TEST2, UNIFORM');
+  CheckDefines('+Test1,Test2', 'ALPHA, BETA, GAMMA, TEST1, TEST2, UNIFORM');
 end;
 
 procedure TestTD2XOptionsParseDefines.TestParseOptionDClear;
 begin
-  CheckSimple('D!', 'Use default Defines');
+  CheckDefines('!', 'Default');
 end;
 
 procedure TestTD2XOptionsParseDefines.TestParseOptionDClearLoad;
 begin
-  CheckSimple('D:Test', 'Use these Defines: TANGO, UNIFORM, VICTOR');
+  CheckDefines(':Test', 'TANGO, UNIFORM, VICTOR');
 end;
 
 procedure TestTD2XOptionsParseDefines.TestParseOptionDDelete;
 begin
-  CheckSimple('D-Beta', 'Use these Defines: ALPHA, GAMMA, UNIFORM');
+  CheckDefines('-Beta', 'ALPHA, GAMMA, UNIFORM');
 end;
 
 procedure TestTD2XOptionsParseDefines.TestParseOptionDDeleteLoad;
 begin
-  CheckSimple('D-~Test.def', 'Use these Defines: ALPHA, BETA, GAMMA');
+  CheckDefines('-~Test.def', 'ALPHA, BETA, GAMMA');
 end;
 
 procedure TestTD2XOptionsParseDefines.TestParseOptionDDeleteMany;
 begin
-  CheckSimple('D-Beta,Gamma', 'Use these Defines: ALPHA, UNIFORM');
+  CheckDefines('-Beta,Gamma', 'ALPHA, UNIFORM');
 end;
 
 procedure TestTD2XOptionsParseDefines.TestParseOptionDEmpty;
 begin
-  CheckSimple('D:', 'Use NO Defines');
+  CheckDefines(':', 'NONE');
 end;
 
 procedure TestTD2XOptionsParseDefines.TestParseOptionDMany;
@@ -1310,13 +1332,12 @@ begin
   Check(fOpts.ProcessOption('D+Value1'), 'ReturnValue1');
   Check(fOpts.ProcessOption('D+Value2,Value3'), 'ReturnValue2');
   fOpts.ProcessOption('@-D');
-  CheckLog('Use these Defines: ALPHA, BETA, GAMMA, UNIFORM, VALUE1, VALUE2, VALUE3',
-    'Report Options');
+  CheckLog('Defines ALPHA, BETA, GAMMA, UNIFORM, VALUE1, VALUE2, VALUE3', 'Report Options');
 
   Check(fOpts.ProcessOption('D-Value2'), 'ReturnValue1');
   Check(fOpts.ProcessOption('D-Uniform,Value1'), 'ReturnValue2');
   fOpts.ProcessOption('@-D');
-  CheckLog('Use these Defines: ALPHA, BETA, GAMMA, VALUE3', 'Report Options');
+  CheckLog('Defines ALPHA, BETA, GAMMA, VALUE3', 'Report Options');
 end;
 
 { TestTD2XOptionsParseCountDefines }
@@ -1501,53 +1522,54 @@ begin
   inherited;
 
   fOpts.HeldDefines.CommaText := 'ALPHA,BETA,GAMMA,UNIFORM';
+
+  fCode := 'H';
+  fLabel := 'Held Defines ';
 end;
 
 procedure TestTD2XOptionsParseHeldDefines.TestParseOptionHAdd;
 begin
-  CheckSimple('H+Value', 'Use these Held Defines: ALPHA, BETA, GAMMA, UNIFORM, VALUE');
+  CheckDefines('+Value', 'ALPHA, BETA, GAMMA, UNIFORM, VALUE');
 end;
 
 procedure TestTD2XOptionsParseHeldDefines.TestParseOptionHAddLoad;
 begin
-  CheckSimple('H+~Test.def',
-    'Use these Held Defines: ALPHA, BETA, GAMMA, TANGO, UNIFORM, VICTOR');
+  CheckDefines('+~Test.def', 'ALPHA, BETA, GAMMA, TANGO, UNIFORM, VICTOR');
 end;
 
 procedure TestTD2XOptionsParseHeldDefines.TestParseOptionHAddMany;
 begin
-  CheckSimple('H+Test1,Test2',
-    'Use these Held Defines: ALPHA, BETA, GAMMA, TEST1, TEST2, UNIFORM');
+  CheckDefines('+Test1,Test2', 'ALPHA, BETA, GAMMA, TEST1, TEST2, UNIFORM');
 end;
 
 procedure TestTD2XOptionsParseHeldDefines.TestParseOptionHClear;
 begin
-  CheckSimple('H!', 'Use default Held Defines');
+  CheckDefines('!', 'Default');
 end;
 
 procedure TestTD2XOptionsParseHeldDefines.TestParseOptionHClearLoad;
 begin
-  CheckSimple('H:Test', 'Use these Held Defines: TANGO, UNIFORM, VICTOR');
+  CheckDefines(':Test', 'TANGO, UNIFORM, VICTOR');
 end;
 
 procedure TestTD2XOptionsParseHeldDefines.TestParseOptionHDelete;
 begin
-  CheckSimple('H-Beta', 'Use these Held Defines: ALPHA, GAMMA, UNIFORM');
+  CheckDefines('-Beta', 'ALPHA, GAMMA, UNIFORM');
 end;
 
 procedure TestTD2XOptionsParseHeldDefines.TestParseOptionHDeleteLoad;
 begin
-  CheckSimple('H-~Test.def', 'Use these Held Defines: ALPHA, BETA, GAMMA');
+  CheckDefines('-~Test.def', 'ALPHA, BETA, GAMMA');
 end;
 
 procedure TestTD2XOptionsParseHeldDefines.TestParseOptionHDeleteMany;
 begin
-  CheckSimple('H-Beta,Gamma', 'Use these Held Defines: ALPHA, UNIFORM');
+  CheckDefines('-Beta,Gamma', 'ALPHA, UNIFORM');
 end;
 
 procedure TestTD2XOptionsParseHeldDefines.TestParseOptionHEmpty;
 begin
-  CheckSimple('H:', 'Use NO Held Defines');
+  CheckDefines(':', 'NONE');
 end;
 
 procedure TestTD2XOptionsParseHeldDefines.TestParseOptionHMany;
@@ -1555,13 +1577,13 @@ begin
   Check(fOpts.ProcessOption('H+Value1'), 'ReturnValue1');
   Check(fOpts.ProcessOption('H+Value2,Value3'), 'ReturnValue2');
   fOpts.ProcessOption('@-H');
-  CheckLog('Use these Held Defines: ALPHA, BETA, GAMMA, UNIFORM, VALUE1, VALUE2, VALUE3',
+  CheckLog('Held Defines ALPHA, BETA, GAMMA, UNIFORM, VALUE1, VALUE2, VALUE3',
     'Report Options');
 
   Check(fOpts.ProcessOption('H-Value2'), 'ReturnValue1');
   Check(fOpts.ProcessOption('H-Uniform,Value1'), 'ReturnValue2');
   fOpts.ProcessOption('@-H');
-  CheckLog('Use these Held Defines: ALPHA, BETA, GAMMA, VALUE3', 'Report Options');
+  CheckLog('Held Defines ALPHA, BETA, GAMMA, VALUE3', 'Report Options');
 end;
 
 { TestTD2XOptionsXmlPer }
@@ -1699,6 +1721,13 @@ begin
   CheckLog(ALL_PROCESSING, 'Processing Xml per Wildcard');
   fOpts.EndProcessing;
   CheckFiles('TestProcessXmlUsesPerWildcard');
+end;
+
+{ TOptionsParseDefinesTestCase }
+
+procedure TOptionsParseDefinesTestCase.CheckDefines(pParam, pResult: string);
+begin
+  CheckSimple(fCode + pParam, fLabel + pResult);
 end;
 
 initialization

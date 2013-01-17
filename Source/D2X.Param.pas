@@ -27,7 +27,7 @@ type
     function IsCode(pStr: string): Boolean;
     function Parse(pStr: string): Boolean;
     procedure Describe(pL: ID2XLogger); virtual;
-    procedure Report(pL: ID2XLogger; pStr: string = ''); virtual;
+    procedure Report(pL: ID2XLogger; pStr: string = '');
     procedure Output(pSL: TStringList); virtual;
     function ToString: string; override;
     function IsDefault: Boolean; virtual;
@@ -40,6 +40,7 @@ type
 
     function GetSample: string; virtual;
     function GetFormatted(pDefault: Boolean): string; virtual;
+    function GetReportDetails(pStr: string = ''): string; virtual;
 
   public
     property ParamLabel: string read fLabel;
@@ -68,7 +69,6 @@ type
     constructor CreateParam(pCode, pLabel, pSample, pDescr: string; pDefault: T;
       pConverter: TspConverter; pFormatter: TspFormatter; pValidator: TspValidator); virtual;
 
-    procedure Report(pL: ID2XLogger; pStr: string = ''); override;
     procedure Output(pSL: TStringList); override;
     function IsDefault: Boolean; override;
     procedure Reset; override;
@@ -78,6 +78,7 @@ type
     fFormatter: TspFormatter;
 
     function GetFormatted(pDefault: Boolean): string; override;
+    function GetReportDetails(pStr: string = ''): string; override;
 
   private
     fDefault: T;
@@ -147,12 +148,17 @@ end;
 
 procedure TD2XParam.Describe(pL: ID2XLogger);
 begin
-  pL.Log('  %1s%-12s %-15s %s', [fCode, GetSample, GetFormatted(True), fDescr]);
+  pL.Log('  %-16s %-15s %s', [fCode + GetSample, GetFormatted(True), fDescr]);
 end;
 
 function TD2XParam.GetFormatted(pDefault: Boolean): string;
 begin
   Result := '';
+end;
+
+function TD2XParam.GetReportDetails(pStr: string): string;
+begin
+  Result := '~~~~';
 end;
 
 function TD2XParam.GetSample: string;
@@ -181,8 +187,12 @@ begin
 end;
 
 procedure TD2XParam.Report(pL: ID2XLogger; pStr: string);
+var
+  lS: string;
 begin
-  //
+  lS := GetReportDetails(pStr);
+  if lS <> '~~~~' then
+    pL.Log('  %-20s %s', [fLabel, lS]);
 end;
 
 procedure TD2XParam.Reset;
@@ -210,10 +220,13 @@ begin
   lBase := ChangeFileExt(ExtractFileName(ParamStr(0)), '');
 
   pL.Log('Usage: %s [ Option | @Params | mFilename | Wildcard ] ... ', [lBase]);
-  pL.Log('Options:        %-15s Description', ['Default']);
+  pL.Log('Options:           %-15s Description', ['Default']);
   for lP in Self do
     lP.Describe(pL);
   pL.Log('  Definitions:', []);
+  pL.Log('    <codes> Flag codes, optionally interspersed with "+" or "-"', []);
+  pL.Log('    <labels> Comma list of Flag Labels, each optionally prefixed or suffixed with "+" or "-"',
+    []);
   pL.Log('    <f/e> If value begins with "." is appended to global name to give file name', []
     );
 end;
@@ -326,6 +339,11 @@ begin
     Result := fFormatter(fValue);
 end;
 
+function TD2XSingleParam<T>.GetReportDetails(pStr: string): string;
+begin
+  Result := GetFormatted(False);
+end;
+
 function TD2XSingleParam<T>.IsDefault: Boolean;
 var
   lComparer: IEqualityComparer<T>;
@@ -339,11 +357,6 @@ begin
   if Assigned(pSL) then
     if not IsDefault then
       pSL.Add('-' + ToString);
-end;
-
-procedure TD2XSingleParam<T>.Report(pL: ID2XLogger; pStr: string);
-begin
-  pL.Log(' %-15s %s', [fLabel, GetFormatted(False)]);
 end;
 
 procedure TD2XSingleParam<T>.Reset;
