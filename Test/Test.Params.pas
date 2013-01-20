@@ -1563,9 +1563,11 @@ var
 begin
   inherited;
 
-  SetLength(lFlags, 2);
+  SetLength(lFlags, 4);
   lFlags[0] := FlagDef('1', 'Test1', 'Test Flag 1');
   lFlags[1] := FlagDef('2', 'Test2', 'Test Flag 2', True);
+  lFlags[2] := FlagDef('U', 'TestU', 'Test Flag Upper');
+  lFlags[3] := FlagDef('l', 'Testl', 'Test Flag Lower');
 
   fFlagsP := TD2XFlagsParam.CreateFlags(lFlags);
 end;
@@ -1580,8 +1582,8 @@ end;
 procedure TestTD2XFlagsParam.TestDescribe;
 begin
   fFlagsP.Describe(fLog);
-  CheckLog('F<codes> | :<labels> Flags 1 Test1 - Test Flag 1 2 Test2 + Test Flag 2',
-    'Describe Param');
+  CheckLog('F<codes> | :<labels> Flags 1 Test1 - Test Flag 1 2 Test2 + Test Flag 2 ' +
+    'U TestU - Test Flag Upper L Testl - Test Flag Lower', 'Describe Param');
 end;
 
 procedure TestTD2XFlagsParam.TestInvalidCreate;
@@ -1658,20 +1660,30 @@ begin
 
   Check(fFlagsP.Parse('F-1'), 'Parse right code with False code');
   CheckEquals(False, fFlagsP.ByCode['1'].Flag, 'False Value');
+
+  Check(fFlagsP.Parse('F+u'), 'Parse right code with Lowercase code');
+  CheckEquals(True, fFlagsP.ByCode['u'].Flag, 'True Lowercase Value');
+  CheckEquals(True, fFlagsP.ByCode['U'].Flag, 'True Uppercase Value');
+
+  Check(fFlagsP.Parse('F-U'), 'Parse right code with Uppercase code');
+  CheckEquals(False, fFlagsP.ByCode['u'].Flag, 'False Lowercase Value');
+  CheckEquals(False, fFlagsP.ByCode['U'].Flag, 'False Uppercase Value');
 end;
 
 procedure TestTD2XFlagsParam.TestReport;
 begin
   fFlagsP.Report(fLog);
-  CheckLog('Flags Test1-,Test2+', 'Report Default Value');
+  CheckLog('Flags Test1-,Test2+,Testl-,TestU-', 'Report Default Value');
 
   fFlagsP.ByCode['1'].Flag := True;
+  fFlagsP.ByCode['U'].Flag := True;
+  fFlagsP.ByCode['l'].Flag := True;
   fFlagsP.Report(fLog);
-  CheckLog('Flags Test1+,Test2+', 'Report True Value');
+  CheckLog('Flags Test1+,Test2+,Testl+,TestU+', 'Report True Value');
 
   fFlagsP.Zero;
   fFlagsP.Report(fLog);
-  CheckLog('Flags Test1-,Test2-', 'Report Zeroed Value');
+  CheckLog('Flags Test1-,Test2-,Testl-,TestU-', 'Report Zeroed Value');
 end;
 
 procedure TestTD2XFlagsParam.TestReset;
@@ -1689,13 +1701,15 @@ end;
 
 procedure TestTD2XFlagsParam.TestToString;
 begin
-  CheckEqualsString('F+2-1', fFlagsP.ToString, 'Report Default Value');
+  CheckEqualsString('F+2-1UL', fFlagsP.ToString, 'Report Default Value');
 
   fFlagsP.ByCode['1'].Flag := True;
-  CheckEqualsString('F+12', fFlagsP.ToString, 'Report True Value');
+  fFlagsP.ByCode['U'].Flag := True;
+  fFlagsP.ByCode['l'].Flag := True;
+  CheckEqualsString('F+12UL', fFlagsP.ToString, 'Report True Value');
 
   fFlagsP.Zero;
-  CheckEqualsString('F-12', fFlagsP.ToString, 'Report Zeroed Value');
+  CheckEqualsString('F-12UL', fFlagsP.ToString, 'Report Zeroed Value');
 end;
 
 procedure TestTD2XFlagsParam.TestZero;

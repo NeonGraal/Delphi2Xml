@@ -1,0 +1,16 @@
+Improvements
+------------
+
+- Direct Xslt Transforms of the xmlfiles (-T?)
+  - Need to specify transform file and output directory and/or extension
+  - Default directory to be base file of transform file and default extension to be from output type of transform
+    - xml, html, txt, ...?
+  - also possibly with SAX events generation rather than direct XML tree
+- Extend XML and Defines file generation to allow specification of generated extension as well as base directory
+  - probably "dir,extn" with default extn and dir and comma only required when setting extn
+    eg: if defaults are "Define,def" then "Def" -> "Def,def" and ",df" -> "Define,df"
+
+
+Nice to have (possibly)
+-----------------------
+- optionally case sensitive flag codes

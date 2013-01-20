@@ -671,7 +671,7 @@ var
 begin
   Result := -1;
   for i := 0 to High(fFlags) do
-    if pCode = fFlags[i].FlagCode then
+    if UpCase(pCode) = fFlags[i].FlagCode then
       Result := i;
 end;
 

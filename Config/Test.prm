@@ -1,7 +1,5 @@
 -d+CPU32,interface,implementation
 -h+standalone_propertyunits
--t
--r
--f-
+-f+tr-f
 -b:..\V6\3.6\Main\V6
 Source\V6.BL.EVAProp.DesignGlazingunitFill.inc

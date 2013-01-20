@@ -1,6 +1,4 @@
 -d+CPU32,Interface,Implementation,Dummy
 -h+Standalone_PropertyUnits
 -f+tr-f
-*.dp?,*.inc,*.pas
--b:..\V6\3.6\Main
-*.dp?,*.inc,*.pas
+-@

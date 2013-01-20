@@ -121,7 +121,7 @@ uses
 function FlagDef(pCode: Char; pLabel, pDescr: string; pDefault: Boolean = False)
   : TD2XFlagDefine;
 begin
-  Result.FlagCode := pCode;
+  Result.FlagCode := UpCase(pCode);
   Result.FlagLabel := pLabel;
   Result.FlagDescr := pDescr;
   Result.FlagDefault := pDefault;
