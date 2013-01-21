@@ -8,6 +8,7 @@ uses
   System.Classes,
   Test.Global,
   Test.IO,
+  Test.Params,
   TestFramework;
 
 type
@@ -33,8 +34,7 @@ const
   PACKAGE_PROCESSING = 'Processing Testing.Test.APackage.dpk ... done';
   BOTH_PROCESSING = 'Processing ... ' + UNIT_PROCESSING + ' ' + PROGRAM_PROCESSING + ' ' +
     PACKAGE_PROCESSING + ' Processed';
-  EXPECTED_SHOW_OPTIONS = 'Usage: %s [ Option | @Params | mFilename | Wildcard ] ... ' +
-    'Options: Default Description ? Show valid options ! Reset all options to defaults ' +
+  EXPECTED_SHOW_OPTIONS = DESCRIPTION_PREFIX + ' ? Show valid options ! Reset all options to defaults ' +
     '@<file> Report/Output Current options F<codes> | :<labels> Flags ' +
     'V Verbose - Log all Parser methods called T Timestamp - Timestamp global output files ' +
     'R Recurse - Recurse into subdirectories N LogNotSupp - Log Not Supported messages ' +
@@ -53,19 +53,20 @@ const
     'CD[+-]:<f/e> :.defs Report Defines Used into <f/e> ' +
     'S[+-]:<f/e> -(.skip) Load Skipped Methods from <f/e> ' +
     'D[+-!:]<def> Add(+), Remove(-), Clear(!) or Load(:) Defines ' +
-    'H[+-!:]<def> Add(+), Remove(-), Clear(!) or Load(:) Held Defines ' +
-    'Definitions: <codes> Flag codes, optionally interspersed with "+" or "-"' +
-    ' <labels> Comma list of Flag Labels, each optionally prefixed or suffixed with "+" or "-"'
-    + ' <f/e> If value begins with "." is appended to global name to give file name' +
-    ' <d/e> [<dir>][,<extn>] <dir> has trailing delimiter stripped and <extn> has leading dot stripped';
-  BASE_REPORT_OPTIONS = 'Current option settings: ' +
-    'Flags FinalToken+,LogErrors+,LogNotSupp-,Recurse-,Timestamp-,Verbose- ' +
+    'H[+-!:]<def> Add(+), Remove(-), Clear(!) or Load(:) Held Defines' + DESCRIPTION_SUFFIX;
+  BASE_REPORT_OPTIONS = REPORT_HEADING +
+    ' Flags FinalToken+,LogErrors+,LogNotSupp-,Recurse-,Timestamp-,Verbose- ' +
   //    'Recurse - Timestamp - Global name Delphi2XmlTests Config dir :Config\ ' +
   //    'Log dir :Log\ Base dir -(.\) Parse mode Full Results per File Show elapsed Quiet ' +
     'Parse mode Full Results per File Show elapsed Quiet ' +
     'Generate XML :Xml,xml Write Defines -(Defines,def) Defines Used :.used ' +
     'Count Children :.chld Count Defines :.defs Skipped Methods -(.skip) ';
   DEFAULT_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Defines Default Held Defines Default';
+{$IFDEF WIN32}
+  EXPECTED_DEFINES = 'CONDITIONALEXPRESSIONS,CPU386,MSWINDOWS,UNICODE,VER230,WIN32';
+{$ELSE}
+  EXPECTED_DEFINES = 'CONDITIONALEXPRESSIONS,MSWINDOWS,UNICODE,VER230';
+{$ENDIF}
 
 implementation
 
@@ -346,7 +347,7 @@ const
   FULLDIR_PROCESSING = DIRECTORY_PROCESSING + ' ' + RECURSE_PROCESSING;
   END_PROCESSING = ' Processing finished!';
   ALL_PROCESSING = BOTH_PROCESSING + ' ' + FULLDIR_PROCESSING;
-  ALTERED_REPORT_OPTIONS = 'Current option settings: Flags ' +
+  ALTERED_REPORT_OPTIONS = REPORT_HEADING + ' Flags ' +
     'FinalToken+,LogErrors+,LogNotSupp+,Recurse+,Timestamp-,Verbose+ ' +
   //    'Recurse + Timestamp - Global name :Test Config dir :Test\ Log dir :Test\ ' +
   //    'Base dir :Test\ Parse mode Full Results per File Show elapsed Quiet ' +
@@ -354,7 +355,7 @@ const
     'Generate XML :Test,xml Write Defines :Test,def Defines Used :.Test ' +
     'Count Children :.Test Count Defines :.Test Skipped Methods :Test.skip ' +
     'Defines TANGO, UNIFORM, VICTOR Held Defines TANGO, UNIFORM, VICTOR';
-  ZERO_REPORT_OPTIONS = 'Current option settings: Flags ' +
+  ZERO_REPORT_OPTIONS = REPORT_HEADING + ' Flags ' +
     'FinalToken-,LogErrors-,LogNotSupp-,Recurse-,Timestamp-,Verbose- ' +
   //    'Recurse - Timestamp - Global name Config dir - Log dir - Base dir - ' +
   //    'Parse mode Full Results per File Show elapsed None Generate XML - ' +
@@ -849,14 +850,8 @@ begin
 end;
 
 procedure TestTD2XOptions.TestParserDefines;
-const
-{$IFDEF WIN32}
-  EXPECTED = 'CONDITIONALEXPRESSIONS CPU386 MSWINDOWS UNICODE VER230 WIN32';
-{$ELSE}
-  EXPECTED = 'CONDITIONALEXPRESSIONS MSWINDOWS UNICODE VER230';
-{$ENDIF}
 begin
-  CheckList(EXPECTED, 'Defines', fOpts.ParserDefines);
+  CheckList(ReplaceStr(EXPECTED_DEFINES, ',', ' '), 'Defines', fOpts.ParserDefines);
 end;
 
 procedure TestTD2XOptions.TestProcessDirectory;
@@ -1083,7 +1078,7 @@ begin
   Check(fOpts.ProcessParam('Testing.Test*', 'Count Children'), 'Process Units');
   fOpts.EndProcessing;
   SetLength(lP, 3);
-  SA(lP[0], [1, 3, 4, 5, 6, 9, 11, 13, 15, 31, 33, 35, 37, 48, 54, 65, 75, 98, 99, 100]);
+  SA(lP[0], [1, 3, 4, 6, 9, 10, 12, 14, 15, 30, 31, 33, 34, 36, 46, 53, 64, 75, 98, 99, 100]);
   SA(lP[1], [7, 15, 17, 21, 22, 30, 31, 37, 45, 46, 51, 52, 57, 60, 87, 88, 94, 98, 100]);
   SA(lP[2], [7, 16, 17, 21, 22, 31, 32, 42, 51, 52, 56, 57, 63, 66, 93, 94, 98, 100]);
   SetLength(lC, 1);

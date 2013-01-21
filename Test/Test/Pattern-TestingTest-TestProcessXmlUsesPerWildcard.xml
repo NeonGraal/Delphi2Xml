@@ -5,8 +5,8 @@
       <MainUnitName group="Testing.Test">Testing.Test.AUnit</MainUnitName>
       <InterfaceSection>
         <UsedUnitName>System.Classes</UsedUnitName>
-        <IncludeFile filename="TEST.INC" msgAt="70,0" />
-        <D2X_notSuppMsg msgAt="90,0">Currently not supported {$D+}</D2X_notSuppMsg>
+        <IncludeFile filename="TEST.INC" msgAt="71,0" />
+        <D2X_notSuppMsg msgAt="91,0">Currently not supported {$D+}</D2X_notSuppMsg>
       </InterfaceSection>
       <ImplementationSection lastToken=";{$ELSE}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}">
         <UsedUnitName>System.SysUtils</UsedUnitName>

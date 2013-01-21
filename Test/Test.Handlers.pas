@@ -35,6 +35,7 @@ uses
   System.Generics.Collections,
   System.StrUtils,
   System.SysUtils,
+  Test.Options,
   TestFramework;
 
 type
@@ -200,13 +201,6 @@ type
 
     procedure TestProcessing;
   end;
-
-const
-{$IFDEF WIN32}
-  EXPECTED_DEFINES = 'CONDITIONALEXPRESSIONS CPU386 MSWINDOWS UNICODE VER230 WIN32';
-{$ELSE}
-  EXPECTED_DEFINES = 'CONDITIONALEXPRESSIONS MSWINDOWS UNICODE VER230';
-{$ENDIF}
 
 function NilReader: TStreamReader;
 begin
@@ -679,7 +673,7 @@ begin
   fHndlr.InitParser(fParser);
 
   fHndlr.EndResults(FileWriterRef(fDS));
-  CheckStream('**** ' + EXPECTED_DEFINES, 'End Results');
+  CheckStream('**** ' + ReplaceStr(EXPECTED_DEFINES, ',', ' '), 'End Results');
 end;
 
 procedure TestTD2XWriteDefinesHandler.TestInit;
@@ -793,7 +787,7 @@ begin
   fHndlr.InitParser(fParser);
 
   fHndlr.BeginFile('', nil);
-  CheckList(EXPECTED_DEFINES, 'Begin File', fParser.StartDefines);
+  CheckList(ReplaceStr(EXPECTED_DEFINES, ',', ' '), 'Begin File', fParser.StartDefines);
 
   fDefs.CommaText := '';
   fHndlr.BeginFile('', nil);

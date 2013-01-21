@@ -2,6 +2,18 @@ unit Test.Params;
 
 interface
 
+const
+  REPORT_HEADING = 'Current option settings:';
+  DESCRIPTION_PREFIX =
+    'Usage: Delphi2XmlTests [ Option | @Params | mFilename | Wildcard ] ... ' +
+    'Options: Default Description';
+  DESCRIPTION_SUFFIX =
+    ' Definitions: <codes> Flag codes, optionally interspersed with "+" or "-"' +
+    ' <labels> Comma list of Flag Labels, each optionally prefixed or suffixed with "+"' +
+    ' or "-" <f/e> If value begins with "." is appended to global name to give file name' +
+    ' <d/e> [<dir>][,<extn>] <dir> has trailing delimiter stripped and <extn> has leading' +
+    ' dot stripped Either of <dir> and/or <extn> can be "!" to specify the default value';
+
 implementation
 
 uses
@@ -801,9 +813,6 @@ end;
 
 { TestTD2XParams }
 
-const
-  REPORT_HEADING = 'Current option settings:';
-
 procedure TestTD2XParams.SetUp;
 begin
   inherited;
@@ -819,14 +828,6 @@ begin
 end;
 
 procedure TestTD2XParams.TestDescribeAll;
-const
-  DESCRIPTION_PREFIX = 'Usage: Delphi2XmlTests ' +
-    '[ Option | @Params | mFilename | Wildcard ] ... Options: Default Description';
-  DESCRIPTION_SUFFIX = ' Definitions:' +
-    ' <codes> Flag codes, optionally interspersed with "+" or "-"' +
-    ' <labels> Comma list of Flag Labels, each optionally prefixed or suffixed with "+" or "-"'
-    + ' <f/e> If value begins with "." is appended to global name to give file name' +
-    ' <d/e> [<dir>][,<extn>] <dir> has trailing delimiter stripped and <extn> has leading dot stripped';
 begin
   fPs.DescribeAll(fLog);
   CheckLog(DESCRIPTION_PREFIX + DESCRIPTION_SUFFIX, 'Describe No Params');

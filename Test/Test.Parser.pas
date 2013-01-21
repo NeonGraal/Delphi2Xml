@@ -29,6 +29,7 @@ uses
   CastaliaPasLex,
   CastaliaPasLexTypes,
   CastaliaSimplePasPar,
+  Test.Options,
   System.Classes;
 
 type
@@ -109,12 +110,6 @@ end;
 procedure TestTD2XDefinesParser.TestGetLexerDefines;
 var
   pDefs: TStringList;
-const
-{$IFDEF WIN32}
-  EXPECTED_DEFINES = 'CONDITIONALEXPRESSIONS,CPU386,MSWINDOWS,UNICODE,VER230,WIN32';
-{$ELSE}
-  EXPECTED_DEFINES = 'CONDITIONALEXPRESSIONS,MSWINDOWS,UNICODE,VER230';
-{$ENDIF}
 begin
   pDefs := TStringList.Create;
   pDefs.Sorted := True;

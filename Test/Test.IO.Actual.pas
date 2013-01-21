@@ -11,6 +11,7 @@ uses
   System.Classes,
   System.SysUtils,
   Test.Global,
+  Test.IO,
   TestFramework;
 
 type
@@ -70,14 +71,8 @@ begin
 end;
 
 procedure TestTD2XFileStream.TestReadFrom;
-const
-  EXPECTED_FILE = 'unit Testing.Test.AUnit; interface uses System.Classes; {$DEFINE TEST} ' +
-    '{$INCLUDE Test.inc} {$D+} implementation uses System.SysUtils; {$IFDEF TEST} ' +
-    '{$DEFINE TEST1} {$ELSE} {$DEFINE TEST2} {$ENDIF} {$IFNDEF TEST} {$DEFINE TEST3} ' +
-    '{$ENDIF} {$IFOPT D+} {$DEFINE TEST6} {$ENDIF} {$IF Defined(TEST)} {$DEFINE TEST4} ' +
-    '{$ELSEIF Defined(TEST1)} {$DEFINE TEST5} {$ENDIF} end.';
 begin
-  CheckReader(EXPECTED_FILE, 'Read From', fFile.ReadFrom);
+  CheckReader(TESTING_UNIT, 'Read From', fFile.ReadFrom);
 end;
 
 procedure TestTD2XFileStream.TestWriteTo;

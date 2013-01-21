@@ -92,11 +92,16 @@ begin
   SplitDirExtn(pDflt, lDDir, lDExtn);
   SplitDirExtn(pStr, pVal, lExtn);
 
-  if lExtn > '' then
-    pVal := pVal + ',' + lExtn
+  if pVal = '!' then
+    pVal := lDDir;
+  if lExtn = '!' then
+    pVal := pVal + ',' + lDExtn
   else
-    if lDExtn > '' then
-      pVal := pVal + ',' + lDExtn;
+    if lExtn > '' then
+      pVal := pVal + ',' + lExtn
+    else
+      if lDExtn > '' then
+        pVal := pVal + ',' + lDExtn;
 end;
 
 function ConvertExtn(pStr, pDflt: string; out pVal: string): Boolean;

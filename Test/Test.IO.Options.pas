@@ -493,6 +493,9 @@ begin
   ConvertDirExtn('', 'Default,def', lResult);
   CheckEqualsString(',def', lResult, 'Default only, No change');
 
+  ConvertDirExtn('!', 'Default,def', lResult);
+  CheckEqualsString('Default,def', lResult, 'Default only, Default Dir');
+
   ConvertDirExtn('Test', '', lResult);
   CheckEqualsString('Test', lResult, 'Dir only');
 
@@ -510,6 +513,12 @@ begin
 
   ConvertDirExtn(',tst', 'Default,def', lResult);
   CheckEqualsString(',tst', lResult, 'Both, Dir only');
+
+  ConvertDirExtn('!,tst', 'Default,def', lResult);
+  CheckEqualsString('Default,tst', lResult, 'Both, Dir Default only');
+
+  ConvertDirExtn('!,!', 'Default,def', lResult);
+  CheckEqualsString('Default,def', lResult, 'Both, Both Default');
 
   ConvertDirExtn('Test,tst', 'Default,def', lResult);
   CheckEqualsString('Test,tst', lResult, 'Both, Both');

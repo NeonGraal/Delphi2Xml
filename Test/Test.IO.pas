@@ -108,6 +108,18 @@ type
 
   end;
 
+const
+  TESTING_UNIT = 'unit Testing.Test.AUnit; interface uses System.Classes; ' +
+    '{$DEFINE TEST} {$INCLUDE Test.inc} {$D+} implementation uses System.SysUtils; ' +
+    '{$IFDEF TEST} {$DEFINE TEST1} {$ELSE} {$DEFINE TEST2} {$ENDIF} ' +
+    '{$IFNDEF TEST} {$DEFINE TEST3} {$ENDIF} {$IFOPT D+} {$DEFINE TEST6} {$ENDIF} ' +
+    '{$IF Defined(TEST)} {$DEFINE TEST4} {$ELSEIF Defined(TEST1)} {$DEFINE TEST5} {$ENDIF} ' +
+    'end.';
+  TESTING_PROGRAM = 'program Testing.Test.AProgram; ' +
+    'uses Testing.Test.AUnit in ''Testing.Test.AUnit.pas''; begin end.';
+  TESTING_PACKAGE = 'package Testing.Test.APackage; ' +
+    'contains Testing.Test.AUnit in ''Testing.Test.AUnit.pas''; end.';
+
 implementation
 
 uses
@@ -536,17 +548,6 @@ begin
 end;
 
 procedure TTestFactory.InitFiles;
-const
-  TESTING_UNIT = 'unit Testing.Test.AUnit; interface uses System.Classes;' +
-    '{$DEFINE TEST} {$INCLUDE Test.inc} {$D+}' + 'implementation uses System.SysUtils;' +
-    '{$IFDEF TEST}{$DEFINE TEST1}{$ELSE}{$DEFINE TEST2}{$ENDIF}' +
-    '{$IFNDEF TEST}{$DEFINE TEST3}{$ENDIF}' + '{$IFOPT D+}{$DEFINE TEST6}{$ENDIF}' +
-    '{$IF Defined(TEST)}{$DEFINE TEST4}{$ELSEIF Defined(TEST1)}{$DEFINE TEST5}{$ENDIF}' +
-    'end.';
-  TESTING_PROGRAM = 'program Testing.Test.AProgram; ' +
-    'uses Testing.Test.AUnit in ''Testing.Test.AUnit.pas''; begin end.';
-  TESTING_PACKAGE = 'package Testing.Test.APackage; ' +
-    'contains Testing.Test.AUnit in ''Testing.Test.AUnit.pas''; end.';
 begin
   fConfigFiles.Add('Test.def', 'Uniform'#13#10'Victor'#13#10'Tango');
   fConfigFiles.Add('Test.prm', '-@'#13#10'-@Test.out');

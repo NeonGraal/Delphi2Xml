@@ -239,6 +239,8 @@ begin
     );
   pL.Log('    <d/e> [<dir>][,<extn>] <dir> has trailing delimiter stripped and <extn> has leading dot stripped', []
     );
+  pL.Log('            Either of <dir> and/or <extn> can be "!" to specify the default value', []
+    );
 end;
 
 function TD2XParams.ForCode(pCode: string): TD2XParam;
