@@ -53,7 +53,10 @@ type
 
   TestTD2XOptionGeneral = class(TTestCase)
   published
+    procedure TestSplitDirExtn;
+
     procedure TestConvertDir;
+    procedure TestConvertDirExtn;
     procedure TestConvertExtn;
     procedure TestConvertFile;
   end;
@@ -471,10 +474,45 @@ begin
   CheckEqualsString('', lResult, 'Default only, No change');
 
   ConvertDir('Test', '', lResult);
-  CheckEqualsString('Test\', lResult, 'Dir only, Path Char added');
+  CheckEqualsString('Test', lResult, 'Dir only');
+
+  ConvertDir('Test\', '', lResult);
+  CheckEqualsString('Test', lResult, 'Dir only, Path Char removed');
 
   ConvertDir('Test', 'Default', lResult);
-  CheckEqualsString('Test\', lResult, 'Both, Path Char added');
+  CheckEqualsString('Test', lResult, 'Both');
+end;
+
+procedure TestTD2XOptionGeneral.TestConvertDirExtn;
+var
+  lResult: string;
+begin
+  ConvertDirExtn('', '', lResult);
+  CheckEqualsString('', lResult, 'Empty All, No change');
+
+  ConvertDirExtn('', 'Default,def', lResult);
+  CheckEqualsString(',def', lResult, 'Default only, No change');
+
+  ConvertDirExtn('Test', '', lResult);
+  CheckEqualsString('Test', lResult, 'Dir only');
+
+  ConvertDirExtn('Test\', '', lResult);
+  CheckEqualsString('Test', lResult, 'Dir only, Path Char removed');
+
+  ConvertDirExtn(',tst', '', lResult);
+  CheckEqualsString(',tst', lResult, 'Extn only');
+
+  ConvertDirExtn(',.tst', '', lResult);
+  CheckEqualsString(',tst', lResult, 'Extn only, Dot Char removed');
+
+  ConvertDirExtn('Test', 'Default,def', lResult);
+  CheckEqualsString('Test,def', lResult, 'Both, Dir only');
+
+  ConvertDirExtn(',tst', 'Default,def', lResult);
+  CheckEqualsString(',tst', lResult, 'Both, Dir only');
+
+  ConvertDirExtn('Test,tst', 'Default,def', lResult);
+  CheckEqualsString('Test,tst', lResult, 'Both, Both');
 end;
 
 procedure TestTD2XOptionGeneral.TestConvertExtn;
@@ -515,6 +553,43 @@ begin
 
   ConvertFile('Test.Test', '.Def', lResult);
   CheckEqualsString('Test.Test', lResult, 'File, No Change');
+end;
+
+procedure TestTD2XOptionGeneral.TestSplitDirExtn;
+var
+  lDir, lExtn: string;
+begin
+  SplitDirExtn('', lDir, lExtn);
+  CheckEqualsString('', lDir, 'Blank string dir');
+  CheckEqualsString('', lExtn, 'Blank string extn');
+
+  SplitDirExtn('Dir', lDir, lExtn);
+  CheckEqualsString('Dir', lDir, 'Dir string dir');
+  CheckEqualsString('', lExtn, 'Dir string extn');
+
+  SplitDirExtn('Dir\', lDir, lExtn);
+  CheckEqualsString('Dir', lDir, 'Dir\ string dir');
+  CheckEqualsString('', lExtn, 'Dir\ string extn');
+
+  SplitDirExtn('\', lDir, lExtn);
+  CheckEqualsString('', lDir, '\ string dir');
+  CheckEqualsString('', lExtn, '\ string extn');
+
+  SplitDirExtn(',ext', lDir, lExtn);
+  CheckEqualsString('', lDir, ',ext string dir');
+  CheckEqualsString('ext', lExtn, ',ext string extn');
+
+  SplitDirExtn(',.ext', lDir, lExtn);
+  CheckEqualsString('', lDir, ',.ext string dir');
+  CheckEqualsString('ext', lExtn, ',.ext string extn');
+
+  SplitDirExtn(',.', lDir, lExtn);
+  CheckEqualsString('', lDir, ',. string dir');
+  CheckEqualsString('', lExtn, ',. string extn');
+
+  SplitDirExtn('Dir,ext', lDir, lExtn);
+  CheckEqualsString('Dir', lDir, 'Dir,ext string dir');
+  CheckEqualsString('ext', lExtn, 'Dir,ext string extn');
 end;
 
 initialization

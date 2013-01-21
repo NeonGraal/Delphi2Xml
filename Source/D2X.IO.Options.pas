@@ -45,7 +45,10 @@ type
     property GlobalName: string read GetGlobalName write SetGlobalName;
   end;
 
+procedure SplitDirExtn(pStr: string; out pDir, pExtn: string);
+
 function ConvertDir(pStr, pDflt: string; out pVal: string): Boolean;
+function ConvertDirExtn(pStr, pDflt: string; out pVal: string): Boolean;
 function ConvertExtn(pStr, pDflt: string; out pVal: string): Boolean;
 function ConvertFile(pStr, pDflt: string; out pVal: string): Boolean;
 
@@ -55,13 +58,45 @@ uses
   D2X.IO.Actual,
   System.StrUtils;
 
+procedure SplitDirExtn(pStr: string; out pDir, pExtn: string);
+var
+  lPos: Integer;
+begin
+  lPos := Pos(',', pStr);
+  pExtn := '';
+  if lPos > 0 then
+  begin
+    pDir := ExcludeTrailingPathDelimiter(Copy(pStr, 1, lPos - 1));
+    pExtn := Copy(pStr, lPos + 1, Length(pStr));
+    if StartsText('.', pExtn) then
+      pExtn := Copy(pExtn, 2, Length(pExtn));
+  end
+  else
+    pDir := ExcludeTrailingPathDelimiter(pStr);
+end;
+
 function ConvertDir(pStr, pDflt: string; out pVal: string): Boolean;
 begin
   Result := True;
   if pStr > '' then
-    pVal := IncludeTrailingPathDelimiter(pStr)
+    pVal := ExcludeTrailingPathDelimiter(pStr)
   else
     pVal := '';
+end;
+
+function ConvertDirExtn(pStr, pDflt: string; out pVal: string): Boolean;
+var
+  lExtn, lDDir, lDExtn: string;
+begin
+  Result := True;
+  SplitDirExtn(pDflt, lDDir, lDExtn);
+  SplitDirExtn(pStr, pVal, lExtn);
+
+  if lExtn > '' then
+    pVal := pVal + ',' + lExtn
+  else
+    if lDExtn > '' then
+      pVal := pVal + ',' + lDExtn;
 end;
 
 function ConvertExtn(pStr, pDflt: string; out pVal: string): Boolean;
@@ -114,8 +149,9 @@ end;
 
 function TD2XFileOptions.BaseFile(pFileOrDir: string): ID2XFile;
 begin
-  if fInputBase.FlagValue then
-    Result := TD2XFileStream.Create(fInputBase.Value + pFileOrDir)
+  if fInputBase.FlagValue and (fInputBase.Value > '') then
+    Result := TD2XFileStream.Create(IncludeTrailingPathDelimiter(fInputBase.Value) +
+        pFileOrDir)
   else
     Result := TD2XFileStream.Create(pFileOrDir);
 end;
@@ -130,8 +166,9 @@ function TD2XFileOptions.ConfigFileOrExtn(pFileOrExtn: string): ID2XFile;
   end;
 
 begin
-  if ID2XFlag(fConfigBase).Flag then
-    Result := TD2XFileStream.Create(fConfigBase.Value + GlobalFileOrExtn(pFileOrExtn))
+  if ID2XFlag(fConfigBase).Flag and (fConfigBase.Value > '') then
+    Result := TD2XFileStream.Create(IncludeTrailingPathDelimiter(fConfigBase.Value) +
+        GlobalFileOrExtn(pFileOrExtn))
   else
     Result := TD2XFileStream.Create(GlobalFileOrExtn(pFileOrExtn));
 end;
@@ -157,8 +194,9 @@ function TD2XFileOptions.LogFileOrExtn(pFileOrExtn: string): ID2XFile;
   end;
 
 begin
-  if ID2XFlag(fLogBase).Flag then
-    Result := TD2XFileStream.Create(fLogBase.Value + GlobalFileOrExtn(pFileOrExtn))
+  if ID2XFlag(fLogBase).Flag and (fLogBase.Value > '') then
+    Result := TD2XFileStream.Create(IncludeTrailingPathDelimiter(fLogBase.Value) +
+        GlobalFileOrExtn(pFileOrExtn))
   else
     Result := TD2XFileStream.Create(GlobalFileOrExtn(pFileOrExtn));
 end;

@@ -81,7 +81,7 @@ type
 
     function GetRecurse: Boolean;
 
-    function MakeNamedRef(pVal: TD2XSingleParam<string>; pSuffix: string): TD2XNamedStreamRef;
+    function MakeNamedRef(pVal: TD2XSingleParam<string>): TD2XNamedStreamRef;
     function MakeFileRef(pVal: TD2XSingleParam<string>; pSuffix: string = ''): TD2XFileRef;
 
   protected
@@ -241,12 +241,18 @@ begin
     end;
 end;
 
-function TD2XOptions.MakeNamedRef(pVal: TD2XSingleParam<string>;
-  pSuffix: string): TD2XNamedStreamRef;
+function TD2XOptions.MakeNamedRef(pVal: TD2XSingleParam<string>): TD2XNamedStreamRef;
 begin
   Result := function(pFilename: string): ID2XFile
+    var
+      lDir, lExtn: string;
     begin
-      Result := fIOFact.SimpleFile(pVal.Value + pFilename + pSuffix);
+      SplitDirExtn(pVal.Value, lDir, lExtn);
+      if lDir > '' then
+        lDir := IncludeTrailingPathDelimiter(lDir);
+      if (lExtn > '') and not StartsText('.', lExtn) then
+        lExtn := '.' + lExtn;
+      Result := fIOFact.SimpleFile(lDir + pFilename + lExtn);
     end;
 end;
 
@@ -724,9 +730,9 @@ begin
     function(pVal: string): Boolean
     begin
       if Assigned(lWriteXml) then
-        lWriteXml.Value := IncludeTrailingPathDelimiter(pVal);
+        lWriteXml.Convert(pVal);
       if Assigned(lWriteDefines) then
-        lWriteDefines.Value := IncludeTrailingPathDelimiter(pVal);
+        lWriteDefines.Convert(pVal);
       Result := True;
     end);
   fIOFact.SetTimestampFlag(fFlags.ByLabel['Timestamp']);
@@ -744,8 +750,8 @@ begin
     'Result per (F[ile], S[ubdir], D[ir], W[ildcard], P[aram], R[un])', rpFile,
     TD2X.CnvEnum<TD2XResultPer>, TD2X.ToLabel<TD2XResultPer>, nil);
   fElapsedMode := TD2XSingleParam<TD2XElapsedMode>.CreateParam('E', 'Show elapsed', '<mode>',
-    'Elapsed time display (N[one], T[otal], D[ir], F[ile], P[rocessing], [Q]uiet)',
-    emQuiet, TD2X.CnvEnum<TD2XElapsedMode>, TD2X.ToLabel<TD2XElapsedMode>, nil);
+    'Elapsed time display (N[one], T[otal], D[ir], F[ile], P[rocessing], [Q]uiet)', emQuiet,
+    TD2X.CnvEnum<TD2XElapsedMode>, TD2X.ToLabel<TD2XElapsedMode>, nil);
 
   fXmlHandler := TD2XXmlHandler.CreateXml(fFlags.ByLabel['FinalToken'],
     function: string
@@ -754,16 +760,16 @@ begin
     end);
   fDefinesUsedHandler := TD2XDefinesUsedHandler.Create;
 
-  lWriteXml := TD2XFlaggedStringParam.CreateFlagStr('X', 'Generate XML', '<dir>',
-    'Generate XML files into current or given <dir>', 'Xml\', True, ConvertDir, nil, nil);
-  lWriteDefines := TD2XFlaggedStringParam.CreateFlagStr('W', 'Write Defines', '<dir>',
-    'Generate Final Defines files into current or given <dir>', 'Defines\', False, ConvertDir,
-    nil, nil);
+  lWriteXml := TD2XFlaggedStringParam.CreateFlagStr('X', 'Generate XML', '<d/e>',
+    'Generate XML files into current or given <d/e>', 'Xml,xml', True, ConvertDirExtn, nil, nil);
+  lWriteDefines := TD2XFlaggedStringParam.CreateFlagStr('W', 'Write Defines', '<d/e>',
+    'Generate Final Defines files into current or given <d/e>', 'Defines,def', False,
+    ConvertDirExtn, nil, nil);
 
   fProcs.Add(TD2XHandlerProcessor.CreateHandler(lWriteXml, fXmlHandler, True)
-    .SetResultsOutput(MakeNamedRef(lWriteXml, '.xml')));
+    .SetResultsOutput(MakeNamedRef(lWriteXml)));
   fProcs.Add(TD2XHandlerProcessor.CreateClass(lWriteDefines, TD2XWriteDefinesHandler)
-    .SetResultsOutput(MakeNamedRef(lWriteDefines, '.def')));
+    .SetResultsOutput(MakeNamedRef(lWriteDefines)));
 
   InitFirstProcessors;
 

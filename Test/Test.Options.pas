@@ -46,8 +46,8 @@ const
     'M<mode> Full Parser type (F[ull], U[ses]) ' +
     'P<per> File Result per (F[ile], S[ubdir], D[ir], W[ildcard], P[aram], R[un]) ' +
     'E<mode> Quiet Elapsed time display (N[one], T[otal], D[ir], F[ile], P[rocessing], [Q]uiet) '
-    + 'X[+-]:<dir> :Xml\ Generate XML files into current or given <dir> ' +
-    'W[+-]:<dir> -(Defines\) Generate Final Defines files into current or given <dir> ' +
+    + 'X[+-]:<d/e> :Xml,xml Generate XML files into current or given <d/e> ' +
+    'W[+-]:<d/e> -(Defines,def) Generate Final Defines files into current or given <d/e> ' +
     'U[+-]:<f/e> :.used Report Defines Used into <f/e> ' +
     'CC[+-]:<f/e> :.chld Report Min/Max Children into <f/e> ' +
     'CD[+-]:<f/e> :.defs Report Defines Used into <f/e> ' +
@@ -56,13 +56,14 @@ const
     'H[+-!:]<def> Add(+), Remove(-), Clear(!) or Load(:) Held Defines ' +
     'Definitions: <codes> Flag codes, optionally interspersed with "+" or "-"' +
     ' <labels> Comma list of Flag Labels, each optionally prefixed or suffixed with "+" or "-"'
-    + ' <f/e> If value begins with "." is appended to global name to give file name';
+    + ' <f/e> If value begins with "." is appended to global name to give file name' +
+    ' <d/e> [<dir>][,<extn>] <dir> has trailing delimiter stripped and <extn> has leading dot stripped';
   BASE_REPORT_OPTIONS = 'Current option settings: ' +
     'Flags FinalToken+,LogErrors+,LogNotSupp-,Recurse-,Timestamp-,Verbose- ' +
   //    'Recurse - Timestamp - Global name Delphi2XmlTests Config dir :Config\ ' +
   //    'Log dir :Log\ Base dir -(.\) Parse mode Full Results per File Show elapsed Quiet ' +
     'Parse mode Full Results per File Show elapsed Quiet ' +
-    'Generate XML :Xml\ Write Defines -(Defines\) Defines Used :.used ' +
+    'Generate XML :Xml,xml Write Defines -(Defines,def) Defines Used :.used ' +
     'Count Children :.chld Count Defines :.defs Skipped Methods -(.skip) ';
   DEFAULT_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Defines Default Held Defines Default';
 
@@ -304,6 +305,8 @@ type
     procedure TestParseOptionWOff;
     procedure TestParseOptionWOn;
     procedure TestParseOptionWBlank;
+    procedure TestParseOptionWDir;
+    procedure TestParseOptionWExtn;
     procedure TestParseOptionWValue;
   end;
 
@@ -312,6 +315,8 @@ type
     procedure TestParseOptionXOff;
     procedure TestParseOptionXOn;
     procedure TestParseOptionXBlank;
+    procedure TestParseOptionXDir;
+    procedure TestParseOptionXExtn;
     procedure TestParseOptionXValue;
   end;
 
@@ -342,11 +347,11 @@ const
   END_PROCESSING = ' Processing finished!';
   ALL_PROCESSING = BOTH_PROCESSING + ' ' + FULLDIR_PROCESSING;
   ALTERED_REPORT_OPTIONS = 'Current option settings: Flags ' +
-    'FinalToken+,LogErrors+,LogNotSupp+,Recurse+,Timestamp+,Verbose+ ' +
+    'FinalToken+,LogErrors+,LogNotSupp+,Recurse+,Timestamp-,Verbose+ ' +
   //    'Recurse + Timestamp - Global name :Test Config dir :Test\ Log dir :Test\ ' +
   //    'Base dir :Test\ Parse mode Full Results per File Show elapsed Quiet ' +
     'Parse mode Full Results per File Show elapsed Quiet ' +
-    'Generate XML :Test\ Write Defines :Test\ Defines Used :.Test ' +
+    'Generate XML :Test,xml Write Defines :Test,def Defines Used :.Test ' +
     'Count Children :.Test Count Defines :.Test Skipped Methods :Test.skip ' +
     'Defines TANGO, UNIFORM, VICTOR Held Defines TANGO, UNIFORM, VICTOR';
   ZERO_REPORT_OPTIONS = 'Current option settings: Flags ' +
@@ -514,7 +519,7 @@ begin
       if not fOpts.ProcessOption(C + C1 + ':Test') then
         fOpts.ProcessOption(C + C1 + '+');
   end;
-  fOpts.ProcessOption('T-');
+  fOpts.ProcessOption('F-T');
   fB.Clear;
 end;
 
@@ -676,12 +681,12 @@ end;
 
 procedure TestTD2XOptionsParseAll.TestParseOptionW;
 begin
-  CheckSimple('W', 'Write Defines :Defines\');
+  CheckSimple('W', 'Write Defines :Defines,def');
 end;
 
 procedure TestTD2XOptionsParseAll.TestParseOptionX;
 begin
-  CheckSimple('X', 'Generate XML :Xml\');
+  CheckSimple('X', 'Generate XML :Xml,xml');
 end;
 
 { TOptionsTestCase }
@@ -1171,44 +1176,64 @@ end;
 
 procedure TestTD2XOptionsParseWriteXml.TestParseOptionXBlank;
 begin
-  CheckSimple('X:', 'Generate XML +');
+  CheckSimple('X:', 'Generate XML :,xml');
+end;
+
+procedure TestTD2XOptionsParseWriteXml.TestParseOptionXDir;
+begin
+  CheckSimple('X:Value', 'Generate XML :Value,xml');
+end;
+
+procedure TestTD2XOptionsParseWriteXml.TestParseOptionXExtn;
+begin
+  CheckSimple('X:,val', 'Generate XML :,val');
 end;
 
 procedure TestTD2XOptionsParseWriteXml.TestParseOptionXOff;
 begin
-  CheckSimple('X-', 'Generate XML -(Xml\)');
+  CheckSimple('X-', 'Generate XML -(Xml,xml)');
 end;
 
 procedure TestTD2XOptionsParseWriteXml.TestParseOptionXOn;
 begin
-  CheckSimple('X+', 'Generate XML :Xml\');
+  CheckSimple('X+', 'Generate XML :Xml,xml');
 end;
 
 procedure TestTD2XOptionsParseWriteXml.TestParseOptionXValue;
 begin
-  CheckSimple('X:Value', 'Generate XML :Value\');
+  CheckSimple('X:Value,val', 'Generate XML :Value,val');
 end;
 
 { TestTD2XOptionsParseWriteDefines }
 
 procedure TestTD2XOptionsParseWriteDefines.TestParseOptionWBlank;
 begin
-  CheckSimple('W:', 'Write Defines +');
+  CheckSimple('W:', 'Write Defines :,def');
+end;
+
+procedure TestTD2XOptionsParseWriteDefines.TestParseOptionWDir;
+begin
+  CheckSimple('W:Write', 'Write Defines :Write,def');
+end;
+
+procedure TestTD2XOptionsParseWriteDefines.TestParseOptionWExtn;
+begin
+  CheckSimple('W:,wrt', 'Write Defines :,wrt');
 end;
 
 procedure TestTD2XOptionsParseWriteDefines.TestParseOptionWOff;
 begin
-  CheckSimple('W-', 'Write Defines -(Defines\)');
+  CheckSimple('W-', 'Write Defines -(Defines,def)');
 end;
 
 procedure TestTD2XOptionsParseWriteDefines.TestParseOptionWOn;
 begin
-  CheckSimple('W+', 'Write Defines :Defines\');
+  CheckSimple('W+', 'Write Defines :Defines,def');
 end;
 
 procedure TestTD2XOptionsParseWriteDefines.TestParseOptionWValue;
 begin
-  CheckSimple('W:Write', 'Write Defines :Write\');
+  CheckSimple('W:Write,wrt', 'Write Defines :Write,wrt');
 end;
 
 { TestTD2XOptionsParseDefinesUsed }

@@ -26,6 +26,7 @@ type
 
     function IsCode(pStr: string): Boolean;
     function Parse(pStr: string): Boolean;
+    procedure Convert(pStr: string); virtual;
     procedure Describe(pL: ID2XLogger); virtual;
     procedure Report(pL: ID2XLogger; pStr: string = '');
     procedure Output(pSL: TStringList); virtual;
@@ -43,6 +44,7 @@ type
     function GetReportDetails(pStr: string = ''): string; virtual;
 
   public
+    property ParamCode: string read fCode;
     property ParamLabel: string read fLabel;
 
   end;
@@ -69,19 +71,20 @@ type
     constructor CreateParam(pCode, pLabel, pSample, pDescr: string; pDefault: T;
       pConverter: TspConverter; pFormatter: TspFormatter; pValidator: TspValidator); virtual;
 
+    procedure Convert(pStr: string); override;
     procedure Output(pSL: TStringList); override;
     function IsDefault: Boolean; override;
     procedure Reset; override;
     procedure Zero; override;
 
   protected
+    fDefault: T;
     fFormatter: TspFormatter;
 
     function GetFormatted(pDefault: Boolean): string; override;
     function GetReportDetails(pStr: string = ''): string; override;
 
   private
-    fDefault: T;
     fConverter: TspConverter;
     fValidator: TspValidator;
     fValue: T;
@@ -128,6 +131,11 @@ begin
 end;
 
 { TD2XParam }
+
+procedure TD2XParam.Convert(pStr: string);
+begin
+// Nothing
+end;
 
 constructor TD2XParam.Create(pCode, pLabel, pSample, pDescr: string;
   pParser: TD2XStringCheckRef);
@@ -229,6 +237,8 @@ begin
     []);
   pL.Log('    <f/e> If value begins with "." is appended to global name to give file name', []
     );
+  pL.Log('    <d/e> [<dir>][,<extn>] <dir> has trailing delimiter stripped and <extn> has leading dot stripped', []
+    );
 end;
 
 function TD2XParams.ForCode(pCode: string): TD2XParam;
@@ -295,6 +305,11 @@ begin
     Result := fValidator(pVal)
   else
     Result := True;
+end;
+
+procedure TD2XSingleParam<T>.Convert(pStr: string);
+begin
+  ConvertAndSet(pStr);
 end;
 
 function TD2XSingleParam<T>.ConvertAndSet(pStr: string): Boolean;

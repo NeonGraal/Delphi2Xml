@@ -825,7 +825,8 @@ const
   DESCRIPTION_SUFFIX = ' Definitions:' +
     ' <codes> Flag codes, optionally interspersed with "+" or "-"' +
     ' <labels> Comma list of Flag Labels, each optionally prefixed or suffixed with "+" or "-"'
-    + ' <f/e> If value begins with "." is appended to global name to give file name';
+    + ' <f/e> If value begins with "." is appended to global name to give file name' +
+    ' <d/e> [<dir>][,<extn>] <dir> has trailing delimiter stripped and <extn> has leading dot stripped';
 begin
   fPs.DescribeAll(fLog);
   CheckLog(DESCRIPTION_PREFIX + DESCRIPTION_SUFFIX, 'Describe No Params');
