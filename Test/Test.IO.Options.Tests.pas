@@ -1,4 +1,4 @@
-unit Test.IO.Options;
+unit Test.IO.Options.Tests;
 
 interface
 

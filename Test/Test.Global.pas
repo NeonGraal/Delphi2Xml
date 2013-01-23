@@ -44,7 +44,6 @@ type
 implementation
 
 uses
-  System.Rtti,
   System.StrUtils,
   Test.Utils;
 

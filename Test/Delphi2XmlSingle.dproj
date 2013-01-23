@@ -92,7 +92,7 @@
 			</DelphiCompile>
 			<DCCReference Include="..\FastMM4\FastMM4.pas"/>
 			<DCCReference Include="..\FastMM4\FastMM4Messages.pas"/>
-			<DCCReference Include="Test.Options.pas"/>
+			<DCCReference Include="Test.Params.Tests.pas"/>
 			<None Include="Profiling\Delphi2XmlSingle.aqt"/>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>

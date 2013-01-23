@@ -9,7 +9,7 @@ uses
   System.StrUtils,
   Winapi.Windows,
   FastMM4Messages in '..\FastMM4\FastMM4Messages.pas',
-  Test.Options in 'Test.Options.pas';
+  Test.Params.Tests in 'Test.Params.Tests.pas';
 
 {$R *.RES}
 

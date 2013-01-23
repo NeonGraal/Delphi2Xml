@@ -1,4 +1,4 @@
-unit Test.IO.Actual;
+unit Test.IO.Actual.Tests;
 
 interface
 
@@ -10,6 +10,7 @@ uses
   D2X.IO.Actual,
   System.Classes,
   System.SysUtils,
+  Test.Constants,
   Test.Global,
   Test.IO,
   TestFramework;

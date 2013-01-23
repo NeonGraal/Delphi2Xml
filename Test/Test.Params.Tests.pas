@@ -1,18 +1,6 @@
-unit Test.Params;
+unit Test.Params.Tests;
 
 interface
-
-const
-  REPORT_HEADING = 'Current option settings:';
-  DESCRIPTION_PREFIX =
-    'Usage: Delphi2XmlTests [ Option | @Params | mFilename | Wildcard ] ... ' +
-    'Options: Default Description';
-  DESCRIPTION_SUFFIX =
-    ' Definitions: <codes> Flag codes, optionally interspersed with "+" or "-"' +
-    ' <labels> Comma list of Flag Labels, each optionally prefixed or suffixed with "+"' +
-    ' or "-" <f/e> If value begins with "." is appended to global name to give file name' +
-    ' <d/e> [<dir>][,<extn>] <dir> has trailing delimiter stripped and <extn> has leading' +
-    ' dot stripped Either of <dir> and/or <extn> can be "!" to specify the default value';
 
 implementation
 
@@ -26,6 +14,7 @@ uses
   System.Rtti,
   System.StrUtils,
   System.SysUtils,
+  Test.Constants,
   Test.Global,
   Test.IO,
   Test.Param,
@@ -50,6 +39,7 @@ type
 
     procedure TestIsCode;
     procedure TestParse;
+    procedure TestConvert;
     procedure TestDescribe;
     procedure TestReport;
     procedure TestOutput;
@@ -101,6 +91,10 @@ type
     procedure TestObjectParam;
     procedure TestStringParam;
     procedure TestBooleanParam;
+
+    procedure TestParseModeParam;
+    procedure TestElapsedModeParam;
+    procedure TestResultPerParam;
 
     procedure TestStringDfltParam;
     procedure TestBooleanDfltParam;
@@ -329,8 +323,49 @@ begin
 
     CheckEquals(False, lBoolP.Value, 'Returned value');
     CheckEqualsString('T-', lBoolP.ToString, 'String representation');
+
+    lBoolP.Convert('+');
+    CheckEquals(False, lBoolP.Value, 'Returned value');
+    CheckEqualsString('T-', lBoolP.ToString, 'String representation');
   finally
     FreeAndNil(lBoolP);
+  end;
+end;
+
+procedure TestTD2XSingleParam.TestElapsedModeParam;
+var
+  lEnumP: TD2XSingleParam<TD2XElapsedMode>;
+begin
+  lEnumP := TD2XSingleParam<TD2XElapsedMode>.CreateParam('T', 'Test', '', '', emNone,
+      function(pStr: string; pDflt: TD2XElapsedMode; out pVal: TD2XElapsedMode): Boolean
+    begin
+      pVal := emNone;
+      Result := True;
+    end, TD2X.ToLabel<TD2XElapsedMode>, nil);
+
+  try
+    lEnumP.Describe(fLog);
+    CheckLog('T -', 'Describe Param');
+    lEnumP.Report(fLog);
+    CheckLog('Test -', 'Report Default Value');
+    Check(lEnumP.IsDefault, 'Check is Default');
+
+    CheckFalse(lEnumP.IsCode('A'), 'Check wrong code');
+    Check(lEnumP.IsCode('T'), 'Check correct code');
+
+    CheckFalse(lEnumP.Parse('A'), 'Parse wrong code');
+    Check(lEnumP.Parse('T'), 'Parse right code with No value');
+    Check(lEnumP.Parse('T0'), 'Parse right code with False value');
+    Check(lEnumP.Parse('T+'), 'Parse right code with True value');
+
+    Check(emNone = lEnumP.Value, 'Returned value');
+    CheckEqualsString('T-', lEnumP.ToString, 'String representation');
+
+    lEnumP.Convert('+');
+    Check(emNone = lEnumP.Value, 'Returned value');
+    CheckEqualsString('T-', lEnumP.ToString, 'String representation');
+  finally
+    FreeAndNil(lEnumP);
   end;
 end;
 
@@ -470,6 +505,80 @@ begin
   end;
 end;
 
+procedure TestTD2XSingleParam.TestParseModeParam;
+var
+  lEnumP: TD2XSingleParam<TD2XParseMode>;
+begin
+  lEnumP := TD2XSingleParam<TD2XParseMode>.CreateParam('T', 'Test', '', '', pmFull,
+      function(pStr: string; pDflt: TD2XParseMode; out pVal: TD2XParseMode): Boolean
+    begin
+      pVal := pmFull;
+      Result := True;
+    end, TD2X.ToLabel<TD2XParseMode>, nil);
+
+  try
+    lEnumP.Describe(fLog);
+    CheckLog('T -', 'Describe Param');
+    lEnumP.Report(fLog);
+    CheckLog('Test -', 'Report Default Value');
+    Check(lEnumP.IsDefault, 'Check is Default');
+
+    CheckFalse(lEnumP.IsCode('A'), 'Check wrong code');
+    Check(lEnumP.IsCode('T'), 'Check correct code');
+
+    CheckFalse(lEnumP.Parse('A'), 'Parse wrong code');
+    Check(lEnumP.Parse('T'), 'Parse right code with No value');
+    Check(lEnumP.Parse('T0'), 'Parse right code with False value');
+    Check(lEnumP.Parse('T+'), 'Parse right code with True value');
+
+    Check(pmFull = lEnumP.Value, 'Returned value');
+    CheckEqualsString('T-', lEnumP.ToString, 'String representation');
+
+    lEnumP.Convert('+');
+    Check(pmFull = lEnumP.Value, 'Returned value');
+    CheckEqualsString('T-', lEnumP.ToString, 'String representation');
+  finally
+    FreeAndNil(lEnumP);
+  end;
+end;
+
+procedure TestTD2XSingleParam.TestResultPerParam;
+var
+  lEnumP: TD2XSingleParam<TD2XParseMode>;
+begin
+  lEnumP := TD2XSingleParam<TD2XParseMode>.CreateParam('T', 'Test', '', '', pmFull,
+      function(pStr: string; pDflt: TD2XParseMode; out pVal: TD2XParseMode): Boolean
+    begin
+      pVal := pmFull;
+      Result := True;
+    end, TD2X.ToLabel<TD2XParseMode>, nil);
+
+  try
+    lEnumP.Describe(fLog);
+    CheckLog('T -', 'Describe Param');
+    lEnumP.Report(fLog);
+    CheckLog('Test -', 'Report Default Value');
+    Check(lEnumP.IsDefault, 'Check is Default');
+
+    CheckFalse(lEnumP.IsCode('A'), 'Check wrong code');
+    Check(lEnumP.IsCode('T'), 'Check correct code');
+
+    CheckFalse(lEnumP.Parse('A'), 'Parse wrong code');
+    Check(lEnumP.Parse('T'), 'Parse right code with No value');
+    Check(lEnumP.Parse('T0'), 'Parse right code with False value');
+    Check(lEnumP.Parse('T+'), 'Parse right code with True value');
+
+    Check(pmFull = lEnumP.Value, 'Returned value');
+    CheckEqualsString('T-', lEnumP.ToString, 'String representation');
+
+    lEnumP.Convert('+');
+    Check(pmFull = lEnumP.Value, 'Returned value');
+    CheckEqualsString('T-', lEnumP.ToString, 'String representation');
+  finally
+    FreeAndNil(lEnumP);
+  end;
+end;
+
 procedure TestTD2XSingleParam.TestStringDfltParam;
 var
   lStrP: TD2XSingleParam<string>;
@@ -521,6 +630,10 @@ begin
     Check(lStrP.Parse('T'), 'Parse right code with No value');
     Check(lStrP.Parse('TSimple'), 'Parse right code with value');
 
+    CheckEqualsString('', lStrP.Value, 'Returned value');
+    CheckEqualsString('T', lStrP.ToString, 'String representation');
+
+    lStrP.Convert('Simple');
     CheckEqualsString('', lStrP.Value, 'Returned value');
     CheckEqualsString('T', lStrP.ToString, 'String representation');
   finally
@@ -697,6 +810,14 @@ begin
   inherited;
 end;
 
+procedure TestTD2XParam.TestConvert;
+begin
+  fPrm := TD2XParam.Create('T', 'Test', '', '', TstParser);
+
+  fPrm.Convert('Test');
+  CheckEqualsString('T', fPrm.ToString, 'ToString');
+end;
+
 procedure TestTD2XParam.TestDescribe;
 begin
   fPrm := TD2XParam.Create('T', 'Test', '', '', TstParser);
@@ -830,17 +951,17 @@ end;
 procedure TestTD2XParams.TestDescribeAll;
 begin
   fPs.DescribeAll(fLog);
-  CheckLog(DESCRIPTION_PREFIX + DESCRIPTION_SUFFIX, 'Describe No Params');
+  CheckLog(UsageDescription + DESCRIPTION_SUFFIX, 'Describe No Params');
 
   fPs.Add(TD2XParam.Create('T', 'Test', '<tst>', 'Test param', TstParser));
   fPs.DescribeAll(fLog);
-  CheckLog(DESCRIPTION_PREFIX + ' T<tst> Test param' + DESCRIPTION_SUFFIX,
+  CheckLog(UsageDescription + ' T<tst> Test param' + DESCRIPTION_SUFFIX,
     'Describe One Param');
 
   fPs.Add(TD2XSingleParam<Boolean>.CreateParam('B', 'Boolean', '[+|-]', 'Boolean param', False,
     TD2X.CnvDflt<Boolean>, TstFormatter, nil));
   fPs.DescribeAll(fLog);
-  CheckLog(DESCRIPTION_PREFIX + ' T<tst> Test param B[+|-] - Boolean param' +
+  CheckLog(UsageDescription + ' T<tst> Test param B[+|-] - Boolean param' +
     DESCRIPTION_SUFFIX, 'Describe Two Params');
 end;
 

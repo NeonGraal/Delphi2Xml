@@ -1,4 +1,4 @@
-unit Test.RunParam;
+unit Test.RunParam.Tests;
 
 interface
 
@@ -8,6 +8,7 @@ uses
   D2X.RunParam,
   System.Classes,
   System.SysUtils,
+  Test.Constants,
   Test.Global,
   Test.IO,
   Test.Options,
@@ -82,7 +83,7 @@ end;
 procedure TestTD2XRunParam.TestDescribeAll;
 begin
   fOpts.DescribeAll;
-  CheckLog(EXPECTED_SHOW_OPTIONS, 'Describe All');
+  CheckLog(UsageDescription + EXPECTED_SHOW_OPTIONS, 'Describe All');
 end;
 
 procedure TestTD2XRunParam.TestEndProcessing;
@@ -94,13 +95,13 @@ end;
 procedure TestTD2XRunParam.TestProcessParam;
 begin
   Check(ParseOption('-?'), 'Return Value');
-  CheckLog(EXPECTED_SHOW_OPTIONS, 'Simple Process Param');
+  CheckLog(UsageDescription + EXPECTED_SHOW_OPTIONS, 'Simple Process Param');
 
   Check(ParseOption('"-?"'), 'Return Value');
-  CheckLog(EXPECTED_SHOW_OPTIONS, 'Quoted Process Param');
+  CheckLog(UsageDescription + EXPECTED_SHOW_OPTIONS, 'Quoted Process Param');
 
   Check(ParseOption('''-?'''), 'Return Value');
-  CheckLog(EXPECTED_SHOW_OPTIONS, 'Double Quoted Process Param');
+  CheckLog(UsageDescription + EXPECTED_SHOW_OPTIONS, 'Double Quoted Process Param');
 end;
 
 procedure TestTD2XRunParam.TestProcessParamInput;

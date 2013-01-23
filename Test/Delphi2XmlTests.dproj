@@ -161,21 +161,29 @@
 			<DCCReference Include="..\Source\D2X.Processors.pas"/>
 			<DCCReference Include="..\Source\D2X.Xml.pas"/>
 			<DCCReference Include="Test.Global.pas"/>
+			<DCCReference Include="Test.Handler.Tests.pas"/>
+			<DCCReference Include="Test.Handlers.Tests.pas"/>
+			<DCCReference Include="Test.IO.Actual.Tests.pas"/>
+			<DCCReference Include="Test.IO.Options.Tests.pas"/>
+			<DCCReference Include="Test.IO.Tests.pas"/>
+			<DCCReference Include="Test.Options.Tests.pas"/>
+			<DCCReference Include="Test.Param.pas"/>
+			<DCCReference Include="Test.Params.Tests.pas"/>
+			<DCCReference Include="Test.Parser.Tests.pas"/>
+			<DCCReference Include="Test.Processor.Tests.pas"/>
+			<DCCReference Include="Test.Processors.Tests.pas"/>
+			<DCCReference Include="Test.Utils.pas"/>
+			<DCCReference Include="Test.Xml.Tests.pas"/>
+			<DCCReference Include="..\Source\D2X.RunParam.pas"/>
+			<DCCReference Include="Test.RunParam.Tests.pas"/>
+			<DCCReference Include="Test.Constants.pas"/>
 			<DCCReference Include="Test.Handler.pas"/>
 			<DCCReference Include="Test.Handlers.pas"/>
-			<DCCReference Include="Test.IO.Actual.pas"/>
-			<DCCReference Include="Test.IO.Options.pas"/>
 			<DCCReference Include="Test.IO.pas"/>
 			<DCCReference Include="Test.Options.pas"/>
-			<DCCReference Include="Test.Param.pas"/>
-			<DCCReference Include="Test.Params.pas"/>
 			<DCCReference Include="Test.Parser.pas"/>
 			<DCCReference Include="Test.Processor.pas"/>
-			<DCCReference Include="Test.Processors.pas"/>
-			<DCCReference Include="Test.Utils.pas"/>
 			<DCCReference Include="Test.Xml.pas"/>
-			<DCCReference Include="..\Source\D2X.RunParam.pas"/>
-			<DCCReference Include="Test.RunParam.pas"/>
 			<None Include="Profiling\Delphi2XmlTest.aqt"/>
 			<None Include="Config\Test.def"/>
 			<None Include="Config\Test.prm"/>
@@ -238,9 +246,6 @@
 					</Source>
 				</Delphi.Personality>
 				<Deployment>
-					<DeployFile LocalName="Delphi2XmlTests" Configuration="Debug" Class="ProjectOutput">
-						<Platform Name="All Platforms"/>
-					</DeployFile>
 					<DeployFile LocalName="Delphi2XmlTests.rsm" Configuration="Debug" Class="DebugSymbols">
 						<Platform Name="Win64">
 							<RemoteName>Delphi2XmlTests.rsm</RemoteName>
@@ -248,6 +253,9 @@
 					</DeployFile>
 					<DeployFile LocalName="$(BDS)\Redist\osx32\libcgunwind.1.0.dylib" Class="DependencyModule">
 						<Platform Name="OSX32"/>
+					</DeployFile>
+					<DeployFile LocalName="Delphi2XmlTests" Configuration="Debug" Class="ProjectOutput">
+						<Platform Name="All Platforms"/>
 					</DeployFile>
 					<DeployFile LocalName="Delphi2XmlTests.exe" Configuration="Debug" Class="ProjectOutput">
 						<Platform Name="Win64"/>
