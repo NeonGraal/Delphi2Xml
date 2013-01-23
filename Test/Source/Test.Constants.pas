@@ -52,7 +52,6 @@ const
 {$ELSE}
   EXPECTED_DEFINES = 'CONDITIONALEXPRESSIONS,MSWINDOWS,UNICODE,VER230';
 {$ENDIF}
-
   TESTING_UNIT = 'unit Testing.Test.AUnit; interface uses System.Classes; ' +
     '{$DEFINE TEST} {$INCLUDE Test.inc} {$D+} implementation uses System.SysUtils; ' +
     '{$IFDEF TEST} {$DEFINE TEST1} {$ELSE} {$DEFINE TEST2} {$ENDIF} ' +
@@ -72,8 +71,7 @@ uses
   System.SysUtils;
 
 const
-  DESCRIPTION_PREFIX =
-    'Usage: %s [ Option | @Params | mFilename | Wildcard ] ... ' +
+  DESCRIPTION_PREFIX = 'Usage: %s [ Option | @Params | mFilename | Wildcard ] ... ' +
     'Options: Default Description';
 
 function UsageDescription: string;

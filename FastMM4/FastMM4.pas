@@ -1,56 +1,56 @@
 (*
 
-Fast Memory Manager 4.991
+ Fast Memory Manager 4.991
 
-Description:
+ Description:
  A fast replacement memory manager for Embarcadero Delphi Win32 applications
  that scales well under multi-threaded usage, is not prone to memory
  fragmentation, and supports shared memory without the use of external .DLL
  files.
 
-Homepage:
+ Homepage:
  http://fastmm.sourceforge.net
 
-Advantages:
+ Advantages:
  - Fast
  - Low overhead. FastMM is designed for an average of 5% and maximum of 10%
-   overhead per block.
+ overhead per block.
  - Supports up to 3GB of user mode address space under Windows 32-bit and 4GB
-   under Windows 64-bit. Add the "$SetPEFlags $20" option (in curly braces)
-   to your .dpr to enable this.
+ under Windows 64-bit. Add the "$SetPEFlags $20" option (in curly braces)
+ to your .dpr to enable this.
  - Highly aligned memory blocks. Can be configured for either 8-byte or 16-byte
-   alignment.
+ alignment.
  - Good scaling under multi-threaded applications
  - Intelligent reallocations. Avoids slow memory move operations through
-   not performing unneccesary downsizes and by having a minimum percentage
-   block size growth factor when an in-place block upsize is not possible.
+ not performing unneccesary downsizes and by having a minimum percentage
+ block size growth factor when an in-place block upsize is not possible.
  - Resistant to address space fragmentation
  - No external DLL required when sharing memory between the application and
-   external libraries (provided both use this memory manager)
+ external libraries (provided both use this memory manager)
  - Optionally reports memory leaks on program shutdown. (This check can be set
-   to be performed only if Delphi is currently running on the machine, so end
-   users won't be bothered by the error message.)
+ to be performed only if Delphi is currently running on the machine, so end
+ users won't be bothered by the error message.)
  - Supports Delphi 4 (or later), C++ Builder 4 (or later), Kylix 3.
 
-Usage:
+ Usage:
  Delphi:
-  Place this unit as the very first unit under the "uses" section in your
-  project's .dpr file. When sharing memory between an application and a DLL
-  (e.g. when passing a long string or dynamic array to a DLL function), both the
-  main application and the DLL must be compiled using this memory manager (with
-  the required conditional defines set). There are some conditional defines
-  (inside FastMM4Options.inc) that may be used to tweak the memory manager. To
-  enable support for a user mode address space greater than 2GB you will have to
-  use the EditBin* tool to set the LARGE_ADDRESS_AWARE flag in the EXE header.
-  This informs Windows x64 or Windows 32-bit (with the /3GB option set) that the
-  application supports an address space larger than 2GB (up to 4GB). In Delphi 6
-  and later you can also specify this flag through the compiler directive
-  {$SetPEFlags $20}
-  *The EditBin tool ships with the MS Visual C compiler.
+ Place this unit as the very first unit under the "uses" section in your
+ project's .dpr file. When sharing memory between an application and a DLL
+ (e.g. when passing a long string or dynamic array to a DLL function), both the
+ main application and the DLL must be compiled using this memory manager (with
+ the required conditional defines set). There are some conditional defines
+ (inside FastMM4Options.inc) that may be used to tweak the memory manager. To
+ enable support for a user mode address space greater than 2GB you will have to
+ use the EditBin* tool to set the LARGE_ADDRESS_AWARE flag in the EXE header.
+ This informs Windows x64 or Windows 32-bit (with the /3GB option set) that the
+ application supports an address space larger than 2GB (up to 4GB). In Delphi 6
+ and later you can also specify this flag through the compiler directive
+ {$SetPEFlags $20}
+ *The EditBin tool ships with the MS Visual C compiler.
  C++ Builder 6:
-  Refer to the instructions inside FastMM4BCB.cpp.
+ Refer to the instructions inside FastMM4BCB.cpp.
 
-License:
+ License:
  This work is copyright Professional Software Development / Pierre le Riche. It
  is released under a dual license, and you may choose to use it under either the
  Mozilla Public License 1.1 (MPL 1.1, available from
@@ -59,129 +59,129 @@ License:
  http://www.opensource.org/licenses/lgpl-license.php). If you find FastMM useful
  or you would like to support further development, a donation would be much
  appreciated. My banking details are:
-   Country: South Africa
-   Bank: ABSA Bank Ltd
-   Branch: Somerset West
-   Branch Code: 334-712
-   Account Name: PSD (Distribution)
-   Account No.: 4041827693
-   Swift Code: ABSAZAJJ
+ Country: South Africa
+ Bank: ABSA Bank Ltd
+ Branch: Somerset West
+ Branch Code: 334-712
+ Account Name: PSD (Distribution)
+ Account No.: 4041827693
+ Swift Code: ABSAZAJJ
  My PayPal account is:
-   bof@psd.co.za
+ bof@psd.co.za
 
-Contact Details:
+ Contact Details:
  My contact details are shown below if you would like to get in touch with me.
  If you use this memory manager I would like to hear from you: please e-mail me
  your comments - good and bad.
  Snailmail:
-   PO Box 2514
-   Somerset West
-   7129
-   South Africa
+ PO Box 2514
+ Somerset West
+ 7129
+ South Africa
  E-mail:
-   plr@psd.co.za
+ plr@psd.co.za
 
-Support:
+ Support:
  If you have trouble using FastMM, you are welcome to drop me an e-mail at the
  address above, or you may post your questions in the BASM newsgroup on the
  Embarcadero news server (which is where I hang out quite frequently).
 
-Disclaimer:
+ Disclaimer:
  FastMM has been tested extensively with both single and multithreaded
  applications on various hardware platforms, but unfortunately I am not in a
  position to make any guarantees. Use it at your own risk.
 
-Acknowledgements (for version 4):
+ Acknowledgements (for version 4):
  - Eric Grange for his RecyclerMM on which the earlier versions of FastMM were
-   based. RecyclerMM was what inspired me to try and write my own memory
-   manager back in early 2004.
+ based. RecyclerMM was what inspired me to try and write my own memory
+ manager back in early 2004.
  - Primoz Gabrijelcic for helping to track down various bugs.
  - Dennis Christensen for his tireless efforts with the Fastcode project:
-   helping to develop, optimize and debug the growing Fastcode library.
+ helping to develop, optimize and debug the growing Fastcode library.
  - JiYuan Xie for implementing the leak reporting code for C++ Builder.
  - Sebastian Zierer for implementing the OS X support.
  - Pierre Y. for his suggestions regarding the extension of the memory leak
-   checking options.
+ checking options.
  - Hanspeter Widmer for his suggestion to have an option to display install and
-   uninstall debug messages and moving options to a separate file, as well as
-   the new usage tracker.
+ uninstall debug messages and moving options to a separate file, as well as
+ the new usage tracker.
  - Anders Isaksson and Greg for finding and identifying the "DelphiIsRunning"
-   bug under Delphi 5.
+ bug under Delphi 5.
  - Francois Malan for various suggestions and bug reports.
  - Craig Peterson for helping me identify the cache associativity issues that
-   could arise due to medium blocks always being an exact multiple of 256 bytes.
-   Also for various other bug reports and enhancement suggestions.
+ could arise due to medium blocks always being an exact multiple of 256 bytes.
+ Also for various other bug reports and enhancement suggestions.
  - Jarek Karciarz, Vladimir Ulchenko (Vavan) and Bob Gonder for their help in
-   implementing the BCB support.
+ implementing the BCB support.
  - Ben Taylor for his suggestion to display the object class of all memory
-   leaks.
+ leaks.
  - Jean Marc Eber and Vincent Mahon (the Memcheck guys) for the call stack
-   trace code and also the method used to catch virtual method calls on freed
-   objects.
+ trace code and also the method used to catch virtual method calls on freed
+ objects.
  - Nahan Hyn for the suggestion to be able to enable or disable memory leak
-   reporting through a global variable (the "ManualLeakReportingControl"
-   option.)
+ reporting through a global variable (the "ManualLeakReportingControl"
+ option.)
  - Leonel Togniolli for various suggestions with regard to enhancing the bug
-   tracking features of FastMM and other helpful advice.
+ tracking features of FastMM and other helpful advice.
  - Joe Bain and Leonel Togniolli for the workaround to QC#10922 affecting
-   compilation under Delphi 2005.
+ compilation under Delphi 2005.
  - Robert Marquardt for the suggestion to make localisation of FastMM easier by
-   having all string constants together.
+ having all string constants together.
  - Simon Kissel and Fikret Hasovic for their help in implementing Kylix support.
  - Matthias Thoma, Petr Vones, Robert Rossmair and the rest of the JCL team for
-   their debug info library used in the debug info support DLL and also the
-   code used to check for a valid call site in the "raw" stack trace code.
+ their debug info library used in the debug info support DLL and also the
+ code used to check for a valid call site in the "raw" stack trace code.
  - Andreas Hausladen for the suggestion to use an external DLL to enable the
-   reporting of debug information.
+ reporting of debug information.
  - Alexander Tabakov for various good suggestions regarding the debugging
-   facilities of FastMM.
+ facilities of FastMM.
  - M. Skloff for some useful suggestions and bringing to my attention some
-   compiler warnings.
+ compiler warnings.
  - Martin Aignesberger for the code to use madExcept instead of the JCL library
-   inside the debug info support DLL.
+ inside the debug info support DLL.
  - Diederik and Dennis Passmore for the suggestion to be able to register
-   expected leaks.
+ expected leaks.
  - Dario Tiraboschi and Mark Gebauer for pointing out the problems that occur
-   when range checking and complete boolean evaluation is turned on.
+ when range checking and complete boolean evaluation is turned on.
  - Arthur Hoornweg for notifying me of the image base being incorrect for
-   borlndmm.dll.
+ borlndmm.dll.
  - Theo Carr-Brion and Hanspeter Widmer for finding the false alarm error
-   message "Block Header Has Been Corrupted" bug in FullDebugMode.
+ message "Block Header Has Been Corrupted" bug in FullDebugMode.
  - Danny Heijl for reporting the compiler error in "release" mode.
  - Omar Zelaya for reporting the BCB support regression bug.
  - Dan Miser for various good suggestions, e.g. not logging expected leaks to
-   file, enhancements the stack trace and messagebox functionality, etc.
+ file, enhancements the stack trace and messagebox functionality, etc.
  - Arjen de Ruijter for fixing the bug in GetMemoryLeakType that caused it
-   to not properly detect expected leaks registered by class when in
-   "FullDebugMode".
+ to not properly detect expected leaks registered by class when in
+ "FullDebugMode".
  - Aleksander Oven for reporting the installation problem when trying to use
-   FastMM in an application together with libraries that all use runtime
-   packages.
+ FastMM in an application together with libraries that all use runtime
+ packages.
  - Kristofer Skaug for reporting the bug that sometimes causes the leak report
-   to be shown, even when all the leaks have been registered as expected leaks.
-   Also for some useful enhancement suggestions.
+ to be shown, even when all the leaks have been registered as expected leaks.
+ Also for some useful enhancement suggestions.
  - Günther Schoch for the "RequireDebuggerPresenceForLeakReporting" option.
  - Jan Schlüter for the "ForceMMX" option.
  - Hallvard Vassbotn for various good enhancement suggestions.
  - Mark Edington for some good suggestions and bug reports.
  - Paul Ishenin for reporting the compilation error when the NoMessageBoxes
-   option is set and also the missing call stack entries issue when "raw" stack
-   traces are enabled, as well as for the Russian translation.
+ option is set and also the missing call stack entries issue when "raw" stack
+ traces are enabled, as well as for the Russian translation.
  - Cristian Nicola for reporting the compilation bug when the
-   CatchUseOfFreedInterfaces option was enabled (4.40).
+ CatchUseOfFreedInterfaces option was enabled (4.40).
  - Mathias Rauen (madshi) for improving the support for madExcept in the debug
-   info support DLL.
+ info support DLL.
  - Roddy Pratt for the BCB5 support code.
  - Rene Mihula for the Czech translation and the suggestion to have dynamic
-   loading of the FullDebugMode DLL as an option.
+ loading of the FullDebugMode DLL as an option.
  - Artur Redzko for the Polish translation.
  - Bart van der Werf for helping me solve the DLL unload order problem when
-   using the debug mode borlndmm.dll library, as well as various other
-   suggestions.
+ using the debug mode borlndmm.dll library, as well as various other
+ suggestions.
  - JRG ("The Delphi Guy") for the Spanish translation.
  - Justus Janssen for Delphi 4 support.
  - Vadim Lopushansky and Charles Vinal for reporting the Delphi 5 compiler
-   error in version 4.50.
+ error in version 4.50.
  - Johni Jeferson Capeletto for the Brazilian Portuguese translation.
  - Kurt Fitzner for reporting the BCB6 compiler error in 4.52.
  - Michal Niklas for reporting the Kylix compiler error in 4.54.
@@ -189,347 +189,347 @@ Acknowledgements (for version 4):
  - Zaenal Mutaqin for the Indonesian translation.
  - Carlos Macao for the Portuguese translation.
  - Michael Winter for catching the performance issue when reallocating certain
-   block sizes.
+ block sizes.
  - dzmitry[li] for the Belarussian translation.
  - Marcelo Montenegro for the updated Spanish translation.
  - Jud Cole for finding and reporting the bug which may trigger a read access
-   violation when upsizing certain small block sizes together with the
-   "UseCustomVariableSizeMoveRoutines" option.
+ violation when upsizing certain small block sizes together with the
+ "UseCustomVariableSizeMoveRoutines" option.
  - Zdenek Vasku for reporting and fixing the memory manager sharing bug
-   affecting Windows 95/98/Me.
+ affecting Windows 95/98/Me.
  - RB Winston for suggesting the improvement to GExperts "backup" support.
  - Thomas Schulz for reporting the bug affecting large address space support
-   under FullDebugMode, as well as the recursive call bug when attempting to
-   report memory leaks when EnableMemoryLeakReporting is disabled.
+ under FullDebugMode, as well as the recursive call bug when attempting to
+ report memory leaks when EnableMemoryLeakReporting is disabled.
  - Luigi Sandon for the Italian translation.
  - Werner Bochtler for various suggestions and bug reports.
  - Markus Beth for suggesting the "NeverSleepOnThreadContention" option.
  - JiYuan Xie for the Simplified Chinese translation.
  - Andrey Shtukaturov for the updated Russian translation, as well as the
-   Ukrainian translation.
+ Ukrainian translation.
  - Dimitry Timokhov for finding two elusive bugs in the memory leak class
-   detection code.
+ detection code.
  - Paulo Moreno for fixing the AllocMem bug in FullDebugMode that prevented
-   large blocks from being cleared.
+ large blocks from being cleared.
  - Vladimir Bochkarev for the suggestion to remove some unnecessary code if the
-   MM sharing mechanism is disabled.
+ MM sharing mechanism is disabled.
  - Loris Luise for the version constant suggestion.
  - J.W. de Bokx for the MessageBox bugfix.
  - Igor Lindunen for reporting the bug that caused the Align16Bytes option to
-   not work in FullDebugMode.
+ not work in FullDebugMode.
  - Ionut Muntean for the Romanian translation.
  - Florent Ouchet for the French translation.
  - Marcus Mönnig for the ScanMemoryPoolForCorruptions suggestion and the
-   suggestion to have the option to scan the memory pool before every
-   operation when in FullDebugMode.
+ suggestion to have the option to scan the memory pool before every
+ operation when in FullDebugMode.
  - Francois Piette for bringing under my attention that
-   ScanMemoryPoolForCorruption was not thread safe.
+ ScanMemoryPoolForCorruption was not thread safe.
  - Michael Rabatscher for reporting some compiler warnings.
  - QianYuan Wang for the Simplified Chinese translation of FastMM4Options.inc.
  - Maurizio Lotauro and Christian-W. Budde for reporting some Delphi 5
-   compiler errors.
+ compiler errors.
  - Patrick van Logchem for the DisableLoggingOfMemoryDumps option.
  - Norbert Spiegel for the BCB4 support code.
  - Uwe Schuster for the improved string leak detection code.
  - Murray McGowan for improvements to the usage tracker.
  - Michael Hieke for the SuppressFreeMemErrorsInsideException option as well
-   as a bugfix to GetMemoryMap.
+ as a bugfix to GetMemoryMap.
  - Richard Bradbrook for fixing the Windows 95 FullDebugMode support that was
-   broken in version 4.94.
+ broken in version 4.94.
  - Zach Saw for the suggestion to (optionally) use SwitchToThread when
-   waiting for a lock on a shared resource to be released.
+ waiting for a lock on a shared resource to be released.
  - Everyone who have made donations. Thanks!
  - Any other Fastcoders or supporters that I have forgotten, and also everyone
-   that helped with the older versions.
+ that helped with the older versions.
 
-Change log:
+ Change log:
  Version 1.00 (28 June 2004):
-  - First version (called PSDMemoryManager). Based on RecyclerMM (free block
-    stack approach) by Eric Grange.
+ - First version (called PSDMemoryManager). Based on RecyclerMM (free block
+ stack approach) by Eric Grange.
  Version 2.00 (3 November 2004):
-  - Complete redesign and rewrite from scratch. Name changed to FastMM to
-    reflect this fact. Uses a linked-list approach. Is faster, has less memory
-    overhead, and will now catch most bad pointers on FreeMem calls.
+ - Complete redesign and rewrite from scratch. Name changed to FastMM to
+ reflect this fact. Uses a linked-list approach. Is faster, has less memory
+ overhead, and will now catch most bad pointers on FreeMem calls.
  Version 3.00 (1 March 2005):
-  - Another rewrite. Reduced the memory overhead by: (a) not having a separate
-    memory area for the linked list of free blocks (uses space inside free
-    blocks themselves) (b) batch managers are allocated as part of chunks (c)
-    block size lookup table size reduced. This should make FastMM more CPU
-    cache friendly.
+ - Another rewrite. Reduced the memory overhead by: (a) not having a separate
+ memory area for the linked list of free blocks (uses space inside free
+ blocks themselves) (b) batch managers are allocated as part of chunks (c)
+ block size lookup table size reduced. This should make FastMM more CPU
+ cache friendly.
  Version 4.00 (7 June 2005):
-  - Yet another rewrite. FastMM4 is in fact three memory managers in one: Small
-    blocks (up to a few KB) are managed through the binning model in the same
-    way as previous versions, medium blocks (from a few KB up to approximately
-    256K) are allocated in a linked-list fashion, and large blocks are grabbed
-    directly from the system through VirtualAlloc. This 3-layered design allows
-    very fast operation with the most frequently used block sizes (small
-    blocks), while also minimizing fragmentation and imparting significant
-    overhead savings with blocks larger than a few KB.
+ - Yet another rewrite. FastMM4 is in fact three memory managers in one: Small
+ blocks (up to a few KB) are managed through the binning model in the same
+ way as previous versions, medium blocks (from a few KB up to approximately
+ 256K) are allocated in a linked-list fashion, and large blocks are grabbed
+ directly from the system through VirtualAlloc. This 3-layered design allows
+ very fast operation with the most frequently used block sizes (small
+ blocks), while also minimizing fragmentation and imparting significant
+ overhead savings with blocks larger than a few KB.
  Version 4.01 (8 June 2005):
-  - Added the options "RequireDebugInfoForLeakReporting" and
-    "RequireIDEPresenceForLeakReporting" as suggested by Pierre Y.
-  - Fixed the "DelphiIsRunning" function not working under Delphi 5, and
-    consequently no leak checking. (Reported by Anders Isaksson and Greg.)
+ - Added the options "RequireDebugInfoForLeakReporting" and
+ "RequireIDEPresenceForLeakReporting" as suggested by Pierre Y.
+ - Fixed the "DelphiIsRunning" function not working under Delphi 5, and
+ consequently no leak checking. (Reported by Anders Isaksson and Greg.)
  Version 4.02 (8 June 2005):
-  - Fixed the compilation error when both the "AssumeMultiThreaded" and
-    "CheckHeapForCorruption options were set. (Reported by Francois Malan.)
+ - Fixed the compilation error when both the "AssumeMultiThreaded" and
+ "CheckHeapForCorruption options were set. (Reported by Francois Malan.)
  Version 4.03 (9 June 2005):
-  - Added descriptive error messages when FastMM4 cannot be installed because
-    another MM has already been installed or memory has already been allocated.
+ - Added descriptive error messages when FastMM4 cannot be installed because
+ another MM has already been installed or memory has already been allocated.
  Version 4.04 (13 June 2005):
-  - Added a small fixed offset to the size of medium blocks (previously always
-    exact multiples of 256 bytes). This makes performance problems due to CPU
-    cache associativity limitations much less likely. (Reported by Craig
-    Peterson.)
+ - Added a small fixed offset to the size of medium blocks (previously always
+ exact multiples of 256 bytes). This makes performance problems due to CPU
+ cache associativity limitations much less likely. (Reported by Craig
+ Peterson.)
  Version 4.05 (17 June 2005):
-  - Added the Align16Bytes option. Disable this option to drop the 16 byte
-    alignment restriction and reduce alignment to 8 bytes for the smallest
-    block sizes. Disabling Align16Bytes should lower memory consumption at the
-    cost of complicating the use of aligned SSE move instructions. (Suggested
-    by Craig Peterson.)
-  - Added a support unit for C++ Builder 6 - Add FastMM4BCB.cpp and
-    FastMM4.pas to your BCB project to use FastMM instead of the RTL MM. Memory
-    leak checking is not supported because (unfortunately) once an MM is
-    installed under BCB you cannot uninstall it... at least not without
-    modifying the RTL code in exit.c or patching the RTL code runtime. (Thanks
-    to Jarek Karciarz, Vladimir Ulchenko and Bob Gonder.)
+ - Added the Align16Bytes option. Disable this option to drop the 16 byte
+ alignment restriction and reduce alignment to 8 bytes for the smallest
+ block sizes. Disabling Align16Bytes should lower memory consumption at the
+ cost of complicating the use of aligned SSE move instructions. (Suggested
+ by Craig Peterson.)
+ - Added a support unit for C++ Builder 6 - Add FastMM4BCB.cpp and
+ FastMM4.pas to your BCB project to use FastMM instead of the RTL MM. Memory
+ leak checking is not supported because (unfortunately) once an MM is
+ installed under BCB you cannot uninstall it... at least not without
+ modifying the RTL code in exit.c or patching the RTL code runtime. (Thanks
+ to Jarek Karciarz, Vladimir Ulchenko and Bob Gonder.)
  Version 4.06 (22 June 2005):
-  - Displays the class of all leaked objects on the memory leak report and also
-    tries to identify leaked long strings. Previously it only displayed the
-    sizes of all leaked blocks. (Suggested by Ben Taylor.)
-  - Added support for displaying the sizes of medium and large block memory
-    leaks. Previously it only displayed details for small block leaks.
+ - Displays the class of all leaked objects on the memory leak report and also
+ tries to identify leaked long strings. Previously it only displayed the
+ sizes of all leaked blocks. (Suggested by Ben Taylor.)
+ - Added support for displaying the sizes of medium and large block memory
+ leaks. Previously it only displayed details for small block leaks.
  Version 4.07 (22 June 2005):
-  - Fixed the detection of the class of leaked objects not working under
-    Windows 98/Me.
+ - Fixed the detection of the class of leaked objects not working under
+ Windows 98/Me.
  Version 4.08 (27 June 2005):
-  - Added a BorlndMM.dpr project to allow you to build a borlndmm.dll that uses
-    FastMM4 instead of the default memory manager. You may replace the old
-    DLL in the Delphi \Bin directory to make the IDE use this memory manager
-    instead.
+ - Added a BorlndMM.dpr project to allow you to build a borlndmm.dll that uses
+ FastMM4 instead of the default memory manager. You may replace the old
+ DLL in the Delphi \Bin directory to make the IDE use this memory manager
+ instead.
  Version 4.09 (30 June 2005):
-  - Included a patch fix for the bug affecting replacement borlndmm.dll files
-    with Delphi 2005 (QC#14007). Compile the patch, close Delphi, and run it
-    once to patch your vclide90.bpl. You will now be able to use the
-    replacement borlndmm.dll to speed up the Delphi 2005 IDE as well.
+ - Included a patch fix for the bug affecting replacement borlndmm.dll files
+ with Delphi 2005 (QC#14007). Compile the patch, close Delphi, and run it
+ once to patch your vclide90.bpl. You will now be able to use the
+ replacement borlndmm.dll to speed up the Delphi 2005 IDE as well.
  Version 4.10 (7 July 2005):
-  - Due to QC#14070 ("Delphi IDE attempts to free memory after the shutdown
-    code of borlndmm.dll has been called"), FastMM cannot be uninstalled
-    safely when used inside a replacement borlndmm.dll for the IDE. Added a
-    conditional define "NeverUninstall" for this purpose.
-  - Added the "FullDebugMode" option to pad all blocks with a header and footer
-    to help you catch memory overwrite bugs in your applications. All blocks
-    returned to freemem are also zeroed out to help catch bugs involving the
-    use of previously freed blocks. Also catches attempts at calling virtual
-    methods of freed objects provided the block in question has not been reused
-    since the object was freed. Displays stack traces on error to aid debugging.
-  - Added the "LogErrorsToFile" option to log all errors to a text file in the
-    same folder as the application.
-  - Added the "ManualLeakReportingControl" option (suggested by Nahan Hyn) to
-    enable control over whether the memory leak report should be done or not
-    via a global variable.
+ - Due to QC#14070 ("Delphi IDE attempts to free memory after the shutdown
+ code of borlndmm.dll has been called"), FastMM cannot be uninstalled
+ safely when used inside a replacement borlndmm.dll for the IDE. Added a
+ conditional define "NeverUninstall" for this purpose.
+ - Added the "FullDebugMode" option to pad all blocks with a header and footer
+ to help you catch memory overwrite bugs in your applications. All blocks
+ returned to freemem are also zeroed out to help catch bugs involving the
+ use of previously freed blocks. Also catches attempts at calling virtual
+ methods of freed objects provided the block in question has not been reused
+ since the object was freed. Displays stack traces on error to aid debugging.
+ - Added the "LogErrorsToFile" option to log all errors to a text file in the
+ same folder as the application.
+ - Added the "ManualLeakReportingControl" option (suggested by Nahan Hyn) to
+ enable control over whether the memory leak report should be done or not
+ via a global variable.
  Version 4.11 (7 July 2005):
-  - Fixed a compilation error under Delphi 2005 due to QC#10922. (Thanks to Joe
-    Bain and Leonel Togniolli.)
-  - Fixed leaked object classes not displaying in the leak report in
-    "FullDebugMode".
-  Version 4.12 (8 July 2005):
-  - Moved all the string constants to one place to make it easier to do
-    translations into other languages. (Thanks to Robert Marquardt.)
-  - Added support for Kylix. Some functionality is currently missing: No
-    support for detecting the object class on leaks and also no MM sharing.
-    (Thanks to Simon Kissel and Fikret Hasovic).
-  Version 4.13 (11 July 2005):
-  - Added the FastMM_DebugInfo.dll support library to display debug info for
-    stack traces.
-  - Stack traces for the memory leak report is now logged to the log file in
-    "FullDebugMode".
-  Version 4.14 (14 July 2005):
-  - Fixed string leaks not being detected as such in "FullDebugMode". (Thanks
-    to Leonel Togniolli.)
-  - Fixed the compilation error in "FullDebugMode" when "LogErrorsToFile" is
-    not set. (Thanks to Leonel Togniolli.)
-  - Added a "Release" option to allow the grouping of various options and to
-    make it easier to make debug and release builds. (Thanks to Alexander
-    Tabakov.)
-  - Added a "HideMemoryLeakHintMessage" option to not display the hint below
-    the memory leak message. (Thanks to Alexander Tabakov.)
-  - Changed the fill character for "FullDebugMode" from zero to $80 to be able
-    to differentiate between invalid memory accesses using nil pointers to
-    invalid memory accesses using fields of freed objects. FastMM tries to
-    reserve the 64K block starting at $80800000 at startup to ensure that an
-    A/V will occur when this block is accessed. (Thanks to Alexander Tabakov.)
-  - Fixed some compiler warnings. (Thanks to M. Skloff)
-  - Fixed some display bugs in the memory leak report. (Thanks to Leonel
-    Togniolli.)
-  - Added a "LogMemoryLeakDetailToFile" option. Some applications leak a lot of
-    memory and can make the log file grow very large very quickly.
-  - Added the option to use madExcept instead of the JCL Debug library in the
-    debug info support DLL. (Thanks to Martin Aignesberger.)
-  - Added procedures "GetMemoryManagerState" and "GetMemoryMap" to retrieve
-    statistics about the current state of the memory manager and memory pool.
-    (A usage tracker form together with a demo is also available.)
-  Version 4.15 (14 July 2005):
-  - Fixed a false 4GB(!) memory leak reported in some instances.
-  Version 4.16 (15 July 2005):
-  - Added the "CatchUseOfFreedInterfaces" option to catch the use of interfaces
-    of freed objects. This option is not compatible with checking that a freed
-    block has not been modified, so enable this option only when hunting an
-    invalid interface reference. (Only relevant if "FullDebugMode" is set.)
-  - During shutdown FastMM now checks that all free blocks have not been
-    modified since being freed. (Only when "FullDebugMode" is set and
-    "CatchUseOfFreedInterfaces" is disabled.)
-  Version 4.17 (15 July 2005):
+ - Fixed a compilation error under Delphi 2005 due to QC#10922. (Thanks to Joe
+ Bain and Leonel Togniolli.)
+ - Fixed leaked object classes not displaying in the leak report in
+ "FullDebugMode".
+ Version 4.12 (8 July 2005):
+ - Moved all the string constants to one place to make it easier to do
+ translations into other languages. (Thanks to Robert Marquardt.)
+ - Added support for Kylix. Some functionality is currently missing: No
+ support for detecting the object class on leaks and also no MM sharing.
+ (Thanks to Simon Kissel and Fikret Hasovic).
+ Version 4.13 (11 July 2005):
+ - Added the FastMM_DebugInfo.dll support library to display debug info for
+ stack traces.
+ - Stack traces for the memory leak report is now logged to the log file in
+ "FullDebugMode".
+ Version 4.14 (14 July 2005):
+ - Fixed string leaks not being detected as such in "FullDebugMode". (Thanks
+ to Leonel Togniolli.)
+ - Fixed the compilation error in "FullDebugMode" when "LogErrorsToFile" is
+ not set. (Thanks to Leonel Togniolli.)
+ - Added a "Release" option to allow the grouping of various options and to
+ make it easier to make debug and release builds. (Thanks to Alexander
+ Tabakov.)
+ - Added a "HideMemoryLeakHintMessage" option to not display the hint below
+ the memory leak message. (Thanks to Alexander Tabakov.)
+ - Changed the fill character for "FullDebugMode" from zero to $80 to be able
+ to differentiate between invalid memory accesses using nil pointers to
+ invalid memory accesses using fields of freed objects. FastMM tries to
+ reserve the 64K block starting at $80800000 at startup to ensure that an
+ A/V will occur when this block is accessed. (Thanks to Alexander Tabakov.)
+ - Fixed some compiler warnings. (Thanks to M. Skloff)
+ - Fixed some display bugs in the memory leak report. (Thanks to Leonel
+ Togniolli.)
+ - Added a "LogMemoryLeakDetailToFile" option. Some applications leak a lot of
+ memory and can make the log file grow very large very quickly.
+ - Added the option to use madExcept instead of the JCL Debug library in the
+ debug info support DLL. (Thanks to Martin Aignesberger.)
+ - Added procedures "GetMemoryManagerState" and "GetMemoryMap" to retrieve
+ statistics about the current state of the memory manager and memory pool.
+ (A usage tracker form together with a demo is also available.)
+ Version 4.15 (14 July 2005):
+ - Fixed a false 4GB(!) memory leak reported in some instances.
+ Version 4.16 (15 July 2005):
+ - Added the "CatchUseOfFreedInterfaces" option to catch the use of interfaces
+ of freed objects. This option is not compatible with checking that a freed
+ block has not been modified, so enable this option only when hunting an
+ invalid interface reference. (Only relevant if "FullDebugMode" is set.)
+ - During shutdown FastMM now checks that all free blocks have not been
+ modified since being freed. (Only when "FullDebugMode" is set and
+ "CatchUseOfFreedInterfaces" is disabled.)
+ Version 4.17 (15 July 2005):
  - Added the AddExpectedMemoryLeaks and RemoveExpectedMemoryLeaks procedures to
-   register/unregister expected leaks, thus preventing the leak report from
-   displaying if only expected leaks occurred. (Thanks to Diederik and Dennis
-   Passmore for the suggestion.) (Note: these functions were renamed in later
-   versions.)
+ register/unregister expected leaks, thus preventing the leak report from
+ displaying if only expected leaks occurred. (Thanks to Diederik and Dennis
+ Passmore for the suggestion.) (Note: these functions were renamed in later
+ versions.)
  - Fixed the "LogMemoryLeakDetailToFile" not logging memory leak detail to file
-   as it is supposed to. (Thanks to Leonel Togniolli.)
+ as it is supposed to. (Thanks to Leonel Togniolli.)
  Version 4.18 (18 July 2005):
  - Fixed some issues when range checking or complete boolean evaluation is
-   switched on. (Thanks to Dario Tiraboschi and Mark Gebauer.)
+ switched on. (Thanks to Dario Tiraboschi and Mark Gebauer.)
  - Added the "OutputInstallUninstallDebugString" option to display a message when
-   FastMM is installed or uninstalled. (Thanks to Hanspeter Widmer.)
+ FastMM is installed or uninstalled. (Thanks to Hanspeter Widmer.)
  - Moved the options to a separate include file. (Thanks to Hanspeter Widmer.)
  - Moved message strings to a separate file for easy translation.
  Version 4.19 (19 July 2005):
  - Fixed Kylix support that was broken in 4.14.
  Version 4.20 (20 July 2005):
  - Fixed a false memory overwrite report at shutdown in "FullDebugMode". If you
-   consistently got a "Block Header Has Been Corrupted" error message during
-   shutdown at address $xxxx0070 then it was probably a false alarm. (Thanks to
-   Theo Carr-Brion and Hanspeter Widmer.}
+ consistently got a "Block Header Has Been Corrupted" error message during
+ shutdown at address $xxxx0070 then it was probably a false alarm. (Thanks to
+ Theo Carr-Brion and Hanspeter Widmer.}
  Version 4.21 (27 July 2005):
  - Minor change to the block header flags to make it possible to immediately
-   tell whether a medium block is being used as a small block pool or not.
-   (Simplifies the leak checking and status reporting code.)
+ tell whether a medium block is being used as a small block pool or not.
+ (Simplifies the leak checking and status reporting code.)
  - Expanded the functionality around the management of expected memory leaks.
  - Added the "ClearLogFileOnStartup" option. Deletes the log file during
-   initialization. (Thanks to M. Skloff.)
+ initialization. (Thanks to M. Skloff.)
  - Changed "OutputInstallUninstallDebugString" to use OutputDebugString instead
-   of MessageBox. (Thanks to Hanspeter Widmer.)
+ of MessageBox. (Thanks to Hanspeter Widmer.)
  Version 4.22 (1 August 2005):
  - Added a FastAllocMem function that avoids an unnecessary FillChar call with
-   large blocks.
+ large blocks.
  - Changed large block resizing behavior to be a bit more conservative. Large
-   blocks will be downsized if the new size is less than half of the old size
-   (the threshold was a quarter previously).
+ blocks will be downsized if the new size is less than half of the old size
+ (the threshold was a quarter previously).
  Version 4.23 (6 August 2005):
  - Fixed BCB6 support (Thanks to Omar Zelaya).
  - Renamed "OutputInstallUninstallDebugString" to "UseOutputDebugString", and
-   added debug string output on memory leak or error detection.
+ added debug string output on memory leak or error detection.
  Version 4.24 (11 August 2005):
  - Added the "NoMessageBoxes" option to suppress the display of message boxes,
-   which is useful for services that should not be interrupted. (Thanks to Dan
-   Miser).
+ which is useful for services that should not be interrupted. (Thanks to Dan
+ Miser).
  - Changed the stack trace code to return the line number of the caller and not
-   the line number of the return address. (Thanks to Dan Miser).
+ the line number of the return address. (Thanks to Dan Miser).
  Version 4.25 (15 August 2005):
  - Fixed GetMemoryLeakType not detecting expected leaks registered by class
-   when in "FullDebugMode". (Thanks to Arjen de Ruijter).
+ when in "FullDebugMode". (Thanks to Arjen de Ruijter).
  Version 4.26 (18 August 2005):
  - Added a "UseRuntimePackages" option that allows FastMM to be used in a main
-   application together with DLLs that all use runtime packages. (Thanks to
-   Aleksander Oven.)
+ application together with DLLs that all use runtime packages. (Thanks to
+ Aleksander Oven.)
  Version 4.27 (24 August 2005):
  - Fixed a bug that sometimes caused the leak report to be shown even though all
-   leaks were registered as expected leaks. (Thanks to Kristofer Skaug.)
+ leaks were registered as expected leaks. (Thanks to Kristofer Skaug.)
  Version 4.29 (30 September 2005):
  - Added the "RequireDebuggerPresenceForLeakReporting" option to only display
-   the leak report if the application is run inside the IDE. (Thanks to Günther
-   Schoch.)
+ the leak report if the application is run inside the IDE. (Thanks to Günther
+ Schoch.)
  - Added the "ForceMMX" option, which when disabled will check the CPU for
-   MMX compatibility before using MMX. (Thanks to Jan Schlüter.)
+ MMX compatibility before using MMX. (Thanks to Jan Schlüter.)
  - Added the module name to the title of error dialogs to more easily identify
-   which application caused the error. (Thanks to Kristofer Skaug.)
+ which application caused the error. (Thanks to Kristofer Skaug.)
  - Added an ASCII dump to the "FullDebugMode" memory dumps. (Thanks to Hallvard
-   Vassbotn.)
+ Vassbotn.)
  - Added the option "HideExpectedLeaksRegisteredByPointer" to suppress the
-   display and logging of expected memory leaks that were registered by pointer.
-   (Thanks to Dan Miser.) Leaks registered by size or class are often ambiguous,
-   so these expected leaks are always logged to file (in FullDebugMode) and are
-   never hidden from the leak display (only displayed if there is at least one
-   unexpected leak).
+ display and logging of expected memory leaks that were registered by pointer.
+ (Thanks to Dan Miser.) Leaks registered by size or class are often ambiguous,
+ so these expected leaks are always logged to file (in FullDebugMode) and are
+ never hidden from the leak display (only displayed if there is at least one
+ unexpected leak).
  - Added a procedure "GetRegisteredMemoryLeaks" to return a list of all
-   registered memory leaks. (Thanks to Dan Miser.)
+ registered memory leaks. (Thanks to Dan Miser.)
  - Added the "RawStackTraces" option to perform "raw" stack traces, negating
-   the need for stack frames. This will usually result in more complete stack
-   traces in FullDebugMode error reports, but it is significantly slower.
-   (Thanks to Hallvard Vassbotn, Dan Miser and the JCL team.)
+ the need for stack frames. This will usually result in more complete stack
+ traces in FullDebugMode error reports, but it is significantly slower.
+ (Thanks to Hallvard Vassbotn, Dan Miser and the JCL team.)
  Version 4.31 (2 October 2005):
  - Fixed the crash bug when both "RawStackTraces" and "FullDebugMode" were
-   enabled. (Thanks to Dan Miser and Mark Edington.)
+ enabled. (Thanks to Dan Miser and Mark Edington.)
  Version 4.33 (6 October 2005):
  - Added a header corruption check to all memory blocks that are identified as
-   leaks in FullDebugMode. This allows better differentiation between memory
-   pool corruption bugs and actual memory leaks.
+ leaks in FullDebugMode. This allows better differentiation between memory
+ pool corruption bugs and actual memory leaks.
  - Fixed the stack overflow bug when using "RawStackTraces".
  Version 4.35 (6 October 2005):
  - Fixed a compilation error when the "NoMessageBoxes" option is set. (Thanks
-   to Paul Ishenin.)
+ to Paul Ishenin.)
  - Before performing a "raw" stack trace, FastMM now checks whether exception
-   handling is in place. If exception handling is not in place FastMM falls
-   back to stack frame tracing. (Exception handling is required to handle the
-   possible A/Vs when reading invalid call addresses. Exception handling is
-   usually always available except when SysUtils hasn't been initialized yet or
-   after SysUtils has been finalized.)
+ handling is in place. If exception handling is not in place FastMM falls
+ back to stack frame tracing. (Exception handling is required to handle the
+ possible A/Vs when reading invalid call addresses. Exception handling is
+ usually always available except when SysUtils hasn't been initialized yet or
+ after SysUtils has been finalized.)
  Version 4.37 (8 October 2005):
  - Fixed the missing call stack trace entry issue when dynamically loading DLLs.
-   (Thanks to Paul Ishenin.)
+ (Thanks to Paul Ishenin.)
  Version 4.39 (12 October 2005):
  - Restored the performance with "RawStackTraces" enabled back to the level it
-   was in 4.35.
+ was in 4.35.
  - Fixed the stack overflow error when using "RawStackTraces" that I thought I
-   had fixed in 4.31, but unfortunately didn't. (Thanks to Craig Peterson.)
+ had fixed in 4.31, but unfortunately didn't. (Thanks to Craig Peterson.)
  Version 4.40 (13 October 2005):
  - Improved "RawStackTraces" to have less incorrect extra entries. (Thanks to
-   Craig Peterson.)
+ Craig Peterson.)
  - Added the Russian (by Paul Ishenin) and Afrikaans translations of
-   FastMM4Messages.pas.
+ FastMM4Messages.pas.
  Version 4.42 (13 October 2005):
  - Fixed the compilation error when "CatchUseOfFreedInterfaces" is enabled.
-   (Thanks to Cristian Nicola.)
+ (Thanks to Cristian Nicola.)
  Version 4.44 (25 October 2005):
  - Implemented a FastGetHeapStatus function in analogy with GetHeapStatus.
-   (Suggested by Cristian Nicola.)
+ (Suggested by Cristian Nicola.)
  - Shifted more of the stack trace code over to the support dll to allow third
-   party vendors to make available their own stack tracing and stack trace
-   logging facilities.
+ party vendors to make available their own stack tracing and stack trace
+ logging facilities.
  - Mathias Rauen (madshi) improved the support for madExcept in the debug info
-   support DLL. Thanks!
+ support DLL. Thanks!
  - Added support for BCB5. (Thanks to Roddy Pratt.)
  - Added the Czech translation by Rene Mihula.
  - Added the "DetectMMOperationsAfterUninstall" option. This will catch
-   attempts to use the MM after FastMM has been uninstalled, and is useful for
-   debugging.
+ attempts to use the MM after FastMM has been uninstalled, and is useful for
+ debugging.
  Version 4.46 (26 October 2005):
  - Renamed FastMM_DebugInfo.dll to FastMM_FullDebugMode.dll and made the
-   dependency on this library a static one. This solves a DLL unload order
-   problem when using FullDebugMode together with the replacement
-   borlndmm.dll. (Thanks to Bart van der Werf.)
+ dependency on this library a static one. This solves a DLL unload order
+ problem when using FullDebugMode together with the replacement
+ borlndmm.dll. (Thanks to Bart van der Werf.)
  - Added the Polish translation by Artur Redzko.
  Version 4.48 (10 November 2005):
  - Fixed class detection for objects leaked in dynamically loaded DLLs that
-   were relocated.
+ were relocated.
  - Fabio Dell'Aria implemented support for EurekaLog in the FullDebugMode
-   support DLL. Thanks!
+ support DLL. Thanks!
  - Added the Spanish translation by JRG ("The Delphi Guy").
  Version 4.49 (10 November 2005):
  - Implemented support for installing replacement AllocMem and leak
-   registration mechanisms for Delphi/BCB versions that support it.
+ registration mechanisms for Delphi/BCB versions that support it.
  - Added support for Delphi 4. (Thanks to Justus Janssen.)
  Version 4.50 (5 December 2005):
  - Renamed the ReportMemoryLeaks global variable to ReportMemoryLeaksOnShutdown
-   to be more consistent with the Delphi 2006 memory manager.
+ to be more consistent with the Delphi 2006 memory manager.
  - Improved the handling of large blocks. Large blocks can now consist of
-   several consecutive segments allocated through VirtualAlloc. This
-   significantly improves speed when frequently resizing large blocks, since
-   these blocks can now often be upsized in-place.
+ several consecutive segments allocated through VirtualAlloc. This
+ significantly improves speed when frequently resizing large blocks, since
+ these blocks can now often be upsized in-place.
  Version 4.52 (7 December 2005):
  - Fixed the compilation error with Delphi 5. (Thanks to Vadim Lopushansky and
-   Charles Vinal for reporting the error.)
+ Charles Vinal for reporting the error.)
  Version 4.54 (15 December 2005):
  - Added the Brazilian Portuguese translation by Johni Jeferson Capeletto.
  - Fixed the compilation error with BCB6. (Thanks to Kurt Fitzner.)
@@ -541,300 +541,300 @@ Change log:
  - Added the Portuguese translation by Carlos Macao.
  Version 4.60 (21 February 2006):
  - Fixed a performance issue due to an unnecessary block move operation when
-   allocating a block in the range 1261-1372 bytes and then reallocating it in
-   the range 1373-1429 bytes twice. (Thanks to Michael Winter.)
+ allocating a block in the range 1261-1372 bytes and then reallocating it in
+ the range 1373-1429 bytes twice. (Thanks to Michael Winter.)
  - Added the Belarussian translation by dzmitry[li].
  - Added the updated Spanish translation by Marcelo Montenegro.
  - Added a new option "EnableSharingWithDefaultMM". This option allows FastMM
-   to be shared with the default MM of Delphi 2006. It is on by default, but
-   MM sharing has to be enabled otherwise it has no effect (refer to the
-   documentation for the "ShareMM" and "AttemptToUseSharedMM" options).
+ to be shared with the default MM of Delphi 2006. It is on by default, but
+ MM sharing has to be enabled otherwise it has no effect (refer to the
+ documentation for the "ShareMM" and "AttemptToUseSharedMM" options).
  Version 4.62 (22 February 2006):
  - Fixed a possible read access violation in the MoveX16LP routine when the
-   UseCustomVariableSizeMoveRoutines option is enabled. (Thanks to Jud Cole for
-   some great detective work in finding this bug.)
+ UseCustomVariableSizeMoveRoutines option is enabled. (Thanks to Jud Cole for
+ some great detective work in finding this bug.)
  - Improved the downsizing behaviour of medium blocks to better correlate with
-   the reallocation behaviour of small blocks. This change reduces the number
-   of transitions between small and medium block types when reallocating blocks
-   in the 0.7K to 2.6K range. It cuts down on the number of memory move
-   operations and improves performance.
+ the reallocation behaviour of small blocks. This change reduces the number
+ of transitions between small and medium block types when reallocating blocks
+ in the 0.7K to 2.6K range. It cuts down on the number of memory move
+ operations and improves performance.
  Version 4.64 (31 March 2006):
  - Added the following functions for use with FullDebugMode (and added the
-   exports to the replacement BorlndMM.dll): SetMMLogFileName,
-   GetCurrentAllocationGroup, PushAllocationGroup, PopAllocationGroup and
-   LogAllocatedBlocksToFile. The purpose of these functions are to allow you to
-   identify and log related memory leaks while your application is still
-   running.
+ exports to the replacement BorlndMM.dll): SetMMLogFileName,
+ GetCurrentAllocationGroup, PushAllocationGroup, PopAllocationGroup and
+ LogAllocatedBlocksToFile. The purpose of these functions are to allow you to
+ identify and log related memory leaks while your application is still
+ running.
  - Fixed a bug in the memory manager sharing mechanism affecting Windows
-   95/98/ME. (Thanks to Zdenek Vasku.)
+ 95/98/ME. (Thanks to Zdenek Vasku.)
  Version 4.66 (9 May 2006):
  - Added a hint comment in this file so that FastMM4Messages.pas will also be
-   backed up by GExperts. (Thanks to RB Winston.)
+ backed up by GExperts. (Thanks to RB Winston.)
  - Fixed a bug affecting large address space (> 2GB) support under
-   FullDebugMode. (Thanks to Thomas Schulz.)
+ FullDebugMode. (Thanks to Thomas Schulz.)
  Version 4.68 (3 July 2006):
  - Added the Italian translation by Luigi Sandon.
  - If FastMM is used inside a DLL it will now use the name of the DLL as base
-   for the log file name. (Previously it always used the name of the main
-   application executable file.)
+ for the log file name. (Previously it always used the name of the main
+ application executable file.)
  - Fixed a rare A/V when both the FullDebugMode and RawStackTraces options were
-   enabled. (Thanks to Primoz Gabrijelcic.)
+ enabled. (Thanks to Primoz Gabrijelcic.)
  - Added the "NeverSleepOnThreadContention" option. This option may improve
-   performance if the ratio of the the number of active threads to the number
-   of CPU cores is low (typically < 2). This option is only useful for 4+ CPU
-   systems, it almost always hurts performance on single and dual CPU systems.
-   (Thanks to Werner Bochtler and Markus Beth.)
+ performance if the ratio of the the number of active threads to the number
+ of CPU cores is low (typically < 2). This option is only useful for 4+ CPU
+ systems, it almost always hurts performance on single and dual CPU systems.
+ (Thanks to Werner Bochtler and Markus Beth.)
  Version 4.70 (4 August 2006):
-  - Added the Simplified Chinese translation by JiYuan Xie.
-  - Added the updated Russian as well as the Ukrainian translation by Andrey
-    Shtukaturov.
-  - Fixed two bugs in the leak class detection code that would sometimes fail
-    to detect the class of leaked objects and strings, and report them as
-    'unknown'. (Thanks to Dimitry Timokhov)
-  Version 4.72 (24 September 2006):
-  - Fixed a bug that caused AllocMem to not clear blocks > 256K in
-    FullDebugMode. (Thanks to Paulo Moreno.)
-  Version 4.74 (9 November 2006):
-  - Fixed a bug in the segmented large block functionality that could lead to
-    an application freeze when upsizing blocks greater than 256K in a
-    multithreaded application (one of those "what the heck was I thinking?"
-    type bugs).
-  Version 4.76 (12 January 2007):
-  - Changed the RawStackTraces code in the FullDebugMode DLL
-    to prevent it from modifying the Windows "GetLastError" error code.
-    (Thanks to Primoz Gabrijelcic.)
-  - Fixed a threading issue when the "CheckHeapForCorruption" option was
-    enabled, but the "FullDebugMode" option was disabled. (Thanks to Primoz
-    Gabrijelcic.)
-  - Removed some unnecessary startup code when the MM sharing mechanism is
-    disabled. (Thanks to Vladimir Bochkarev.)
-  - In FullDebugMode leaked blocks would sometimes be reported as belonging to
-    the class "TFreedObject" if they were allocated but never used. Such blocks
-    will now be reported as "unknown". (Thanks to Francois Malan.)
-  - In recent versions the replacement borlndmm.dll created a log file (when
-    enabled) that used the "borlndmm" prefix instead of the application name.
-    It is now fixed to use the application name, however if FastMM is used
-    inside other DLLs the name of those DLLs will be used. (Thanks to Bart van
-    der Werf.)
-  - Added a "FastMMVersion" constant. (Suggested by Loris Luise.)
-  - Fixed an issue with error message boxes not displaying under certain
-    configurations. (Thanks to J.W. de Bokx.)
-  - FastMM will now display only one error message at a time. If many errors
-    occur in quick succession, only the first error will be shown (but all will
-    be logged). This avoids a stack overflow with badly misbehaved programs.
-    (Thanks to Bart van der Werf.)
-  - Added a LoadDebugDLLDynamically option to be used in conjunction with
-    FullDebugMode. In this mode FastMM_FullDebugMode.dll is loaded dynamically.
-    If the DLL cannot be found, stack traces will not be available. (Thanks to
-    Rene Mihula.)
-  Version 4.78 (1 March 2007):
-  - The MB_DEFAULT_DESKTOP_ONLY constant that is used when displaying messages
-    boxes since 4.76 is not defined under Kylix, and the source would thus not
-    compile. That constant is now defined. (Thanks to Werner Bochtler.)
-  - Moved the medium block locking code that was duplicated in several places
-    to a subroutine to reduce code size. (Thanks to Hallvard Vassbotn.)
-  - Fixed a bug in the leak registration code that sometimes caused registered
-    leaks to be reported erroneously. (Thanks to Primoz Gabrijelcic.)
-  - Added the NoDebugInfo option (on by default) that suppresses the generation
-    of debug info for the FastMM4.pas unit. This will prevent the integrated
-    debugger from stepping into the memory manager. (Thanks to Primoz
-    Gabrijelcic.)
-  - Increased the default stack trace depth in FullDebugMode from 9 to 10 to
-    ensure that the Align16Bytes setting works in FullDebugMode. (Thanks to
-    Igor Lindunen.)
-  - Updated the Czech translation. (Thanks to Rene Mihula.)
-  Version 4.84 (7 July 2008):
-  - Added the Romanian translation. (Thanks to Ionut Muntean.)
-  - Optimized the GetMemoryMap procedure to improve speed.
-  - Added the GetMemoryManagerUsageSummary function that returns a summary of
-    the GetMemoryManagerState call. (Thanks to Hallvard Vassbotn.)
-  - Added the French translation. (Thanks to Florent Ouchet.)
-  - Added the "AlwaysAllocateTopDown" FullDebugMode option to help with
-    catching bad pointer arithmetic code in an address space > 2GB. This option
-    is enabled by default.
-  - Added the "InstallOnlyIfRunningInIDE" option. Enable this option to
-    only install FastMM as the memory manager when the application is run
-    inside the Delphi IDE. This is useful when you want to deploy the same EXE
-    that you use for testing, but only want the debugging features active on
-    development machines. When this option is enabled and the application is
-    not being run inside the IDE, then the default Delphi memory manager will
-    be used (which, since Delphi 2006, is FastMM without FullDebugMode.) This
-    option is off by default.
-  - Added the "FullDebugModeInIDE" option. This is a convenient shorthand for
-    enabling FullDebugMode, InstallOnlyIfRunningInIDE and
-    LoadDebugDLLDynamically. This causes FastMM to be used in FullDebugMode
-    when the application is being debugged on development machines, and the
-    default memory manager when the same executable is deployed. This allows
-    the debugging and deployment of an application without having to compile
-    separate executables. This option is off by default.
-  - Added a ScanMemoryPoolForCorruptions procedure that checks the entire
-    memory pool for corruptions and raises an exception if one is found. It can
-    be called at any time, but is only available in FullDebugMode. (Thanks to
-    Marcus Mönnig.)
-  - Added a global variable "FullDebugModeScanMemoryPoolBeforeEveryOperation".
-    When this variable is set to true and FullDebugMode is enabled, then the
-    entire memory pool is checked for consistency before every GetMem, FreeMem
-    and ReallocMem operation. An "Out of Memory" error is raised if a
-    corruption is found (and this variable is set to false to prevent recursive
-    errors). This obviously incurs a massive performance hit, so enable it only
-    when hunting for elusive memory corruption bugs. (Thanks to Marcus Mönnig.)
-  - Fixed a bug in AllocMem that caused the FPU stack to be shifted by one
-    position.
-  - Changed the default for option "EnableMMX" to false, since using MMX may
-    cause unexpected behaviour in code that passes parameters on the FPU stack
-    (like some "compiler magic" routines, e.g. VarFromReal).
-  - Removed the "EnableSharingWithDefaultMM" option. This is now the default
-    behaviour and cannot be disabled. (FastMM will always try to share memory
-    managers between itself and the default memory manager when memory manager
-    sharing is enabled.)
-  - Introduced a new memory manager sharing mechanism based on memory mapped
-    files. This solves compatibility issues with console and service
-    applications. This sharing mechanism currently runs in parallel with the
-    old mechanism, but the old mechanism can be disabled by undefining
-    "EnableBackwardCompatibleMMSharing" in FastMM4Options.inc.
-  - Fixed the recursive call error when the EnableMemoryLeakReporting option
-    is disabled and an attempt is made to register a memory leak under Delphi
-    2006 or later. (Thanks to Thomas Schulz.)
-  - Added a global variable "SuppressMessageBoxes" to enable or disable
-    messageboxes at runtime. (Thanks to Craig Peterson.)
-  - Added the leak reporting code for C++ Builder, as well as various other
-    C++ Builder bits written by JiYuan Xie. (Thank you!)
-  - Added the new Usage Tracker written by Hanspeter Widmer. (Thank you!)
-  Version 4.86 (31 July 2008):
-  - Tweaked the string detection algorithm somewhat to be less strict, and
-    allow non-class leaks to be more often categorized as strings.
-  - Fixed a compilation error under Delphi 5.
-  - Made LogAllocatedBlocksToFile and ScanMemoryPoolForCorruptions thread
-    safe. (Thanks to Francois Piette.)
-  Version 4.88 (13 August 2008):
-  - Fixed compiler warnings in NoOpRegisterExpectedMemoryLeak and
-    NoOpUnRegisterExpectedMemoryLeak. (Thanks to Michael Rabatscher.)
-  - Added the Simplified Chinese translation of FastMM4Options.inc by
-    QianYuan Wang. (Thank you!)
-  - Included the updated C++ Builder files with support for BCB6 without
-    update 4 applied. (Submitted by JiYuan Xie. Thanks!)
-  - Fixed a compilation error under Delphi 5.
-  - Made LogAllocatedBlocksToFile and ScanMemoryPoolForCorruptions thread
-    safe - for real this time. (Thanks to Francois Piette.)
-  Version 4.90 (9 September 2008):
-  - Added logging of the thread ID when capturing and displaying stack
-    traces. (Suggested by Allen Bauer and Mark Edington.)
-  - Fixed a Delphi 5 compiler error under FullDebugMode. (Thanks to Maurizio
-    Lotauro and Christian-W. Budde.)
-  - Changed a default setting in FastMM4Options.inc: RawStackTraces is now
-    off by default due to the high number of support requests I receive with
-    regards to the false postives it may cause. I recommend compiling debug
-    builds of applications with the "Stack Frames" option enabled.
-  - Fixed a compilation error under Kylix. (Thanks to Werner Bochtler.)
-  - Official support for Delphi 2009.
-  Version 4.92 (25 November 2008):
-  - Added the DisableLoggingOfMemoryDumps option under FullDebugMode. When
-    this option is set, memory dumps will not be logged for memory leaks or
-    errors. (Thanks to Patrick van Logchem.)
-  - Exposed the class and string type detection code in the interface section
-    for use in application code (if required). (Requested by Patrick van
-    Logchem.)
-  - Fixed a bug in SetMMLogFileName that could cause the log file name to be
-    set incorrectly.
-  - Added BCB4 support. (Thanks to Norbert Spiegel.)
-  - Included the updated Czech translation by Rene Mihula.
-  - When FastMM raises an error due to a freed block being modified, it now
-    logs detail about which bytes in the block were modified.
-  Version 4.94 (28 August 2009):
-  - Added the DoNotInstallIfDLLMissing option that prevents FastMM from
-    installing itself if the FastMM_FullDebugMode.dll library is not
-    available. (Only applicable when FullDebugMode and LoadDebugDLLDynamically
-    are both enabled.) This is useful when the same executable will be used for
-    both debugging and deployment - when the debug support DLL is available
-    FastMM will be installed in FullDebugMode, and otherwise the default memory
-    manager will be used.
-  - Added the FullDebugModeWhenDLLAvailable option that combines the
-    FullDebugMode, LoadDebugDLLDynamically and DoNotInstallIfDLLMissing options.
-  - Re-enabled RawStackTraces by default. The frame based stack traces (even
-    when compiling with stack frames enabled) are generally too incomplete.
-  - Improved the speed of large block operations under FullDebugMode: Since
-    large blocks are never reused, there is no point in clearing them before
-    and after use (so it does not do that anymore).
-  - If an error occurs in FullDebugMode and FastMM is unable to append to the
-    log file, it will attempt to write to a log file of the same name in the
-    "My Documents" folder. This feature is helpful when the executable resides
-    in a read-only location and the default log file, which is derived from the
-    executable name, would thus not be writeable.
-  - Added support for controlling the error log file location through an
-    environment variable. If the 'FastMMLogFilePath' environment variable is
-    set then any generated error logs will be written to the specified folder
-    instead of the default location (which is the same folder as the
-    application).
-  - Improved the call instruction detection code in the FastMM_FullDebugMode
-    library. (Thanks to the JCL team.)
-  - Improved the string leak detection and reporting code. (Thanks to Uwe
-    Schuster.)
-  - New FullDebugMode feature: Whenever FreeMem or ReallocMem is called, FastMM
-    will check that the block was actually allocated through the same FastMM
-    instance. This is useful for tracking down memory manager sharing issues.
-  - Compatible with Delphi 2010.
-  Version 4.96 (31 August 2010):
-  - Reduced the minimum block size to 4 bytes from the previous value of 12
-    bytes (only applicable to 8 byte alignment). This reduces memory usage if
-    the application allocates many blocks <= 4 bytes in size.
-  - Added colour-coded change indication to the FastMM usage tracker, making
-    it easier to spot changes in the memory usage grid. (Thanks to Murray
-    McGowan.)
-  - Added the SuppressFreeMemErrorsInsideException FullDebugMode option: If
-    FastMM encounters a problem with a memory block inside the FullDebugMode
-    FreeMem handler then an "invalid pointer operation" exception will usually
-    be raised. If the FreeMem occurs while another exception is being handled
-    (perhaps in the try.. finally code) then the original exception will be
-    lost. With this option set FastMM will ignore errors inside FreeMem when an
-    exception is being handled, thus allowing the original exception to
-    propagate. This option is on by default. (Thanks to Michael Hieke.)
-  - Fixed Windows 95 FullDebugMode support that was broken in 4.94. (Thanks to
-    Richard Bradbrook.)
-  - Fixed a bug affecting GetMemoryMap performance and accuracy of measurements
-    above 2GB if a large address space is not enabled for the project. (Thanks
-    to Michael Hieke.)
-  - Added the FullDebugModeRegisterAllAllocsAsExpectedMemoryLeak boolean flag.
-    When set, all allocations are automatically registered as expected memory
-    leaks. Only available in FullDebugMode. (Thanks to Brian Cook.)
-  - Compatible with Delphi XE.
-  Version 4.97 (30 September 2010):
-  - Fixed a crash bug (that crept in in 4.96) that may manifest itself when
-    resizing a block to 4 bytes or less.
-  - Added the UseSwitchToThread option. Set this option to call SwitchToThread
-    instead of sitting in a "busy waiting" loop when a thread contention
-    occurs. This is used in conjunction with the NeverSleepOnThreadContention
-    option, and has no effect unless NeverSleepOnThreadContention is also
-    defined. This option may improve performance with many CPU cores and/or
-    threads of different priorities. Note that the SwitchToThread API call is
-    only available on Windows 2000 and later. (Thanks to Zach Saw.)
-  Version 4.98 (23 September 2011):
-  - Added the FullDebugModeCallBacks define which adds support for memory
-    manager event callbacks. This allows the application to be notified of
-    memory allocations, frees and reallocations as they occur. (Thanks to
-    Jeroen Pluimers.)
-  - Added security options ClearMemoryBeforeReturningToOS and
-    AlwaysClearFreedMemory to force the clearing of memory blocks after being
-    freed. This could possibly provide some protection against information
-    theft, but at a significant performance penalty. (Thanks to Andrey
-    Sozonov.)
-  - Shifted the code in the initialization section to a procedure
-    RunInitializationCode. This allows the startup code to be called before
-    InitUnits, which is required by some software protection tools.
-  - Added support for Delphi XE2 (Windows 32-bit and Windows 64-bit platforms
-    only).
-  Version 4.99 (6 November 2011):
-  - Fixed crashes in the 64-bit BASM codepath when more than 4GB of memory is
-    allocated.
-  - Fixed bad record alignment under 64-bit that affected performance.
-  - Fixed compilation errors with some older compilers.
-  Version 4.991 (3 September 2012)
-  - Added the LogMemoryManagerStateToFile call. This call logs a summary of
-    the memory manager state to file: The total allocated memory, overhead,
-    efficiency, and a breakdown of allocated memory by class and string type.
-    This call may be useful to catch objects that do not necessarily leak, but
-    do linger longer than they should.
-  - OS X support added by Sebastian Zierer
-  - Compatible with Delphi XE3
+ - Added the Simplified Chinese translation by JiYuan Xie.
+ - Added the updated Russian as well as the Ukrainian translation by Andrey
+ Shtukaturov.
+ - Fixed two bugs in the leak class detection code that would sometimes fail
+ to detect the class of leaked objects and strings, and report them as
+ 'unknown'. (Thanks to Dimitry Timokhov)
+ Version 4.72 (24 September 2006):
+ - Fixed a bug that caused AllocMem to not clear blocks > 256K in
+ FullDebugMode. (Thanks to Paulo Moreno.)
+ Version 4.74 (9 November 2006):
+ - Fixed a bug in the segmented large block functionality that could lead to
+ an application freeze when upsizing blocks greater than 256K in a
+ multithreaded application (one of those "what the heck was I thinking?"
+ type bugs).
+ Version 4.76 (12 January 2007):
+ - Changed the RawStackTraces code in the FullDebugMode DLL
+ to prevent it from modifying the Windows "GetLastError" error code.
+ (Thanks to Primoz Gabrijelcic.)
+ - Fixed a threading issue when the "CheckHeapForCorruption" option was
+ enabled, but the "FullDebugMode" option was disabled. (Thanks to Primoz
+ Gabrijelcic.)
+ - Removed some unnecessary startup code when the MM sharing mechanism is
+ disabled. (Thanks to Vladimir Bochkarev.)
+ - In FullDebugMode leaked blocks would sometimes be reported as belonging to
+ the class "TFreedObject" if they were allocated but never used. Such blocks
+ will now be reported as "unknown". (Thanks to Francois Malan.)
+ - In recent versions the replacement borlndmm.dll created a log file (when
+ enabled) that used the "borlndmm" prefix instead of the application name.
+ It is now fixed to use the application name, however if FastMM is used
+ inside other DLLs the name of those DLLs will be used. (Thanks to Bart van
+ der Werf.)
+ - Added a "FastMMVersion" constant. (Suggested by Loris Luise.)
+ - Fixed an issue with error message boxes not displaying under certain
+ configurations. (Thanks to J.W. de Bokx.)
+ - FastMM will now display only one error message at a time. If many errors
+ occur in quick succession, only the first error will be shown (but all will
+ be logged). This avoids a stack overflow with badly misbehaved programs.
+ (Thanks to Bart van der Werf.)
+ - Added a LoadDebugDLLDynamically option to be used in conjunction with
+ FullDebugMode. In this mode FastMM_FullDebugMode.dll is loaded dynamically.
+ If the DLL cannot be found, stack traces will not be available. (Thanks to
+ Rene Mihula.)
+ Version 4.78 (1 March 2007):
+ - The MB_DEFAULT_DESKTOP_ONLY constant that is used when displaying messages
+ boxes since 4.76 is not defined under Kylix, and the source would thus not
+ compile. That constant is now defined. (Thanks to Werner Bochtler.)
+ - Moved the medium block locking code that was duplicated in several places
+ to a subroutine to reduce code size. (Thanks to Hallvard Vassbotn.)
+ - Fixed a bug in the leak registration code that sometimes caused registered
+ leaks to be reported erroneously. (Thanks to Primoz Gabrijelcic.)
+ - Added the NoDebugInfo option (on by default) that suppresses the generation
+ of debug info for the FastMM4.pas unit. This will prevent the integrated
+ debugger from stepping into the memory manager. (Thanks to Primoz
+ Gabrijelcic.)
+ - Increased the default stack trace depth in FullDebugMode from 9 to 10 to
+ ensure that the Align16Bytes setting works in FullDebugMode. (Thanks to
+ Igor Lindunen.)
+ - Updated the Czech translation. (Thanks to Rene Mihula.)
+ Version 4.84 (7 July 2008):
+ - Added the Romanian translation. (Thanks to Ionut Muntean.)
+ - Optimized the GetMemoryMap procedure to improve speed.
+ - Added the GetMemoryManagerUsageSummary function that returns a summary of
+ the GetMemoryManagerState call. (Thanks to Hallvard Vassbotn.)
+ - Added the French translation. (Thanks to Florent Ouchet.)
+ - Added the "AlwaysAllocateTopDown" FullDebugMode option to help with
+ catching bad pointer arithmetic code in an address space > 2GB. This option
+ is enabled by default.
+ - Added the "InstallOnlyIfRunningInIDE" option. Enable this option to
+ only install FastMM as the memory manager when the application is run
+ inside the Delphi IDE. This is useful when you want to deploy the same EXE
+ that you use for testing, but only want the debugging features active on
+ development machines. When this option is enabled and the application is
+ not being run inside the IDE, then the default Delphi memory manager will
+ be used (which, since Delphi 2006, is FastMM without FullDebugMode.) This
+ option is off by default.
+ - Added the "FullDebugModeInIDE" option. This is a convenient shorthand for
+ enabling FullDebugMode, InstallOnlyIfRunningInIDE and
+ LoadDebugDLLDynamically. This causes FastMM to be used in FullDebugMode
+ when the application is being debugged on development machines, and the
+ default memory manager when the same executable is deployed. This allows
+ the debugging and deployment of an application without having to compile
+ separate executables. This option is off by default.
+ - Added a ScanMemoryPoolForCorruptions procedure that checks the entire
+ memory pool for corruptions and raises an exception if one is found. It can
+ be called at any time, but is only available in FullDebugMode. (Thanks to
+ Marcus Mönnig.)
+ - Added a global variable "FullDebugModeScanMemoryPoolBeforeEveryOperation".
+ When this variable is set to true and FullDebugMode is enabled, then the
+ entire memory pool is checked for consistency before every GetMem, FreeMem
+ and ReallocMem operation. An "Out of Memory" error is raised if a
+ corruption is found (and this variable is set to false to prevent recursive
+ errors). This obviously incurs a massive performance hit, so enable it only
+ when hunting for elusive memory corruption bugs. (Thanks to Marcus Mönnig.)
+ - Fixed a bug in AllocMem that caused the FPU stack to be shifted by one
+ position.
+ - Changed the default for option "EnableMMX" to false, since using MMX may
+ cause unexpected behaviour in code that passes parameters on the FPU stack
+ (like some "compiler magic" routines, e.g. VarFromReal).
+ - Removed the "EnableSharingWithDefaultMM" option. This is now the default
+ behaviour and cannot be disabled. (FastMM will always try to share memory
+ managers between itself and the default memory manager when memory manager
+ sharing is enabled.)
+ - Introduced a new memory manager sharing mechanism based on memory mapped
+ files. This solves compatibility issues with console and service
+ applications. This sharing mechanism currently runs in parallel with the
+ old mechanism, but the old mechanism can be disabled by undefining
+ "EnableBackwardCompatibleMMSharing" in FastMM4Options.inc.
+ - Fixed the recursive call error when the EnableMemoryLeakReporting option
+ is disabled and an attempt is made to register a memory leak under Delphi
+ 2006 or later. (Thanks to Thomas Schulz.)
+ - Added a global variable "SuppressMessageBoxes" to enable or disable
+ messageboxes at runtime. (Thanks to Craig Peterson.)
+ - Added the leak reporting code for C++ Builder, as well as various other
+ C++ Builder bits written by JiYuan Xie. (Thank you!)
+ - Added the new Usage Tracker written by Hanspeter Widmer. (Thank you!)
+ Version 4.86 (31 July 2008):
+ - Tweaked the string detection algorithm somewhat to be less strict, and
+ allow non-class leaks to be more often categorized as strings.
+ - Fixed a compilation error under Delphi 5.
+ - Made LogAllocatedBlocksToFile and ScanMemoryPoolForCorruptions thread
+ safe. (Thanks to Francois Piette.)
+ Version 4.88 (13 August 2008):
+ - Fixed compiler warnings in NoOpRegisterExpectedMemoryLeak and
+ NoOpUnRegisterExpectedMemoryLeak. (Thanks to Michael Rabatscher.)
+ - Added the Simplified Chinese translation of FastMM4Options.inc by
+ QianYuan Wang. (Thank you!)
+ - Included the updated C++ Builder files with support for BCB6 without
+ update 4 applied. (Submitted by JiYuan Xie. Thanks!)
+ - Fixed a compilation error under Delphi 5.
+ - Made LogAllocatedBlocksToFile and ScanMemoryPoolForCorruptions thread
+ safe - for real this time. (Thanks to Francois Piette.)
+ Version 4.90 (9 September 2008):
+ - Added logging of the thread ID when capturing and displaying stack
+ traces. (Suggested by Allen Bauer and Mark Edington.)
+ - Fixed a Delphi 5 compiler error under FullDebugMode. (Thanks to Maurizio
+ Lotauro and Christian-W. Budde.)
+ - Changed a default setting in FastMM4Options.inc: RawStackTraces is now
+ off by default due to the high number of support requests I receive with
+ regards to the false postives it may cause. I recommend compiling debug
+ builds of applications with the "Stack Frames" option enabled.
+ - Fixed a compilation error under Kylix. (Thanks to Werner Bochtler.)
+ - Official support for Delphi 2009.
+ Version 4.92 (25 November 2008):
+ - Added the DisableLoggingOfMemoryDumps option under FullDebugMode. When
+ this option is set, memory dumps will not be logged for memory leaks or
+ errors. (Thanks to Patrick van Logchem.)
+ - Exposed the class and string type detection code in the interface section
+ for use in application code (if required). (Requested by Patrick van
+ Logchem.)
+ - Fixed a bug in SetMMLogFileName that could cause the log file name to be
+ set incorrectly.
+ - Added BCB4 support. (Thanks to Norbert Spiegel.)
+ - Included the updated Czech translation by Rene Mihula.
+ - When FastMM raises an error due to a freed block being modified, it now
+ logs detail about which bytes in the block were modified.
+ Version 4.94 (28 August 2009):
+ - Added the DoNotInstallIfDLLMissing option that prevents FastMM from
+ installing itself if the FastMM_FullDebugMode.dll library is not
+ available. (Only applicable when FullDebugMode and LoadDebugDLLDynamically
+ are both enabled.) This is useful when the same executable will be used for
+ both debugging and deployment - when the debug support DLL is available
+ FastMM will be installed in FullDebugMode, and otherwise the default memory
+ manager will be used.
+ - Added the FullDebugModeWhenDLLAvailable option that combines the
+ FullDebugMode, LoadDebugDLLDynamically and DoNotInstallIfDLLMissing options.
+ - Re-enabled RawStackTraces by default. The frame based stack traces (even
+ when compiling with stack frames enabled) are generally too incomplete.
+ - Improved the speed of large block operations under FullDebugMode: Since
+ large blocks are never reused, there is no point in clearing them before
+ and after use (so it does not do that anymore).
+ - If an error occurs in FullDebugMode and FastMM is unable to append to the
+ log file, it will attempt to write to a log file of the same name in the
+ "My Documents" folder. This feature is helpful when the executable resides
+ in a read-only location and the default log file, which is derived from the
+ executable name, would thus not be writeable.
+ - Added support for controlling the error log file location through an
+ environment variable. If the 'FastMMLogFilePath' environment variable is
+ set then any generated error logs will be written to the specified folder
+ instead of the default location (which is the same folder as the
+ application).
+ - Improved the call instruction detection code in the FastMM_FullDebugMode
+ library. (Thanks to the JCL team.)
+ - Improved the string leak detection and reporting code. (Thanks to Uwe
+ Schuster.)
+ - New FullDebugMode feature: Whenever FreeMem or ReallocMem is called, FastMM
+ will check that the block was actually allocated through the same FastMM
+ instance. This is useful for tracking down memory manager sharing issues.
+ - Compatible with Delphi 2010.
+ Version 4.96 (31 August 2010):
+ - Reduced the minimum block size to 4 bytes from the previous value of 12
+ bytes (only applicable to 8 byte alignment). This reduces memory usage if
+ the application allocates many blocks <= 4 bytes in size.
+ - Added colour-coded change indication to the FastMM usage tracker, making
+ it easier to spot changes in the memory usage grid. (Thanks to Murray
+ McGowan.)
+ - Added the SuppressFreeMemErrorsInsideException FullDebugMode option: If
+ FastMM encounters a problem with a memory block inside the FullDebugMode
+ FreeMem handler then an "invalid pointer operation" exception will usually
+ be raised. If the FreeMem occurs while another exception is being handled
+ (perhaps in the try.. finally code) then the original exception will be
+ lost. With this option set FastMM will ignore errors inside FreeMem when an
+ exception is being handled, thus allowing the original exception to
+ propagate. This option is on by default. (Thanks to Michael Hieke.)
+ - Fixed Windows 95 FullDebugMode support that was broken in 4.94. (Thanks to
+ Richard Bradbrook.)
+ - Fixed a bug affecting GetMemoryMap performance and accuracy of measurements
+ above 2GB if a large address space is not enabled for the project. (Thanks
+ to Michael Hieke.)
+ - Added the FullDebugModeRegisterAllAllocsAsExpectedMemoryLeak boolean flag.
+ When set, all allocations are automatically registered as expected memory
+ leaks. Only available in FullDebugMode. (Thanks to Brian Cook.)
+ - Compatible with Delphi XE.
+ Version 4.97 (30 September 2010):
+ - Fixed a crash bug (that crept in in 4.96) that may manifest itself when
+ resizing a block to 4 bytes or less.
+ - Added the UseSwitchToThread option. Set this option to call SwitchToThread
+ instead of sitting in a "busy waiting" loop when a thread contention
+ occurs. This is used in conjunction with the NeverSleepOnThreadContention
+ option, and has no effect unless NeverSleepOnThreadContention is also
+ defined. This option may improve performance with many CPU cores and/or
+ threads of different priorities. Note that the SwitchToThread API call is
+ only available on Windows 2000 and later. (Thanks to Zach Saw.)
+ Version 4.98 (23 September 2011):
+ - Added the FullDebugModeCallBacks define which adds support for memory
+ manager event callbacks. This allows the application to be notified of
+ memory allocations, frees and reallocations as they occur. (Thanks to
+ Jeroen Pluimers.)
+ - Added security options ClearMemoryBeforeReturningToOS and
+ AlwaysClearFreedMemory to force the clearing of memory blocks after being
+ freed. This could possibly provide some protection against information
+ theft, but at a significant performance penalty. (Thanks to Andrey
+ Sozonov.)
+ - Shifted the code in the initialization section to a procedure
+ RunInitializationCode. This allows the startup code to be called before
+ InitUnits, which is required by some software protection tools.
+ - Added support for Delphi XE2 (Windows 32-bit and Windows 64-bit platforms
+ only).
+ Version 4.99 (6 November 2011):
+ - Fixed crashes in the 64-bit BASM codepath when more than 4GB of memory is
+ allocated.
+ - Fixed bad record alignment under 64-bit that affected performance.
+ - Fixed compilation errors with some older compilers.
+ Version 4.991 (3 September 2012)
+ - Added the LogMemoryManagerStateToFile call. This call logs a summary of
+ the memory manager state to file: The total allocated memory, overhead,
+ efficiency, and a breakdown of allocated memory by class and string type.
+ This call may be useful to catch objects that do not necessarily leak, but
+ do linger longer than they should.
+ - OS X support added by Sebastian Zierer
+ - Compatible with Delphi XE3
 
 *)
 
@@ -842,270 +842,250 @@ unit FastMM4;
 
 interface
 
-{$Include FastMM4Options.inc}
-
+{$INCLUDE FastMM4Options.inc}
 {$RANGECHECKS OFF}
 {$BOOLEVAL OFF}
 {$OVERFLOWCHECKS OFF}
 {$OPTIMIZATION ON}
 {$TYPEDADDRESS OFF}
 {$LONGSTRINGS ON}
-
 {Compiler version defines}
-{$ifndef BCB}
-  {$ifdef ver120}
-    {$define Delphi4or5}
-  {$endif}
-  {$ifdef ver130}
-    {$define Delphi4or5}
-  {$endif}
-  {$ifdef ver140}
-    {$define Delphi6}
-  {$endif}
-  {$ifdef ver150}
-    {$define Delphi7}
-  {$endif}
-  {$ifdef ver170}
-    {$define Delphi2005}
-  {$endif}
-{$else}
-  {for BCB4, use the Delphi 5 codepath}
-  {$ifdef ver120}
-    {$define Delphi4or5}
-    {$define BCB4}
-  {$endif}
-  {for BCB5, use the Delphi 5 codepath}
-  {$ifdef ver130}
-    {$define Delphi4or5}
-  {$endif}
-{$endif}
-{$ifdef ver180}
-  {$define BDS2006}
-{$endif}
-{$define 32Bit}
-{$ifndef Delphi4or5}
-  {$if SizeOf(Pointer) = 8}
-    {$define 64Bit}
-    {$undef 32Bit}
-  {$ifend}
-  {$if CompilerVersion >= 23}
-    {$define XE2AndUp}
-  {$ifend}
-  {$define BCB6OrDelphi6AndUp}
-  {$ifndef BCB}
-    {$define Delphi6AndUp}
-  {$endif}
-  {$ifndef Delphi6}
-    {$define BCB6OrDelphi7AndUp}
-    {$ifndef BCB}
-      {$define Delphi7AndUp}
-    {$endif}
-    {$ifndef BCB}
-      {$ifndef Delphi7}
-        {$ifndef Delphi2005}
-          {$define BDS2006AndUp}
-        {$endif}
-      {$endif}
-    {$endif}
-  {$endif}
-{$endif}
-
-{$ifdef 64Bit}
-  {Under 64 bit memory blocks must always be 16-byte aligned}
-  {$define Align16Bytes}
-  {No need for MMX under 64-bit, since SSE2 is available}
-  {$undef EnableMMX}
-  {There is little need for raw stack traces under 64-bit, since frame based
-   stack traces are much more accurate than under 32-bit. (And frame based
-   stack tracing is much faster.)}
-  {$undef RawStackTraces}
-{$endif}
-
+{$IFNDEF BCB}
+{$IFDEF ver120}
+{$DEFINE Delphi4or5}
+{$ENDIF}
+{$IFDEF ver130}
+{$DEFINE Delphi4or5}
+{$ENDIF}
+{$IFDEF ver140}
+{$DEFINE Delphi6}
+{$ENDIF}
+{$IFDEF ver150}
+{$DEFINE Delphi7}
+{$ENDIF}
+{$IFDEF ver170}
+{$DEFINE Delphi2005}
+{$ENDIF}
+{$ELSE}
+{for BCB4, use the Delphi 5 codepath}
+{$IFDEF ver120}
+{$DEFINE Delphi4or5}
+{$DEFINE BCB4}
+{$ENDIF}
+{for BCB5, use the Delphi 5 codepath}
+{$IFDEF ver130}
+{$DEFINE Delphi4or5}
+{$ENDIF}
+{$ENDIF}
+{$IFDEF ver180}
+{$DEFINE BDS2006}
+{$ENDIF}
+{$DEFINE 32Bit}
+{$IFNDEF Delphi4or5}
+{$IF SizeOf(Pointer) = 8}
+{$DEFINE 64Bit}
+{$UNDEF 32Bit}
+{$IFEND}
+{$IF CompilerVersion >= 23}
+{$DEFINE XE2AndUp}
+{$IFEND}
+{$DEFINE BCB6OrDelphi6AndUp}
+{$IFNDEF BCB}
+{$DEFINE Delphi6AndUp}
+{$ENDIF}
+{$IFNDEF Delphi6}
+{$DEFINE BCB6OrDelphi7AndUp}
+{$IFNDEF BCB}
+{$DEFINE Delphi7AndUp}
+{$ENDIF}
+{$IFNDEF BCB}
+{$IFNDEF Delphi7}
+{$IFNDEF Delphi2005}
+{$DEFINE BDS2006AndUp}
+{$ENDIF}
+{$ENDIF}
+{$ENDIF}
+{$ENDIF}
+{$ENDIF}
+{$IFDEF 64Bit}
+{Under 64 bit memory blocks must always be 16-byte aligned}
+{$DEFINE Align16Bytes}
+{No need for MMX under 64-bit, since SSE2 is available}
+{$UNDEF EnableMMX}
+{There is little need for raw stack traces under 64-bit, since frame based
+ stack traces are much more accurate than under 32-bit. (And frame based
+ stack tracing is much faster.)}
+{$UNDEF RawStackTraces}
+{$ENDIF}
 {IDE debug mode always enables FullDebugMode and dynamic loading of the FullDebugMode DLL.}
-{$ifdef FullDebugModeInIDE}
-  {$define InstallOnlyIfRunningInIDE}
-  {$define FullDebugMode}
-  {$define LoadDebugDLLDynamically}
-{$endif}
-
+{$IFDEF FullDebugModeInIDE}
+{$DEFINE InstallOnlyIfRunningInIDE}
+{$DEFINE FullDebugMode}
+{$DEFINE LoadDebugDLLDynamically}
+{$ENDIF}
 {Install in FullDebugMode only when the DLL is available?}
-{$ifdef FullDebugModeWhenDLLAvailable}
-  {$define FullDebugMode}
-  {$define LoadDebugDLLDynamically}
-  {$define DoNotInstallIfDLLMissing}
-{$endif}
-
-{$ifdef Linux}
-  {$define POSIX}
-{$endif}
-
+{$IFDEF FullDebugModeWhenDLLAvailable}
+{$DEFINE FullDebugMode}
+{$DEFINE LoadDebugDLLDynamically}
+{$DEFINE DoNotInstallIfDLLMissing}
+{$ENDIF}
+{$IFDEF Linux}
+{$DEFINE POSIX}
+{$ENDIF}
 {Some features not currently supported under Kylix / OS X}
-{$ifdef POSIX}
-  {$undef FullDebugMode}
-  {$undef LogErrorsToFile}
-  {$undef LogMemoryLeakDetailToFile}
-  {$undef ShareMM}
-  {$undef AttemptToUseSharedMM}
-  {$undef RequireIDEPresenceForLeakReporting}
-  {$undef UseOutputDebugString}
-  {$ifdef PIC}
-    {BASM version does not support position independent code}
-    {$undef ASMVersion}
-  {$endif}
-{$endif}
-
+{$IFDEF POSIX}
+{$UNDEF FullDebugMode}
+{$UNDEF LogErrorsToFile}
+{$UNDEF LogMemoryLeakDetailToFile}
+{$UNDEF ShareMM}
+{$UNDEF AttemptToUseSharedMM}
+{$UNDEF RequireIDEPresenceForLeakReporting}
+{$UNDEF UseOutputDebugString}
+{$IFDEF PIC}
+{BASM version does not support position independent code}
+{$UNDEF ASMVersion}
+{$ENDIF}
+{$ENDIF}
 {Do we require debug info for leak checking?}
-{$ifdef RequireDebugInfoForLeakReporting}
-  {$ifopt D-}
-    {$undef EnableMemoryLeakReporting}
-  {$endif}
-{$endif}
-
+{$IFDEF RequireDebugInfoForLeakReporting}
+{$IFOPT D-}
+{$UNDEF EnableMemoryLeakReporting}
+{$ENDIF}
+{$ENDIF}
 {Enable heap checking and leak reporting in full debug mode}
-{$ifdef FullDebugMode}
-  {$STACKFRAMES ON}
-  {$define CheckHeapForCorruption}
-  {$ifndef CatchUseOfFreedInterfaces}
-    {$define CheckUseOfFreedBlocksOnShutdown}
-  {$endif}
-{$else}
-  {Error logging requires FullDebugMode}
-  {$undef LogErrorsToFile}
-  {$undef CatchUseOfFreedInterfaces}
-  {$undef RawStackTraces}
-  {$undef AlwaysAllocateTopDown}
-{$endif}
-
+{$IFDEF FullDebugMode}
+{$STACKFRAMES ON}
+{$DEFINE CheckHeapForCorruption}
+{$IFNDEF CatchUseOfFreedInterfaces}
+{$DEFINE CheckUseOfFreedBlocksOnShutdown}
+{$ENDIF}
+{$ELSE}
+{Error logging requires FullDebugMode}
+{$UNDEF LogErrorsToFile}
+{$UNDEF CatchUseOfFreedInterfaces}
+{$UNDEF RawStackTraces}
+{$UNDEF AlwaysAllocateTopDown}
+{$ENDIF}
 {Set defines for security options}
-{$ifdef FullDebugMode}
-  {In FullDebugMode small and medium blocks are always cleared when calling
-   FreeMem. Large blocks are always returned to the OS immediately.}
-  {$ifdef ClearMemoryBeforeReturningToOS}
-    {$define ClearLargeBlocksBeforeReturningToOS}
-  {$endif}
-  {$ifdef AlwaysClearFreedMemory}
-    {$define ClearLargeBlocksBeforeReturningToOS}
-  {$endif}
-{$else}
-  {If memory blocks are cleared in FreeMem then they do not need to be cleared
-   before returning the memory to the OS.}
-  {$ifdef AlwaysClearFreedMemory}
-    {$define ClearSmallAndMediumBlocksInFreeMem}
-    {$define ClearLargeBlocksBeforeReturningToOS}
-  {$else}
-    {$ifdef ClearMemoryBeforeReturningToOS}
-      {$define ClearMediumBlockPoolsBeforeReturningToOS}
-      {$define ClearLargeBlocksBeforeReturningToOS}
-    {$endif}
-  {$endif}
-{$endif}
-
+{$IFDEF FullDebugMode}
+{In FullDebugMode small and medium blocks are always cleared when calling
+ FreeMem. Large blocks are always returned to the OS immediately.}
+{$IFDEF ClearMemoryBeforeReturningToOS}
+{$DEFINE ClearLargeBlocksBeforeReturningToOS}
+{$ENDIF}
+{$IFDEF AlwaysClearFreedMemory}
+{$DEFINE ClearLargeBlocksBeforeReturningToOS}
+{$ENDIF}
+{$ELSE}
+{If memory blocks are cleared in FreeMem then they do not need to be cleared
+ before returning the memory to the OS.}
+{$IFDEF AlwaysClearFreedMemory}
+{$DEFINE ClearSmallAndMediumBlocksInFreeMem}
+{$DEFINE ClearLargeBlocksBeforeReturningToOS}
+{$ELSE}
+{$IFDEF ClearMemoryBeforeReturningToOS}
+{$DEFINE ClearMediumBlockPoolsBeforeReturningToOS}
+{$DEFINE ClearLargeBlocksBeforeReturningToOS}
+{$ENDIF}
+{$ENDIF}
+{$ENDIF}
 {Only the Pascal version supports extended heap corruption checking.}
-{$ifdef CheckHeapForCorruption}
-  {$undef ASMVersion}
-{$endif}
-
+{$IFDEF CheckHeapForCorruption}
+{$UNDEF ASMVersion}
+{$ENDIF}
 {For BASM bits that are not implemented in 64-bit.}
-{$ifdef 32Bit}
-  {$ifdef ASMVersion}
-    {$define Use32BitAsm}
-  {$endif}
-{$endif}
-
-{$ifdef UseRuntimePackages}
-  {$define AssumeMultiThreaded}
-{$endif}
-
-{$ifdef BCB6OrDelphi6AndUp}
-  {$WARN SYMBOL_PLATFORM OFF}
-  {$WARN SYMBOL_DEPRECATED OFF}
-{$endif}
-
+{$IFDEF 32Bit}
+{$IFDEF ASMVersion}
+{$DEFINE Use32BitAsm}
+{$ENDIF}
+{$ENDIF}
+{$IFDEF UseRuntimePackages}
+{$DEFINE AssumeMultiThreaded}
+{$ENDIF}
+{$IFDEF BCB6OrDelphi6AndUp}
+{$WARN SYMBOL_PLATFORM OFF}
+{$WARN SYMBOL_DEPRECATED OFF}
+{$ENDIF}
 {Leak detail logging requires error logging}
-{$ifndef LogErrorsToFile}
-  {$undef LogMemoryLeakDetailToFile}
-  {$undef ClearLogFileOnStartup}
-{$endif}
-
-{$ifndef EnableMemoryLeakReporting}
-  {Manual leak reporting control requires leak reporting to be enabled}
-  {$undef ManualLeakReportingControl}
-{$endif}
-
-{$ifndef EnableMMX}
-  {$undef ForceMMX}
-{$endif}
-
+{$IFNDEF LogErrorsToFile}
+{$UNDEF LogMemoryLeakDetailToFile}
+{$UNDEF ClearLogFileOnStartup}
+{$ENDIF}
+{$IFNDEF EnableMemoryLeakReporting}
+{Manual leak reporting control requires leak reporting to be enabled}
+{$UNDEF ManualLeakReportingControl}
+{$ENDIF}
+{$IFNDEF EnableMMX}
+{$UNDEF ForceMMX}
+{$ENDIF}
 {Are any of the MM sharing options enabled?}
-{$ifdef ShareMM}
-  {$define MMSharingEnabled}
-{$endif}
-{$ifdef AttemptToUseSharedMM}
-  {$define MMSharingEnabled}
-{$endif}
-
+{$IFDEF ShareMM}
+{$DEFINE MMSharingEnabled}
+{$ENDIF}
+{$IFDEF AttemptToUseSharedMM}
+{$DEFINE MMSharingEnabled}
+{$ENDIF}
 {Instruct GExperts to back up the messages file as well.}
 {#BACKUP FastMM4Messages.pas}
 
 {Should debug info be disabled?}
-{$ifdef NoDebugInfo}
-  {$DEBUGINFO OFF}
-{$endif}
-
-{$ifdef BCB}
-  {$ifdef borlndmmdll}
-    {$OBJEXPORTALL OFF}
-  {$endif}
-  {$ifndef PatchBCBTerminate}
-    {Cannot uninstall safely under BCB}
-    {$define NeverUninstall}
-    {Disable memory leak reporting}
-    {$undef EnableMemoryLeakReporting}
-  {$endif}
-{$endif}
+{$IFDEF NoDebugInfo}
+{$DEBUGINFO OFF}
+{$ENDIF}
+{$IFDEF BCB}
+{$IFDEF borlndmmdll}
+{$OBJEXPORTALL OFF}
+{$ENDIF}
+{$IFNDEF PatchBCBTerminate}
+{Cannot uninstall safely under BCB}
+{$DEFINE NeverUninstall}
+{Disable memory leak reporting}
+{$UNDEF EnableMemoryLeakReporting}
+{$ENDIF}
+{$ENDIF}
 
 {-------------------------Public constants-----------------------------}
 const
   {The current version of FastMM}
   FastMMVersion = '4.991';
   {The number of small block types}
-{$ifdef Align16Bytes}
+{$IFDEF Align16Bytes}
   NumSmallBlockTypes = 46;
-{$else}
+{$ELSE}
   NumSmallBlockTypes = 56;
-{$endif}
+{$ENDIF}
 
-{----------------------------Public types------------------------------}
+  {----------------------------Public types------------------------------}
 type
 
   {Make sure all the required types are available}
-{$ifdef BCB6OrDelphi6AndUp}
-  {$if CompilerVersion < 20}
+{$IFDEF BCB6OrDelphi6AndUp}
+{$IF CompilerVersion < 20}
   PByte = PAnsiChar;
   {NativeInt didn't exist or was broken before Delphi 2009.}
   NativeInt = Integer;
-  {$ifend}
-  {$if CompilerVersion < 21}
+{$IFEND}
+{$IF CompilerVersion < 21}
   {NativeUInt didn't exist or was broken before Delphi 2010.}
   NativeUInt = Cardinal;
-  {$ifend}
-  {$if CompilerVersion < 22}
+{$IFEND}
+{$IF CompilerVersion < 22}
   {PNativeUInt didn't exist before Delphi XE.}
   PNativeUInt = ^Cardinal;
-  {$ifend}
-  {$if CompilerVersion < 23}
+{$IFEND}
+{$IF CompilerVersion < 23}
   {IntPtr and UIntPtr didn't exist before Delphi XE2.}
   IntPtr = Integer;
   UIntPtr = Cardinal;
-  {$ifend}
-{$else}
+{$IFEND}
+{$ELSE}
   PByte = PAnsiChar;
   NativeInt = Integer;
   NativeUInt = Cardinal;
   PNativeUInt = ^Cardinal;
   IntPtr = Integer;
   UIntPtr = Cardinal;
-{$endif}
+{$ENDIF}
 
   TSmallBlockTypeState = record
     {The internal size of the block type}
@@ -1118,7 +1098,8 @@ type
      free blocks)}
     ReservedAddressSpace: NativeUInt;
   end;
-  TSmallBlockTypeStates = array[0..NumSmallBlockTypes - 1] of TSmallBlockTypeState;
+
+  TSmallBlockTypeStates = array [0 .. NumSmallBlockTypes - 1] of TSmallBlockTypeState;
 
   TMemoryManagerState = record
     {Small block type states}
@@ -1145,32 +1126,33 @@ type
   end;
 
   {Memory map}
-  TChunkStatus = (csUnallocated, csAllocated, csReserved, csSysAllocated,
-    csSysReserved);
-  TMemoryMap = array[0..65535] of TChunkStatus;
+  TChunkStatus = (csUnallocated, csAllocated, csReserved, csSysAllocated, csSysReserved);
+  TMemoryMap = array [0 .. 65535] of TChunkStatus;
 
-{$ifdef EnableMemoryLeakReporting}
+{$IFDEF EnableMemoryLeakReporting}
+
   {List of registered leaks}
   TRegisteredMemoryLeak = record
     LeakAddress: Pointer;
     LeakedClass: TClass;
-    {$ifdef CheckCppObjectTypeEnabled}
+{$IFDEF CheckCppObjectTypeEnabled}
     LeakedCppTypeIdPtr: Pointer;
-    {$endif}
+{$ENDIF}
     LeakSize: NativeInt;
     LeakCount: Integer;
   end;
-  TRegisteredMemoryLeaks = array of TRegisteredMemoryLeak;
-{$endif}
 
+  TRegisteredMemoryLeaks = array of TRegisteredMemoryLeak;
+{$ENDIF}
   {Used by the DetectStringData routine to detect whether a leaked block
    contains string data.}
   TStringDataType = (stUnknown, stAnsiString, stUnicodeString);
 
   {The callback procedure for WalkAllocatedBlocks.}
-  TWalkAllocatedBlocksCallback = procedure(APBlock: Pointer; ABlockSize: NativeInt; AUserData: Pointer);
+  TWalkAllocatedBlocksCallback = procedure(APBlock: Pointer; ABlockSize: NativeInt;
+    AUserData: Pointer);
 
-{--------------------------Public variables----------------------------}
+  {--------------------------Public variables----------------------------}
 var
   {If this variable is set to true and FullDebugMode is enabled, then the
    entire memory pool is checked for consistency before every memory
@@ -1179,57 +1161,49 @@ var
    only when absolutely necessary.}
   FullDebugModeScanMemoryPoolBeforeEveryOperation: Boolean = False;
   FullDebugModeRegisterAllAllocsAsExpectedMemoryLeak: Boolean = False;
-{$ifdef ManualLeakReportingControl}
+{$IFDEF ManualLeakReportingControl}
   {Variable is declared in system.pas in newer Delphi versions.}
-  {$ifndef BDS2006AndUp}
+{$IFNDEF BDS2006AndUp}
   ReportMemoryLeaksOnShutdown: Boolean;
-  {$endif}
-{$endif}
+{$ENDIF}
+{$ENDIF}
   {If set to True, disables the display of all messageboxes}
   SuppressMessageBoxes: Boolean;
 
-{-------------------------Public procedures----------------------------}
-{Executes the code normally run in the initialization section. Running it
- earlier may be required with e.g. some software protection tools.}
+  {-------------------------Public procedures----------------------------}
+  {Executes the code normally run in the initialization section. Running it
+   earlier may be required with e.g. some software protection tools.}
 procedure RunInitializationCode;
 {Installation procedures must be exposed for the BCB helper unit FastMM4BCB.cpp}
-{$ifdef BCB}
+{$IFDEF BCB}
 procedure InitializeMemoryManager;
 function CheckCanInstallMemoryManager: Boolean;
 procedure InstallMemoryManager;
 
-{$ifdef FullDebugMode}
+{$IFDEF FullDebugMode}
 (*$HPPEMIT '#define FullDebugMode' *)
-
-{$ifdef ClearLogFileOnStartup}
+{$IFDEF ClearLogFileOnStartup}
 (*$HPPEMIT '  #define ClearLogFileOnStartup' *)
 procedure DeleteEventLog;
-{$endif}
-
-{$ifdef LoadDebugDLLDynamically}
+{$ENDIF}
+{$IFDEF LoadDebugDLLDynamically}
 (*$HPPEMIT '  #define LoadDebugDLLDynamically' *)
-{$endif}
-
-{$ifdef RawStackTraces}
+{$ENDIF}
+{$IFDEF RawStackTraces}
 (*$HPPEMIT '  #define RawStackTraces' *)
-{$endif}
-
-{$endif}
-
-{$ifdef PatchBCBTerminate}
+{$ENDIF}
+{$ENDIF}
+{$IFDEF PatchBCBTerminate}
 (*$HPPEMIT ''#13#10 *)
 (*$HPPEMIT '#define PatchBCBTerminate' *)
-
-{$ifdef EnableMemoryLeakReporting}
+{$IFDEF EnableMemoryLeakReporting}
 (*$HPPEMIT ''#13#10 *)
 (*$HPPEMIT '#define EnableMemoryLeakReporting' *)
-{$endif}
-
-{$ifdef DetectMMOperationsAfterUninstall}
+{$ENDIF}
+{$IFDEF DetectMMOperationsAfterUninstall}
 (*$HPPEMIT ''#13#10 *)
 (*$HPPEMIT '#define DetectMMOperationsAfterUninstall' *)
-{$endif}
-
+{$ENDIF}
 {Called in FastMM4BCB.cpp, should contain codes of original "finalization" section}
 procedure FinalizeMemoryManager;
 
@@ -1237,7 +1211,7 @@ procedure FinalizeMemoryManager;
 var
   pCppDebugHook: ^Integer = nil; //PInteger not defined in BCB5
 
-{$ifdef CheckCppObjectTypeEnabled}
+{$IFDEF CheckCppObjectTypeEnabled}
 (*$HPPEMIT ''#13#10 *)
 (*$HPPEMIT '#define CheckCppObjectTypeEnabled' *)
 
@@ -1245,8 +1219,10 @@ type
   TGetCppVirtObjSizeByTypeIdPtrFunc = function(APointer: Pointer): Cardinal;
   TGetCppVirtObjTypeIdPtrFunc = function(APointer: Pointer; ASize: Cardinal): Pointer;
   TGetCppVirtObjTypeNameFunc = function(APointer: Pointer; ASize: Cardinal): PAnsiChar;
-  TGetCppVirtObjTypeNameByTypeIdPtrFunc = function (APointer: Pointer): PAnsiChar;
-  TGetCppVirtObjTypeNameByVTablePtrFunc = function(AVTablePtr: Pointer; AVTablePtrOffset: Cardinal): PAnsiChar;
+  TGetCppVirtObjTypeNameByTypeIdPtrFunc = function(APointer: Pointer): PAnsiChar;
+  TGetCppVirtObjTypeNameByVTablePtrFunc = function(AVTablePtr: Pointer;
+    AVTablePtrOffset: Cardinal): PAnsiChar;
+
 var
   {Return virtual object's size from typeId pointer}
   GetCppVirtObjSizeByTypeIdPtrFunc: TGetCppVirtObjSizeByTypeIdPtrFunc = nil;
@@ -1258,22 +1234,23 @@ var
   GetCppVirtObjTypeNameByTypeIdPtrFunc: TGetCppVirtObjTypeNameByTypeIdPtrFunc = nil;
   {Retrieve virtual object's typeId pointer from it's virtual table pointer}
   GetCppVirtObjTypeNameByVTablePtrFunc: TGetCppVirtObjTypeNameByVTablePtrFunc = nil;
-{$endif}
-{$endif}
-{$endif}
-
-{$ifndef FullDebugMode}
-{The standard memory manager functions}
-function FastGetMem(ASize: {$ifdef XE2AndUp}NativeInt{$else}Integer{$endif}): Pointer;
+{$ENDIF}
+{$ENDIF}
+{$ENDIF}
+{$IFNDEF FullDebugMode}
+  {The standard memory manager functions}
+function FastGetMem(ASize: {$IFDEF XE2AndUp}NativeInt{$ELSE}Integer{$ENDIF}): Pointer;
 function FastFreeMem(APointer: Pointer): Integer;
-function FastReallocMem(APointer: Pointer; ANewSize: {$ifdef XE2AndUp}NativeInt{$else}Integer{$endif}): Pointer;
-function FastAllocMem(ASize: {$ifdef XE2AndUp}NativeInt{$else}Cardinal{$endif}): Pointer;
-{$else}
-{The FullDebugMode memory manager functions}
-function DebugGetMem(ASize: {$ifdef XE2AndUp}NativeInt{$else}Integer{$endif}): Pointer;
+function FastReallocMem(APointer: Pointer; ANewSize:
+  {$IFDEF XE2AndUp}NativeInt{$ELSE}Integer{$ENDIF}): Pointer;
+function FastAllocMem(ASize: {$IFDEF XE2AndUp}NativeInt{$ELSE}Cardinal{$ENDIF}): Pointer;
+{$ELSE}
+  {The FullDebugMode memory manager functions}
+function DebugGetMem(ASize: {$IFDEF XE2AndUp}NativeInt{$ELSE}Integer{$ENDIF}): Pointer;
 function DebugFreeMem(APointer: Pointer): Integer;
-function DebugReallocMem(APointer: Pointer; ANewSize: {$ifdef XE2AndUp}NativeInt{$else}Integer{$endif}): Pointer;
-function DebugAllocMem(ASize: {$ifdef XE2AndUp}NativeInt{$else}Cardinal{$endif}): Pointer;
+function DebugReallocMem(APointer: Pointer; ANewSize:
+  {$IFDEF XE2AndUp}NativeInt{$ELSE}Integer{$ENDIF}): Pointer;
+function DebugAllocMem(ASize: {$IFDEF XE2AndUp}NativeInt{$ELSE}Cardinal{$ENDIF}): Pointer;
 {Scans the memory pool for any corruptions. If a corruption is encountered an "Out of Memory" exception is
  raised.}
 procedure ScanMemoryPoolForCorruptions;
@@ -1297,9 +1274,9 @@ procedure PopAllocationGroup;
  AFirstAllocationGroupToLog or it is zero, then all allocation groups are
  logged. This routine also checks the memory pool for consistency at the same
  time, raising an "Out of Memory" error if the check fails.}
-procedure LogAllocatedBlocksToFile(AFirstAllocationGroupToLog, ALastAllocationGroupToLog: Cardinal);
-{$endif}
-
+procedure LogAllocatedBlocksToFile(AFirstAllocationGroupToLog, ALastAllocationGroupToLog
+    : Cardinal);
+{$ENDIF}
 {Releases all allocated memory (use with extreme care)}
 procedure FreeAllMemory;
 
@@ -1309,36 +1286,40 @@ function FastGetHeapStatus: THeapStatus;
 {Returns statistics about the current state of the memory manager}
 procedure GetMemoryManagerState(var AMemoryManagerState: TMemoryManagerState);
 {Returns a summary of the information returned by GetMemoryManagerState}
-procedure GetMemoryManagerUsageSummary(
-  var AMemoryManagerUsageSummary: TMemoryManagerUsageSummary);
-{$ifndef POSIX}
+procedure GetMemoryManagerUsageSummary(var AMemoryManagerUsageSummary
+    : TMemoryManagerUsageSummary);
+{$IFNDEF POSIX}
 {Gets the state of every 64K block in the 4GB address space}
 procedure GetMemoryMap(var AMemoryMap: TMemoryMap);
-{$endif}
-
-{$ifdef EnableMemoryLeakReporting}
+{$ENDIF}
+{$IFDEF EnableMemoryLeakReporting}
 {Registers expected memory leaks. Returns true on success. The list of leaked
  blocks is limited, so failure is possible if the list is full.}
 function RegisterExpectedMemoryLeak(ALeakedPointer: Pointer): Boolean; overload;
-function RegisterExpectedMemoryLeak(ALeakedObjectClass: TClass; ACount: Integer = 1): Boolean; overload;
-function RegisterExpectedMemoryLeak(ALeakedBlockSize: NativeInt; ACount: Integer = 1): Boolean; overload;
-{$ifdef CheckCppObjectTypeEnabled}
+function RegisterExpectedMemoryLeak(ALeakedObjectClass: TClass; ACount: Integer = 1)
+  : Boolean; overload;
+function RegisterExpectedMemoryLeak(ALeakedBlockSize: NativeInt; ACount: Integer = 1)
+  : Boolean; overload;
+{$IFDEF CheckCppObjectTypeEnabled}
 {Registers expected memory leaks by virtual object's typeId pointer.
  Usage: RegisterExpectedMemoryLeak(typeid(ACppObject).tpp, Count);}
-function RegisterExpectedMemoryLeak(ALeakedCppVirtObjTypeIdPtr: Pointer; ACount: Integer): boolean; overload;
-{$endif}
+function RegisterExpectedMemoryLeak(ALeakedCppVirtObjTypeIdPtr: Pointer; ACount: Integer)
+  : Boolean; overload;
+{$ENDIF}
 {Removes expected memory leaks. Returns true on success.}
 function UnregisterExpectedMemoryLeak(ALeakedPointer: Pointer): Boolean; overload;
-function UnregisterExpectedMemoryLeak(ALeakedObjectClass: TClass; ACount: Integer = 1): Boolean; overload;
-function UnregisterExpectedMemoryLeak(ALeakedBlockSize: NativeInt; ACount: Integer = 1): Boolean; overload;
-{$ifdef CheckCppObjectTypeEnabled}
+function UnregisterExpectedMemoryLeak(ALeakedObjectClass: TClass; ACount: Integer = 1)
+  : Boolean; overload;
+function UnregisterExpectedMemoryLeak(ALeakedBlockSize: NativeInt; ACount: Integer = 1)
+  : Boolean; overload;
+{$IFDEF CheckCppObjectTypeEnabled}
 {Usage: UnregisterExpectedMemoryLeak(typeid(ACppObject).tpp, Count);}
-function UnregisterExpectedMemoryLeak(ALeakedCppVirtObjTypeIdPtr: Pointer; ACount: Integer): boolean; overload;
-{$endif}
+function UnregisterExpectedMemoryLeak(ALeakedCppVirtObjTypeIdPtr: Pointer; ACount: Integer)
+  : Boolean; overload;
+{$ENDIF}
 {Returns a list of all expected memory leaks}
 function GetRegisteredMemoryLeaks: TRegisteredMemoryLeaks;
-{$endif}
-
+{$ENDIF}
 {Returns the class for a memory block. Returns nil if it is not a valid class.
  Used by the leak detection code.}
 function DetectClassInstance(APointer: Pointer): TClass;
@@ -1352,9 +1333,11 @@ function DetectStringData(APMemoryBlock: Pointer;
 procedure WalkAllocatedBlocks(ACallBack: TWalkAllocatedBlocksCallback; AUserData: Pointer);
 {Writes a log file containing a summary of the memory mananger state and a summary of allocated blocks grouped by
  class. The file will be saved in UTF-8 encoding (in supported Delphi versions). Returns True on success. }
-function LogMemoryManagerStateToFile(const AFileName: string; const AAdditionalDetails: string = ''): Boolean;
+function LogMemoryManagerStateToFile(const AFileName: string;
+  const AAdditionalDetails: string = ''): Boolean;
 
-{$ifdef FullDebugMode}
+{$IFDEF FullDebugMode}
+
 {-------------FullDebugMode constants---------------}
 const
   {The stack trace depth. (Must be an *uneven* number to ensure that the
@@ -1367,20 +1350,20 @@ const
   MaxFakeVMTEntries = 200;
   {The pattern used to fill unused memory}
   DebugFillByte = $80;
-{$ifdef 32Bit}
+{$IFDEF 32Bit}
   DebugFillPattern = $01010101 * Cardinal(DebugFillByte);
   {The address that is reserved so that accesses to the address of the fill
    pattern will result in an A/V. (Not used under 64-bit, since the upper half
    of the address space is always reserved by the OS.)}
   DebugReservedAddress = $01010000 * Cardinal(DebugFillByte);
-{$else}
+{$ELSE}
   DebugFillPattern = $8080808080808080;
-{$endif}
+{$ENDIF}
 
-{-------------------------FullDebugMode structures--------------------}
+  {-------------------------FullDebugMode structures--------------------}
 type
   PStackTrace = ^TStackTrace;
-  TStackTrace = array[0..StackTraceDepth - 1] of NativeUInt;
+  TStackTrace = array [0 .. StackTraceDepth - 1] of NativeUInt;
 
   TBlockOperation = (boBlockCheck, boGetMem, boFreeMem, boReallocMem);
 
@@ -1389,6 +1372,7 @@ type
    Align16Bytes option will not work. Current size = 128 bytes under 32-bit,
    and 240 bytes under 64-bit.}
   PFullDebugBlockHeader = ^TFullDebugBlockHeader;
+
   TFullDebugBlockHeader = record
     {Space used by the medium block manager for previous/next block management.
      If a medium block is binned then these two fields will be modified.}
@@ -1434,19 +1418,23 @@ type
   public
     procedure GetVirtualMethodIndex;
     procedure VirtualMethodError;
-{$ifdef CatchUseOfFreedInterfaces}
+{$IFDEF CatchUseOfFreedInterfaces}
     procedure InterfaceError;
-{$endif}
+{$ENDIF}
   end;
 
-{$ifdef FullDebugModeCallBacks}
+{$IFDEF FullDebugModeCallBacks}
+
   {FullDebugMode memory manager event callbacks. Note that APHeaderFreedBlock in the TOnDebugFreeMemFinish
    will not be valid for large (>260K) blocks.}
   TOnDebugGetMemFinish = procedure(APHeaderNewBlock: PFullDebugBlockHeader; ASize: NativeInt);
   TOnDebugFreeMemStart = procedure(APHeaderBlockToFree: PFullDebugBlockHeader);
-  TOnDebugFreeMemFinish = procedure(APHeaderFreedBlock: PFullDebugBlockHeader; AResult: Integer);
-  TOnDebugReallocMemStart = procedure(APHeaderBlockToReallocate: PFullDebugBlockHeader; ANewSize: NativeInt);
-  TOnDebugReallocMemFinish = procedure(APHeaderReallocatedBlock: PFullDebugBlockHeader; ANewSize: NativeInt);
+  TOnDebugFreeMemFinish = procedure(APHeaderFreedBlock: PFullDebugBlockHeader;
+    AResult: Integer);
+  TOnDebugReallocMemStart = procedure(APHeaderBlockToReallocate: PFullDebugBlockHeader;
+    ANewSize: NativeInt);
+  TOnDebugReallocMemFinish = procedure(APHeaderReallocatedBlock: PFullDebugBlockHeader;
+    ANewSize: NativeInt);
 
 var
   {Note: FastMM will not catch exceptions inside these hooks, so make sure your hook code runs without
@@ -1456,28 +1444,30 @@ var
   OnDebugFreeMemFinish: TOnDebugFreeMemFinish = nil;
   OnDebugReallocMemStart: TOnDebugReallocMemStart = nil;
   OnDebugReallocMemFinish: TOnDebugReallocMemFinish = nil;
-{$endif}
-{$endif}
+{$ENDIF}
+{$ENDIF}
 
 implementation
 
 uses
-{$ifndef POSIX}
+{$IFNDEF POSIX}
   Windows,
-  {$ifdef FullDebugMode}
-    {$ifdef Delphi4or5}
+{$IFDEF FullDebugMode}
+{$IFDEF Delphi4or5}
   ShlObj,
-    {$else}
+{$ELSE}
   SHFolder,
-    {$endif}
-  {$endif}
-{$else}
-  {$ifdef MACOS}
-  Posix.Stdlib, Posix.Unistd, Posix.Fcntl,
-  {$ELSE}
+{$ENDIF}
+{$ENDIF}
+{$ELSE}
+{$IFDEF MACOS}
+  Posix.Stdlib,
+  Posix.Unistd,
+  Posix.Fcntl,
+{$ELSE}
   Libc,
-  {$endif}
-{$endif}
+{$ENDIF}
+{$ENDIF}
   FastMM4Messages;
 
 {Fixed size move procedures. The 64-bit versions assume 16-byte alignment.}
@@ -1490,22 +1480,24 @@ procedure Move44(const ASource; var ADest; ACount: NativeInt); forward;
 procedure Move52(const ASource; var ADest; ACount: NativeInt); forward;
 procedure Move60(const ASource; var ADest; ACount: NativeInt); forward;
 procedure Move68(const ASource; var ADest; ACount: NativeInt); forward;
-{$ifdef 64Bit}
+{$IFDEF 64Bit}
 {These are not needed and thus unimplemented under 32-bit}
 procedure Move8(const ASource; var ADest; ACount: NativeInt); forward;
 procedure Move24(const ASource; var ADest; ACount: NativeInt); forward;
 procedure Move40(const ASource; var ADest; ACount: NativeInt); forward;
 procedure Move56(const ASource; var ADest; ACount: NativeInt); forward;
-{$endif}
-
-{$ifdef DetectMMOperationsAfterUninstall}
+{$ENDIF}
+{$IFDEF DetectMMOperationsAfterUninstall}
 {Invalid handlers to catch MM operations after uninstall}
 function InvalidFreeMem(APointer: Pointer): Integer; forward;
-function InvalidGetMem(ASize: {$ifdef XE2AndUp}NativeInt{$else}Integer{$endif}): Pointer; forward;
-function InvalidReallocMem(APointer: Pointer; ANewSize: {$ifdef XE2AndUp}NativeInt{$else}Integer{$endif}): Pointer; forward;
-function InvalidAllocMem(ASize: {$ifdef XE2AndUp}NativeInt{$else}Cardinal{$endif}): Pointer; forward;
+function InvalidGetMem(ASize:
+  {$IFDEF XE2AndUp}NativeInt{$ELSE}Integer{$ENDIF}): Pointer; forward;
+function InvalidReallocMem(APointer: Pointer; ANewSize:
+  {$IFDEF XE2AndUp}NativeInt{$ELSE}Integer{$ENDIF}): Pointer; forward;
+function InvalidAllocMem(ASize:
+  {$IFDEF XE2AndUp}NativeInt{$ELSE}Cardinal{$ENDIF}): Pointer; forward;
 function InvalidRegisterAndUnRegisterMemoryLeak(APointer: Pointer): Boolean; forward;
-{$endif}
+{$ENDIF}
 
 {-------------------------Private constants----------------------------}
 const
@@ -1515,13 +1507,13 @@ const
    possible read access violation when reading past the end of a memory block
    in the optimized move routine (MoveX16LP). In Full Debug mode we leave a
    trailing 256 bytes to be able to safely do a memory dump.}
-  MediumBlockPoolSize = 20 * 64 * 1024{$ifndef FullDebugMode} - 16{$else} - 256{$endif};
+  MediumBlockPoolSize = 20 * 64 * 1024{$IFNDEF FullDebugMode} - 16{$ELSE} - 256{$ENDIF};
   {The granularity of small blocks}
-{$ifdef Align16Bytes}
+{$IFDEF Align16Bytes}
   SmallBlockGranularity = 16;
-{$else}
+{$ELSE}
   SmallBlockGranularity = 8;
-{$endif}
+{$ENDIF}
   {The granularity of medium blocks. Newly allocated medium blocks are
    a multiple of this size plus MediumBlockSizeOffset, to avoid cache line
    conflicts}
@@ -1541,7 +1533,8 @@ const
   MediumBlockBinCount = MediumBlockBinGroupCount * MediumBlockBinsPerGroup;
   {The maximum size allocatable through medium blocks. Blocks larger than this
    fall through to VirtualAlloc ( = large blocks).}
-  MaximumMediumBlockSize = MinimumMediumBlockSize + (MediumBlockBinCount - 1) * MediumBlockGranularity;
+  MaximumMediumBlockSize = MinimumMediumBlockSize + (MediumBlockBinCount - 1) *
+    MediumBlockGranularity;
   {The target number of small blocks per pool. The actual number of blocks per
    pool may be much greater for very small sizes and less for larger sizes. The
    cost of allocating the small block pool is amortized across all the small
@@ -1553,8 +1546,10 @@ const
    small block pool.}
   MinimumSmallBlocksPerPool = 12;
   {The lower and upper limits for the optimal small block pool size}
-  OptimalSmallBlockPoolSizeLowerLimit = 29 * 1024 - MediumBlockGranularity + MediumBlockSizeOffset;
-  OptimalSmallBlockPoolSizeUpperLimit = 64 * 1024 - MediumBlockGranularity + MediumBlockSizeOffset;
+  OptimalSmallBlockPoolSizeLowerLimit = 29 * 1024 - MediumBlockGranularity +
+    MediumBlockSizeOffset;
+  OptimalSmallBlockPoolSizeUpperLimit = 64 * 1024 - MediumBlockGranularity +
+    MediumBlockSizeOffset;
   {The maximum small block pool size. If a free block is this size or larger
    then it will be split.}
   MaximumSmallBlockPoolSize = OptimalSmallBlockPoolSizeUpperLimit + MinimumMediumBlockSize;
@@ -1593,57 +1588,50 @@ const
   {-------------Memory leak reporting constants---------------}
   ExpectedMemoryLeaksListSize = 64 * 1024;
   {-------------Other constants---------------}
-{$ifndef NeverSleepOnThreadContention}
+{$IFNDEF NeverSleepOnThreadContention}
   {Sleep time when a resource (small/medium/large block manager) is in use}
   InitialSleepTime = 0;
   {Used when the resource is still in use after the first sleep}
   AdditionalSleepTime = 1;
-{$endif}
+{$ENDIF}
   {Hexadecimal characters}
-  HexTable: array[0..15] of AnsiChar = ('0', '1', '2', '3', '4', '5', '6', '7',
-    '8', '9', 'A', 'B', 'C', 'D', 'E', 'F');
+  HexTable: array [0 .. 15] of AnsiChar = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+    'A', 'B', 'C', 'D', 'E', 'F');
   {Copyright message - not used anywhere in the code}
-  Copyright: AnsiString = 'FastMM4 (c) 2004 - 2011 Pierre le Riche / Professional Software Development';
-{$ifdef FullDebugMode}
+  Copyright: AnsiString =
+    'FastMM4 (c) 2004 - 2011 Pierre le Riche / Professional Software Development';
+{$IFDEF FullDebugMode}
   {Virtual Method Called On Freed Object Errors}
-  StandardVirtualMethodNames: array[1 + vmtParent div SizeOf(Pointer) .. vmtDestroy div SizeOf(Pointer)] of PAnsiChar = (
-{$ifdef BCB6OrDelphi6AndUp}
-  {$if RTLVersion >= 20}
-    'Equals',
-    'GetHashCode',
-    'ToString',
-  {$ifend}
-{$endif}
-    'SafeCallException',
-    'AfterConstruction',
-    'BeforeDestruction',
-    'Dispatch',
-    'DefaultHandler',
-    'NewInstance',
-    'FreeInstance',
-    'Destroy');
+  StandardVirtualMethodNames: array [1 + vmtParent div SizeOf(Pointer)
+      .. vmtDestroy div SizeOf(Pointer)] of PAnsiChar = (
+{$IFDEF BCB6OrDelphi6AndUp}
+{$IF RTLVersion >= 20}
+    'Equals', 'GetHashCode', 'ToString',
+{$IFEND}
+{$ENDIF}
+    'SafeCallException', 'AfterConstruction', 'BeforeDestruction', 'Dispatch',
+    'DefaultHandler', 'NewInstance', 'FreeInstance', 'Destroy');
   {The name of the FullDebugMode support DLL. The support DLL implements stack
    tracing and the conversion of addresses to unit and line number information.}
-{$ifdef 32Bit}
+{$IFDEF 32Bit}
   FullDebugModeLibraryName = FullDebugModeLibraryName32Bit;
-{$else}
+{$ELSE}
   FullDebugModeLibraryName = FullDebugModeLibraryName64Bit;
-{$endif}
-{$endif}
+{$ENDIF}
+{$ENDIF}
 
-{-------------------------Private types----------------------------}
+  {-------------------------Private types----------------------------}
 type
 
-{$ifdef Delphi4or5}
+{$IFDEF Delphi4or5}
   {Delphi 5 Compatibility}
   PCardinal = ^Cardinal;
   PPointer = ^Pointer;
-{$endif}
-{$ifdef BCB4}
+{$ENDIF}
+{$IFDEF BCB4}
   {Define some additional types for BCB4}
-  PInteger  = ^Integer;
-{$endif}
-
+  PInteger = ^Integer;
+{$ENDIF}
   {Move procedure type}
   TMoveProc = procedure(const ASource; var ADest; ACount: NativeInt);
 
@@ -1654,26 +1642,27 @@ type
 
   {The layout of a string allocation. Used to detect string leaks.}
   PStrRec = ^StrRec;
+
   StrRec = packed record
-{$ifdef 64Bit}
+{$IFDEF 64Bit}
     _Padding: Integer;
-{$endif}
-{$ifdef BCB6OrDelphi6AndUp}
-  {$if RTLVersion >= 20}
+{$ENDIF}
+{$IFDEF BCB6OrDelphi6AndUp}
+{$IF RTLVersion >= 20}
     codePage: Word;
     elemSize: Word;
-  {$ifend}
-{$endif}
+{$IFEND}
+{$ENDIF}
     refCnt: Integer;
     length: Integer;
   end;
 
-{$ifdef EnableMemoryLeakReporting}
+{$IFDEF EnableMemoryLeakReporting}
+
   {Different kinds of memory leaks}
   TMemoryLeakType = (mltUnexpectedLeak, mltExpectedLeakRegisteredByPointer,
     mltExpectedLeakRegisteredByClass, mltExpectedLeakRegisteredBySize);
-{$endif}
-
+{$ENDIF}
   {---------------Small block structures-------------}
 
   {Pointer to the header of a small block pool}
@@ -1681,6 +1670,7 @@ type
 
   {Small block type (Size = 32 bytes for 32-bit, 64 bytes for 64-bit).}
   PSmallBlockType = ^TSmallBlockType;
+
   TSmallBlockType = record
     {True = Block type is locked}
     BlockTypeLocked: Boolean;
@@ -1705,29 +1695,29 @@ type
     MaxSequentialFeedBlockAddress: Pointer;
     {The pool that is current being used to serve blocks in sequential order}
     CurrentSequentialFeedPool: PSmallBlockPoolHeader;
-{$ifdef UseCustomFixedSizeMoveRoutines}
+{$IFDEF UseCustomFixedSizeMoveRoutines}
     {The fixed size move procedure used to move data for this block size when
      it is upsized. When a block is downsized (which usually does not occur
      that often) the variable size move routine is used.}
     UpsizeMoveProcedure: TMoveProc;
-{$else}
+{$ELSE}
     Reserved1: Pointer;
-{$endif}
-{$ifdef 64Bit}
+{$ENDIF}
+{$IFDEF 64Bit}
     {Pad to 64 bytes for 64-bit}
     Reserved2: Pointer;
-{$endif}
+{$ENDIF}
   end;
 
   {Small block pool (Size = 32 bytes for 32-bit, 48 bytes for 64-bit).}
   TSmallBlockPoolHeader = record
     {BlockType}
     BlockType: PSmallBlockType;
-{$ifdef 32Bit}
+{$IFDEF 32Bit}
     {Align the next fields to the same fields in TSmallBlockType and pad this
      structure to 32 bytes for 32-bit}
     Reserved1: Cardinal;
-{$endif}
+{$ENDIF}
     {The next and previous pool that has free blocks of this size. Do not
      change the position of these two fields: They must be at the same offsets
      as the fields in TSmallBlockType of the same name.}
@@ -1755,6 +1745,7 @@ type
   {The medium block pool from which medium blocks are drawn. Size = 16 bytes
    for 32-bit and 32 bytes for 64-bit.}
   PMediumBlockPoolHeader = ^TMediumBlockPoolHeader;
+
   TMediumBlockPoolHeader = record
     {Points to the previous and next medium block pools. This circular linked
      list is used to track memory leaks on program shutdown.}
@@ -1774,8 +1765,9 @@ type
    Offset: BlockSize - 2*SizeOf(Pointer) = Size of this block (if this block is free)
    Offset: BlockSize - SizeOf(Pointer) = Size of the next block and flags
 
-  {A medium block that is unused}
+   {A medium block that is unused}
   PMediumFreeBlock = ^TMediumFreeBlock;
+
   TMediumFreeBlock = record
     PreviousFreeBlock: PMediumFreeBlock;
     NextFreeBlock: PMediumFreeBlock;
@@ -1785,6 +1777,7 @@ type
 
   {Large block header record (Size = 16 for 32-bit, 32 for 64-bit)}
   PLargeBlockHeader = ^TLargeBlockHeader;
+
   TLargeBlockHeader = record
     {Points to the previous and next large blocks. This circular linked
      list is used to track memory leaks on program shutdown.}
@@ -1797,22 +1790,23 @@ type
   end;
 
   {-------------------------Expected Memory Leak Structures--------------------}
-{$ifdef EnableMemoryLeakReporting}
+{$IFDEF EnableMemoryLeakReporting}
 
   {The layout of an expected leak. All fields may not be specified, in which
    case it may be harder to determine which leaks are expected and which are
    not.}
   PExpectedMemoryLeak = ^TExpectedMemoryLeak;
   PPExpectedMemoryLeak = ^PExpectedMemoryLeak;
+
   TExpectedMemoryLeak = record
     {Linked list pointers}
     PreviousLeak, NextLeak: PExpectedMemoryLeak;
     {Information about the expected leak}
     LeakAddress: Pointer;
     LeakedClass: TClass;
-    {$ifdef CheckCppObjectTypeEnabled}
+{$IFDEF CheckCppObjectTypeEnabled}
     LeakedCppTypeIdPtr: Pointer;
-    {$endif}
+{$ENDIF}
     LeakSize: NativeInt;
     LeakCount: Integer;
   end;
@@ -1829,18 +1823,20 @@ type
     {Entries with only size specified}
     FirstEntryBySizeOnly: PExpectedMemoryLeak;
     {The expected leaks buffer (Need to leave space for this header)}
-    ExpectedLeaks: array[0..(ExpectedMemoryLeaksListSize - 64) div SizeOf(TExpectedMemoryLeak) - 1] of TExpectedMemoryLeak;
+    ExpectedLeaks: array [0 .. (ExpectedMemoryLeaksListSize - 64)
+        div SizeOf(TExpectedMemoryLeak) - 1] of TExpectedMemoryLeak;
   end;
+
   PExpectedMemoryLeaks = ^TExpectedMemoryLeaks;
 
-{$endif}
+{$ENDIF}
 
-{-------------------------Private constants----------------------------}
+  {-------------------------Private constants----------------------------}
 const
-{$ifndef BCB6OrDelphi7AndUp}
+{$IFNDEF BCB6OrDelphi7AndUp}
   reOutOfMemory = 1;
   reInvalidPtr = 2;
-{$endif}
+{$ENDIF}
   {The size of the block header in front of small and medium blocks}
   BlockHeaderSize = SizeOf(Pointer);
   {The size of a small block pool header}
@@ -1849,94 +1845,86 @@ const
   MediumBlockPoolHeaderSize = SizeOf(TMediumBlockPoolHeader);
   {The size of the header in front of Large blocks}
   LargeBlockHeaderSize = SizeOf(TLargeBlockHeader);
-{$ifdef FullDebugMode}
+{$IFDEF FullDebugMode}
   {We need space for the header, the trailer checksum and the trailing block
    size (only used by freed medium blocks).}
-  FullDebugBlockOverhead = SizeOf(TFullDebugBlockHeader) + SizeOf(NativeUInt) + SizeOf(Pointer);
-{$endif}
+  FullDebugBlockOverhead = SizeOf(TFullDebugBlockHeader) + SizeOf(NativeUInt) +
+    SizeOf(Pointer);
+{$ENDIF}
 
-{-------------------------Private variables----------------------------}
+  {-------------------------Private variables----------------------------}
 var
   {-----------------Small block management------------------}
   {The small block types. Sizes include the leading header. Sizes are
    picked to limit maximum wastage to about 10% or 256 bytes (whichever is
    less) where possible.}
-  SmallBlockTypes: array[0..NumSmallBlockTypes - 1] of TSmallBlockType =(
+  SmallBlockTypes: array [0 .. NumSmallBlockTypes - 1] of TSmallBlockType = (
     {8/16 byte jumps}
-{$ifndef Align16Bytes}
-    (BlockSize: 8 {$ifdef UseCustomFixedSizeMoveRoutines}; UpsizeMoveProcedure: Move4{$endif}),
-{$endif}
-    (BlockSize: 16 {$ifdef UseCustomFixedSizeMoveRoutines}; UpsizeMoveProcedure: {$ifdef 32Bit}Move12{$else}Move8{$endif}{$endif}),
-{$ifndef Align16Bytes}
-    (BlockSize: 24 {$ifdef UseCustomFixedSizeMoveRoutines}; UpsizeMoveProcedure: Move20{$endif}),
-{$endif}
-    (BlockSize: 32 {$ifdef UseCustomFixedSizeMoveRoutines}; UpsizeMoveProcedure: {$ifdef 32Bit}Move28{$else}Move24{$endif}{$endif}),
-{$ifndef Align16Bytes}
-    (BlockSize: 40 {$ifdef UseCustomFixedSizeMoveRoutines}; UpsizeMoveProcedure: Move36{$endif}),
-{$endif}
-    (BlockSize: 48 {$ifdef UseCustomFixedSizeMoveRoutines}; UpsizeMoveProcedure: {$ifdef 32Bit}Move44{$else}Move40{$endif}{$endif}),
-{$ifndef Align16Bytes}
-    (BlockSize: 56 {$ifdef UseCustomFixedSizeMoveRoutines}; UpsizeMoveProcedure: Move52{$endif}),
-{$endif}
-    (BlockSize: 64 {$ifdef UseCustomFixedSizeMoveRoutines}; UpsizeMoveProcedure: {$ifdef 32Bit}Move60{$else}Move56{$endif}{$endif}),
-{$ifndef Align16Bytes}
-    (BlockSize: 72 {$ifdef UseCustomFixedSizeMoveRoutines}; UpsizeMoveProcedure: Move68{$endif}),
-{$endif}
+{$IFNDEF Align16Bytes}
+    (
+      BlockSize: 8
+      {$IFDEF UseCustomFixedSizeMoveRoutines}; UpsizeMoveProcedure: Move4{$ENDIF}),
+{$ENDIF}
+    (BlockSize: 16 {$IFDEF UseCustomFixedSizeMoveRoutines}; UpsizeMoveProcedure:
+      {$IFDEF 32Bit}Move12{$ELSE}Move8{$ENDIF}{$ENDIF}),
+{$IFNDEF Align16Bytes}
+    (BlockSize: 24
+      {$IFDEF UseCustomFixedSizeMoveRoutines}; UpsizeMoveProcedure: Move20{$ENDIF}),
+{$ENDIF}
+    (BlockSize: 32 {$IFDEF UseCustomFixedSizeMoveRoutines}; UpsizeMoveProcedure:
+      {$IFDEF 32Bit}Move28{$ELSE}Move24{$ENDIF}{$ENDIF}),
+{$IFNDEF Align16Bytes}
+    (BlockSize: 40
+      {$IFDEF UseCustomFixedSizeMoveRoutines}; UpsizeMoveProcedure: Move36{$ENDIF}),
+{$ENDIF}
+    (BlockSize: 48 {$IFDEF UseCustomFixedSizeMoveRoutines}; UpsizeMoveProcedure:
+      {$IFDEF 32Bit}Move44{$ELSE}Move40{$ENDIF}{$ENDIF}),
+{$IFNDEF Align16Bytes}
+    (BlockSize: 56
+      {$IFDEF UseCustomFixedSizeMoveRoutines}; UpsizeMoveProcedure: Move52{$ENDIF}),
+{$ENDIF}
+    (BlockSize: 64 {$IFDEF UseCustomFixedSizeMoveRoutines}; UpsizeMoveProcedure:
+      {$IFDEF 32Bit}Move60{$ELSE}Move56{$ENDIF}{$ENDIF}),
+{$IFNDEF Align16Bytes}
+    (BlockSize: 72
+      {$IFDEF UseCustomFixedSizeMoveRoutines}; UpsizeMoveProcedure: Move68{$ENDIF}),
+{$ENDIF}
     (BlockSize: 80),
-{$ifndef Align16Bytes}
+{$IFNDEF Align16Bytes}
     (BlockSize: 88),
-{$endif}
+{$ENDIF}
     (BlockSize: 96),
-{$ifndef Align16Bytes}
+{$IFNDEF Align16Bytes}
     (BlockSize: 104),
-{$endif}
+{$ENDIF}
     (BlockSize: 112),
-{$ifndef Align16Bytes}
+{$IFNDEF Align16Bytes}
     (BlockSize: 120),
-{$endif}
+{$ENDIF}
     (BlockSize: 128),
-{$ifndef Align16Bytes}
+{$IFNDEF Align16Bytes}
     (BlockSize: 136),
-{$endif}
+{$ENDIF}
     (BlockSize: 144),
-{$ifndef Align16Bytes}
+{$IFNDEF Align16Bytes}
     (BlockSize: 152),
-{$endif}
+{$ENDIF}
     (BlockSize: 160),
     {16 byte jumps}
-    (BlockSize: 176),
-    (BlockSize: 192),
-    (BlockSize: 208),
-    (BlockSize: 224),
-    (BlockSize: 240),
-    (BlockSize: 256),
-    (BlockSize: 272),
-    (BlockSize: 288),
-    (BlockSize: 304),
-    (BlockSize: 320),
+    (BlockSize: 176), (BlockSize: 192), (BlockSize: 208), (BlockSize: 224), (BlockSize: 240),
+    (BlockSize: 256), (BlockSize: 272), (BlockSize: 288), (BlockSize: 304), (BlockSize: 320),
     {32 byte jumps}
-    (BlockSize: 352),
-    (BlockSize: 384),
-    (BlockSize: 416),
-    (BlockSize: 448),
-    (BlockSize: 480),
+    (BlockSize: 352), (BlockSize: 384), (BlockSize: 416), (BlockSize: 448), (BlockSize: 480),
     {48 byte jumps}
-    (BlockSize: 528),
-    (BlockSize: 576),
-    (BlockSize: 624),
-    (BlockSize: 672),
+    (BlockSize: 528), (BlockSize: 576), (BlockSize: 624), (BlockSize: 672),
     {64 byte jumps}
-    (BlockSize: 736),
-    (BlockSize: 800),
+    (BlockSize: 736), (BlockSize: 800),
     {80 byte jumps}
-    (BlockSize: 880),
-    (BlockSize: 960),
+    (BlockSize: 880), (BlockSize: 960),
     {96 byte jumps}
-    (BlockSize: 1056),
-    (BlockSize: 1152),
+    (BlockSize: 1056), (BlockSize: 1152),
     {112 byte jumps}
-    (BlockSize: 1264),
-    (BlockSize: 1376),
+    (BlockSize: 1264), (BlockSize: 1376),
     {128 byte jumps}
     (BlockSize: 1504),
     {144 byte jumps}
@@ -1955,10 +1943,10 @@ var
      requested block size is already locked by another thread then up to two
      larger block sizes may be used instead. Having the last block size occur
      three times avoids the need to have a size overflow check.}
-    (BlockSize: MaximumSmallBlockSize),
-    (BlockSize: MaximumSmallBlockSize));
+    (BlockSize: MaximumSmallBlockSize), (BlockSize: MaximumSmallBlockSize));
   {Size to small block type translation table}
-  AllocSize2SmallBlockTypeIndX4: array[0..(MaximumSmallBlockSize - 1) div SmallBlockGranularity] of Byte;
+  AllocSize2SmallBlockTypeIndX4: array [0 .. (MaximumSmallBlockSize - 1)
+      div SmallBlockGranularity] of Byte;
   {-----------------Medium block management------------------}
   {A dummy medium block pool header: Maintains a circular list of all medium
    block pools to enable memory leak detection on program shutdown.}
@@ -1974,12 +1962,12 @@ var
   MediumBlockBinGroupBitmap: Cardinal;
   {The medium block bins: total of 32 * 32 = 1024 bins of a certain
    minimum size.}
-  MediumBlockBinBitmaps: array[0..MediumBlockBinGroupCount - 1] of Cardinal;
+  MediumBlockBinBitmaps: array [0 .. MediumBlockBinGroupCount - 1] of Cardinal;
   {The medium block bins. There are 1024 LIFO circular linked lists each
    holding blocks of a specified minimum size. The sizes vary in size from
    MinimumMediumBlockSize to MaximumMediumBlockSize. The bins are treated as
    type TMediumFreeBlock to avoid pointer checks.}
-  MediumBlockBins: array[0..MediumBlockBinCount - 1] of TMediumFreeBlock;
+  MediumBlockBins: array [0 .. MediumBlockBinCount - 1] of TMediumFreeBlock;
   {-----------------Large block management------------------}
   {Are large blocks locked?}
   LargeBlocksLocked: Boolean;
@@ -1987,15 +1975,15 @@ var
    to enable memory leak detection on program shutdown.}
   LargeBlocksCircularList: TLargeBlockHeader;
   {-------------------------Expected Memory Leak Structures--------------------}
-{$ifdef EnableMemoryLeakReporting}
+{$IFDEF EnableMemoryLeakReporting}
   {The expected memory leaks}
   ExpectedMemoryLeaks: PExpectedMemoryLeaks;
   ExpectedMemoryLeaksListLocked: Boolean;
-{$endif}
+{$ENDIF}
   {---------------------Full Debug Mode structures--------------------}
-{$ifdef FullDebugMode}
+{$IFDEF FullDebugMode}
   {The allocation group stack}
-  AllocationGroupStack: array[0..AllocationGroupStackSize - 1] of Cardinal;
+  AllocationGroupStack: array [0 .. AllocationGroupStackSize - 1] of Cardinal;
   {The allocation group stack top (it is an index into AllocationGroupStack)}
   AllocationGroupStackTop: Cardinal;
   {The last allocation number used}
@@ -2007,7 +1995,7 @@ var
    block header or footer.}
   ThreadsInFullDebugModeRoutine: Integer;
   {The current log file name}
-  MMLogFileName: array[0..1023] of AnsiChar;
+  MMLogFileName: array [0 .. 1023] of AnsiChar;
   {The 64K block of reserved memory used to trap invalid memory accesses using
    fields in a freed object.}
   ReservedBlock: Pointer;
@@ -2015,80 +2003,86 @@ var
    virtual method call on a freed object.}
   VMIndex: Integer;
   {The fake VMT used to catch virtual method calls on freed objects.}
-  FreedObjectVMT: packed record
-    VMTData: array[vmtSelfPtr .. vmtParent + SizeOf(Pointer) - 1] of byte;
-    VMTMethods: array[SizeOf(Pointer) + vmtParent .. vmtParent + MaxFakeVMTEntries * SizeOf(Pointer) + SizeOf(Pointer) - 1] of Byte;
-  end;
-  {$ifdef CatchUseOfFreedInterfaces}
-  VMTBadInterface: array[0..MaxFakeVMTEntries - 1] of Pointer;
-  {$endif}
-{$endif}
-  {--------------Other info--------------}
-  {The memory manager that was replaced}
-  OldMemoryManager: {$ifndef BDS2006AndUp}TMemoryManager{$else}TMemoryManagerEx{$endif};
-  {The replacement memory manager}
-  NewMemoryManager: {$ifndef BDS2006AndUp}TMemoryManager{$else}TMemoryManagerEx{$endif};
-{$ifdef DetectMMOperationsAfterUninstall}
-  {Invalid handlers to catch MM operations after uninstall}
-  InvalidMemoryManager: {$ifndef BDS2006AndUp}TMemoryManager{$else}TMemoryManagerEx{$endif} = (
-    GetMem: InvalidGetMem;
-    FreeMem: InvalidFreeMem;
-    ReallocMem: InvalidReallocMem
-  {$ifdef BDS2006AndUp};
-    AllocMem: InvalidAllocMem;
-    RegisterExpectedMemoryLeak: InvalidRegisterAndUnRegisterMemoryLeak;
-    UnRegisterExpectedMemoryLeak: InvalidRegisterAndUnRegisterMemoryLeak;
-  {$endif}
-  );
-{$endif}
-
-{$ifdef MMSharingEnabled}
-  {A string uniquely identifying the current process (for sharing the memory
-   manager between DLLs and the main application)}
-  MappingObjectName: array[0..25] of AnsiChar = ('L', 'o', 'c', 'a', 'l', '\',
-    'F', 'a', 's', 't', 'M', 'M', '_', 'P', 'I', 'D', '_', '?', '?', '?', '?',
-    '?', '?', '?', '?', #0);
-{$ifdef EnableBackwardCompatibleMMSharing}
-  UniqueProcessIDString: array[1..20] of AnsiChar = ('?', '?', '?', '?', '?',
-    '?', '?', '?', '_', 'P', 'I', 'D', '_', 'F', 'a', 's', 't', 'M', 'M', #0);
-  UniqueProcessIDStringBE: array[1..23] of AnsiChar = ('?', '?', '?', '?', '?',
-    '?', '?', '?', '_', 'P', 'I', 'D', '_', 'F', 'a', 's', 't', 'M', 'M', '_',
-    'B', 'E', #0);
-  {The handle of the MM window}
-  MMWindow: HWND;
-  {The handle of the MM window (for default MM of Delphi 2006 compatibility)}
-  MMWindowBE: HWND;
-{$endif}
-  {The handle of the memory mapped file}
-  MappingObjectHandle: NativeUInt;
-{$endif}
-  {Has FastMM been installed?}
-  FastMMIsInstalled: Boolean;
-  {Is the MM in place a shared memory manager?}
-  IsMemoryManagerOwner: Boolean;
-  {Must MMX be used for move operations?}
-{$ifdef EnableMMX}
-  {$ifndef ForceMMX}
-  UseMMX: Boolean;
-  {$endif}
-{$endif}
-  {Is a MessageBox currently showing? If so, do not show another one.}
-  ShowingMessageBox: Boolean;
-  {True if RunInitializationCode has been called already.}
-  InitializationCodeHasRun: Boolean = False;
+  FreedObjectVMT: packed record VMTData: array [vmtSelfPtr .. vmtParent + SizeOf(Pointer) -
+      1] of Byte;
+  VMTMethods: array [SizeOf(Pointer) + vmtParent .. vmtParent + MaxFakeVMTEntries *
+      SizeOf(Pointer) + SizeOf(Pointer) - 1] of Byte;
+end;
+{$IFDEF CatchUseOfFreedInterfaces}
+VMTBadInterface:
+array [0 .. MaxFakeVMTEntries - 1] of Pointer;
+{$ENDIF}
+{$ENDIF}
+{--------------Other info--------------}
+{The memory manager that was replaced}
+OldMemoryManager: {$IFNDEF BDS2006AndUp}TMemoryManager{$ELSE}TMemoryManagerEx{$ENDIF};
+{The replacement memory manager}
+NewMemoryManager: {$IFNDEF BDS2006AndUp}TMemoryManager{$ELSE}TMemoryManagerEx{$ENDIF};
+{$IFDEF DetectMMOperationsAfterUninstall}
+{Invalid handlers to catch MM operations after uninstall}
+InvalidMemoryManager: {$IFNDEF BDS2006AndUp}TMemoryManager{$ELSE}TMemoryManagerEx{$ENDIF} = (GetMem: InvalidGetMem; FreeMem: InvalidFreeMem; ReallocMem: InvalidReallocMem
+{$IFDEF BDS2006AndUp}; AllocMem: InvalidAllocMem;
+  RegisterExpectedMemoryLeak: InvalidRegisterAndUnRegisterMemoryLeak;
+  UnregisterExpectedMemoryLeak: InvalidRegisterAndUnRegisterMemoryLeak;
+{$ENDIF}
+);
+{$ENDIF}
+{$IFDEF MMSharingEnabled}
+{A string uniquely identifying the current process (for sharing the memory
+ manager between DLLs and the main application)}
+MappingObjectName:
+array [0 .. 25] of AnsiChar = ('L', 'o', 'c', 'a', 'l', '\', 'F', 'a', 's', 't', 'M', 'M', '_',
+  'P', 'I', 'D', '_', '?', '?', '?', '?', '?', '?', '?', '?', #0);
+{$IFDEF EnableBackwardCompatibleMMSharing}
+UniqueProcessIDString:
+array [1 .. 20] of AnsiChar = ('?', '?', '?', '?', '?', '?', '?', '?', '_', 'P', 'I', 'D', '_',
+  'F', 'a', 's', 't', 'M', 'M', #0);
+UniqueProcessIDStringBE:
+array [1 .. 23] of AnsiChar = ('?', '?', '?', '?', '?', '?', '?', '?', '_', 'P', 'I', 'D', '_',
+  'F', 'a', 's', 't', 'M', 'M', '_', 'B', 'E', #0);
+{The handle of the MM window}
+MMWindow:
+HWND;
+{The handle of the MM window (for default MM of Delphi 2006 compatibility)}
+MMWindowBE:
+HWND;
+{$ENDIF}
+{The handle of the memory mapped file}
+MappingObjectHandle:
+NativeUInt;
+{$ENDIF}
+{Has FastMM been installed?}
+FastMMIsInstalled:
+Boolean;
+{Is the MM in place a shared memory manager?}
+IsMemoryManagerOwner:
+Boolean;
+{Must MMX be used for move operations?}
+{$IFDEF EnableMMX}
+{$IFNDEF ForceMMX}
+UseMMX:
+Boolean;
+{$ENDIF}
+{$ENDIF}
+{Is a MessageBox currently showing? If so, do not show another one.}
+ShowingMessageBox:
+Boolean;
+{True if RunInitializationCode has been called already.}
+InitializationCodeHasRun:
+Boolean = False;
 
 {----------------Utility Functions------------------}
 
 {A copy of StrLen in order to avoid the SysUtils unit, which would have
  introduced overhead like exception handling code.}
 function StrLen(const AStr: PAnsiChar): NativeUInt;
-{$ifndef Use32BitAsm}
+{$IFNDEF Use32BitAsm}
 begin
   Result := 0;
   while AStr[Result] <> #0 do
     Inc(Result);
 end;
-{$else}
+{$ELSE}
 asm
   {Check the first byte}
   cmp byte ptr [eax], 0
@@ -2116,10 +2110,10 @@ asm
 @ZeroLength:
   xor eax, eax
 end;
-{$endif}
+{$ENDIF}
+{$IFDEF EnableMMX}
+{$IFNDEF ForceMMX}
 
-{$ifdef EnableMMX}
-{$ifndef ForceMMX}
 {Returns true if the CPUID instruction is supported}
 function CPUID_Supported: Boolean;
 asm
@@ -2142,11 +2136,11 @@ asm
   push esi
   mov esi, edx
   {cpuid instruction}
-{$ifdef Delphi4or5}
+  {$IFDEF Delphi4or5}
   db $0f, $a2
-{$else}
+  {$ELSE}
   cpuid
-{$endif}
+  {$ENDIF}
   {Save registers}
   mov TRegisters[esi].RegEAX, eax
   mov TRegisters[esi].RegEBX, ebx
@@ -2171,49 +2165,49 @@ begin
   else
     Result := False;
 end;
-{$endif}
-{$endif}
+{$ENDIF}
+{$ENDIF}
 
 {Compare [AAddress], CompareVal:
  If Equal: [AAddress] := NewVal and result = CompareVal
  If Unequal: Result := [AAddress]}
 function LockCmpxchg(CompareVal, NewVal: Byte; AAddress: PByte): Byte;
 asm
-{$ifdef 32Bit}
+  {$IFDEF 32Bit}
   {On entry:
-    al = CompareVal,
-    dl = NewVal,
-    ecx = AAddress}
-  {$ifndef LINUX}
+  al = CompareVal,
+  dl = NewVal,
+  ecx = AAddress}
+  {$IFNDEF LINUX}
   lock cmpxchg [ecx], dl
-  {$else}
+  {$ELSE}
   {Workaround for Kylix compiler bug}
   db $F0, $0F, $B0, $11
-  {$endif}
-{$else}
+  {$ENDIF}
+  {$ELSE}
   {On entry:
-    cl = CompareVal
-    dl = NewVal
-    r8 = AAddress}
+  cl = CompareVal
+  dl = NewVal
+  r8 = AAddress}
   .noframe
   mov rax, rcx
   lock cmpxchg [r8], dl
-{$endif}
+  {$ENDIF}
 end;
 
-{$ifndef ASMVersion}
+{$IFNDEF ASMVersion}
+
 {Gets the first set bit in the 32-bit number, returning the bit index}
 function FindFirstSetBit(ACardinal: Cardinal): Cardinal;
 asm
-{$ifdef 64Bit}
+  {$IFDEF 64Bit}
   .noframe
   mov rax, rcx
-{$endif}
+  {$ENDIF}
   bsf eax, eax
 end;
-{$endif}
-
-{$ifdef MACOS}
+{$ENDIF}
+{$IFDEF MACOS}
 
 function StrLCopy(Dest: PAnsiChar; const Source: PAnsiChar; MaxLen: Cardinal): PAnsiChar;
 var
@@ -2231,7 +2225,7 @@ function GetModuleFileName(Module: HMODULE; Buffer: PAnsiChar; BufLen: Integer):
 const
   CUnknown: AnsiString = 'unknown';
 var
-  tmp: array[0..512] of Char;
+  tmp: array [0 .. 512] of Char;
 begin
   if FastMMIsInstalled then
   begin
@@ -2240,40 +2234,41 @@ begin
   end
   else
   begin
-    Result := Length(CUnknown);
+    Result := length(CUnknown);
     StrLCopy(Buffer, Pointer(CUnknown), Result + 1);
   end;
 end;
 
 const
-  INVALID_HANDLE_VALUE = THandle(-1);
+  INVALID_HANDLE_VALUE = THandle( -1);
 
 function FileCreate(const FileName: string): THandle;
 begin
-  Result := THandle(__open(PAnsiChar(UTF8String(FileName)), O_RDWR or O_CREAT or O_TRUNC or O_EXCL, FileAccessRights));
+  Result := THandle(__open(PAnsiChar(UTF8String(FileName)), O_RDWR or O_CREAT or O_TRUNC or
+        O_EXCL, FileAccessRights));
 end;
 
-{$endif}
+{$ENDIF}
 
 {Writes the module filename to the specified buffer and returns the number of
  characters written.}
 function AppendModuleFileName(ABuffer: PAnsiChar): Integer;
 var
-  LModuleHandle: HModule;
+  LModuleHandle: HMODULE;
 begin
   {Get the module handle}
-{$ifndef borlndmmdll}
+{$IFNDEF borlndmmdll}
   if IsLibrary then
     LModuleHandle := HInstance
   else
-{$endif}
+{$ENDIF}
     LModuleHandle := 0;
   {Get the module name}
-{$ifndef POSIX}
+{$IFNDEF POSIX}
   Result := GetModuleFileNameA(LModuleHandle, ABuffer, 512);
-{$else}
+{$ELSE}
   Result := GetModuleFileName(LModuleHandle, ABuffer, 512);
-{$endif}
+{$ENDIF}
 end;
 
 {Copies the name of the module followed by the given string to the buffer,
@@ -2291,8 +2286,7 @@ begin
     {Find the last backslash}
     LCopyStart := PAnsiChar(PByte(ABuffer) + LModuleNameLength - 1);
     LModuleNameLength := 0;
-    while (UIntPtr(LCopyStart) >= UIntPtr(ABuffer))
-      and (LCopyStart^ <> '\') do
+    while (UIntPtr(LCopyStart) >= UIntPtr(ABuffer)) and (LCopyStart^ <> '\') do
     begin
       Inc(LModuleNameLength);
       Dec(LCopyStart);
@@ -2325,45 +2319,46 @@ end;
 
 procedure Move4(const ASource; var ADest; ACount: NativeInt);
 asm
-{$ifdef 32Bit}
+  {$IFDEF 32Bit}
   mov eax, [eax]
   mov [edx], eax
-{$else}
-.noframe
+  {$ELSE}
+  .noframe
   mov eax, [rcx]
   mov [rdx], eax
-{$endif}
+  {$ENDIF}
 end;
 
-{$ifdef 64Bit}
+{$IFDEF 64Bit}
+
 procedure Move8(const ASource; var ADest; ACount: NativeInt);
 asm
   mov rax, [rcx]
   mov [rdx], rax
 end;
-{$endif}
+{$ENDIF}
 
 procedure Move12(const ASource; var ADest; ACount: NativeInt);
 asm
-{$ifdef 32Bit}
+  {$IFDEF 32Bit}
   mov ecx, [eax]
   mov [edx], ecx
   mov ecx, [eax + 4]
   mov eax, [eax + 8]
   mov [edx + 4], ecx
   mov [edx + 8], eax
-{$else}
-.noframe
+  {$ELSE}
+  .noframe
   mov rax, [rcx]
   mov ecx, [rcx + 8]
   mov [rdx], rax
   mov [rdx + 8], ecx
-{$endif}
+  {$ENDIF}
 end;
 
 procedure Move20(const ASource; var ADest; ACount: NativeInt);
 asm
-{$ifdef 32Bit}
+  {$IFDEF 32Bit}
   mov ecx, [eax]
   mov [edx], ecx
   mov ecx, [eax + 4]
@@ -2374,16 +2369,17 @@ asm
   mov eax, [eax + 16]
   mov [edx + 12], ecx
   mov [edx + 16], eax
-{$else}
-.noframe
+  {$ELSE}
+  .noframe
   movdqa xmm0, [rcx]
   mov ecx, [rcx + 16]
   movdqa [rdx], xmm0
   mov [rdx + 16], ecx
-{$endif}
+  {$ENDIF}
 end;
 
-{$ifdef 64Bit}
+{$IFDEF 64Bit}
+
 procedure Move24(const ASource; var ADest; ACount: NativeInt);
 asm
   movdqa xmm0, [rcx]
@@ -2391,11 +2387,11 @@ asm
   movdqa [rdx], xmm0
   mov [rdx + 16], r8
 end;
-{$endif}
+{$ENDIF}
 
 procedure Move28(const ASource; var ADest; ACount: NativeInt);
 asm
-{$ifdef 32Bit}
+  {$IFDEF 32Bit}
   mov ecx, [eax]
   mov [edx], ecx
   mov ecx, [eax + 4]
@@ -2410,20 +2406,20 @@ asm
   mov eax, [eax + 24]
   mov [edx + 20], ecx
   mov [edx + 24], eax
-{$else}
-.noframe
+  {$ELSE}
+  .noframe
   movdqa xmm0, [rcx]
   mov r8, [rcx + 16]
   mov ecx, [rcx + 24]
   movdqa [rdx], xmm0
   mov [rdx + 16], r8
   mov [rdx + 24], ecx
-{$endif}
+  {$ENDIF}
 end;
 
 procedure Move36(const ASource; var ADest; ACount: NativeInt);
 asm
-{$ifdef 32Bit}
+  {$IFDEF 32Bit}
   fild qword ptr [eax]
   fild qword ptr [eax + 8]
   fild qword ptr [eax + 16]
@@ -2434,18 +2430,19 @@ asm
   fistp qword ptr [edx + 16]
   fistp qword ptr [edx + 8]
   fistp qword ptr [edx]
-{$else}
-.noframe
+  {$ELSE}
+  .noframe
   movdqa xmm0, [rcx]
   movdqa xmm1, [rcx + 16]
   mov ecx, [rcx + 32]
   movdqa [rdx], xmm0
   movdqa [rdx + 16], xmm1
   mov [rdx + 32], ecx
-{$endif}
+  {$ENDIF}
 end;
 
-{$ifdef 64Bit}
+{$IFDEF 64Bit}
+
 procedure Move40(const ASource; var ADest; ACount: NativeInt);
 asm
   movdqa xmm0, [rcx]
@@ -2455,11 +2452,11 @@ asm
   movdqa [rdx + 16], xmm1
   mov [rdx + 32], r8
 end;
-{$endif}
+{$ENDIF}
 
 procedure Move44(const ASource; var ADest; ACount: NativeInt);
 asm
-{$ifdef 32Bit}
+  {$IFDEF 32Bit}
   fild qword ptr [eax]
   fild qword ptr [eax + 8]
   fild qword ptr [eax + 16]
@@ -2472,8 +2469,8 @@ asm
   fistp qword ptr [edx + 16]
   fistp qword ptr [edx + 8]
   fistp qword ptr [edx]
-{$else}
-.noframe
+  {$ELSE}
+  .noframe
   movdqa xmm0, [rcx]
   movdqa xmm1, [rcx + 16]
   mov r8, [rcx + 32]
@@ -2482,12 +2479,12 @@ asm
   movdqa [rdx + 16], xmm1
   mov [rdx + 32], r8
   mov [rdx + 40], ecx
-{$endif}
+  {$ENDIF}
 end;
 
 procedure Move52(const ASource; var ADest; ACount: NativeInt);
 asm
-{$ifdef 32Bit}
+  {$IFDEF 32Bit}
   fild qword ptr [eax]
   fild qword ptr [eax + 8]
   fild qword ptr [eax + 16]
@@ -2502,8 +2499,8 @@ asm
   fistp qword ptr [edx + 16]
   fistp qword ptr [edx + 8]
   fistp qword ptr [edx]
-{$else}
-.noframe
+  {$ELSE}
+  .noframe
   movdqa xmm0, [rcx]
   movdqa xmm1, [rcx + 16]
   movdqa xmm2, [rcx + 32]
@@ -2512,10 +2509,11 @@ asm
   movdqa [rdx + 16], xmm1
   movdqa [rdx + 32], xmm2
   mov [rdx + 48], ecx
-{$endif}
+  {$ENDIF}
 end;
 
-{$ifdef 64Bit}
+{$IFDEF 64Bit}
+
 procedure Move56(const ASource; var ADest; ACount: NativeInt);
 asm
   movdqa xmm0, [rcx]
@@ -2527,11 +2525,11 @@ asm
   movdqa [rdx + 32], xmm2
   mov [rdx + 48], r8
 end;
-{$endif}
+{$ENDIF}
 
 procedure Move60(const ASource; var ADest; ACount: NativeInt);
 asm
-{$ifdef 32Bit}
+  {$IFDEF 32Bit}
   fild qword ptr [eax]
   fild qword ptr [eax + 8]
   fild qword ptr [eax + 16]
@@ -2548,8 +2546,8 @@ asm
   fistp qword ptr [edx + 16]
   fistp qword ptr [edx + 8]
   fistp qword ptr [edx]
-{$else}
-.noframe
+  {$ELSE}
+  .noframe
   movdqa xmm0, [rcx]
   movdqa xmm1, [rcx + 16]
   movdqa xmm2, [rcx + 32]
@@ -2560,12 +2558,12 @@ asm
   movdqa [rdx + 32], xmm2
   mov [rdx + 48], r8
   mov [rdx + 56], ecx
-{$endif}
+  {$ENDIF}
 end;
 
 procedure Move68(const ASource; var ADest; ACount: NativeInt);
 asm
-{$ifdef 32Bit}
+  {$IFDEF 32Bit}
   fild qword ptr [eax]
   fild qword ptr [eax + 8]
   fild qword ptr [eax + 16]
@@ -2584,8 +2582,8 @@ asm
   fistp qword ptr [edx + 16]
   fistp qword ptr [edx + 8]
   fistp qword ptr [edx]
-{$else}
-.noframe
+  {$ELSE}
+  .noframe
   movdqa xmm0, [rcx]
   movdqa xmm1, [rcx + 16]
   movdqa xmm2, [rcx + 32]
@@ -2596,7 +2594,7 @@ asm
   movdqa [rdx + 32], xmm2
   movdqa [rdx + 48], xmm3
   mov [rdx + 64], ecx
-{$endif}
+  {$ENDIF}
 end;
 
 {Variable size move procedure: Rounds ACount up to the next multiple of 16 less
@@ -2605,65 +2603,65 @@ end;
  ACount.}
 procedure MoveX16LP(const ASource; var ADest; ACount: NativeInt);
 asm
-{$ifdef 32Bit}
+  {$IFDEF 32Bit}
   {Make the counter negative based: The last 12 bytes are moved separately}
   sub ecx, 12
   add eax, ecx
   add edx, ecx
-{$ifdef EnableMMX}
-  {$ifndef ForceMMX}
+  {$IFDEF EnableMMX}
+  {$IFNDEF ForceMMX}
   cmp UseMMX, True
   jne @FPUMove
-  {$endif}
+  {$ENDIF}
   {Make the counter negative based: The last 12 bytes are moved separately}
   neg ecx
   jns @MMXMoveLast12
 @MMXMoveLoop:
   {Move a 16 byte block}
-  {$ifdef Delphi4or5}
+  {$IFDEF Delphi4or5}
   {Delphi 5 compatibility}
   db $0f, $6f, $04, $01
   db $0f, $6f, $4c, $01, $08
   db $0f, $7f, $04, $11
   db $0f, $7f, $4c, $11, $08
-  {$else}
+  {$ELSE}
   movq mm0, [eax + ecx]
   movq mm1, [eax + ecx + 8]
   movq [edx + ecx], mm0
   movq [edx + ecx + 8], mm1
-  {$endif}
+  {$ENDIF}
   {Are there another 16 bytes to move?}
   add ecx, 16
   js @MMXMoveLoop
 @MMXMoveLast12:
   {Do the last 12 bytes}
-  {$ifdef Delphi4or5}
+  {$IFDEF Delphi4or5}
   {Delphi 5 compatibility}
   db $0f, $6f, $04, $01
-  {$else}
+  {$ELSE}
   movq mm0, [eax + ecx]
-  {$endif}
+  {$ENDIF}
   mov eax, [eax + ecx + 8]
-  {$ifdef Delphi4or5}
+  {$IFDEF Delphi4or5}
   {Delphi 5 compatibility}
   db $0f, $7f, $04, $11
-  {$else}
+  {$ELSE}
   movq [edx + ecx], mm0
-  {$endif}
+  {$ENDIF}
   mov [edx + ecx + 8], eax
   {Exit MMX state}
-  {$ifdef Delphi4or5}
+  {$IFDEF Delphi4or5}
   {Delphi 5 compatibility}
   db $0f, $77
-  {$else}
+  {$ELSE}
   emms
-  {$endif}
-  {$ifndef ForceMMX}
+  {$ENDIF}
+  {$IFNDEF ForceMMX}
   ret
-  {$endif}
-{$endif}
-{FPU code is only used if MMX is not forced}
-{$ifndef ForceMMX}
+  {$ENDIF}
+  {$ENDIF}
+  {FPU code is only used if MMX is not forced}
+  {$IFNDEF ForceMMX}
 @FPUMove:
   neg ecx
   jns @FPUMoveLast12
@@ -2682,9 +2680,9 @@ asm
   fistp qword ptr [edx + ecx]
   mov eax, [eax + ecx + 8]
   mov [edx + ecx + 8], eax
-{$endif}
-{$else}
-.noframe
+  {$ENDIF}
+  {$ELSE}
+  .noframe
   {Make the counter negative based: The last 8 bytes are moved separately}
   sub r8, 8
   add rcx, r8
@@ -2702,7 +2700,7 @@ asm
   {Do the last 8 bytes}
   mov r9, [rcx + r8]
   mov [rdx + r8], r9
-{$endif}
+  {$ENDIF}
 end;
 
 {Variable size move procedure: Rounds ACount up to the next multiple of 8 less
@@ -2711,7 +2709,7 @@ end;
  ACount.}
 procedure MoveX8LP(const ASource; var ADest; ACount: NativeInt);
 asm
-{$ifdef 32Bit}
+  {$IFDEF 32Bit}
   {Make the counter negative based: The last 4 bytes are moved separately}
   sub ecx, 4
   {4 bytes or less? -> Use the Move4 routine.}
@@ -2719,38 +2717,38 @@ asm
   add eax, ecx
   add edx, ecx
   neg ecx
-{$ifdef EnableMMX}
-  {$ifndef ForceMMX}
+  {$IFDEF EnableMMX}
+  {$IFNDEF ForceMMX}
   cmp UseMMX, True
   jne @FPUMoveLoop
-  {$endif}
+  {$ENDIF}
 @MMXMoveLoop:
   {Move an 8 byte block}
-{$ifdef Delphi4or5}
+  {$IFDEF Delphi4or5}
   {Delphi 5 compatibility}
   db $0f, $6f, $04, $01
   db $0f, $7f, $04, $11
-{$else}
+  {$ELSE}
   movq mm0, [eax + ecx]
   movq [edx + ecx], mm0
-{$endif}
+  {$ENDIF}
   {Are there another 8 bytes to move?}
   add ecx, 8
   js @MMXMoveLoop
   {Exit MMX state}
-{$ifdef Delphi4or5}
+  {$IFDEF Delphi4or5}
   {Delphi 5 compatibility}
   db $0f, $77
-{$else}
+  {$ELSE}
   emms
-{$endif}
+  {$ENDIF}
   {Do the last 4 bytes}
   mov eax, [eax + ecx]
   mov [edx + ecx], eax
   ret
-{$endif}
-{FPU code is only used if MMX is not forced}
-{$ifndef ForceMMX}
+  {$ENDIF}
+  {FPU code is only used if MMX is not forced}
+  {$IFNDEF ForceMMX}
 @FPUMoveLoop:
   {Move an 8 byte block}
   fild qword ptr [eax + ecx]
@@ -2762,13 +2760,13 @@ asm
   mov eax, [eax + ecx]
   mov [edx + ecx], eax
   ret
-{$endif}
+  {$ENDIF}
 @FourBytesOrLess:
   {Four or less bytes to move}
   mov eax, [eax]
   mov [edx], eax
-{$else}
-.noframe
+  {$ELSE}
+  .noframe
   {Make the counter negative based}
   add rcx, r8
   add rdx, r8
@@ -2780,13 +2778,12 @@ asm
   {Are there another 8 bytes to move?}
   add r8, 8
   js @MoveLoop
-{$endif}
+  {$ENDIF}
 end;
 
 {----------------Windows Emulation Functions for Kylix / OS X Support-----------------}
 
-{$ifdef POSIX}
-
+{$IFDEF POSIX}
 const
   {Messagebox constants}
   MB_OK = 0;
@@ -2799,7 +2796,8 @@ const
   MEM_TOP_DOWN = $100000;
   PAGE_READWRITE = 4;
 
-procedure MessageBoxA(hWnd: Cardinal; AMessageText, AMessageTitle: PAnsiChar; uType: Cardinal); stdcall;
+procedure MessageBoxA(HWND: Cardinal; AMessageText, AMessageTitle: PAnsiChar;
+  uType: Cardinal); stdcall;
 begin
   if FastMMIsInstalled then
     writeln(AMessageText)
@@ -2807,7 +2805,8 @@ begin
     __write(STDERR_FILENO, AMessageText, StrLen(AMessageText));
 end;
 
-function VirtualAlloc(lpvAddress: Pointer; dwSize, flAllocationType, flProtect: Cardinal): Pointer; stdcall;
+function VirtualAlloc(lpvAddress: Pointer; dwSize, flAllocationType, flProtect: Cardinal)
+  : Pointer; stdcall;
 begin
   Result := valloc(dwSize);
 end;
@@ -2822,7 +2821,7 @@ function WriteFile(hFile: THandle; const Buffer; nNumberOfBytesToWrite: Cardinal
   var lpNumberOfBytesWritten: Cardinal; lpOverlapped: Pointer): Boolean; stdcall;
 begin
   lpNumberOfBytesWritten := __write(hFile, @Buffer, nNumberOfBytesToWrite);
-  if lpNumberOfBytesWritten = Cardinal(-1) then
+  if lpNumberOfBytesWritten = Cardinal( -1) then
   begin
     lpNumberOfBytesWritten := 0;
     Result := False;
@@ -2831,40 +2830,40 @@ begin
     Result := True;
 end;
 
-{$ifndef NeverSleepOnThreadContention}
+{$IFNDEF NeverSleepOnThreadContention}
+
 procedure Sleep(dwMilliseconds: Cardinal); stdcall;
 begin
   {Convert to microseconds (more or less)}
   usleep(dwMilliseconds shl 10);
 end;
-{$endif}
-{$endif}
-
+{$ENDIF}
+{$ENDIF}
 {-----------------Debugging Support Functions and Procedures------------------}
 
-{$ifdef FullDebugMode}
+{$IFDEF FullDebugMode}
 
 {Returns the current thread ID}
 function GetThreadID: Cardinal;
-{$ifdef 32Bit}
+{$IFDEF 32Bit}
 asm
   mov eax, FS:[$24]
 end;
-{$else}
+{$ELSE}
 begin
   Result := GetCurrentThreadId;
 end;
-{$endif}
+{$ENDIF}
 
 {Fills a block of memory with the given dword (32-bit) or qword (64-bit).
  Always fills a multiple of SizeOf(Pointer) bytes}
 procedure DebugFillMem(var AAddress; AByteCount: NativeInt; AFillValue: NativeUInt);
 asm
-{$ifdef 32Bit}
+  {$IFDEF 32Bit}
   {On Entry:
-   eax = AAddress
-   edx = AByteCount
-   ecx = AFillValue}
+  eax = AAddress
+  edx = AByteCount
+  ecx = AFillValue}
   add eax, edx
   neg edx
   jns @Done
@@ -2873,11 +2872,11 @@ asm
   add edx, 4
   js @FillLoop
 @Done:
-{$else}
+  {$ELSE}
   {On Entry:
-   rcx = AAddress
-   rdx = AByteCount
-   r8 = AFillValue}
+  rcx = AAddress
+  rdx = AByteCount
+  r8 = AFillValue}
   add rcx, rdx
   neg rdx
   jns @Done
@@ -2886,70 +2885,68 @@ asm
   add rdx, 8
   js @FillLoop
 @Done:
-{$endif}
+  {$ENDIF}
 end;
 
-  {$ifndef LoadDebugDLLDynamically}
-
+{$IFNDEF LoadDebugDLLDynamically}
 {The stack trace procedure. The stack trace module is external since it may
  raise handled access violations that result in the creation of exception
  objects and the stack trace code is not re-entrant.}
 procedure GetStackTrace(AReturnAddresses: PNativeUInt;
-  AMaxDepth, ASkipFrames: Cardinal); external FullDebugModeLibraryName
-  name {$ifdef RawStackTraces}'GetRawStackTrace'{$else}'GetFrameBasedStackTrace'{$endif};
+  AMaxDepth, ASkipFrames: Cardinal); external FullDebugModeLibraryName name
+{$IFDEF RawStackTraces}'GetRawStackTrace'{$ELSE}'GetFrameBasedStackTrace'{$ENDIF};
 
 {The exported procedure in the FastMM_FullDebugMode.dll library used to convert
  the return addresses of a stack trace to a text string.}
 function LogStackTrace(AReturnAddresses: PNativeUInt;
-  AMaxDepth: Cardinal; ABuffer: PAnsiChar): PAnsiChar; external FullDebugModeLibraryName
-  name 'LogStackTrace';
+  AMaxDepth: Cardinal; ABuffer: PAnsiChar): PAnsiChar;
+  external FullDebugModeLibraryName name 'LogStackTrace';
 
-  {$else}
+{$ELSE}
 
-  {Default no-op stack trace and logging handlers}
-  procedure NoOpGetStackTrace(AReturnAddresses: PNativeUInt;
-    AMaxDepth, ASkipFrames: Cardinal);
-  begin
-    DebugFillMem(AReturnAddresses^, AMaxDepth * SizeOf(Pointer), 0);
-  end;
+{Default no-op stack trace and logging handlers}
+procedure NoOpGetStackTrace(AReturnAddresses: PNativeUInt;
+  AMaxDepth, ASkipFrames: Cardinal);
+begin
+  DebugFillMem(AReturnAddresses^, AMaxDepth * SizeOf(Pointer), 0);
+end;
 
-  function NoOpLogStackTrace(AReturnAddresses: PNativeUInt;
-    AMaxDepth: Cardinal; ABuffer: PAnsiChar): PAnsiChar;
-  begin
-    Result := ABuffer;
-  end;
+function NoOpLogStackTrace(AReturnAddresses: PNativeUInt;
+  AMaxDepth: Cardinal; ABuffer: PAnsiChar): PAnsiChar;
+begin
+  Result := ABuffer;
+end;
 
 var
 
   {Handle to the FullDebugMode DLL}
   FullDebugModeDLL: HMODULE;
 
-  GetStackTrace: procedure (AReturnAddresses: PNativeUInt;
-    AMaxDepth, ASkipFrames: Cardinal) = NoOpGetStackTrace;
+  GetStackTrace: procedure(AReturnAddresses: PNativeUInt; AMaxDepth, ASkipFrames: Cardinal)
+    = NoOpGetStackTrace;
 
-  LogStackTrace: function (AReturnAddresses: PNativeUInt;
-    AMaxDepth: Cardinal; ABuffer: PAnsiChar): PAnsiChar = NoOpLogStackTrace;
+  LogStackTrace: function(AReturnAddresses: PNativeUInt; AMaxDepth: Cardinal;
+    ABuffer: PAnsiChar): PAnsiChar = NoOpLogStackTrace;
 
-  {$endif}
+{$ENDIF}
+{$ENDIF}
+{$IFNDEF POSIX}
 
-{$endif}
-
-{$ifndef POSIX}
 function DelphiIsRunning: Boolean;
 begin
   Result := FindWindowA('TAppBuilder', nil) <> 0;
 end;
-{$endif}
+{$ENDIF}
 
 {Converts an unsigned integer to string at the buffer location, returning the
  new buffer position. Note: The 32-bit asm version only supports numbers up to
  2^31 - 1.}
 function NativeUIntToStrBuf(ANum: NativeUInt; APBuffer: PAnsiChar): PAnsiChar;
-{$ifndef Use32BitAsm}
+{$IFNDEF Use32BitAsm}
 const
   MaxDigits = 20;
 var
-  LDigitBuffer: array[0..MaxDigits - 1] of AnsiChar;
+  LDigitBuffer: array [0 .. MaxDigits - 1] of AnsiChar;
   LCount: Cardinal;
   LDigit: NativeUInt;
 begin
@@ -2966,7 +2963,7 @@ begin
   System.Move(LDigitBuffer[MaxDigits - LCount], APBuffer^, LCount);
   Result := APBuffer + LCount;
 end;
-{$else}
+{$ELSE}
 asm
   {On entry: eax = ANum, edx = ABuffer}
   push edi
@@ -3075,16 +3072,16 @@ asm
   {Restore edi}
   pop edi
 end;
-{$endif}
+{$ENDIF}
 
 {Converts an unsigned integer to a hexadecimal string at the buffer location,
  returning the new buffer position.}
 function NativeUIntToHexBuf(ANum: NativeUInt; APBuffer: PAnsiChar): PAnsiChar;
-{$ifndef Use32BitAsm}
+{$IFNDEF Use32BitAsm}
 const
   MaxDigits = 16;
 var
-  LDigitBuffer: array[0..MaxDigits - 1] of AnsiChar;
+  LDigitBuffer: array [0 .. MaxDigits - 1] of AnsiChar;
   LCount: Cardinal;
   LDigit: NativeUInt;
 begin
@@ -3101,11 +3098,11 @@ begin
   System.Move(LDigitBuffer[MaxDigits - LCount], APBuffer^, LCount);
   Result := APBuffer + LCount;
 end;
-{$else}
+{$ELSE}
 asm
   {On entry:
-    eax = ANum
-    edx = ABuffer}
+  eax = ANum
+  edx = ABuffer}
   push ebx
   push edi
   {Save ANum in ebx}
@@ -3182,11 +3179,12 @@ asm
   pop edi
   pop ebx
 end;
-{$endif}
+{$ENDIF}
 
 {Appends the source text to the destination and returns the new destination
  position}
-function AppendStringToBuffer(const ASource, ADestination: PAnsiChar; ACount: Cardinal): PAnsiChar;
+function AppendStringToBuffer(const ASource, ADestination: PAnsiChar; ACount: Cardinal)
+  : PAnsiChar;
 begin
   System.Move(ASource^, ADestination^, ACount);
   Result := Pointer(PByte(ADestination) + ACount);
@@ -3203,11 +3201,12 @@ begin
   begin
     LPClassName := PShortString(PPointer(PByte(AClass) + vmtClassName)^);
     {Append the class name}
-    Result := AppendStringToBuffer(@LPClassName^[1], ADestination, Length(LPClassName^));
+    Result := AppendStringToBuffer(@LPClassName^[1], ADestination, length(LPClassName^));
   end
   else
   begin
-    Result := AppendStringToBuffer(UnknownClassNameMsg, ADestination, Length(UnknownClassNameMsg));
+    Result := AppendStringToBuffer(UnknownClassNameMsg, ADestination,
+      length(UnknownClassNameMsg));
   end;
 end;
 
@@ -3217,15 +3216,15 @@ begin
   if (not ShowingMessageBox) and (not SuppressMessageBoxes) then
   begin
     ShowingMessageBox := True;
-    MessageBoxA(0, AText, ACaption,
-      MB_OK or MB_ICONERROR or MB_TASKMODAL or MB_DEFAULT_DESKTOP_ONLY);
+    MessageBoxA(0, AText, ACaption, MB_OK or MB_ICONERROR or MB_TASKMODAL or
+        MB_DEFAULT_DESKTOP_ONLY);
     ShowingMessageBox := False;
   end;
 end;
 
 {Returns the class for a memory block. Returns nil if it is not a valid class}
 function DetectClassInstance(APointer: Pointer): TClass;
-{$ifndef POSIX}
+{$IFNDEF POSIX}
 var
   LMemInfo: TMemoryBasicInformation;
 
@@ -3233,45 +3232,42 @@ var
   function IsValidVMTAddress(APAddress: Pointer): Boolean;
   begin
     {Do some basic pointer checks: Must be dword aligned and beyond 64K}
-    if (UIntPtr(APAddress) > 65535)
-      and (UIntPtr(APAddress) and 3 = 0) then
+    if (UIntPtr(APAddress) > 65535) and (UIntPtr(APAddress) and 3 = 0) then
     begin
       {Do we need to recheck the virtual memory?}
-      if (UIntPtr(LMemInfo.BaseAddress) > UIntPtr(APAddress))
-        or ((UIntPtr(LMemInfo.BaseAddress) + LMemInfo.RegionSize) < (UIntPtr(APAddress) + 4)) then
+      if (UIntPtr(LMemInfo.BaseAddress) > UIntPtr(APAddress)) or
+        ((UIntPtr(LMemInfo.BaseAddress) + LMemInfo.RegionSize) < (UIntPtr(APAddress) + 4)) then
       begin
         {Get the VM status for the pointer}
         LMemInfo.RegionSize := 0;
-        VirtualQuery(APAddress,  LMemInfo, SizeOf(LMemInfo));
+        VirtualQuery(APAddress, LMemInfo, SizeOf(LMemInfo));
       end;
       {Check the readability of the memory address}
-      Result := (LMemInfo.RegionSize >= 4)
-        and (LMemInfo.State = MEM_COMMIT)
-        and (LMemInfo.Protect and (PAGE_READONLY or PAGE_READWRITE or PAGE_EXECUTE or PAGE_EXECUTE_READ or PAGE_EXECUTE_READWRITE or PAGE_EXECUTE_WRITECOPY) <> 0)
-        and (LMemInfo.Protect and PAGE_GUARD = 0);
+      Result := (LMemInfo.RegionSize >= 4) and (LMemInfo.State = MEM_COMMIT) and
+        (LMemInfo.Protect and (PAGE_READONLY or PAGE_READWRITE or PAGE_EXECUTE or
+            PAGE_EXECUTE_READ or PAGE_EXECUTE_READWRITE or PAGE_EXECUTE_WRITECOPY) <> 0) and
+        (LMemInfo.Protect and PAGE_GUARD = 0);
     end
     else
       Result := False;
   end;
 
-  {Returns true if AClassPointer points to a class VMT}
+{Returns true if AClassPointer points to a class VMT}
   function InternalIsValidClass(AClassPointer: Pointer; ADepth: Integer = 0): Boolean;
   var
     LParentClassSelfPointer: PPointer;
   begin
     {Check that the self pointer as well as parent class self pointer addresses
      are valid}
-    if (ADepth < 1000)
-      and IsValidVMTAddress(Pointer(PByte(AClassPointer) + vmtSelfPtr))
-      and IsValidVMTAddress(Pointer(PByte(AClassPointer) + vmtParent)) then
+    if (ADepth < 1000) and IsValidVMTAddress(Pointer(PByte(AClassPointer) + vmtSelfPtr)) and
+      IsValidVMTAddress(Pointer(PByte(AClassPointer) + vmtParent)) then
     begin
       {Get a pointer to the parent class' self pointer}
       LParentClassSelfPointer := PPointer(PByte(AClassPointer) + vmtParent)^;
       {Check that the self pointer as well as the parent class is valid}
-      Result := (PPointer(PByte(AClassPointer) + vmtSelfPtr)^ = AClassPointer)
-        and ((LParentClassSelfPointer = nil)
-          or (IsValidVMTAddress(LParentClassSelfPointer)
-            and InternalIsValidClass(LParentClassSelfPointer^, ADepth + 1)));
+      Result := (PPointer(PByte(AClassPointer) + vmtSelfPtr)^ = AClassPointer) and
+        ((LParentClassSelfPointer = nil) or (IsValidVMTAddress(LParentClassSelfPointer) and
+            InternalIsValidClass(LParentClassSelfPointer^, ADepth + 1)));
     end
     else
       Result := False;
@@ -3284,18 +3280,19 @@ begin
   LMemInfo.RegionSize := 0;
   {Check the block}
   if (not InternalIsValidClass(Pointer(Result), 0))
-{$ifdef FullDebugMode}
+{$IFDEF FullDebugMode}
     or (Result = @FreedObjectVMT.VMTMethods[0])
-{$endif}
+{$ENDIF}
   then
     Result := nil;
 end;
-{$else}
+{$ELSE}
+
 begin
   {Not currently supported under Linux / OS X}
   Result := nil;
 end;
-{$endif}
+{$ENDIF}
 
 {Gets the available size inside a block}
 function GetAvailableSpaceInBlock(APointer: Pointer): NativeUInt;
@@ -3325,24 +3322,24 @@ var
   LInd: Cardinal;
 begin
   {Lock the medium blocks}
-{$ifndef AssumeMultiThreaded}
+{$IFNDEF AssumeMultiThreaded}
   if IsMultiThread then
-{$endif}
+{$ENDIF}
   begin
     for LInd := 0 to NumSmallBlockTypes - 1 do
     begin
       while LockCmpxchg(0, 1, @SmallBlockTypes[LInd].BlockTypeLocked) <> 0 do
       begin
-{$ifdef NeverSleepOnThreadContention}
-  {$ifdef UseSwitchToThread}
+{$IFDEF NeverSleepOnThreadContention}
+{$IFDEF UseSwitchToThread}
         SwitchToThread;
-  {$endif}
-{$else}
+{$ENDIF}
+{$ELSE}
         Sleep(InitialSleepTime);
         if LockCmpxchg(0, 1, @SmallBlockTypes[LInd].BlockTypeLocked) = 0 then
           Break;
         Sleep(AdditionalSleepTime);
-{$endif}
+{$ENDIF}
       end;
     end;
   end;
@@ -3357,12 +3354,15 @@ begin
   {Get the pointer to the first block}
   AFirstPtr := Pointer(PByte(APSmallBlockPool) + SmallBlockPoolHeaderSize);
   {Get a pointer to the last block}
-  if (APSmallBlockPool.BlockType.CurrentSequentialFeedPool <> APSmallBlockPool)
-    or (UIntPtr(APSmallBlockPool.BlockType.NextSequentialFeedBlockAddress) > UIntPtr(APSmallBlockPool.BlockType.MaxSequentialFeedBlockAddress)) then
+  if (APSmallBlockPool.BlockType.CurrentSequentialFeedPool <> APSmallBlockPool) or
+    (UIntPtr(APSmallBlockPool.BlockType.NextSequentialFeedBlockAddress) >
+      UIntPtr(APSmallBlockPool.BlockType.MaxSequentialFeedBlockAddress)) then
   begin
     {Not the sequential feed - point to the end of the block}
-    LBlockSize := PNativeUInt(PByte(APSmallBlockPool) - BlockHeaderSize)^ and DropMediumAndLargeFlagsMask;
-    ALastPtr := Pointer(PByte(APSmallBlockPool) + LBlockSize - APSmallBlockPool.BlockType.BlockSize);
+    LBlockSize := PNativeUInt(PByte(APSmallBlockPool) - BlockHeaderSize)^ and
+      DropMediumAndLargeFlagsMask;
+    ALastPtr := Pointer(PByte(APSmallBlockPool) + LBlockSize -
+        APSmallBlockPool.BlockType.BlockSize);
   end
   else
   begin
@@ -3380,7 +3380,8 @@ var
   LBlockSize: NativeUInt;
 begin
   {Get the size of this block}
-  LBlockSize := PNativeUInt(PByte(APMediumBlock) - BlockHeaderSize)^ and DropMediumAndLargeFlagsMask;
+  LBlockSize := PNativeUInt(PByte(APMediumBlock) - BlockHeaderSize)^ and
+    DropMediumAndLargeFlagsMask;
   {Advance the pointer}
   Result := Pointer(PByte(APMediumBlock) + LBlockSize);
   {Is the next block the end of medium pool marker?}
@@ -3392,9 +3393,10 @@ end;
 {Gets the first medium block in the medium block pool}
 function GetFirstMediumBlockInPool(APMediumBlockPoolHeader: PMediumBlockPoolHeader): Pointer;
 begin
-  if (MediumSequentialFeedBytesLeft = 0)
-    or (UIntPtr(LastSequentiallyFedMediumBlock) < UIntPtr(APMediumBlockPoolHeader))
-    or (UIntPtr(LastSequentiallyFedMediumBlock) > UIntPtr(APMediumBlockPoolHeader) + MediumBlockPoolSize) then
+  if (MediumSequentialFeedBytesLeft = 0) or
+    (UIntPtr(LastSequentiallyFedMediumBlock) < UIntPtr(APMediumBlockPoolHeader)) or
+    (UIntPtr(LastSequentiallyFedMediumBlock) > UIntPtr(APMediumBlockPoolHeader) +
+      MediumBlockPoolSize) then
   begin
     Result := Pointer(PByte(APMediumBlockPoolHeader) + MediumBlockPoolHeaderSize);
   end
@@ -3410,30 +3412,32 @@ end;
 
 {Locks the medium blocks. Note that the 32-bit asm version is assumed to
  preserve all registers except eax.}
-{$ifndef Use32BitAsm}
+{$IFNDEF Use32BitAsm}
+
 procedure LockMediumBlocks;
 begin
   {Lock the medium blocks}
-{$ifndef AssumeMultiThreaded}
+{$IFNDEF AssumeMultiThreaded}
   if IsMultiThread then
-{$endif}
+{$ENDIF}
   begin
     while LockCmpxchg(0, 1, @MediumBlocksLocked) <> 0 do
     begin
-{$ifdef NeverSleepOnThreadContention}
-  {$ifdef UseSwitchToThread}
+{$IFDEF NeverSleepOnThreadContention}
+{$IFDEF UseSwitchToThread}
       SwitchToThread;
-  {$endif}
-{$else}
+{$ENDIF}
+{$ELSE}
       Sleep(InitialSleepTime);
       if LockCmpxchg(0, 1, @MediumBlocksLocked) = 0 then
         Break;
       Sleep(AdditionalSleepTime);
-{$endif}
+{$ENDIF}
     end;
   end;
 end;
-{$else}
+{$ELSE}
+
 procedure LockMediumBlocks;
 asm
   {Note: This routine is assumed to preserve all registers except eax}
@@ -3442,19 +3446,19 @@ asm
   {Attempt to lock the medium blocks}
   lock cmpxchg MediumBlocksLocked, ah
   je @Done
-{$ifdef NeverSleepOnThreadContention}
+  {$IFDEF NeverSleepOnThreadContention}
   {Pause instruction (improves performance on P4)}
   rep nop
-  {$ifdef UseSwitchToThread}
+  {$IFDEF UseSwitchToThread}
   push ecx
   push edx
   call SwitchToThread
   pop edx
   pop ecx
-  {$endif}
+  {$ENDIF}
   {Try again}
   jmp @MediumBlockLockLoop
-{$else}
+  {$ELSE}
   {Couldn't lock the medium blocks - sleep and try again}
   push ecx
   push edx
@@ -3476,16 +3480,16 @@ asm
   pop ecx
   {Try again}
   jmp @MediumBlockLockLoop
-{$endif}
+  {$ENDIF}
 @Done:
 end;
-{$endif}
+{$ENDIF}
 
 {Removes a medium block from the circular linked list of free blocks.
  Does not change any header flags. Medium blocks should be locked
  before calling this procedure.}
 procedure RemoveMediumFreeBlock(APMediumFreeBlock: PMediumFreeBlock);
-{$ifndef ASMVersion}
+{$IFNDEF ASMVersion}
 var
   LPreviousFreeBlock, LNextFreeBlock: PMediumFreeBlock;
   LBinNumber, LBinGroupNumber: Cardinal;
@@ -3501,35 +3505,35 @@ begin
   if LPreviousFreeBlock = LNextFreeBlock then
   begin
     {Get the bin number for this block size}
-    LBinNumber := (UIntPtr(LNextFreeBlock) - UIntPtr(@MediumBlockBins)) div SizeOf(TMediumFreeBlock);
+    LBinNumber := (UIntPtr(LNextFreeBlock) - UIntPtr(@MediumBlockBins))
+      div SizeOf(TMediumFreeBlock);
     LBinGroupNumber := LBinNumber div 32;
     {Flag this bin as empty}
-    MediumBlockBinBitmaps[LBinGroupNumber] := MediumBlockBinBitmaps[LBinGroupNumber]
-      and (not (1 shl (LBinNumber and 31)));
+    MediumBlockBinBitmaps[LBinGroupNumber] := MediumBlockBinBitmaps[LBinGroupNumber] and
+      (not(1 shl (LBinNumber and 31)));
     {Is the group now entirely empty?}
     if MediumBlockBinBitmaps[LBinGroupNumber] = 0 then
     begin
       {Flag this group as empty}
-      MediumBlockBinGroupBitmap := MediumBlockBinGroupBitmap
-        and (not (1 shl LBinGroupNumber));
+      MediumBlockBinGroupBitmap := MediumBlockBinGroupBitmap and (not(1 shl LBinGroupNumber));
     end;
   end;
 end;
-{$else}
-{$ifdef 32Bit}
+{$ELSE}
+{$IFDEF 32Bit}
 asm
   {On entry: eax = APMediumFreeBlock}
   {Get the current previous and next blocks}
   mov ecx, TMediumFreeBlock[eax].NextFreeBlock
   mov edx, TMediumFreeBlock[eax].PreviousFreeBlock
   {Is this bin now empty? If the previous and next free block pointers are
-   equal, they must point to the bin.}
+  equal, they must point to the bin.}
   cmp ecx, edx
   {Remove this block from the linked list}
   mov TMediumFreeBlock[ecx].PreviousFreeBlock, edx
   mov TMediumFreeBlock[edx].NextFreeBlock, ecx
   {Is this bin now empty? If the previous and next free block pointers are
-   equal, they must point to the bin.}
+  equal, they must point to the bin.}
   je @BinIsNowEmpty
 @Done:
   ret
@@ -3553,7 +3557,7 @@ asm
   rol eax, cl
   and MediumBlockBinGroupBitmap, eax
 end;
-{$else}
+{$ELSE}
 asm
   {On entry: rcx = APMediumFreeBlock}
   mov rax, rcx
@@ -3561,13 +3565,13 @@ asm
   mov rcx, TMediumFreeBlock[rax].NextFreeBlock
   mov rdx, TMediumFreeBlock[rax].PreviousFreeBlock
   {Is this bin now empty? If the previous and next free block pointers are
-   equal, they must point to the bin.}
+  equal, they must point to the bin.}
   cmp rcx, rdx
   {Remove this block from the linked list}
   mov TMediumFreeBlock[rcx].PreviousFreeBlock, rdx
   mov TMediumFreeBlock[rdx].NextFreeBlock, rcx
   {Is this bin now empty? If the previous and next free block pointers are
-   equal, they must point to the bin.}
+  equal, they must point to the bin.}
   jne @Done
   {Get the bin number for this block size in rcx}
   lea r8, MediumBlockBins
@@ -3589,12 +3593,13 @@ asm
   and MediumBlockBinGroupBitmap, eax
 @Done:
 end;
-{$endif}
-{$endif}
+{$ENDIF}
+{$ENDIF}
 
 {Inserts a medium block into the appropriate medium block bin.}
-procedure InsertMediumBlockIntoBin(APMediumFreeBlock: PMediumFreeBlock; AMediumBlockSize: Cardinal);
-{$ifndef ASMVersion}
+procedure InsertMediumBlockIntoBin(APMediumFreeBlock: PMediumFreeBlock;
+  AMediumBlockSize: Cardinal);
+{$IFNDEF ASMVersion}
 var
   LBinNumber, LBinGroupNumber: Cardinal;
   LPBin, LPFirstFreeBlock: PMediumFreeBlock;
@@ -3618,19 +3623,18 @@ begin
     {Get the group number}
     LBinGroupNumber := LBinNumber div 32;
     {Flag this bin as used}
-    MediumBlockBinBitmaps[LBinGroupNumber] := MediumBlockBinBitmaps[LBinGroupNumber]
-      or (1 shl (LBinNumber and 31));
+    MediumBlockBinBitmaps[LBinGroupNumber] := MediumBlockBinBitmaps[LBinGroupNumber] or
+      (1 shl (LBinNumber and 31));
     {Flag the group as used}
-    MediumBlockBinGroupBitmap := MediumBlockBinGroupBitmap
-      or (1 shl LBinGroupNumber);
+    MediumBlockBinGroupBitmap := MediumBlockBinGroupBitmap or (1 shl LBinGroupNumber);
   end;
 end;
-{$else}
-{$ifdef 32Bit}
+{$ELSE}
+{$IFDEF 32Bit}
 asm
   {On entry: eax = APMediumFreeBlock, edx = AMediumBlockSize}
   {Get the bin number for this block size. Get the bin that holds blocks of at
-   least this size.}
+  least this size.}
   sub edx, MinimumMediumBlockSize
   shr edx, 8
   {Validate the bin number}
@@ -3671,12 +3675,12 @@ asm
   shl eax, cl
   or MediumBlockBinGroupBitmap, eax
 end;
-{$else}
+{$ELSE}
 asm
   {On entry: rax = APMediumFreeBlock, edx = AMediumBlockSize}
   mov rax, rcx
   {Get the bin number for this block size. Get the bin that holds blocks of at
-   least this size.}
+  least this size.}
   sub edx, MinimumMediumBlockSize
   shr edx, 8
   {Validate the bin number}
@@ -3716,13 +3720,13 @@ asm
   or MediumBlockBinGroupBitmap, eax
 @Done:
 end;
-{$endif}
-{$endif}
+{$ENDIF}
+{$ENDIF}
 
 {Bins what remains in the current sequential feed medium block pool. Medium
  blocks must be locked.}
 procedure BinMediumSequentialFeedRemainder;
-{$ifndef ASMVersion}
+{$IFNDEF ASMVersion}
 var
   LSequentialFeedFreeSize, LNextBlockSizeAndFlags: NativeUInt;
   LPRemainderBlock, LNextMediumBlock: Pointer;
@@ -3735,46 +3739,53 @@ begin
     LNextBlockSizeAndFlags := PNativeUInt(PByte(LNextMediumBlock) - BlockHeaderSize)^;
     {Point to the remainder}
     LPRemainderBlock := Pointer(PByte(LNextMediumBlock) - LSequentialFeedFreeSize);
-{$ifndef FullDebugMode}
+{$IFNDEF FullDebugMode}
     {Can the next block be combined with the remainder?}
     if (LNextBlockSizeAndFlags and IsFreeBlockFlag) <> 0 then
     begin
       {Increase the size of this block}
       Inc(LSequentialFeedFreeSize, LNextBlockSizeAndFlags and DropMediumAndLargeFlagsMask);
       {Remove the next block as well}
-      if (LNextBlockSizeAndFlags and DropMediumAndLargeFlagsMask) >= MinimumMediumBlockSize then
+      if (LNextBlockSizeAndFlags and DropMediumAndLargeFlagsMask) >= MinimumMediumBlockSize
+      then
         RemoveMediumFreeBlock(LNextMediumBlock);
     end
     else
     begin
-{$endif}
+{$ENDIF}
       {Set the "previous block is free" flag of the next block}
-      PNativeUInt(PByte(LNextMediumBlock) - BlockHeaderSize)^ := LNextBlockSizeAndFlags or PreviousMediumBlockIsFreeFlag;
-{$ifndef FullDebugMode}
+      PNativeUInt(PByte(LNextMediumBlock) - BlockHeaderSize)^ := LNextBlockSizeAndFlags or
+        PreviousMediumBlockIsFreeFlag;
+{$IFNDEF FullDebugMode}
     end;
-{$endif}
+{$ENDIF}
     {Store the size of the block as well as the flags}
-    PNativeUInt(PByte(LPRemainderBlock) - BlockHeaderSize)^ := LSequentialFeedFreeSize or IsMediumBlockFlag or IsFreeBlockFlag;
+    PNativeUInt(PByte(LPRemainderBlock) - BlockHeaderSize)^ := LSequentialFeedFreeSize or
+      IsMediumBlockFlag or IsFreeBlockFlag;
     {Store the trailing size marker}
-    PNativeUInt(PByte(LPRemainderBlock) + LSequentialFeedFreeSize - BlockHeaderSize * 2)^ := LSequentialFeedFreeSize;
-{$ifdef FullDebugMode}
+    PNativeUInt(PByte(LPRemainderBlock) + LSequentialFeedFreeSize - BlockHeaderSize * 2)^ :=
+      LSequentialFeedFreeSize;
+{$IFDEF FullDebugMode}
     {In full debug mode the sequential feed remainder will never be too small to
      fit a full debug header.}
     {Clear the user area of the block}
-    DebugFillMem(Pointer(PByte(LPRemainderBlock) + SizeOf(TFullDebugBlockHeader) + SizeOf(NativeUInt))^,
-      LSequentialFeedFreeSize - FullDebugBlockOverhead - SizeOf(NativeUInt),
-      {$ifndef CatchUseOfFreedInterfaces}DebugFillPattern{$else}NativeUInt(@VMTBadInterface){$endif});
+    DebugFillMem(Pointer(PByte(LPRemainderBlock) + SizeOf(TFullDebugBlockHeader) +
+          SizeOf(NativeUInt))^, LSequentialFeedFreeSize - FullDebugBlockOverhead -
+        SizeOf(NativeUInt),
+{$IFNDEF CatchUseOfFreedInterfaces}DebugFillPattern{$ELSE}NativeUInt
+        (@VMTBadInterface){$ENDIF});
     {We need to set a valid debug header and footer in the remainder}
     PFullDebugBlockHeader(LPRemainderBlock).HeaderCheckSum := NativeUInt(LPRemainderBlock);
-    PNativeUInt(PByte(LPRemainderBlock) + SizeOf(TFullDebugBlockHeader))^ := not NativeUInt(LPRemainderBlock);
-{$endif}
+    PNativeUInt(PByte(LPRemainderBlock) + SizeOf(TFullDebugBlockHeader))^ :=
+      not NativeUInt(LPRemainderBlock);
+{$ENDIF}
     {Bin this medium block}
     if LSequentialFeedFreeSize >= MinimumMediumBlockSize then
       InsertMediumBlockIntoBin(LPRemainderBlock, LSequentialFeedFreeSize);
   end;
 end;
-{$else}
-{$ifdef 32Bit}
+{$ELSE}
+{$IFDEF 32Bit}
 asm
   cmp MediumSequentialFeedBytesLeft, 0
   jne @MustBinMedium
@@ -3832,7 +3843,7 @@ asm
   jmp @BinTheRemainder
 @Done:
 end;
-{$else}
+{$ELSE}
 asm
   .params 2
   xor eax, eax
@@ -3886,8 +3897,8 @@ asm
   jmp @BinTheRemainder
 @Done:
 end;
-{$endif}
-{$endif}
+{$ENDIF}
+{$ENDIF}
 
 {Allocates a new sequential feed medium block pool and immediately splits off a
  block of the requested size. The block size must be a multiple of 16 and
@@ -3901,19 +3912,21 @@ begin
   BinMediumSequentialFeedRemainder;
   {Allocate a new sequential feed block pool}
   LNewPool := VirtualAlloc(nil, MediumBlockPoolSize,
-    MEM_COMMIT{$ifdef AlwaysAllocateTopDown} or MEM_TOP_DOWN{$endif}, PAGE_READWRITE);
+    MEM_COMMIT{$IFDEF AlwaysAllocateTopDown} or MEM_TOP_DOWN{$ENDIF}, PAGE_READWRITE);
   if LNewPool <> nil then
   begin
     {Insert this block pool into the list of block pools}
     LOldFirstMediumBlockPool := MediumBlockPoolsCircularList.NextMediumBlockPoolHeader;
-    PMediumBlockPoolHeader(LNewPool).PreviousMediumBlockPoolHeader := @MediumBlockPoolsCircularList;
+    PMediumBlockPoolHeader(LNewPool).PreviousMediumBlockPoolHeader :=
+      @MediumBlockPoolsCircularList;
     MediumBlockPoolsCircularList.NextMediumBlockPoolHeader := LNewPool;
     PMediumBlockPoolHeader(LNewPool).NextMediumBlockPoolHeader := LOldFirstMediumBlockPool;
     LOldFirstMediumBlockPool.PreviousMediumBlockPoolHeader := LNewPool;
     {Store the sequential feed pool trailer}
     PNativeUInt(PByte(LNewPool) + MediumBlockPoolSize - BlockHeaderSize)^ := IsMediumBlockFlag;
     {Get the number of bytes still available}
-    MediumSequentialFeedBytesLeft := (MediumBlockPoolSize - MediumBlockPoolHeaderSize) - AFirstBlockSize;
+    MediumSequentialFeedBytesLeft := (MediumBlockPoolSize - MediumBlockPoolHeaderSize) -
+      AFirstBlockSize;
     {Get the result}
     Result := Pointer(PByte(LNewPool) + MediumBlockPoolSize - AFirstBlockSize);
     LastSequentiallyFedMediumBlock := Result;
@@ -3934,22 +3947,22 @@ end;
 procedure LockLargeBlocks;
 begin
   {Lock the large blocks}
-{$ifndef AssumeMultiThreaded}
+{$IFNDEF AssumeMultiThreaded}
   if IsMultiThread then
-{$endif}
+{$ENDIF}
   begin
     while LockCmpxchg(0, 1, @LargeBlocksLocked) <> 0 do
     begin
-{$ifdef NeverSleepOnThreadContention}
-  {$ifdef UseSwitchToThread}
+{$IFDEF NeverSleepOnThreadContention}
+{$IFDEF UseSwitchToThread}
       SwitchToThread;
-  {$endif}
-{$else}
+{$ENDIF}
+{$ELSE}
       Sleep(InitialSleepTime);
       if LockCmpxchg(0, 1, @LargeBlocksLocked) = 0 then
         Break;
       Sleep(AdditionalSleepTime);
-{$endif}
+{$ENDIF}
     end;
   end;
 end;
@@ -3967,11 +3980,10 @@ begin
    SizeOf(Pointer) overhead so a huge block size is a multiple of 16 bytes less
    SizeOf(Pointer) (so we can use a single move function for reallocating all
    block types)}
-  LLargeUsedBlockSize := (ASize + LargeBlockHeaderSize + LargeBlockGranularity - 1 + BlockHeaderSize)
-    and -LargeBlockGranularity;
+  LLargeUsedBlockSize := (ASize + LargeBlockHeaderSize + LargeBlockGranularity - 1 +
+      BlockHeaderSize) and -LargeBlockGranularity;
   {Get the Large block}
-  Result := VirtualAlloc(nil, LLargeUsedBlockSize, MEM_COMMIT or MEM_TOP_DOWN,
-    PAGE_READWRITE);
+  Result := VirtualAlloc(nil, LLargeUsedBlockSize, MEM_COMMIT or MEM_TOP_DOWN, PAGE_READWRITE);
   {Set the Large block fields}
   if Result <> nil then
   begin
@@ -3988,12 +4000,12 @@ begin
     LargeBlocksLocked := False;
     {Add the size of the header}
     Inc(PByte(Result), LargeBlockHeaderSize);
-{$ifdef FullDebugMode}
+{$IFDEF FullDebugMode}
     {Since large blocks are never reused, the user area is not initialized to
      the debug fill pattern, but the debug header and footer must be set.}
     PFullDebugBlockHeader(Result).HeaderCheckSum := NativeUInt(Result);
     PNativeUInt(PByte(Result) + SizeOf(TFullDebugBlockHeader))^ := not NativeUInt(Result);
-{$endif}
+{$ENDIF}
   end;
 end;
 
@@ -4001,40 +4013,40 @@ end;
 function FreeLargeBlock(APointer: Pointer): Integer;
 var
   LPreviousLargeBlockHeader, LNextLargeBlockHeader: PLargeBlockHeader;
-{$ifndef POSIX}
+{$IFNDEF POSIX}
   LRemainingSize: NativeUInt;
   LCurrentSegment: Pointer;
   LMemInfo: TMemoryBasicInformation;
-{$endif}
+{$ENDIF}
 begin
-{$ifdef ClearLargeBlocksBeforeReturningToOS}
-  FillChar(APointer^,
-    (PLargeBlockHeader(PByte(APointer) - LargeBlockHeaderSize).BlockSizeAndFlags
-      and DropMediumAndLargeFlagsMask) - LargeBlockHeaderSize, 0);
-{$endif}
+{$IFDEF ClearLargeBlocksBeforeReturningToOS}
+  FillChar(APointer^, (PLargeBlockHeader(PByte(APointer) - LargeBlockHeaderSize)
+        .BlockSizeAndFlags and DropMediumAndLargeFlagsMask) - LargeBlockHeaderSize, 0);
+{$ENDIF}
   {Point to the start of the large block}
   APointer := Pointer(PByte(APointer) - LargeBlockHeaderSize);
   {Get the previous and next large blocks}
   LockLargeBlocks;
   LPreviousLargeBlockHeader := PLargeBlockHeader(APointer).PreviousLargeBlockHeader;
   LNextLargeBlockHeader := PLargeBlockHeader(APointer).NextLargeBlockHeader;
-{$ifndef POSIX}
+{$IFNDEF POSIX}
   {Is the large block segmented?}
   if PLargeBlockHeader(APointer).BlockSizeAndFlags and LargeBlockIsSegmented = 0 then
   begin
-{$endif}
+{$ENDIF}
     {Single segment large block: Try to free it}
     if VirtualFree(APointer, 0, MEM_RELEASE) then
       Result := 0
     else
       Result := -1;
-{$ifndef POSIX}
+{$IFNDEF POSIX}
   end
   else
   begin
     {The large block is segmented - free all segments}
     LCurrentSegment := APointer;
-    LRemainingSize := PLargeBlockHeader(APointer).BlockSizeAndFlags and DropMediumAndLargeFlagsMask;
+    LRemainingSize := PLargeBlockHeader(APointer).BlockSizeAndFlags and
+      DropMediumAndLargeFlagsMask;
     Result := 0;
     while True do
     begin
@@ -4054,7 +4066,7 @@ begin
       Inc(PByte(LCurrentSegment), NativeUInt(LMemInfo.RegionSize));
     end;
   end;
-{$endif}
+{$ENDIF}
   {Success?}
   if Result = 0 then
   begin
@@ -4066,23 +4078,24 @@ begin
   LargeBlocksLocked := False;
 end;
 
-{$ifndef FullDebugMode}
+{$IFNDEF FullDebugMode}
+
 {Reallocates a large block to at least the requested size. Returns the new
  pointer, or nil on error}
 function ReallocateLargeBlock(APointer: Pointer; ANewSize: NativeUInt): Pointer;
 var
-  LOldAvailableSize, LBlockHeader, LOldUserSize, LMinimumUpsize,
-    LNewAllocSize: NativeUInt;
-{$ifndef POSIX}
+  LOldAvailableSize, LBlockHeader, LOldUserSize, LMinimumUpsize, LNewAllocSize: NativeUInt;
+{$IFNDEF POSIX}
   LNewSegmentSize: NativeUInt;
   LNextSegmentPointer: Pointer;
   LMemInfo: TMemoryBasicInformation;
-{$endif}
+{$ENDIF}
 begin
   {Get the block header}
   LBlockHeader := PNativeUInt(PByte(APointer) - BlockHeaderSize)^;
   {Large block - size is (16 + 4) less than the allocated size}
-  LOldAvailableSize := (LBlockHeader and DropMediumAndLargeFlagsMask) - (LargeBlockHeaderSize + BlockHeaderSize);
+  LOldAvailableSize := (LBlockHeader and DropMediumAndLargeFlagsMask) -
+    (LargeBlockHeaderSize + BlockHeaderSize);
   {Is it an upsize or a downsize?}
   if ANewSize > LOldAvailableSize then
   begin
@@ -4096,10 +4109,11 @@ begin
       LNewAllocSize := LMinimumUpsize
     else
       LNewAllocSize := ANewSize;
-{$ifndef POSIX}
+{$IFNDEF POSIX}
     {Can another large block segment be allocated directly after this segment,
      thus negating the need to move the data?}
-    LNextSegmentPointer := Pointer(PByte(APointer) - LargeBlockHeaderSize + (LBlockHeader and DropMediumAndLargeFlagsMask));
+    LNextSegmentPointer := Pointer(PByte(APointer) - LargeBlockHeaderSize +
+        (LBlockHeader and DropMediumAndLargeFlagsMask));
     VirtualQuery(LNextSegmentPointer, LMemInfo, SizeOf(LMemInfo));
     if LMemInfo.State = MEM_FREE then
     begin
@@ -4110,26 +4124,29 @@ begin
       begin
         {There is enough space after the block to extend it - determine by how
          much}
-        LNewSegmentSize := (LNewAllocSize - LOldAvailableSize + LargeBlockGranularity - 1) and -LargeBlockGranularity;
+        LNewSegmentSize := (LNewAllocSize - LOldAvailableSize + LargeBlockGranularity - 1) and
+          -LargeBlockGranularity;
         if LNewSegmentSize > LMemInfo.RegionSize then
           LNewSegmentSize := LMemInfo.RegionSize;
         {Attempy to reserve the address range (which will fail if another
          thread has just reserved it) and commit it immediately afterwards.}
-        if (VirtualAlloc(LNextSegmentPointer, LNewSegmentSize, MEM_RESERVE, PAGE_READWRITE) <> nil)
-          and (VirtualAlloc(LNextSegmentPointer, LNewSegmentSize, MEM_COMMIT, PAGE_READWRITE) <> nil) then
+        if (VirtualAlloc(LNextSegmentPointer, LNewSegmentSize, MEM_RESERVE, PAGE_READWRITE) <>
+            nil) and (VirtualAlloc(LNextSegmentPointer, LNewSegmentSize, MEM_COMMIT,
+            PAGE_READWRITE) <> nil) then
         begin
           {Update the requested size}
-          PLargeBlockHeader(PByte(APointer) - LargeBlockHeaderSize).UserAllocatedSize := ANewSize;
+          PLargeBlockHeader(PByte(APointer) - LargeBlockHeaderSize).UserAllocatedSize
+            := ANewSize;
           PLargeBlockHeader(PByte(APointer) - LargeBlockHeaderSize).BlockSizeAndFlags :=
-            (PLargeBlockHeader(PByte(APointer) - LargeBlockHeaderSize).BlockSizeAndFlags + LNewSegmentSize)
-            or LargeBlockIsSegmented;
+            (PLargeBlockHeader(PByte(APointer) - LargeBlockHeaderSize).BlockSizeAndFlags +
+              LNewSegmentSize) or LargeBlockIsSegmented;
           {Success}
           Result := APointer;
           Exit;
         end;
       end;
     end;
-{$endif}
+{$ENDIF}
     {Could not resize in place: Allocate the new block}
     Result := FastGetMem(LNewAllocSize);
     if Result <> nil then
@@ -4140,13 +4157,14 @@ begin
       if LNewAllocSize > (MaximumMediumBlockSize - BlockHeaderSize) then
         PLargeBlockHeader(PByte(Result) - LargeBlockHeaderSize).UserAllocatedSize := ANewSize;
       {The user allocated size is stored for large blocks}
-      LOldUserSize := PLargeBlockHeader(PByte(APointer) - LargeBlockHeaderSize).UserAllocatedSize;
+      LOldUserSize := PLargeBlockHeader(PByte(APointer) - LargeBlockHeaderSize)
+        .UserAllocatedSize;
       {The number of bytes to move is the old user size.}
-{$ifdef UseCustomVariableSizeMoveRoutines}
+{$IFDEF UseCustomVariableSizeMoveRoutines}
       MoveX16LP(APointer^, Result^, LOldUserSize);
-{$else}
+{$ELSE}
       System.Move(APointer^, Result^, LOldUserSize);
-{$endif}
+{$ENDIF}
       {Free the old block}
       FastFreeMem(APointer);
     end;
@@ -4171,42 +4189,42 @@ begin
       begin
         {Still a large block? -> Set the user size}
         if ANewSize > (MaximumMediumBlockSize - BlockHeaderSize) then
-          PLargeBlockHeader(PByte(APointer) - LargeBlockHeaderSize).UserAllocatedSize := ANewSize;
+          PLargeBlockHeader(PByte(APointer) - LargeBlockHeaderSize).UserAllocatedSize
+            := ANewSize;
         {Move the data across}
-{$ifdef UseCustomVariableSizeMoveRoutines}
-{$ifdef Align16Bytes}
+{$IFDEF UseCustomVariableSizeMoveRoutines}
+{$IFDEF Align16Bytes}
         MoveX16LP(APointer^, Result^, ANewSize);
-{$else}
+{$ELSE}
         MoveX8LP(APointer^, Result^, ANewSize);
-{$endif}
-{$else}
+{$ENDIF}
+{$ELSE}
         System.Move(APointer^, Result^, ANewSize);
-{$endif}
+{$ENDIF}
         {Free the old block}
         FastFreeMem(APointer);
       end;
     end;
   end;
 end;
-{$endif}
-
+{$ENDIF}
 {---------------------Replacement Memory Manager Interface---------------------}
 
 {Replacement for SysGetMem}
 
-function FastGetMem(ASize: {$ifdef XE2AndUp}NativeInt{$else}Integer{$endif}): Pointer;
-{$ifndef ASMVersion}
+function FastGetMem(ASize: {$IFDEF XE2AndUp}NativeInt{$ELSE}Integer{$ENDIF}): Pointer;
+{$IFNDEF ASMVersion}
 var
-  LMediumBlock{$ifndef FullDebugMode}, LNextFreeBlock, LSecondSplit{$endif}: PMediumFreeBlock;
+  LMediumBlock{$IFNDEF FullDebugMode}, LNextFreeBlock, LSecondSplit{$ENDIF}: PMediumFreeBlock;
   LNextMediumBlockHeader: PNativeUInt;
-  LBlockSize, LAvailableBlockSize{$ifndef FullDebugMode}, LSecondSplitSize{$endif},
+  LBlockSize, LAvailableBlockSize{$IFNDEF FullDebugMode}, LSecondSplitSize{$ENDIF},
     LSequentialFeedFreeSize: NativeUInt;
   LPSmallBlockType: PSmallBlockType;
   LPSmallBlockPool, LPNewFirstPool: PSmallBlockPoolHeader;
   LNewFirstFreeBlock: Pointer;
   LPMediumBin: PMediumFreeBlock;
-  LBinNumber, {$ifndef FullDebugMode}LBinGroupsMasked, {$endif}LBinGroupMasked,
-    LBinGroupNumber: Cardinal;
+  LBinNumber, {$IFNDEF FullDebugMode}LBinGroupsMasked,
+  {$ENDIF}LBinGroupMasked, LBinGroupNumber: Cardinal;
 begin
   {Is it a small block? -> Take the header size into account when
    determining the required block size}
@@ -4214,14 +4232,13 @@ begin
   begin
     {-------------------------Allocate a small block---------------------------}
     {Get the block type from the size}
-    LPSmallBlockType := PSmallBlockType(AllocSize2SmallBlockTypeIndX4[
-      (NativeUInt(ASize) + (BlockHeaderSize - 1)) div SmallBlockGranularity]
-      * (SizeOf(TSmallBlockType) div 4)
-      + UIntPtr(@SmallBlockTypes));
+    LPSmallBlockType := PSmallBlockType(AllocSize2SmallBlockTypeIndX4
+        [(NativeUInt(ASize) + (BlockHeaderSize - 1)) div SmallBlockGranularity] *
+        (SizeOf(TSmallBlockType) div 4) + UIntPtr(@SmallBlockTypes));
     {Lock the block type}
-{$ifndef AssumeMultiThreaded}
+{$IFNDEF AssumeMultiThreaded}
     if IsMultiThread then
-{$endif}
+{$ENDIF}
     begin
       while True do
       begin
@@ -4238,11 +4255,11 @@ begin
           Break;
         {All three sizes locked - given up and sleep}
         Dec(PByte(LPSmallBlockType), 2 * SizeOf(TSmallBlockType));
-{$ifdef NeverSleepOnThreadContention}
-  {$ifdef UseSwitchToThread}
+{$IFDEF NeverSleepOnThreadContention}
+{$IFDEF UseSwitchToThread}
         SwitchToThread;
-  {$endif}
-{$else}
+{$ENDIF}
+{$ELSE}
         {Both this block type and the next is in use: sleep}
         Sleep(InitialSleepTime);
         {Try the lock again}
@@ -4250,7 +4267,7 @@ begin
           Break;
         {Sleep longer}
         Sleep(AdditionalSleepTime);
-{$endif}
+{$ENDIF}
       end;
     end;
     {Get the first pool with free blocks}
@@ -4262,15 +4279,15 @@ begin
       Result := LPSmallBlockPool.FirstFreeBlock;
       {Get the new first free block}
       LNewFirstFreeBlock := PPointer(PByte(Result) - BlockHeaderSize)^;
-{$ifdef CheckHeapForCorruption}
+{$IFDEF CheckHeapForCorruption}
       {The block should be free}
       if (NativeUInt(LNewFirstFreeBlock) and ExtractSmallFlagsMask) <> IsFreeBlockFlag then
-  {$ifdef BCB6OrDelphi7AndUp}
+{$IFDEF BCB6OrDelphi7AndUp}
         System.Error(reInvalidPtr);
-  {$else}
+{$ELSE}
         System.RunError(reInvalidPtr);
-  {$endif}
-{$endif}
+{$ENDIF}
+{$ENDIF}
       LNewFirstFreeBlock := Pointer(UIntPtr(LNewFirstFreeBlock) and DropSmallFlagsMask);
       {Increment the number of used blocks}
       Inc(LPSmallBlockPool.BlocksInUse);
@@ -4297,22 +4314,24 @@ begin
         {Increment the number of used blocks in the sequential feed pool}
         Inc(LPSmallBlockPool.BlocksInUse);
         {Store the next sequential feed block address}
-        LPSmallBlockType.NextSequentialFeedBlockAddress := Pointer(PByte(Result) + LPSmallBlockType.BlockSize);
+        LPSmallBlockType.NextSequentialFeedBlockAddress :=
+          Pointer(PByte(Result) + LPSmallBlockType.BlockSize);
       end
       else
       begin
         {Need to allocate a pool: Lock the medium blocks}
         LockMediumBlocks;
-{$ifndef FullDebugMode}
+{$IFNDEF FullDebugMode}
         {Are there any available blocks of a suitable size?}
-        LBinGroupsMasked := MediumBlockBinGroupBitmap and ($ffffff00 or LPSmallBlockType.AllowedGroupsForBlockPoolBitmap);
+        LBinGroupsMasked := MediumBlockBinGroupBitmap and
+          ($FFFFFF00 or LPSmallBlockType.AllowedGroupsForBlockPoolBitmap);
         if LBinGroupsMasked <> 0 then
         begin
           {Get the bin group with free blocks}
           LBinGroupNumber := FindFirstSetBit(LBinGroupsMasked);
           {Get the bin in the group with free blocks}
-          LBinNumber := FindFirstSetBit(MediumBlockBinBitmaps[LBinGroupNumber])
-            + LBinGroupNumber * 32;
+          LBinNumber := FindFirstSetBit(MediumBlockBinBitmaps[LBinGroupNumber]) +
+            LBinGroupNumber * 32;
           LPMediumBin := @MediumBlockBins[LBinNumber];
           {Get the first block in the bin}
           LMediumBlock := LPMediumBin.NextFreeBlock;
@@ -4325,31 +4344,34 @@ begin
           begin
             {Flag this bin as empty}
             MediumBlockBinBitmaps[LBinGroupNumber] := MediumBlockBinBitmaps[LBinGroupNumber]
-              and (not (1 shl (LBinNumber and 31)));
+              and (not(1 shl (LBinNumber and 31)));
             {Is the group now entirely empty?}
             if MediumBlockBinBitmaps[LBinGroupNumber] = 0 then
             begin
               {Flag this group as empty}
-              MediumBlockBinGroupBitmap := MediumBlockBinGroupBitmap
-                and (not (1 shl LBinGroupNumber));
+              MediumBlockBinGroupBitmap := MediumBlockBinGroupBitmap and
+                (not(1 shl LBinGroupNumber));
             end;
           end;
           {Get the size of the available medium block}
-          LBlockSize := PNativeUInt(PByte(LMediumBlock) - BlockHeaderSize)^ and DropMediumAndLargeFlagsMask;
-  {$ifdef CheckHeapForCorruption}
+          LBlockSize := PNativeUInt(PByte(LMediumBlock) - BlockHeaderSize)^ and
+            DropMediumAndLargeFlagsMask;
+{$IFDEF CheckHeapForCorruption}
           {Check that this block is actually free and the next and previous blocks
            are both in use.}
-          if ((PNativeUInt(PByte(LMediumBlock) - BlockHeaderSize)^ and ExtractMediumAndLargeFlagsMask) <> (IsMediumBlockFlag or IsFreeBlockFlag))
-            or ((PNativeUInt(PByte(LMediumBlock) + (PNativeUInt(PByte(LMediumBlock) - BlockHeaderSize)^ and DropMediumAndLargeFlagsMask) - BlockHeaderSize)^ and IsFreeBlockFlag) <> 0)
-          then
+          if ((PNativeUInt(PByte(LMediumBlock) - BlockHeaderSize)^ and
+                ExtractMediumAndLargeFlagsMask) <> (IsMediumBlockFlag or IsFreeBlockFlag)) or
+            ((PNativeUInt(PByte(LMediumBlock) + (PNativeUInt(PByte(LMediumBlock) -
+                      BlockHeaderSize)^ and DropMediumAndLargeFlagsMask) - BlockHeaderSize)
+                ^ and IsFreeBlockFlag) <> 0) then
           begin
-    {$ifdef BCB6OrDelphi7AndUp}
+{$IFDEF BCB6OrDelphi7AndUp}
             System.Error(reInvalidPtr);
-    {$else}
+{$ELSE}
             System.RunError(reInvalidPtr);
-    {$endif}
+{$ENDIF}
           end;
-  {$endif}
+{$ENDIF}
           {Should the block be split?}
           if LBlockSize >= MaximumSmallBlockPoolSize then
           begin
@@ -4359,28 +4381,33 @@ begin
             LBlockSize := LPSmallBlockType.OptimalBlockPoolSize;
             {Split the block in two}
             LSecondSplit := PMediumFreeBlock(PByte(LMediumBlock) + LBlockSize);
-            PNativeUInt(PByte(LSecondSplit) - BlockHeaderSize)^ := LSecondSplitSize or (IsMediumBlockFlag or IsFreeBlockFlag);
+            PNativeUInt(PByte(LSecondSplit) - BlockHeaderSize)^ := LSecondSplitSize or
+              (IsMediumBlockFlag or IsFreeBlockFlag);
             {Store the size of the second split as the second last dword/qword}
-            PNativeUInt(PByte(LSecondSplit) + LSecondSplitSize - 2 * BlockHeaderSize)^ := LSecondSplitSize;
+            PNativeUInt(PByte(LSecondSplit) + LSecondSplitSize - 2 * BlockHeaderSize)^ :=
+              LSecondSplitSize;
             {Put the remainder in a bin (it will be big enough)}
             InsertMediumBlockIntoBin(LSecondSplit, LSecondSplitSize);
           end
           else
           begin
             {Mark this block as used in the block following it}
-            LNextMediumBlockHeader := PNativeUInt(PByte(LMediumBlock) + LBlockSize - BlockHeaderSize);
-            LNextMediumBlockHeader^ := LNextMediumBlockHeader^ and (not PreviousMediumBlockIsFreeFlag);
+            LNextMediumBlockHeader :=
+              PNativeUInt(PByte(LMediumBlock) + LBlockSize - BlockHeaderSize);
+            LNextMediumBlockHeader^ := LNextMediumBlockHeader^ and
+              (not PreviousMediumBlockIsFreeFlag);
           end;
         end
         else
         begin
-{$endif}
+{$ENDIF}
           {Check the sequential feed medium block pool for space}
           LSequentialFeedFreeSize := MediumSequentialFeedBytesLeft;
           if LSequentialFeedFreeSize >= LPSmallBlockType.MinimumBlockPoolSize then
           begin
             {Enough sequential feed space: Will the remainder be usable?}
-            if LSequentialFeedFreeSize >= (LPSmallBlockType.OptimalBlockPoolSize + MinimumMediumBlockSize) then
+            if LSequentialFeedFreeSize >= (LPSmallBlockType.OptimalBlockPoolSize +
+                MinimumMediumBlockSize) then
             begin
               LBlockSize := LPSmallBlockType.OptimalBlockPoolSize;
             end
@@ -4412,12 +4439,13 @@ begin
               Exit;
             end;
           end;
-{$ifndef FullDebugMode}
+{$IFNDEF FullDebugMode}
         end;
-{$endif}
+{$ENDIF}
         {Mark this block as in use}
         {Set the size and flags for this block}
-        PNativeUInt(PByte(LMediumBlock) - BlockHeaderSize)^ := LBlockSize or IsMediumBlockFlag or IsSmallBlockPoolInUseFlag;
+        PNativeUInt(PByte(LMediumBlock) - BlockHeaderSize)^ := LBlockSize or
+          IsMediumBlockFlag or IsSmallBlockPoolInUseFlag;
         {Unlock medium blocks}
         MediumBlocksLocked := False;
         {Set up the block pool}
@@ -4428,19 +4456,22 @@ begin
         {Set it up for sequential block serving}
         LPSmallBlockType.CurrentSequentialFeedPool := LPSmallBlockPool;
         Result := Pointer(PByte(LPSmallBlockPool) + SmallBlockPoolHeaderSize);
-        LPSmallBlockType.NextSequentialFeedBlockAddress := Pointer(PByte(Result) + LPSmallBlockType.BlockSize);
-        LPSmallBlockType.MaxSequentialFeedBlockAddress := Pointer(PByte(LPSmallBlockPool) + LBlockSize - LPSmallBlockType.BlockSize);
+        LPSmallBlockType.NextSequentialFeedBlockAddress :=
+          Pointer(PByte(Result) + LPSmallBlockType.BlockSize);
+        LPSmallBlockType.MaxSequentialFeedBlockAddress :=
+          Pointer(PByte(LPSmallBlockPool) + LBlockSize - LPSmallBlockType.BlockSize);
       end;
-{$ifdef FullDebugMode}
+{$IFDEF FullDebugMode}
       {Clear the user area of the block}
-      DebugFillMem(Pointer(PByte(Result) + (SizeOf(TFullDebugBlockHeader) + SizeOf(NativeUInt)))^,
-        LPSmallBlockType.BlockSize - FullDebugBlockOverhead - SizeOf(NativeUInt),
-        {$ifndef CatchUseOfFreedInterfaces}DebugFillPattern{$else}NativeUInt(@VMTBadInterface){$endif});
+      DebugFillMem(Pointer(PByte(Result) + (SizeOf(TFullDebugBlockHeader) + SizeOf(NativeUInt))
+          )^, LPSmallBlockType.BlockSize - FullDebugBlockOverhead - SizeOf(NativeUInt),
+{$IFNDEF CatchUseOfFreedInterfaces}DebugFillPattern{$ELSE}NativeUInt
+          (@VMTBadInterface){$ENDIF});
       {Block was fed sequentially - we need to set a valid debug header. Use
        the block address.}
       PFullDebugBlockHeader(Result).HeaderCheckSum := NativeUInt(Result);
       PNativeUInt(PByte(Result) + SizeOf(TFullDebugBlockHeader))^ := not NativeUInt(Result);
-{$endif}
+{$ENDIF}
     end;
     {Unlock the block type}
     LPSmallBlockType.BlockTypeLocked := False;
@@ -4455,8 +4486,8 @@ begin
       {------------------------Allocate a medium block--------------------------}
       {Get the block size and bin number for this block size. Block sizes are
        rounded up to the next bin size.}
-      LBlockSize := ((NativeUInt(ASize) + (MediumBlockGranularity - 1 + BlockHeaderSize - MediumBlockSizeOffset))
-        and -MediumBlockGranularity) + MediumBlockSizeOffset;
+      LBlockSize := ((NativeUInt(ASize) + (MediumBlockGranularity - 1 + BlockHeaderSize -
+              MediumBlockSizeOffset)) and -MediumBlockGranularity) + MediumBlockSizeOffset;
       {Get the bin number}
       LBinNumber := (LBlockSize - MinimumMediumBlockSize) div MediumBlockGranularity;
       {Lock the medium blocks}
@@ -4464,7 +4495,8 @@ begin
       {Calculate the bin group}
       LBinGroupNumber := LBinNumber div 32;
       {Is there a suitable block inside this group?}
-      LBinGroupMasked := MediumBlockBinBitmaps[LBinGroupNumber] and -(1 shl (LBinNumber and 31));
+      LBinGroupMasked := MediumBlockBinBitmaps[LBinGroupNumber] and
+        -(1 shl (LBinNumber and 31));
       if LBinGroupMasked <> 0 then
       begin
         {Get the actual bin number}
@@ -4472,7 +4504,7 @@ begin
       end
       else
       begin
-{$ifndef FullDebugMode}
+{$IFNDEF FullDebugMode}
         {Try all groups greater than this group}
         LBinGroupsMasked := MediumBlockBinGroupBitmap and -(2 shl LBinGroupNumber);
         if LBinGroupsMasked <> 0 then
@@ -4480,23 +4512,24 @@ begin
           {There is a suitable group with space: get the bin number}
           LBinGroupNumber := FindFirstSetBit(LBinGroupsMasked);
           {Get the bin in the group with free blocks}
-          LBinNumber := FindFirstSetBit(MediumBlockBinBitmaps[LBinGroupNumber])
-            + LBinGroupNumber * 32;
+          LBinNumber := FindFirstSetBit(MediumBlockBinBitmaps[LBinGroupNumber]) +
+            LBinGroupNumber * 32;
         end
         else
         begin
-{$endif}
+{$ENDIF}
           {There are no bins with a suitable block: Sequentially feed the required block}
           LSequentialFeedFreeSize := MediumSequentialFeedBytesLeft;
           if LSequentialFeedFreeSize >= LBlockSize then
           begin
-{$ifdef FullDebugMode}
+{$IFDEF FullDebugMode}
             {In full debug mode a medium block must have enough bytes to fit
              all the debug info, so we must make sure there are no tiny medium
              blocks at the start of the pool.}
-            if LSequentialFeedFreeSize - LBlockSize < (FullDebugBlockOverhead + BlockHeaderSize) then
+            if LSequentialFeedFreeSize - LBlockSize < (FullDebugBlockOverhead + BlockHeaderSize)
+            then
               LBlockSize := LSequentialFeedFreeSize;
-{$endif}
+{$ENDIF}
             {Block can be fed sequentially}
             Result := Pointer(PByte(LastSequentiallyFedMediumBlock) - LBlockSize);
             {Store the last sequentially fed block}
@@ -4511,24 +4544,27 @@ begin
             {Need to allocate a new sequential feed block}
             Result := AllocNewSequentialFeedMediumPool(LBlockSize);
           end;
-{$ifdef FullDebugMode}
+{$IFDEF FullDebugMode}
           {Block was fed sequentially - we need to set a valid debug header}
           if Result <> nil then
           begin
             PFullDebugBlockHeader(Result).HeaderCheckSum := NativeUInt(Result);
-            PNativeUInt(PByte(Result) + SizeOf(TFullDebugBlockHeader))^ := not NativeUInt(Result);
+            PNativeUInt(PByte(Result) + SizeOf(TFullDebugBlockHeader))^ :=
+              not NativeUInt(Result);
             {Clear the user area of the block}
-            DebugFillMem(Pointer(PByte(Result) + SizeOf(TFullDebugBlockHeader) + SizeOf(NativeUInt))^,
-              LBlockSize - FullDebugBlockOverhead - SizeOf(NativeUInt),
-              {$ifndef CatchUseOfFreedInterfaces}DebugFillPattern{$else}NativeUInt(@VMTBadInterface){$endif});
+            DebugFillMem(Pointer(PByte(Result) + SizeOf(TFullDebugBlockHeader) +
+                  SizeOf(NativeUInt))^, LBlockSize - FullDebugBlockOverhead -
+                SizeOf(NativeUInt),
+{$IFNDEF CatchUseOfFreedInterfaces}DebugFillPattern{$ELSE}NativeUInt
+                (@VMTBadInterface){$ENDIF});
           end;
-{$endif}
+{$ENDIF}
           {Done}
           MediumBlocksLocked := False;
           Exit;
-{$ifndef FullDebugMode}
+{$IFNDEF FullDebugMode}
         end;
-{$endif}
+{$ENDIF}
       end;
       {If we get here we have a valid LBinGroupNumber and LBinNumber:
        Use the first block in the bin, splitting it if necessary}
@@ -4536,27 +4572,33 @@ begin
       LPMediumBin := @MediumBlockBins[LBinNumber];
       {Get the result}
       Result := LPMediumBin.NextFreeBlock;
-{$ifdef CheckHeapForCorruption}
+{$IFDEF CheckHeapForCorruption}
       {Check that this block is actually free and the next and previous blocks
        are both in use (except in full debug mode).}
-      if ((PNativeUInt(PByte(Result) - BlockHeaderSize)^ and {$ifndef FullDebugMode}ExtractMediumAndLargeFlagsMask{$else}(IsMediumBlockFlag or IsFreeBlockFlag){$endif}) <> (IsFreeBlockFlag or IsMediumBlockFlag))
-  {$ifndef FullDebugMode}
-        or ((PNativeUInt(PByte(Result) + (PNativeUInt(PByte(Result) - BlockHeaderSize)^ and DropMediumAndLargeFlagsMask) - BlockHeaderSize)^ and (ExtractMediumAndLargeFlagsMask - IsSmallBlockPoolInUseFlag)) <> (IsMediumBlockFlag or PreviousMediumBlockIsFreeFlag))
-  {$endif}
+      if ((PNativeUInt(PByte(Result) - BlockHeaderSize)^ and
+          {$IFNDEF FullDebugMode}ExtractMediumAndLargeFlagsMask{$ELSE}(IsMediumBlockFlag or
+              IsFreeBlockFlag){$ENDIF}) <> (IsFreeBlockFlag or IsMediumBlockFlag))
+{$IFNDEF FullDebugMode}
+        or ((PNativeUInt(PByte(Result) + (PNativeUInt(PByte(Result) - BlockHeaderSize)^ and
+                DropMediumAndLargeFlagsMask) - BlockHeaderSize)^ and
+            (ExtractMediumAndLargeFlagsMask - IsSmallBlockPoolInUseFlag)) <>
+          (IsMediumBlockFlag or PreviousMediumBlockIsFreeFlag))
+{$ENDIF}
       then
       begin
-  {$ifdef BCB6OrDelphi7AndUp}
+{$IFDEF BCB6OrDelphi7AndUp}
         System.Error(reInvalidPtr);
-  {$else}
+{$ELSE}
         System.RunError(reInvalidPtr);
-  {$endif}
+{$ENDIF}
       end;
-{$endif}
+{$ENDIF}
       {Remove the block from the bin containing it}
       RemoveMediumFreeBlock(Result);
       {Get the block size}
-      LAvailableBlockSize := PNativeUInt(PByte(Result) - BlockHeaderSize)^ and DropMediumAndLargeFlagsMask;
-{$ifndef FullDebugMode}
+      LAvailableBlockSize := PNativeUInt(PByte(Result) - BlockHeaderSize)^ and
+        DropMediumAndLargeFlagsMask;
+{$IFNDEF FullDebugMode}
       {Is it an exact fit or not?}
       LSecondSplitSize := LAvailableBlockSize - LBlockSize;
       if LSecondSplitSize <> 0 then
@@ -4564,42 +4606,46 @@ begin
         {Split the block in two}
         LSecondSplit := PMediumFreeBlock(PByte(Result) + LBlockSize);
         {Set the size of the second split}
-        PNativeUInt(PByte(LSecondSplit) - BlockHeaderSize)^ := LSecondSplitSize or (IsMediumBlockFlag or IsFreeBlockFlag);
+        PNativeUInt(PByte(LSecondSplit) - BlockHeaderSize)^ := LSecondSplitSize or
+          (IsMediumBlockFlag or IsFreeBlockFlag);
         {Store the size of the second split}
-        PNativeUInt(PByte(LSecondSplit) + LSecondSplitSize - 2 * BlockHeaderSize)^ := LSecondSplitSize;
+        PNativeUInt(PByte(LSecondSplit) + LSecondSplitSize - 2 * BlockHeaderSize)^ :=
+          LSecondSplitSize;
         {Put the remainder in a bin if it is big enough}
         if LSecondSplitSize >= MinimumMediumBlockSize then
           InsertMediumBlockIntoBin(LSecondSplit, LSecondSplitSize);
       end
       else
       begin
-{$else}
-        {In full debug mode blocks are never split or coalesced}
-        LBlockSize := LAvailableBlockSize;
-{$endif}
-        {Mark this block as used in the block following it}
-        LNextMediumBlockHeader := Pointer(PByte(Result) + LBlockSize - BlockHeaderSize);
-{$ifndef FullDebugMode}
-  {$ifdef CheckHeapForCorruption}
-        {The next block must be in use}
-        if (LNextMediumBlockHeader^ and (ExtractMediumAndLargeFlagsMask - IsSmallBlockPoolInUseFlag)) <> (IsMediumBlockFlag or PreviousMediumBlockIsFreeFlag) then
-    {$ifdef BCB6OrDelphi7AndUp}
+{$ELSE}
+      {In full debug mode blocks are never split or coalesced}
+      LBlockSize := LAvailableBlockSize;
+{$ENDIF}
+      {Mark this block as used in the block following it}
+      LNextMediumBlockHeader := Pointer(PByte(Result) + LBlockSize - BlockHeaderSize);
+{$IFNDEF FullDebugMode}
+{$IFDEF CheckHeapForCorruption}
+      {The next block must be in use}
+      if (LNextMediumBlockHeader^ and (ExtractMediumAndLargeFlagsMask -
+            IsSmallBlockPoolInUseFlag)) <> (IsMediumBlockFlag or PreviousMediumBlockIsFreeFlag)
+      then
+{$IFDEF BCB6OrDelphi7AndUp}
         System.Error(reInvalidPtr);
-    {$else}
+{$ELSE}
         System.RunError(reInvalidPtr);
-    {$endif}
-  {$endif}
-{$endif}
-        LNextMediumBlockHeader^ :=
-          LNextMediumBlockHeader^ and (not PreviousMediumBlockIsFreeFlag);
-{$ifndef FullDebugMode}
-      end;
-      {Set the size and flags for this block}
-      PNativeUInt(PByte(Result) - BlockHeaderSize)^ := LBlockSize or IsMediumBlockFlag;
-{$else}
+{$ENDIF}
+{$ENDIF}
+{$ENDIF}
+      LNextMediumBlockHeader^ := LNextMediumBlockHeader^ and
+        (not PreviousMediumBlockIsFreeFlag);
+{$IFNDEF FullDebugMode}
+    end;
+    {Set the size and flags for this block}
+    PNativeUInt(PByte(Result) - BlockHeaderSize)^ := LBlockSize or IsMediumBlockFlag;
+{$ELSE}
       {In full debug mode blocks are never split or coalesced}
       Dec(PNativeUInt(PByte(Result) - BlockHeaderSize)^, IsFreeBlockFlag);
-{$endif}
+{$ENDIF}
       {Unlock the medium blocks}
       MediumBlocksLocked := False;
     end
@@ -4613,45 +4659,45 @@ begin
     end;
   end;
 end;
-{$else}
-{$ifdef 32Bit}
+{$ELSE}
+{$IFDEF 32Bit}
 asm
   {On entry:
-    eax = ASize}
+  eax = ASize}
   {Since most allocations are for small blocks, determine the small block type
-   index so long}
+  index so long}
   lea edx, [eax + BlockHeaderSize - 1]
-{$ifdef Align16Bytes}
+  {$IFDEF Align16Bytes}
   shr edx, 4
-{$else}
+  {$ELSE}
   shr edx, 3
-{$endif}
+  {$ENDIF}
   {Is it a small block?}
   cmp eax, (MaximumSmallBlockSize - BlockHeaderSize)
   {Save ebx}
   push ebx
   {Get the IsMultiThread variable so long}
-{$ifndef AssumeMultiThreaded}
+  {$IFNDEF AssumeMultiThreaded}
   mov cl, IsMultiThread
-{$endif}
+  {$ENDIF}
   {Is it a small block?}
   ja @NotASmallBlock
   {Do we need to lock the block type?}
-{$ifndef AssumeMultiThreaded}
+  {$IFNDEF AssumeMultiThreaded}
   test cl, cl
-{$endif}
+  {$ENDIF}
   {Get the small block type in ebx}
   movzx eax, byte ptr [AllocSize2SmallBlockTypeIndX4 + edx]
   lea ebx, [SmallBlockTypes + eax * 8]
   {Do we need to lock the block type?}
-{$ifndef AssumeMultiThreaded}
+  {$IFNDEF AssumeMultiThreaded}
   jnz @LockBlockTypeLoop
-{$else}
+  {$ELSE}
   jmp @LockBlockTypeLoop
   {Align branch target}
   nop
   nop
-{$endif}
+  {$ENDIF}
 @GotLockOnSmallBlockType:
   {Find the next free block: Get the first pool with free blocks in edx}
   mov edx, TSmallBlockType[ebx].NextPartiallyFreePool
@@ -4679,10 +4725,10 @@ asm
   {All done}
   ret
   {Align branch target}
-{$ifndef AssumeMultiThreaded}
+  {$IFNDEF AssumeMultiThreaded}
   nop
   nop
-{$endif}
+  {$ENDIF}
   nop
 @TrySmallSequentialFeed:
   {Try to feed a small block sequentially: Get the sequential feed block pool}
@@ -4740,20 +4786,20 @@ asm
   je @GotLockOnSmallBlockType
   {Block type and two sizes larger are all locked - give up and sleep}
   sub ebx, 2 * Type(TSmallBlockType)
-{$ifdef NeverSleepOnThreadContention}
+  {$IFDEF NeverSleepOnThreadContention}
   {Pause instruction (improves performance on P4)}
   rep nop
-  {$ifdef UseSwitchToThread}
+  {$IFDEF UseSwitchToThread}
   call SwitchToThread
-  {$endif}
+  {$ENDIF}
   {Try again}
   jmp @LockBlockTypeLoop
   {Align branch target}
   nop
-  {$ifndef UseSwitchToThread}
+  {$IFNDEF UseSwitchToThread}
   nop
-  {$endif}
-{$else}
+  {$ENDIF}
+  {$ELSE}
   {Couldn't grab the block type - sleep and try again}
   push InitialSleepTime
   call Sleep
@@ -4771,16 +4817,16 @@ asm
   nop
   nop
   nop
-{$endif}
+  {$ENDIF}
 @AllocateSmallBlockPool:
   {save additional registers}
   push esi
   push edi
   {Do we need to lock the medium blocks?}
-{$ifndef AssumeMultiThreaded}
+  {$IFNDEF AssumeMultiThreaded}
   cmp IsMultiThread, False
   je @MediumBlocksLockedForPool
-{$endif}
+  {$ENDIF}
   call LockMediumBlocks
 @MediumBlocksLockedForPool:
   {Are there any available blocks of a suitable size?}
@@ -4821,7 +4867,7 @@ asm
   cmp edi, MaximumSmallBlockPoolSize
   jb @UseWholeBlock
   {Split the block: get the size of the second part, new block size is the
-   optimal size}
+  optimal size}
   mov edx, edi
   movzx edi, TSmallBlockType[ebx].OptimalBlockPoolSize
   sub edx, edi
@@ -4835,9 +4881,9 @@ asm
   call InsertMediumBlockIntoBin
   jmp @GotMediumBlock
   {Align branch target}
-{$ifdef AssumeMultiThreaded}
+  {$IFDEF AssumeMultiThreaded}
   nop
-{$endif}
+  {$ENDIF}
 @NoSuitableMediumBlocks:
   {Check the sequential feed medium block pool for space}
   movzx ecx, TSmallBlockType[ebx].MinimumBlockPoolSize
@@ -4862,7 +4908,7 @@ asm
   {Align branch target}
 @AllocateNewSequentialFeed:
   {Need to allocate a new sequential feed medium block pool: use the
-   optimal size for this small block pool}
+  optimal size for this small block pool}
   movzx eax, TSmallBlockType[ebx].OptimalBlockPoolSize
   mov edi, eax
   {Allocate the medium block pool}
@@ -4913,22 +4959,22 @@ asm
   pop ebx
   {Done}
   ret
-{-------------------Medium block allocation-------------------}
+  {-------------------Medium block allocation-------------------}
   {Align branch target}
   nop
 @NotASmallBlock:
   cmp eax, (MaximumMediumBlockSize - BlockHeaderSize)
   ja @IsALargeBlockRequest
   {Get the bin size for this block size. Block sizes are
-   rounded up to the next bin size.}
+  rounded up to the next bin size.}
   lea ebx, [eax + MediumBlockGranularity - 1 + BlockHeaderSize - MediumBlockSizeOffset]
   and ebx, -MediumBlockGranularity
   add ebx, MediumBlockSizeOffset
   {Do we need to lock the medium blocks?}
-{$ifndef AssumeMultiThreaded}
+  {$IFNDEF AssumeMultiThreaded}
   test cl, cl
   jz @MediumBlocksLocked
-{$endif}
+  {$ENDIF}
   call LockMediumBlocks
 @MediumBlocksLocked:
   {Get the bin number in ecx and the group number in edx}
@@ -5051,7 +5097,7 @@ asm
   pop esi
   pop ebx
   ret
-{-------------------Large block allocation-------------------}
+  {-------------------Large block allocation-------------------}
   {Align branch target}
 @IsALargeBlockRequest:
   pop ebx
@@ -5059,30 +5105,30 @@ asm
   jns AllocateLargeBlock
   xor eax, eax
 end;
-{$else}
+{$ELSE}
 {64-bit BASM implementation}
 asm
   {On entry:
-    rcx = ASize}
+  rcx = ASize}
   .params 2
   .pushnv rbx
   .pushnv rsi
   .pushnv rdi
   {Since most allocations are for small blocks, determine the small block type
-   index so long}
+  index so long}
   lea edx, [ecx + BlockHeaderSize - 1]
-{$ifdef Align16Bytes}
+  {$IFDEF Align16Bytes}
   shr edx, 4
-{$else}
+  {$ELSE}
   shr edx, 3
-{$endif}
+  {$ENDIF}
   {Preload the addresses of some small block structures}
   lea r8, AllocSize2SmallBlockTypeIndX4
   lea rbx, SmallBlockTypes
-{$ifndef AssumeMultiThreaded}
+  {$IFNDEF AssumeMultiThreaded}
   {Get the IsMultiThread variable so long}
   movzx esi, IsMultiThread
-{$endif}
+  {$ENDIF}
   {Is it a small block?}
   cmp rcx, (MaximumSmallBlockSize - BlockHeaderSize)
   ja @NotASmallBlock
@@ -5091,12 +5137,12 @@ asm
   shl ecx, 4 //SizeOf(TSmallBlockType) = 64
   add rbx, rcx
   {Do we need to lock the block type?}
-{$ifndef AssumeMultiThreaded}
+  {$IFNDEF AssumeMultiThreaded}
   test esi, esi
   jnz @LockBlockTypeLoop
-{$else}
+  {$ELSE}
   jmp @LockBlockTypeLoop
-{$endif}
+  {$ENDIF}
 @GotLockOnSmallBlockType:
   {Find the next free block: Get the first pool with free blocks in rdx}
   mov rdx, TSmallBlockType[rbx].NextPartiallyFreePool
@@ -5163,15 +5209,15 @@ asm
   je @GotLockOnSmallBlockType
   {Block type and two sizes larger are all locked - give up and sleep}
   sub rbx, 2 * Type(TSmallBlockType)
-{$ifdef NeverSleepOnThreadContention}
+  {$IFDEF NeverSleepOnThreadContention}
   {Pause instruction (improves performance on P4)}
   pause
-  {$ifdef UseSwitchToThread}
+  {$IFDEF UseSwitchToThread}
   call SwitchToThread
-  {$endif}
+  {$ENDIF}
   {Try again}
   jmp @LockBlockTypeLoop
-{$else}
+  {$ELSE}
   {Couldn't grab the block type - sleep and try again}
   mov ecx, InitialSleepTime
   call Sleep
@@ -5185,13 +5231,13 @@ asm
   call Sleep
   {Try again}
   jmp @LockBlockTypeLoop
-{$endif}
+  {$ENDIF}
 @AllocateSmallBlockPool:
   {Do we need to lock the medium blocks?}
-{$ifndef AssumeMultiThreaded}
+  {$IFNDEF AssumeMultiThreaded}
   test esi, esi
   jz @MediumBlocksLockedForPool
-{$endif}
+  {$ENDIF}
   call LockMediumBlocks
 @MediumBlocksLockedForPool:
   {Are there any available blocks of a suitable size?}
@@ -5220,8 +5266,8 @@ asm
   cmp rdi, rdx
   jne @MediumBinNotEmpty
   {r8 = @MediumBlockBinBitmaps, eax = bin group number,
-   r9 = bin group number * 4, ecx = bin number, edi = @bin, esi = free block,
-   ebx = block type}
+  r9 = bin group number * 4, ecx = bin number, edi = @bin, esi = free block,
+  ebx = block type}
   {Flag this bin as empty}
   mov edx, -2
   rol edx, cl
@@ -5237,7 +5283,7 @@ asm
   cmp edi, MaximumSmallBlockPoolSize
   jb @UseWholeBlock
   {Split the block: get the size of the second part, new block size is the
-   optimal size}
+  optimal size}
   mov edx, edi
   movzx edi, TSmallBlockType[rbx].OptimalBlockPoolSize
   sub edx, edi
@@ -5274,7 +5320,7 @@ asm
   {Align branch target}
 @AllocateNewSequentialFeed:
   {Need to allocate a new sequential feed medium block pool: use the
-   optimal size for this small block pool}
+  optimal size for this small block pool}
   movzx ecx, TSmallBlockType[rbx].OptimalBlockPoolSize
   mov edi, ecx
   {Allocate the medium block pool}
@@ -5316,20 +5362,20 @@ asm
   {Set the small block header}
   mov [rax - BlockHeaderSize], rsi
   jmp @Done
-{-------------------Medium block allocation-------------------}
+  {-------------------Medium block allocation-------------------}
 @NotASmallBlock:
   cmp rcx, (MaximumMediumBlockSize - BlockHeaderSize)
   ja @IsALargeBlockRequest
   {Get the bin size for this block size. Block sizes are
-   rounded up to the next bin size.}
+  rounded up to the next bin size.}
   lea ebx, [ecx + MediumBlockGranularity - 1 + BlockHeaderSize - MediumBlockSizeOffset]
   and ebx, -MediumBlockGranularity
   add ebx, MediumBlockSizeOffset
   {Do we need to lock the medium blocks?}
-{$ifndef AssumeMultiThreaded}
+  {$IFNDEF AssumeMultiThreaded}
   test esi, esi
   jz @MediumBlocksLocked
-{$endif}
+  {$ENDIF}
   call LockMediumBlocks
 @MediumBlocksLocked:
   {Get the bin number in ecx and the group number in edx}
@@ -5442,7 +5488,7 @@ asm
   mov MediumBlocksLocked, cl //workaround for QC99023
   mov rax, rsi
   jmp @Done
-{-------------------Large block allocation-------------------}
+  {-------------------Large block allocation-------------------}
 @IsALargeBlockRequest:
   xor rax, rax
   test rcx, rcx
@@ -5450,19 +5496,19 @@ asm
   call AllocateLargeBlock
 @Done:
 end;
-{$endif}
-{$endif}
+{$ENDIF}
+{$ENDIF}
+{$IFNDEF ASMVersion}
 
-{$ifndef ASMVersion}
 {Frees a medium block, returning 0 on success, -1 otherwise}
 function FreeMediumBlock(APointer: Pointer): Integer;
 var
-  LNextMediumBlock{$ifndef FullDebugMode}, LPreviousMediumBlock{$endif}: PMediumFreeBlock;
+  LNextMediumBlock{$IFNDEF FullDebugMode}, LPreviousMediumBlock{$ENDIF}: PMediumFreeBlock;
   LNextMediumBlockSizeAndFlags: NativeUInt;
-  LBlockSize{$ifndef FullDebugMode}, LPreviousMediumBlockSize{$endif}: Cardinal;
-{$ifndef FullDebugMode}
+  LBlockSize{$IFNDEF FullDebugMode}, LPreviousMediumBlockSize{$ENDIF}: Cardinal;
+{$IFNDEF FullDebugMode}
   LPPreviousMediumBlockPoolHeader, LPNextMediumBlockPoolHeader: PMediumBlockPoolHeader;
-{$endif}
+{$ENDIF}
   LBlockHeader: NativeUInt;
 begin
   {Get the block header}
@@ -5474,16 +5520,16 @@ begin
   {Can we combine this block with the next free block?}
   LNextMediumBlock := PMediumFreeBlock(PByte(APointer) + LBlockSize);
   LNextMediumBlockSizeAndFlags := PNativeUInt(PByte(LNextMediumBlock) - BlockHeaderSize)^;
-{$ifndef FullDebugMode}
-{$ifdef CheckHeapForCorruption}
+{$IFNDEF FullDebugMode}
+{$IFDEF CheckHeapForCorruption}
   {Check that this block was flagged as in use in the next block}
   if (LNextMediumBlockSizeAndFlags and PreviousMediumBlockIsFreeFlag) <> 0 then
-{$ifdef BCB6OrDelphi7AndUp}
+{$IFDEF BCB6OrDelphi7AndUp}
     System.Error(reInvalidPtr);
-{$else}
+{$ELSE}
     System.RunError(reInvalidPtr);
-{$endif}
-{$endif}
+{$ENDIF}
+{$ENDIF}
   if (LNextMediumBlockSizeAndFlags and IsFreeBlockFlag) <> 0 then
   begin
     {Increase the size of this block}
@@ -5494,29 +5540,32 @@ begin
   end
   else
   begin
-{$endif}
+{$ENDIF}
     {Reset the "previous in use" flag of the next block}
-    PNativeUInt(PByte(LNextMediumBlock) - BlockHeaderSize)^ := LNextMediumBlockSizeAndFlags or PreviousMediumBlockIsFreeFlag;
-{$ifndef FullDebugMode}
+    PNativeUInt(PByte(LNextMediumBlock) - BlockHeaderSize)^ := LNextMediumBlockSizeAndFlags or
+      PreviousMediumBlockIsFreeFlag;
+{$IFNDEF FullDebugMode}
   end;
   {Can we combine this block with the previous free block? We need to
    re-read the flags since it could have changed before we could lock the
    medium blocks.}
-  if (PNativeUInt(PByte(APointer) - BlockHeaderSize)^ and PreviousMediumBlockIsFreeFlag) <> 0 then
+  if (PNativeUInt(PByte(APointer) - BlockHeaderSize)^ and PreviousMediumBlockIsFreeFlag) <> 0
+  then
   begin
     {Get the size of the free block just before this one}
     LPreviousMediumBlockSize := PNativeUInt(PByte(APointer) - 2 * BlockHeaderSize)^;
     {Get the start of the previous block}
     LPreviousMediumBlock := PMediumFreeBlock(PByte(APointer) - LPreviousMediumBlockSize);
-{$ifdef CheckHeapForCorruption}
+{$IFDEF CheckHeapForCorruption}
     {Check that the previous block is actually free}
-    if (PNativeUInt(PByte(LPreviousMediumBlock) - BlockHeaderSize)^ and ExtractMediumAndLargeFlagsMask) <> (IsMediumBlockFlag or IsFreeBlockFlag) then
-{$ifdef BCB6OrDelphi7AndUp}
-    System.Error(reInvalidPtr);
-{$else}
-    System.RunError(reInvalidPtr);
-{$endif}
-{$endif}
+    if (PNativeUInt(PByte(LPreviousMediumBlock) - BlockHeaderSize)^ and
+        ExtractMediumAndLargeFlagsMask) <> (IsMediumBlockFlag or IsFreeBlockFlag) then
+{$IFDEF BCB6OrDelphi7AndUp}
+      System.Error(reInvalidPtr);
+{$ELSE}
+      System.RunError(reInvalidPtr);
+{$ENDIF}
+{$ENDIF}
     {Set the new block size}
     Inc(LBlockSize, LPreviousMediumBlockSize);
     {This is the new current block}
@@ -5525,51 +5574,55 @@ begin
     if LPreviousMediumBlockSize >= MinimumMediumBlockSize then
       RemoveMediumFreeBlock(LPreviousMediumBlock);
   end;
-{$ifdef CheckHeapForCorruption}
+{$IFDEF CheckHeapForCorruption}
   {Check that the previous block is currently flagged as in use}
-  if (PNativeUInt(PByte(APointer) - BlockHeaderSize)^ and PreviousMediumBlockIsFreeFlag) <> 0 then
-{$ifdef BCB6OrDelphi7AndUp}
+  if (PNativeUInt(PByte(APointer) - BlockHeaderSize)^ and PreviousMediumBlockIsFreeFlag) <> 0
+  then
+{$IFDEF BCB6OrDelphi7AndUp}
     System.Error(reInvalidPtr);
-{$else}
+{$ELSE}
     System.RunError(reInvalidPtr);
-{$endif}
-{$endif}
+{$ENDIF}
+{$ENDIF}
   {Is the entire medium block pool free, and there are other free blocks
    that can fit the largest possible medium block? -> free it. (Except in
    full debug mode where medium pools are never freed.)}
   if (LBlockSize <> (MediumBlockPoolSize - MediumBlockPoolHeaderSize)) then
   begin
     {Store the size of the block as well as the flags}
-    PNativeUInt(PByte(APointer) - BlockHeaderSize)^ := LBlockSize or (IsMediumBlockFlag or IsFreeBlockFlag);
-{$else}
+    PNativeUInt(PByte(APointer) - BlockHeaderSize)^ := LBlockSize or
+      (IsMediumBlockFlag or IsFreeBlockFlag);
+{$ELSE}
     {Mark the block as free}
     Inc(PNativeUInt(PByte(APointer) - BlockHeaderSize)^, IsFreeBlockFlag);
-{$endif}
+{$ENDIF}
     {Store the trailing size marker}
     PNativeUInt(PByte(APointer) + LBlockSize - 2 * BlockHeaderSize)^ := LBlockSize;
     {Insert this block back into the bins: Size check not required here,
      since medium blocks that are in use are not allowed to be
      shrunk smaller than MinimumMediumBlockSize}
     InsertMediumBlockIntoBin(APointer, LBlockSize);
-{$ifndef FullDebugMode}
-{$ifdef CheckHeapForCorruption}
+{$IFNDEF FullDebugMode}
+{$IFDEF CheckHeapForCorruption}
     {Check that this block is actually free and the next and previous blocks are both in use.}
-    if ((PNativeUInt(PByte(APointer) - BlockHeaderSize)^ and ExtractMediumAndLargeFlagsMask) <> (IsMediumBlockFlag or IsFreeBlockFlag))
-      or ((PNativeUInt(PByte(APointer) + (PNativeUInt(PByte(APointer) - BlockHeaderSize)^ and DropMediumAndLargeFlagsMask) - BlockHeaderSize)^ and IsFreeBlockFlag) <> 0) then
+    if ((PNativeUInt(PByte(APointer) - BlockHeaderSize)^ and ExtractMediumAndLargeFlagsMask) <>
+        (IsMediumBlockFlag or IsFreeBlockFlag)) or
+      ((PNativeUInt(PByte(APointer) + (PNativeUInt(PByte(APointer) - BlockHeaderSize)^ and
+              DropMediumAndLargeFlagsMask) - BlockHeaderSize)^ and IsFreeBlockFlag) <> 0) then
     begin
-{$ifdef BCB6OrDelphi7AndUp}
-    System.Error(reInvalidPtr);
-{$else}
-    System.RunError(reInvalidPtr);
-{$endif}
+{$IFDEF BCB6OrDelphi7AndUp}
+      System.Error(reInvalidPtr);
+{$ELSE}
+      System.RunError(reInvalidPtr);
+{$ENDIF}
     end;
-{$endif}
-{$endif}
+{$ENDIF}
+{$ENDIF}
     {Unlock medium blocks}
     MediumBlocksLocked := False;
     {All OK}
     Result := 0;
-{$ifndef FullDebugMode}
+{$IFNDEF FullDebugMode}
   end
   else
   begin
@@ -5594,15 +5647,18 @@ begin
     begin
       {Remove this medium block pool from the linked list}
       Dec(PByte(APointer), MediumBlockPoolHeaderSize);
-      LPPreviousMediumBlockPoolHeader := PMediumBlockPoolHeader(APointer).PreviousMediumBlockPoolHeader;
-      LPNextMediumBlockPoolHeader := PMediumBlockPoolHeader(APointer).NextMediumBlockPoolHeader;
+      LPPreviousMediumBlockPoolHeader := PMediumBlockPoolHeader(APointer)
+        .PreviousMediumBlockPoolHeader;
+      LPNextMediumBlockPoolHeader := PMediumBlockPoolHeader(APointer)
+        .NextMediumBlockPoolHeader;
       LPPreviousMediumBlockPoolHeader.NextMediumBlockPoolHeader := LPNextMediumBlockPoolHeader;
-      LPNextMediumBlockPoolHeader.PreviousMediumBlockPoolHeader := LPPreviousMediumBlockPoolHeader;
+      LPNextMediumBlockPoolHeader.PreviousMediumBlockPoolHeader :=
+        LPPreviousMediumBlockPoolHeader;
       {Unlock medium blocks}
       MediumBlocksLocked := False;
-{$ifdef ClearMediumBlockPoolsBeforeReturningToOS}
+{$IFDEF ClearMediumBlockPoolsBeforeReturningToOS}
       FillChar(APointer^, MediumBlockPoolSize, 0);
-{$endif}
+{$ENDIF}
       {Free the medium block pool}
       if VirtualFree(APointer, 0, MEM_RELEASE) then
         Result := 0
@@ -5610,15 +5666,15 @@ begin
         Result := -1;
     end;
   end;
-{$endif}
+{$ENDIF}
 end;
-{$endif}
+{$ENDIF}
 
 {Replacement for SysFreeMem}
 function FastFreeMem(APointer: Pointer): Integer;
-{$ifndef ASMVersion}
+{$IFNDEF ASMVersion}
 var
-  LPSmallBlockPool{$ifndef FullDebugMode}, LPPreviousPool, LPNextPool{$endif},
+  LPSmallBlockPool{$IFNDEF FullDebugMode}, LPPreviousPool, LPNextPool{$ENDIF},
     LPOldFirstPool: PSmallBlockPoolHeader;
   LPSmallBlockType: PSmallBlockType;
   LOldFirstFreeBlock: Pointer;
@@ -5633,26 +5689,26 @@ begin
     LPSmallBlockPool := PSmallBlockPoolHeader(LBlockHeader);
     {Get the block type}
     LPSmallBlockType := LPSmallBlockPool.BlockType;
-{$ifdef ClearSmallAndMediumBlocksInFreeMem}
+{$IFDEF ClearSmallAndMediumBlocksInFreeMem}
     FillChar(APointer^, LPSmallBlockType.BlockSize - BlockHeaderSize, 0);
-{$endif}
+{$ENDIF}
     {Lock the block type}
-{$ifndef AssumeMultiThreaded}
+{$IFNDEF AssumeMultiThreaded}
     if IsMultiThread then
-{$endif}
+{$ENDIF}
     begin
       while (LockCmpxchg(0, 1, @LPSmallBlockType.BlockTypeLocked) <> 0) do
       begin
-{$ifdef NeverSleepOnThreadContention}
-  {$ifdef UseSwitchToThread}
+{$IFDEF NeverSleepOnThreadContention}
+{$IFDEF UseSwitchToThread}
         SwitchToThread;
-  {$endif}
-{$else}
+{$ENDIF}
+{$ELSE}
         Sleep(InitialSleepTime);
         if LockCmpxchg(0, 1, @LPSmallBlockType.BlockTypeLocked) = 0 then
           Break;
         Sleep(AdditionalSleepTime);
-{$endif}
+{$ENDIF}
       end;
     end;
     {Get the old first free block}
@@ -5668,7 +5724,8 @@ begin
       LPSmallBlockType.NextPartiallyFreePool := LPSmallBlockPool;
     end;
     {Store the old first free block}
-    PNativeUInt(PByte(APointer) - BlockHeaderSize)^ := UIntPtr(LOldFirstFreeBlock) or IsFreeBlockFlag;
+    PNativeUInt(PByte(APointer) - BlockHeaderSize)^ := UIntPtr(LOldFirstFreeBlock) or
+      IsFreeBlockFlag;
     {Store this as the new first free block}
     LPSmallBlockPool.FirstFreeBlock := APointer;
     {Decrement the number of allocated blocks}
@@ -5676,7 +5733,7 @@ begin
     {Small block pools are never freed in full debug mode. This increases the
      likehood of success in catching objects still being used after being
      destroyed.}
-{$ifndef FullDebugMode}
+{$IFNDEF FullDebugMode}
     {Is the entire pool now free? -> Free it.}
     if LPSmallBlockPool.BlocksInUse = 0 then
     begin
@@ -5696,12 +5753,12 @@ begin
     end
     else
     begin
-{$endif}
+{$ENDIF}
       {Unlock this block type}
       LPSmallBlockType.BlockTypeLocked := False;
-{$ifndef FullDebugMode}
+{$IFNDEF FullDebugMode}
     end;
-{$endif}
+{$ENDIF}
     {No error}
     Result := 0;
   end
@@ -5710,12 +5767,11 @@ begin
     {Is this a medium block or a large block?}
     if LBlockHeader and (IsFreeBlockFlag or IsLargeBlockFlag) = 0 then
     begin
-{$ifdef ClearSmallAndMediumBlocksInFreeMem}
+{$IFDEF ClearSmallAndMediumBlocksInFreeMem}
       {Get the block header, extract the block size and clear the block it.}
       LBlockHeader := PNativeUInt(PByte(APointer) - BlockHeaderSize)^;
-      FillChar(APointer^,
-        (LBlockHeader and DropMediumAndLargeFlagsMask) - BlockHeaderSize, 0);
-{$endif}
+      FillChar(APointer^, (LBlockHeader and DropMediumAndLargeFlagsMask) - BlockHeaderSize, 0);
+{$ENDIF}
       Result := FreeMediumBlock(APointer);
     end
     else
@@ -5729,8 +5785,8 @@ begin
     end;
   end;
 end;
-{$else}
-{$ifdef 32Bit}
+{$ELSE}
+{$IFDEF 32Bit}
 asm
   {Get the block header in edx}
   mov edx, [eax - 4]
@@ -5741,12 +5797,12 @@ asm
   {Save ebx}
   push ebx
   {Get the IsMultiThread variable in bl}
-{$ifndef AssumeMultiThreaded}
+  {$IFNDEF AssumeMultiThreaded}
   mov bl, IsMultiThread
-{$endif}
+  {$ENDIF}
   {Is it a small block that is in use?}
   jnz @NotSmallBlockInUse
-{$ifdef ClearSmallAndMediumBlocksInFreeMem}
+  {$IFDEF ClearSmallAndMediumBlocksInFreeMem}
   push edx
   push ecx
   mov edx, TSmallBlockPoolHeader[edx].BlockType
@@ -5756,21 +5812,21 @@ asm
   call System.@FillChar
   pop ecx
   pop edx
-{$endif}
+  {$ENDIF}
   {Do we need to lock the block type?}
-{$ifndef AssumeMultiThreaded}
+  {$IFNDEF AssumeMultiThreaded}
   test bl, bl
-{$endif}
+  {$ENDIF}
   {Get the small block type in ebx}
   mov ebx, TSmallBlockPoolHeader[edx].BlockType
   {Do we need to lock the block type?}
-{$ifndef AssumeMultiThreaded}
+  {$IFNDEF AssumeMultiThreaded}
   jnz @LockBlockTypeLoop
-{$else}
+  {$ELSE}
   jmp @LockBlockTypeLoop
   {Align branch target}
   nop
-{$endif}
+  {$ENDIF}
 @GotLockOnSmallBlockType:
   {Current state: edx = @SmallBlockPoolHeader, ecx = APointer, ebx = @SmallBlockType}
   {Decrement the number of blocks in use}
@@ -5797,9 +5853,9 @@ asm
   {Done}
   ret
   {Align branch target}
-{$ifndef AssumeMultiThreaded}
+  {$IFNDEF AssumeMultiThreaded}
   nop
-{$endif}
+  {$ENDIF}
 @SmallPoolWasFull:
   {Insert this as the first partially free pool for the block size}
   mov ecx, TSmallBlockType[ebx].NextPartiallyFreePool
@@ -5820,8 +5876,8 @@ asm
   nop
 @PoolIsNowEmpty:
   {Was this pool actually in the linked list of pools with space? If not, it
-   can only be the sequential feed pool (it is the only pool that may contain
-   only one block, i.e. other blocks have not been split off yet)}
+  can only be the sequential feed pool (it is the only pool that may contain
+  only one block, i.e. other blocks have not been split off yet)}
   test eax, eax
   jz @IsSequentialFeedPool
   {Pool is now empty: Remove it from the linked list and free it}
@@ -5843,38 +5899,38 @@ asm
   {Release this pool}
   mov eax, edx
   mov edx, [edx - 4]
-{$ifndef AssumeMultiThreaded}
+  {$IFNDEF AssumeMultiThreaded}
   mov bl, IsMultiThread
-{$endif}
+  {$ENDIF}
   jmp @FreeMediumBlock
   {Align branch target}
-{$ifndef AssumeMultiThreaded}
+  {$IFNDEF AssumeMultiThreaded}
   nop
   nop
-{$endif}
+  {$ENDIF}
   nop
 @LockBlockTypeLoop:
   mov eax, $100
   {Attempt to grab the block type}
   lock cmpxchg TSmallBlockType([ebx]).BlockTypeLocked, ah
   je @GotLockOnSmallBlockType
-{$ifdef NeverSleepOnThreadContention}
+  {$IFDEF NeverSleepOnThreadContention}
   {Pause instruction (improves performance on P4)}
   rep nop
-  {$ifdef UseSwitchToThread}
+  {$IFDEF UseSwitchToThread}
   push ecx
   push edx
   call SwitchToThread
   pop edx
   pop ecx
-  {$endif}
+  {$ENDIF}
   {Try again}
   jmp @LockBlockTypeLoop
   {Align branch target}
-  {$ifndef UseSwitchToThread}
+  {$IFNDEF UseSwitchToThread}
   nop
-  {$endif}
-{$else}
+  {$ENDIF}
+  {$ELSE}
   {Couldn't grab the block type - sleep and try again}
   push ecx
   push edx
@@ -5899,7 +5955,7 @@ asm
   {Align branch target}
   nop
   nop
-{$endif}
+  {$ENDIF}
   {---------------------Medium blocks------------------------------}
   {Align branch target}
 @NotSmallBlockInUse:
@@ -5907,7 +5963,7 @@ asm
   test dl, IsFreeBlockFlag + IsLargeBlockFlag
   jnz @NotASmallOrMediumBlock
 @FreeMediumBlock:
-{$ifdef ClearSmallAndMediumBlocksInFreeMem}
+  {$IFDEF ClearSmallAndMediumBlocksInFreeMem}
   push eax
   push edx
   and edx, DropMediumAndLargeFlagsMask
@@ -5916,14 +5972,14 @@ asm
   call System.@FillChar
   pop edx
   pop eax
-{$endif}
+  {$ENDIF}
   {Drop the flags}
   and edx, DropMediumAndLargeFlagsMask
   {Free the medium block pointed to by eax, header in edx, bl = IsMultiThread}
-{$ifndef AssumeMultiThreaded}
+  {$IFNDEF AssumeMultiThreaded}
   {Do we need to lock the medium blocks?}
   test bl, bl
-{$endif}
+  {$ENDIF}
   {Block size in ebx}
   mov ebx, edx
   {Save registers}
@@ -5931,9 +5987,9 @@ asm
   {Pointer in esi}
   mov esi, eax
   {Do we need to lock the medium blocks?}
-{$ifndef AssumeMultiThreaded}
+  {$IFNDEF AssumeMultiThreaded}
   jz @MediumBlocksLocked
-{$endif}
+  {$ENDIF}
   call LockMediumBlocks
 @MediumBlocksLocked:
   {Can we combine this block with the next free block?}
@@ -5946,13 +6002,13 @@ asm
   mov [esi + ebx - 4], ecx
 @NextBlockChecked:
   {Can we combine this block with the previous free block? We need to
-   re-read the flags since it could have changed before we could lock the
-   medium blocks.}
+  re-read the flags since it could have changed before we could lock the
+  medium blocks.}
   test byte ptr [esi - 4], PreviousMediumBlockIsFreeFlag
   jnz @PreviousBlockIsFree
 @PreviousBlockChecked:
   {Is the entire medium block pool free, and there are other free blocks
-   that can fit the largest possible medium block -> free it.}
+  that can fit the largest possible medium block -> free it.}
   cmp ebx, (MediumBlockPoolSize - MediumBlockPoolHeaderSize)
   je @EntireMediumPoolFree
 @BinFreeMediumBlock:
@@ -5962,8 +6018,8 @@ asm
   {Store the trailing size marker}
   mov [esi + ebx - 8], ebx
   {Insert this block back into the bins: Size check not required here,
-   since medium blocks that are in use are not allowed to be
-   shrunk smaller than MinimumMediumBlockSize}
+  since medium blocks that are in use are not allowed to be
+  shrunk smaller than MinimumMediumBlockSize}
   mov eax, esi
   mov edx, ebx
   {Insert into bin}
@@ -6007,8 +6063,8 @@ asm
   {Align branch target}
 @EntireMediumPoolFree:
   {Should we make this the new sequential feed medium block pool? If the
-   current sequential feed pool is not entirely free, we make this the new
-   sequential feed pool.}
+  current sequential feed pool is not entirely free, we make this the new
+  sequential feed pool.}
   cmp MediumSequentialFeedBytesLeft, MediumBlockPoolSize - MediumBlockPoolHeaderSize
   jne @MakeEmptyMediumPoolSequentialFeed
   {Point esi to the medium block pool header}
@@ -6020,12 +6076,12 @@ asm
   mov TMediumBlockPoolHeader[edx].PreviousMediumBlockPoolHeader, eax
   {Unlock medium blocks}
   mov MediumBlocksLocked, False;
-{$ifdef ClearMediumBlockPoolsBeforeReturningToOS}
+  {$IFDEF ClearMediumBlockPoolsBeforeReturningToOS}
   mov eax, esi
   mov edx, MediumBlockPoolSize
   xor ecx, ecx
   call System.@FillChar
-{$endif}
+  {$ENDIF}
   {Free the medium block pool}
   push MEM_RELEASE
   push 0
@@ -6049,7 +6105,7 @@ asm
   {Bin the current sequential feed pool}
   call BinMediumSequentialFeedRemainder
   {Set this medium pool up as the new sequential feed pool:
-   Store the sequential feed pool trailer}
+  Store the sequential feed pool trailer}
   mov dword ptr [ebx - BlockHeaderSize], IsMediumBlockFlag
   {Store the number of bytes available in the sequential feed chunk}
   mov MediumSequentialFeedBytesLeft, MediumBlockPoolSize - MediumBlockPoolHeaderSize
@@ -6076,8 +6132,7 @@ asm
   mov eax, -1
 end;
 
-{$else}
-
+{$ELSE}
 {---------------64-bit BASM FastFreeMem---------------}
 asm
   .params 3
@@ -6088,12 +6143,12 @@ asm
   {Is it a small block in use?}
   test dl, IsFreeBlockFlag + IsMediumBlockFlag + IsLargeBlockFlag
   {Get the IsMultiThread variable in bl}
-{$ifndef AssumeMultiThreaded}
+  {$IFNDEF AssumeMultiThreaded}
   mov bl, IsMultiThread
-{$endif}
+  {$ENDIF}
   {Is it a small block that is in use?}
   jnz @NotSmallBlockInUse
-{$ifdef ClearSmallAndMediumBlocksInFreeMem}
+  {$IFDEF ClearSmallAndMediumBlocksInFreeMem}
   mov rsi, rcx
   mov rdx, TSmallBlockPoolHeader[rdx].BlockType
   movzx edx, TSmallBlockType(rdx).BlockSize
@@ -6102,19 +6157,19 @@ asm
   call System.@FillChar
   mov rcx, rsi
   mov rdx, [rcx - BlockHeaderSize]
-{$endif}
+  {$ENDIF}
   {Do we need to lock the block type?}
-{$ifndef AssumeMultiThreaded}
+  {$IFNDEF AssumeMultiThreaded}
   test bl, bl
-{$endif}
+  {$ENDIF}
   {Get the small block type in rbx}
   mov rbx, TSmallBlockPoolHeader[rdx].BlockType
   {Do we need to lock the block type?}
-{$ifndef AssumeMultiThreaded}
+  {$IFNDEF AssumeMultiThreaded}
   jnz @LockBlockTypeLoop
-{$else}
+  {$ELSE}
   jmp @LockBlockTypeLoop
-{$endif}
+  {$ENDIF}
 @GotLockOnSmallBlockType:
   {Current state: rdx = @SmallBlockPoolHeader, rcx = APointer, rbx = @SmallBlockType}
   {Decrement the number of blocks in use}
@@ -6151,8 +6206,8 @@ asm
   jmp @Done
 @PoolIsNowEmpty:
   {Was this pool actually in the linked list of pools with space? If not, it
-   can only be the sequential feed pool (it is the only pool that may contain
-   only one block, i.e. other blocks have not been split off yet)}
+  can only be the sequential feed pool (it is the only pool that may contain
+  only one block, i.e. other blocks have not been split off yet)}
   test rax, rax
   jz @IsSequentialFeedPool
   {Pool is now empty: Remove it from the linked list and free it}
@@ -6174,27 +6229,27 @@ asm
   {Release this pool}
   mov rcx, rdx
   mov rdx, [rdx - BlockHeaderSize]
-{$ifndef AssumeMultiThreaded}
+  {$IFNDEF AssumeMultiThreaded}
   mov bl, IsMultiThread
-{$endif}
+  {$ENDIF}
   jmp @FreeMediumBlock
 @LockBlockTypeLoop:
   mov eax, $100
   {Attempt to grab the block type}
   lock cmpxchg TSmallBlockType([rbx]).BlockTypeLocked, ah
   je @GotLockOnSmallBlockType
-{$ifdef NeverSleepOnThreadContention}
+  {$IFDEF NeverSleepOnThreadContention}
   {Pause instruction (improves performance on P4)}
   pause
-  {$ifdef UseSwitchToThread}
+  {$IFDEF UseSwitchToThread}
   mov rsi, rcx
   call SwitchToThread
   mov rcx, rsi
   mov rdx, [rcx - BlockHeaderSize]
-  {$endif}
+  {$ENDIF}
   {Try again}
   jmp @LockBlockTypeLoop
-{$else}
+  {$ELSE}
   {Couldn't grab the block type - sleep and try again}
   mov rsi, rcx
   mov ecx, InitialSleepTime
@@ -6214,14 +6269,14 @@ asm
   mov rdx, [rcx - BlockHeaderSize]
   {Try again}
   jmp @LockBlockTypeLoop
-{$endif}
+  {$ENDIF}
   {---------------------Medium blocks------------------------------}
 @NotSmallBlockInUse:
   {Not a small block in use: is it a medium or large block?}
   test dl, IsFreeBlockFlag + IsLargeBlockFlag
   jnz @NotASmallOrMediumBlock
 @FreeMediumBlock:
-{$ifdef ClearSmallAndMediumBlocksInFreeMem}
+  {$IFDEF ClearSmallAndMediumBlocksInFreeMem}
   mov rsi, rcx
   and rdx, DropMediumAndLargeFlagsMask
   sub rdx, BlockHeaderSize
@@ -6229,22 +6284,22 @@ asm
   call System.@FillChar
   mov rcx, rsi
   mov rdx, [rcx - BlockHeaderSize]
-{$endif}
+  {$ENDIF}
   {Drop the flags}
   and rdx, DropMediumAndLargeFlagsMask
   {Free the medium block pointed to by eax, header in edx, bl = IsMultiThread}
-{$ifndef AssumeMultiThreaded}
+  {$IFNDEF AssumeMultiThreaded}
   {Do we need to lock the medium blocks?}
   test bl, bl
-{$endif}
+  {$ENDIF}
   {Block size in rbx}
   mov rbx, rdx
   {Pointer in rsi}
   mov rsi, rcx
   {Do we need to lock the medium blocks?}
-{$ifndef AssumeMultiThreaded}
+  {$IFNDEF AssumeMultiThreaded}
   jz @MediumBlocksLocked
-{$endif}
+  {$ENDIF}
   call LockMediumBlocks
 @MediumBlocksLocked:
   {Can we combine this block with the next free block?}
@@ -6257,13 +6312,13 @@ asm
   mov [rsi + rbx - BlockHeaderSize], rcx
 @NextBlockChecked:
   {Can we combine this block with the previous free block? We need to
-   re-read the flags since it could have changed before we could lock the
-   medium blocks.}
+  re-read the flags since it could have changed before we could lock the
+  medium blocks.}
   test byte ptr [rsi - BlockHeaderSize], PreviousMediumBlockIsFreeFlag
   jnz @PreviousBlockIsFree
 @PreviousBlockChecked:
   {Is the entire medium block pool free, and there are other free blocks
-   that can fit the largest possible medium block -> free it.}
+  that can fit the largest possible medium block -> free it.}
   cmp ebx, (MediumBlockPoolSize - MediumBlockPoolHeaderSize)
   je @EntireMediumPoolFree
 @BinFreeMediumBlock:
@@ -6273,8 +6328,8 @@ asm
   {Store the trailing size marker}
   mov [rsi + rbx - 2 * BlockHeaderSize], rbx
   {Insert this block back into the bins: Size check not required here,
-   since medium blocks that are in use are not allowed to be
-   shrunk smaller than MinimumMediumBlockSize}
+  since medium blocks that are in use are not allowed to be
+  shrunk smaller than MinimumMediumBlockSize}
   mov rcx, rsi
   mov rdx, rbx
   {Insert into bin}
@@ -6311,8 +6366,8 @@ asm
   jmp @PreviousBlockChecked
 @EntireMediumPoolFree:
   {Should we make this the new sequential feed medium block pool? If the
-   current sequential feed pool is not entirely free, we make this the new
-   sequential feed pool.}
+  current sequential feed pool is not entirely free, we make this the new
+  sequential feed pool.}
   lea r8, MediumSequentialFeedBytesLeft
   cmp dword ptr [r8], MediumBlockPoolSize - MediumBlockPoolHeaderSize //workaround for QC99023
   jne @MakeEmptyMediumPoolSequentialFeed
@@ -6326,12 +6381,12 @@ asm
   {Unlock medium blocks}
   xor eax, eax
   mov MediumBlocksLocked, al
-{$ifdef ClearMediumBlockPoolsBeforeReturningToOS}
+  {$IFDEF ClearMediumBlockPoolsBeforeReturningToOS}
   mov rcx, rsi
   mov edx, MediumBlockPoolSize
   xor r8, r8
   call System.@FillChar
-{$endif}
+  {$ENDIF}
   {Free the medium block pool}
   mov rcx, rsi
   xor edx, edx
@@ -6348,7 +6403,7 @@ asm
   {Bin the current sequential feed pool}
   call BinMediumSequentialFeedRemainder
   {Set this medium pool up as the new sequential feed pool:
-   Store the sequential feed pool trailer}
+  Store the sequential feed pool trailer}
   mov qword ptr [rbx - BlockHeaderSize], IsMediumBlockFlag
   {Store the number of bytes available in the sequential feed chunk}
   lea rax, MediumSequentialFeedBytesLeft
@@ -6369,24 +6424,25 @@ asm
   call FreeLargeBlock
 @Done:
 end;
-{$endif}
-{$endif}
+{$ENDIF}
+{$ENDIF}
+{$IFNDEF FullDebugMode}
 
-{$ifndef FullDebugMode}
 {Replacement for SysReallocMem}
-function FastReallocMem(APointer: Pointer; ANewSize: {$ifdef XE2AndUp}NativeInt{$else}Integer{$endif}): Pointer;
-{$ifndef ASMVersion}
+function FastReallocMem(APointer: Pointer; ANewSize:
+  {$IFDEF XE2AndUp}NativeInt{$ELSE}Integer{$ENDIF}): Pointer;
+{$IFNDEF ASMVersion}
 var
-  LBlockHeader, LNextBlockSizeAndFlags, LNewAllocSize, LBlockFlags,
-    LOldAvailableSize, LNextBlockSize, LNewAvailableSize, LMinimumUpsize,
-    LSecondSplitSize, LNewBlockSize: NativeUInt;
+  LBlockHeader, LNextBlockSizeAndFlags, LNewAllocSize, LBlockFlags, LOldAvailableSize,
+    LNextBlockSize, LNewAvailableSize, LMinimumUpsize, LSecondSplitSize,
+    LNewBlockSize: NativeUInt;
   LPSmallBlockType: PSmallBlockType;
   LPNextBlock, LPNextBlockHeader: Pointer;
 
   {Upsizes a large block in-place. The following variables are assumed correct:
-    LBlockFlags, LOldAvailableSize, LPNextBlock, LNextBlockSizeAndFlags,
-    LNextBlockSize, LNewAvailableSize. Medium blocks must be locked on entry if
-    required.}
+   LBlockFlags, LOldAvailableSize, LPNextBlock, LNextBlockSizeAndFlags,
+   LNextBlockSize, LNewAvailableSize. Medium blocks must be locked on entry if
+   required.}
   procedure MediumBlockInPlaceUpsize;
   begin
     {Remove the next block}
@@ -6399,8 +6455,9 @@ var
     else
       LNewAllocSize := NativeUInt(ANewSize);
     {Round up to the nearest block size granularity}
-    LNewBlockSize := ((LNewAllocSize + (BlockHeaderSize + MediumBlockGranularity - 1 - MediumBlockSizeOffset))
-      and -MediumBlockGranularity) + MediumBlockSizeOffset;
+    LNewBlockSize :=
+      ((LNewAllocSize + (BlockHeaderSize + MediumBlockGranularity - 1 - MediumBlockSizeOffset))
+        and -MediumBlockGranularity) + MediumBlockSizeOffset;
     {Calculate the size of the second split}
     LSecondSplitSize := LNewAvailableSize + BlockHeaderSize - LNewBlockSize;
     {Does it fit?}
@@ -6410,17 +6467,19 @@ var
       LNewBlockSize := LNewAvailableSize + BlockHeaderSize;
       {Grab the whole block: Mark it as used in the block following it}
       LPNextBlockHeader := Pointer(PByte(APointer) + LNewAvailableSize);
-      PNativeUInt(LPNextBlockHeader)^ :=
-        PNativeUInt(LPNextBlockHeader)^ and (not PreviousMediumBlockIsFreeFlag);
+      PNativeUInt(LPNextBlockHeader)^ := PNativeUInt(LPNextBlockHeader)^ and
+        (not PreviousMediumBlockIsFreeFlag);
     end
     else
     begin
       {Split the block in two}
       LPNextBlock := PMediumFreeBlock(PByte(APointer) + LNewBlockSize);
       {Set the size of the second split}
-      PNativeUInt(PByte(LPNextBlock) - BlockHeaderSize)^ := LSecondSplitSize or (IsMediumBlockFlag or IsFreeBlockFlag);
+      PNativeUInt(PByte(LPNextBlock) - BlockHeaderSize)^ := LSecondSplitSize or
+        (IsMediumBlockFlag or IsFreeBlockFlag);
       {Store the size of the second split before the header of the next block}
-      PNativeUInt(PByte(LPNextBlock) + LSecondSplitSize - 2 * BlockHeaderSize)^ := LSecondSplitSize;
+      PNativeUInt(PByte(LPNextBlock) + LSecondSplitSize - 2 * BlockHeaderSize)^ :=
+        LSecondSplitSize;
       {Put the remainder in a bin if it is big enough}
       if LSecondSplitSize >= MinimumMediumBlockSize then
         InsertMediumBlockIntoBin(LPNextBlock, LSecondSplitSize);
@@ -6429,29 +6488,30 @@ var
     PNativeUInt(PByte(APointer) - BlockHeaderSize)^ := LNewBlockSize or LBlockFlags;
   end;
 
-  {In-place downsize of a medium block. On entry Size must be less than half of
-   LOldAvailableSize.}
+{In-place downsize of a medium block. On entry Size must be less than half of
+ LOldAvailableSize.}
   procedure MediumBlockInPlaceDownsize;
   begin
     {Round up to the next medium block size}
-    LNewBlockSize := ((ANewSize + (BlockHeaderSize + MediumBlockGranularity - 1 - MediumBlockSizeOffset))
-      and -MediumBlockGranularity) + MediumBlockSizeOffset;
+    LNewBlockSize :=
+      ((ANewSize + (BlockHeaderSize + MediumBlockGranularity - 1 - MediumBlockSizeOffset)) and
+        -MediumBlockGranularity) + MediumBlockSizeOffset;
     {Get the size of the second split}
     LSecondSplitSize := (LOldAvailableSize + BlockHeaderSize) - LNewBlockSize;
     {Lock the medium blocks}
     LockMediumBlocks;
     {Set the new size}
     PNativeUInt(PByte(APointer) - BlockHeaderSize)^ :=
-      (PNativeUInt(PByte(APointer) - BlockHeaderSize)^ and ExtractMediumAndLargeFlagsMask)
-      or LNewBlockSize;
+      (PNativeUInt(PByte(APointer) - BlockHeaderSize)^ and ExtractMediumAndLargeFlagsMask) or
+      LNewBlockSize;
     {Is the next block in use?}
     LPNextBlock := PNativeUInt(PByte(APointer) + LOldAvailableSize + BlockHeaderSize);
     LNextBlockSizeAndFlags := PNativeUInt(PByte(LPNextBlock) - BlockHeaderSize)^;
     if LNextBlockSizeAndFlags and IsFreeBlockFlag = 0 then
     begin
       {The next block is in use: flag its previous block as free}
-      PNativeUInt(PByte(LPNextBlock) - BlockHeaderSize)^ :=
-        LNextBlockSizeAndFlags or PreviousMediumBlockIsFreeFlag;
+      PNativeUInt(PByte(LPNextBlock) - BlockHeaderSize)^ := LNextBlockSizeAndFlags or
+        PreviousMediumBlockIsFreeFlag;
     end
     else
     begin
@@ -6464,9 +6524,11 @@ var
     {Set the split}
     LPNextBlock := PNativeUInt(PByte(APointer) + LNewBlockSize);
     {Store the free part's header}
-    PNativeUInt(PByte(LPNextBlock) - BlockHeaderSize)^ := LSecondSplitSize or (IsMediumBlockFlag or IsFreeBlockFlag);
+    PNativeUInt(PByte(LPNextBlock) - BlockHeaderSize)^ := LSecondSplitSize or
+      (IsMediumBlockFlag or IsFreeBlockFlag);
     {Store the trailing size field}
-    PNativeUInt(PByte(LPNextBlock) + LSecondSplitSize - 2 * BlockHeaderSize)^ := LSecondSplitSize;
+    PNativeUInt(PByte(LPNextBlock) + LSecondSplitSize - 2 * BlockHeaderSize)^ :=
+      LSecondSplitSize;
     {Bin this free block}
     if LSecondSplitSize >= MinimumMediumBlockSize then
       InsertMediumBlockIntoBin(LPNextBlock, LSecondSplitSize);
@@ -6505,15 +6567,15 @@ begin
         if Result <> nil then
         begin
           {Move the data across}
-{$ifdef UseCustomVariableSizeMoveRoutines}
-  {$ifdef Align16Bytes}
+{$IFDEF UseCustomVariableSizeMoveRoutines}
+{$IFDEF Align16Bytes}
           MoveX16LP(APointer^, Result^, ANewSize);
-  {$else}
+{$ELSE}
           MoveX8LP(APointer^, Result^, ANewSize);
-  {$endif}
-{$else}
+{$ENDIF}
+{$ELSE}
           System.Move(APointer^, Result^, ANewSize);
-{$endif}
+{$ENDIF}
           {Free the old pointer}
           FastFreeMem(APointer);
         end;
@@ -6538,13 +6600,14 @@ begin
         {Do we need to store the requested size? Only large blocks store the
          requested size.}
         if LNewAllocSize > (MaximumMediumBlockSize - BlockHeaderSize) then
-          PLargeBlockHeader(PByte(Result) - LargeBlockHeaderSize).UserAllocatedSize := ANewSize;
+          PLargeBlockHeader(PByte(Result) - LargeBlockHeaderSize).UserAllocatedSize :=
+            ANewSize;
         {Move the data across}
-{$ifdef UseCustomFixedSizeMoveRoutines}
+{$IFDEF UseCustomFixedSizeMoveRoutines}
         LPSmallBlockType.UpsizeMoveProcedure(APointer^, Result^, LOldAvailableSize);
-{$else}
+{$ELSE}
         System.Move(APointer^, Result^, LOldAvailableSize);
-{$endif}
+{$ENDIF}
         {Free the old pointer}
         FastFreeMem(APointer);
       end;
@@ -6578,15 +6641,16 @@ begin
           begin
             {The next block is free and there is enough space to grow this
              block in place.}
-{$ifndef AssumeMultiThreaded}
+{$IFNDEF AssumeMultiThreaded}
             if IsMultiThread then
             begin
-{$endif}
+{$ENDIF}
               {Multi-threaded application - lock medium blocks and re-read the
                information on the blocks.}
               LockMediumBlocks;
               {Re-read the info for this block}
-              LBlockFlags := PNativeUInt(PByte(APointer) - BlockHeaderSize)^ and ExtractMediumAndLargeFlagsMask;
+              LBlockFlags := PNativeUInt(PByte(APointer) - BlockHeaderSize)^ and
+                ExtractMediumAndLargeFlagsMask;
               {Re-read the info for the next block}
               LNextBlockSizeAndFlags := PNativeUInt(PByte(LPNextBlock) - BlockHeaderSize)^;
               {Recalculate the next block size}
@@ -6594,8 +6658,8 @@ begin
               {The available size including the next block}
               LNewAvailableSize := LOldAvailableSize + LNextBlockSize;
               {Is the next block still free and the size still sufficient?}
-              if (LNextBlockSizeAndFlags and IsFreeBlockFlag <> 0)
-                and (NativeUInt(ANewSize) <= LNewAvailableSize) then
+              if (LNextBlockSizeAndFlags and IsFreeBlockFlag <> 0) and
+                (NativeUInt(ANewSize) <= LNewAvailableSize) then
               begin
                 {Upsize the block in-place}
                 MediumBlockInPlaceUpsize;
@@ -6608,7 +6672,7 @@ begin
               end;
               {Couldn't use the block: Unlock the medium blocks}
               MediumBlocksLocked := False;
-{$ifndef AssumeMultiThreaded}
+{$IFNDEF AssumeMultiThreaded}
             end
             else
             begin
@@ -6621,7 +6685,7 @@ begin
               {Done}
               Exit;
             end;
-{$endif}
+{$ENDIF}
           end;
         end;
         {Couldn't upsize in place. Grab a new block and move the data across:
@@ -6638,13 +6702,14 @@ begin
         begin
           {If it's a large block - store the actual user requested size}
           if LNewAllocSize > (MaximumMediumBlockSize - BlockHeaderSize) then
-            PLargeBlockHeader(PByte(Result) - LargeBlockHeaderSize).UserAllocatedSize := ANewSize;
+            PLargeBlockHeader(PByte(Result) - LargeBlockHeaderSize).UserAllocatedSize
+              := ANewSize;
           {Move the data across}
-{$ifdef UseCustomVariableSizeMoveRoutines}
+{$IFDEF UseCustomVariableSizeMoveRoutines}
           MoveX16LP(APointer^, Result^, LOldAvailableSize);
-{$else}
+{$ELSE}
           System.Move(APointer^, Result^, LOldAvailableSize);
-{$endif}
+{$ENDIF}
           {Free the old block}
           FastFreeMem(APointer);
         end;
@@ -6691,15 +6756,15 @@ begin
               if Result <> nil then
               begin
                 {Move the data across}
-{$ifdef UseCustomVariableSizeMoveRoutines}
-  {$ifdef Align16Bytes}
+{$IFDEF UseCustomVariableSizeMoveRoutines}
+{$IFDEF Align16Bytes}
                 MoveX16LP(APointer^, Result^, ANewSize);
-  {$else}
+{$ELSE}
                 MoveX8LP(APointer^, Result^, ANewSize);
-  {$endif}
-{$else}
+{$ENDIF}
+{$ELSE}
                 System.Move(APointer^, Result^, ANewSize);
-{$endif}
+{$ENDIF}
                 {Free the old block}
                 FastFreeMem(APointer);
               end;
@@ -6725,8 +6790,8 @@ begin
     end;
   end;
 end;
-{$else}
-{$ifdef 32Bit}
+{$ELSE}
+{$IFDEF 32Bit}
 asm
   {On entry: eax = APointer; edx = ANewSize}
   {Get the block header: Is it actually a small block?}
@@ -6751,8 +6816,8 @@ asm
   cmp ecx, edx
   jb @SmallUpsize
   {It's a downsize. Do we need to allocate a smaller block? Only if the new
-   size is less than a quarter of the available size less
-   SmallBlockDownsizeCheckAdder bytes}
+  size is less than a quarter of the available size less
+  SmallBlockDownsizeCheckAdder bytes}
   lea ebx, [edx * 4 + SmallBlockDownsizeCheckAdder]
   cmp ebx, ecx
   jb @NotSmallInPlaceDownsize
@@ -6780,15 +6845,15 @@ asm
   {Original pointer in eax}
   mov eax, esi
   {Move the data across}
-{$ifdef UseCustomVariableSizeMoveRoutines}
-  {$ifdef Align16Bytes}
+  {$IFDEF UseCustomVariableSizeMoveRoutines}
+  {$IFDEF Align16Bytes}
   call MoveX16LP
-  {$else}
+  {$ELSE}
   call MoveX8LP
-  {$endif}
-{$else}
+  {$ENDIF}
+  {$ELSE}
   call System.Move
-{$endif}
+  {$ENDIF}
   {Free the original pointer}
   mov eax, esi
   call FastFreeMem
@@ -6804,9 +6869,9 @@ asm
 @SmallUpsize:
   {State: esi = APointer, edx = ANewSize, ecx = Current Block Size, ebx = Current Block Type}
   {This pointer is being reallocated to a larger block and therefore it is
-   logical to assume that it may be enlarged again. Since reallocations are
-   expensive, there is a minimum upsize percentage to avoid unnecessary
-   future move operations.}
+  logical to assume that it may be enlarged again. Since reallocations are
+  expensive, there is a minimum upsize percentage to avoid unnecessary
+  future move operations.}
   {Small blocks always grow with at least 100% + SmallBlockUpsizeAdder bytes}
   lea ecx, [ecx + ecx + SmallBlockUpsizeAdder]
   {save edi}
@@ -6814,7 +6879,7 @@ asm
   {Save the requested size in edi}
   mov edi, edx
   {New allocated size is the maximum of the requested size and the minimum
-   upsize}
+  upsize}
   xor eax, eax
   sub ecx, edx
   adc eax, -1
@@ -6826,7 +6891,7 @@ asm
   test eax, eax
   jz @SmallUpsizeDone
   {Do we need to store the requested size? Only large blocks store the
-   requested size.}
+  requested size.}
   cmp edi, MaximumMediumBlockSize - BlockHeaderSize
   jbe @NotSmallUpsizeToLargeBlock
   {Store the user requested size}
@@ -6842,11 +6907,11 @@ asm
   {Move from the old block}
   mov eax, esi
   {Move the data across}
-{$ifdef UseCustomFixedSizeMoveRoutines}
+  {$IFDEF UseCustomFixedSizeMoveRoutines}
   call TSmallBlockType[ebx].UpsizeMoveProcedure
-{$else}
+  {$ELSE}
   call System.Move
-{$endif}
+  {$ENDIF}
   {Free the old pointer}
   mov eax, esi
   call FastFreeMem
@@ -6865,7 +6930,7 @@ asm
   jnz @PossibleLargeBlock
   {-------------------------------Medium block--------------------------------------}
   {Status: ecx = Current Block Size + Flags, eax/esi = APointer,
-   edx = Requested Size}
+  edx = Requested Size}
   mov ebx, ecx
   {Drop the flags from the header}
   and ecx, DropMediumAndLargeFlagsMask
@@ -6884,7 +6949,7 @@ asm
   {Is it an upsize or a downsize?}
   ja @MediumBlockUpsize
   {Status: ecx = Current Block Size - 4, bl = Current Block Flags,
-   edi = @Next Block, eax/esi = APointer, edx = Requested Size}
+  edi = @Next Block, eax/esi = APointer, edx = Requested Size}
   {Must be less than half the current size or we don't bother resizing.}
   lea ebp, [edx + edx]
   cmp ebp, ecx
@@ -6903,8 +6968,8 @@ asm
   nop
 @MediumMustDownsize:
   {In-place downsize? Balance the cost of moving the data vs. the cost of
-   fragmenting the memory pool. Medium blocks in use may never be smaller
-   than MinimumMediumBlockSize.}
+  fragmenting the memory pool. Medium blocks in use may never be smaller
+  than MinimumMediumBlockSize.}
   cmp edx, MinimumMediumBlockSize - BlockHeaderSize
   jae @MediumBlockInPlaceDownsize
   {The requested size is less than the minimum medium block size. If the
@@ -6914,8 +6979,8 @@ asm
   cmp edx, MediumInPlaceDownsizeLimit
   jb @MediumDownsizeRealloc
   {The request is for a size smaller than the minimum medium block size, but
-   not small enough to justify moving data: Reduce the block size to the
-   minimum medium block size}
+  not small enough to justify moving data: Reduce the block size to the
+  minimum medium block size}
   mov edx, MinimumMediumBlockSize - BlockHeaderSize
   {Is it already at the minimum medium block size?}
   cmp ecx, edx
@@ -6929,15 +6994,15 @@ asm
   add ecx, BlockHeaderSize
   sub ecx, ebp
   {Lock the medium blocks}
-{$ifndef AssumeMultiThreaded}
+  {$IFNDEF AssumeMultiThreaded}
   cmp IsMultiThread, False
   je @DoMediumInPlaceDownsize
-{$endif}
+  {$ENDIF}
 @DoMediumLockForDownsize:
   {Lock the medium blocks (ecx *must* be preserved)}
   call LockMediumBlocks
   {Reread the flags - they may have changed before medium blocks could be
-   locked.}
+  locked.}
   mov ebx, ExtractMediumAndLargeFlagsMask
   and ebx, [esi - 4]
 @DoMediumInPlaceDownsize:
@@ -6957,9 +7022,9 @@ asm
   {Align branch target}
   nop
   nop
-{$ifdef AssumeMultiThreaded}
+  {$IFDEF AssumeMultiThreaded}
   nop
-{$endif}
+  {$ENDIF}
 @MediumDownsizeNextBlockFree:
   {The next block is free: combine it}
   mov eax, edi
@@ -7008,15 +7073,15 @@ asm
   mov eax, esi
   mov ecx, edi
   {Move the data across}
-{$ifdef UseCustomVariableSizeMoveRoutines}
-  {$ifdef Align16Bytes}
+  {$IFDEF UseCustomVariableSizeMoveRoutines}
+  {$IFDEF Align16Bytes}
   call MoveX16LP
-  {$else}
+  {$ELSE}
   call MoveX8LP
-  {$endif}
-{$else}
+  {$ENDIF}
+  {$ELSE}
   call System.Move
-{$endif}
+  {$ENDIF}
   mov eax, esi
   call FastFreeMem
   {Return the result}
@@ -7030,7 +7095,7 @@ asm
   {Align branch target}
 @MediumBlockUpsize:
   {Status: ecx = Current Block Size - 4, bl = Current Block Flags,
-   edi = @Next Block, eax/esi = APointer, edx = Requested Size}
+  edi = @Next Block, eax/esi = APointer, edx = Requested Size}
   {Can we do an in-place upsize?}
   mov eax, [edi - 4]
   test al, IsFreeBlockFlag
@@ -7043,16 +7108,16 @@ asm
   cmp edx, ebp
   ja @CannotUpsizeMediumBlockInPlace
   {The next block is free and there is enough space to grow this
-   block in place.}
-{$ifndef AssumeMultiThreaded}
+  block in place.}
+  {$IFNDEF AssumeMultiThreaded}
   cmp IsMultiThread, False
   je @DoMediumInPlaceUpsize
-{$endif}
+  {$ENDIF}
 @DoMediumLockForUpsize:
   {Lock the medium blocks (ecx and edx *must* be preserved}
   call LockMediumBlocks
   {Re-read the info for this block (since it may have changed before the medium
-   blocks could be locked)}
+  blocks could be locked)}
   mov ebx, ExtractMediumAndLargeFlagsMask
   and ebx, [esi - 4]
   {Re-read the info for the next block}
@@ -7104,11 +7169,11 @@ asm
   {Upsize done}
   jmp @MediumUpsizeInPlaceDone
   {Align branch target}
-{$ifndef AssumeMultiThreaded}
+  {$IFNDEF AssumeMultiThreaded}
   nop
   nop
   nop
-{$endif}
+  {$ENDIF}
 @MediumInPlaceUpsizeSplit:
   {Store the size of the second split as the second last dword}
   mov [esi + ebp - 4], edx
@@ -7144,8 +7209,8 @@ asm
   mov MediumBlocksLocked, False
 @CannotUpsizeMediumBlockInPlace:
   {Couldn't upsize in place. Grab a new block and move the data across:
-   If we have to reallocate and move medium blocks, we grow by at
-   least 25%}
+  If we have to reallocate and move medium blocks, we grow by at
+  least 25%}
   mov eax, ecx
   shr eax, 2
   add eax, ecx
@@ -7177,11 +7242,11 @@ asm
   mov edx, eax
   mov eax, esi
   mov ecx, edi
-{$ifdef UseCustomVariableSizeMoveRoutines}
+  {$IFDEF UseCustomVariableSizeMoveRoutines}
   call MoveX16LP
-{$else}
+  {$ELSE}
   call System.Move
-{$endif}
+  {$ENDIF}
   {Free the old block}
   mov eax, esi
   call FastFreeMem
@@ -7208,8 +7273,7 @@ asm
   xor eax, eax
 end;
 
-{$else}
-
+{$ELSE}
 {-----------------64-bit BASM FastReallocMem-----------------}
 asm
   .params 3
@@ -7236,8 +7300,8 @@ asm
   cmp rcx, rdx
   jb @SmallUpsize
   {It's a downsize. Do we need to allocate a smaller block? Only if the new
-   size is less than a quarter of the available size less
-   SmallBlockDownsizeCheckAdder bytes}
+  size is less than a quarter of the available size less
+  SmallBlockDownsizeCheckAdder bytes}
   lea ebx, [edx * 4 + SmallBlockDownsizeCheckAdder]
   cmp ebx, ecx
   jb @NotSmallInPlaceDownsize
@@ -7262,15 +7326,15 @@ asm
   {Original pointer in ecx}
   mov rcx, rsi
   {Move the data across}
-{$ifdef UseCustomVariableSizeMoveRoutines}
-  {$ifdef Align16Bytes}
+  {$IFDEF UseCustomVariableSizeMoveRoutines}
+  {$IFDEF Align16Bytes}
   call MoveX16LP
-  {$else}
+  {$ELSE}
   call MoveX8LP
-  {$endif}
-{$else}
+  {$ENDIF}
+  {$ELSE}
   call System.Move
-{$endif}
+  {$ENDIF}
   {Free the original pointer}
   mov rcx, rsi
   call FastFreeMem
@@ -7280,15 +7344,15 @@ asm
 @SmallUpsize:
   {State: rsi = APointer, rdx = ANewSize, rcx = Current Block Size, rbx = Current Block Type}
   {This pointer is being reallocated to a larger block and therefore it is
-   logical to assume that it may be enlarged again. Since reallocations are
-   expensive, there is a minimum upsize percentage to avoid unnecessary
-   future move operations.}
+  logical to assume that it may be enlarged again. Since reallocations are
+  expensive, there is a minimum upsize percentage to avoid unnecessary
+  future move operations.}
   {Small blocks always grow with at least 100% + SmallBlockUpsizeAdder bytes}
   lea ecx, [ecx + ecx + SmallBlockUpsizeAdder]
   {Save the requested size in rdi}
   mov rdi, rdx
   {New allocated size is the maximum of the requested size and the minimum
-   upsize}
+  upsize}
   xor rax, rax
   sub rcx, rdx
   adc rax, -1
@@ -7300,7 +7364,7 @@ asm
   test rax, rax
   jz @Done
   {Do we need to store the requested size? Only large blocks store the
-   requested size.}
+  requested size.}
   cmp rdi, MaximumMediumBlockSize - BlockHeaderSize
   jbe @NotSmallUpsizeToLargeBlock
   {Store the user requested size}
@@ -7316,11 +7380,11 @@ asm
   {Move from the old block}
   mov rcx, rsi
   {Move the data across}
-{$ifdef UseCustomFixedSizeMoveRoutines}
+  {$IFDEF UseCustomFixedSizeMoveRoutines}
   call TSmallBlockType[rbx].UpsizeMoveProcedure
-{$else}
+  {$ELSE}
   call System.Move
-{$endif}
+  {$ENDIF}
   {Free the old pointer}
   mov rcx, rsi
   call FastFreeMem
@@ -7333,7 +7397,7 @@ asm
   jnz @PossibleLargeBlock
   {-------------------------------Medium block--------------------------------------}
   {Status: rcx = Current Block Size + Flags, rsi = APointer,
-   rdx = Requested Size}
+  rdx = Requested Size}
   mov rbx, rcx
   {Drop the flags from the header}
   and ecx, DropMediumAndLargeFlagsMask
@@ -7347,7 +7411,7 @@ asm
   cmp rdx, rcx
   ja @MediumBlockUpsize
   {Status: ecx = Current Block Size - BlockHeaderSize, bl = Current Block Flags,
-   rdi = @Next Block, rsi = APointer, rdx = Requested Size}
+  rdi = @Next Block, rsi = APointer, rdx = Requested Size}
   {Must be less than half the current size or we don't bother resizing.}
   lea r15, [rdx + rdx]
   cmp r15, rcx
@@ -7357,8 +7421,8 @@ asm
   jmp @Done
 @MediumMustDownsize:
   {In-place downsize? Balance the cost of moving the data vs. the cost of
-   fragmenting the memory pool. Medium blocks in use may never be smaller
-   than MinimumMediumBlockSize.}
+  fragmenting the memory pool. Medium blocks in use may never be smaller
+  than MinimumMediumBlockSize.}
   cmp edx, MinimumMediumBlockSize - BlockHeaderSize
   jae @MediumBlockInPlaceDownsize
   {The requested size is less than the minimum medium block size. If the
@@ -7368,8 +7432,8 @@ asm
   cmp edx, MediumInPlaceDownsizeLimit
   jb @MediumDownsizeRealloc
   {The request is for a size smaller than the minimum medium block size, but
-   not small enough to justify moving data: Reduce the block size to the
-   minimum medium block size}
+  not small enough to justify moving data: Reduce the block size to the
+  minimum medium block size}
   mov edx, MinimumMediumBlockSize - BlockHeaderSize
   {Is it already at the minimum medium block size?}
   cmp ecx, edx
@@ -7383,18 +7447,18 @@ asm
   add ecx, BlockHeaderSize
   sub ecx, r15d
   {Lock the medium blocks}
-{$ifndef AssumeMultiThreaded}
+  {$IFNDEF AssumeMultiThreaded}
   lea r8, IsMultiThread
   cmp byte ptr [r8], False
   je @DoMediumInPlaceDownsize
-{$endif}
+  {$ENDIF}
 @DoMediumLockForDownsize:
   {Lock the medium blocks}
   mov ebx, ecx
   call LockMediumBlocks
   mov ecx, ebx
   {Reread the flags - they may have changed before medium blocks could be
-   locked.}
+  locked.}
   mov rbx, ExtractMediumAndLargeFlagsMask
   and rbx, [rsi - BlockHeaderSize]
 @DoMediumInPlaceDownsize:
@@ -7453,15 +7517,15 @@ asm
   mov rcx, rsi
   mov r8, rdi
   {Move the data across}
-{$ifdef UseCustomVariableSizeMoveRoutines}
-  {$ifdef Align16Bytes}
+  {$IFDEF UseCustomVariableSizeMoveRoutines}
+  {$IFDEF Align16Bytes}
   call MoveX16LP
-  {$else}
+  {$ELSE}
   call MoveX8LP
-  {$endif}
-{$else}
+  {$ENDIF}
+  {$ELSE}
   call System.Move
-{$endif}
+  {$ENDIF}
   mov rcx, rsi
   call FastFreeMem
   {Return the result}
@@ -7469,7 +7533,7 @@ asm
   jmp @Done
 @MediumBlockUpsize:
   {Status: ecx = Current Block Size - BlockHeaderSize, bl = Current Block Flags,
-   rdi = @Next Block, rsi = APointer, rdx = Requested Size}
+  rdi = @Next Block, rsi = APointer, rdx = Requested Size}
   {Can we do an in-place upsize?}
   mov rax, [rdi - BlockHeaderSize]
   test al, IsFreeBlockFlag
@@ -7482,12 +7546,12 @@ asm
   cmp rdx, r15
   ja @CannotUpsizeMediumBlockInPlace
   {The next block is free and there is enough space to grow this
-   block in place.}
-{$ifndef AssumeMultiThreaded}
+  block in place.}
+  {$IFNDEF AssumeMultiThreaded}
   lea r8, IsMultiThread
   cmp byte ptr [r8], False
   je @DoMediumInPlaceUpsize
-{$endif}
+  {$ENDIF}
 @DoMediumLockForUpsize:
   {Lock the medium blocks.}
   mov rbx, rcx
@@ -7496,7 +7560,7 @@ asm
   mov rcx, rbx
   mov rdx, r15
   {Re-read the info for this block (since it may have changed before the medium
-   blocks could be locked)}
+  blocks could be locked)}
   mov rbx, ExtractMediumAndLargeFlagsMask
   and rbx, [rsi - BlockHeaderSize]
   {Re-read the info for the next block}
@@ -7574,8 +7638,8 @@ asm
   mov byte ptr [rax], False
 @CannotUpsizeMediumBlockInPlace:
   {Couldn't upsize in place. Grab a new block and move the data across:
-   If we have to reallocate and move medium blocks, we grow by at
-   least 25%}
+  If we have to reallocate and move medium blocks, we grow by at
+  least 25%}
   mov eax, ecx
   shr eax, 2
   add eax, ecx
@@ -7609,11 +7673,11 @@ asm
   mov rdx, rax
   mov rcx, rsi
   mov r8, rdi
-{$ifdef UseCustomVariableSizeMoveRoutines}
+  {$IFDEF UseCustomVariableSizeMoveRoutines}
   call MoveX16LP
-{$else}
+  {$ELSE}
   call System.Move
-{$endif}
+  {$ENDIF}
   {Free the old block}
   mov rcx, rsi
   call FastFreeMem
@@ -7633,21 +7697,21 @@ asm
   xor eax, eax
 @Done:
 end;
-{$endif}
-{$endif}
-{$endif}
+{$ENDIF}
+{$ENDIF}
+{$ENDIF}
 
 {Allocates a block and fills it with zeroes}
-function FastAllocMem(ASize: {$ifdef XE2AndUp}NativeInt{$else}Cardinal{$endif}): Pointer;
-{$ifndef ASMVersion}
+function FastAllocMem(ASize: {$IFDEF XE2AndUp}NativeInt{$ELSE}Cardinal{$ENDIF}): Pointer;
+{$IFNDEF ASMVersion}
 begin
   Result := FastGetMem(ASize);
   {Large blocks are already zero filled}
   if (Result <> nil) and (ASize <= (MaximumMediumBlockSize - BlockHeaderSize)) then
     FillChar(Result^, ASize, 0);
 end;
-{$else}
-{$ifdef 32Bit}
+{$ELSE}
+{$IFDEF 32Bit}
 asm
   push ebx
   {Get the size rounded down to the previous multiple of 4 into ebx}
@@ -7661,9 +7725,9 @@ asm
   {Point edx to the last dword}
   lea edx, [eax + ebx]
   {ebx = $ffffffff if no block could be allocated, otherwise size rounded down
-   to previous multiple of 4. If ebx = 0 then the block size is 1..4 bytes and
-   the FPU based clearing loop should not be used (since it clears 8 bytes per
-   iteration).}
+  to previous multiple of 4. If ebx = 0 then the block size is 1..4 bytes and
+  the FPU based clearing loop should not be used (since it clears 8 bytes per
+  iteration).}
   or ebx, ecx
   jz @ClearLastDWord
   {Large blocks are already zero filled}
@@ -7674,7 +7738,7 @@ asm
   {Load zero into st(0)}
   fldz
   {Clear groups of 8 bytes. Block sizes are always four less than a multiple
-   of 8.}
+  of 8.}
 @FillLoop:
   fst qword ptr [edx + ebx]
   add ebx, 8
@@ -7690,14 +7754,13 @@ asm
   pop ebx
 end;
 
-{$else}
-
+{$ELSE}
 {---------------64-bit BASM FastAllocMem---------------}
 asm
   .params 1
   .pushnv rbx
   {Get the size rounded down to the previous multiple of SizeOf(Pointer) into
-   ebx}
+  ebx}
   lea rbx, [rcx - 1]
   and rbx, -8
   {Get the block}
@@ -7708,9 +7771,9 @@ asm
   {Point rdx to the last dword}
   lea rdx, [rax + rbx]
   {rbx = -1 if no block could be allocated, otherwise size rounded down
-   to previous multiple of 8. If rbx = 0 then the block size is 1..8 bytes and
-   the SSE2 based clearing loop should not be used (since it clears 16 bytes per
-   iteration).}
+  to previous multiple of 8. If rbx = 0 then the block size is 1..8 bytes and
+  the SSE2 based clearing loop should not be used (since it clears 16 bytes per
+  iteration).}
   or rbx, rcx
   jz @ClearLastQWord
   {Large blocks are already zero filled}
@@ -7721,7 +7784,7 @@ asm
   {Load zero into xmm0}
   pxor xmm0, xmm0
   {Clear groups of 16 bytes. Block sizes are always 8 less than a multiple of
-   16.}
+  16.}
 @FillLoop:
   movdqa [rdx + rbx], xmm0
   add rbx, 16
@@ -7732,74 +7795,74 @@ asm
   mov [rdx], rcx
 @Done:
 end;
-{$endif}
-{$endif}
-
+{$ENDIF}
+{$ENDIF}
 {-----------------Post Uninstall GetMem/FreeMem/ReallocMem-------------------}
 
-{$ifdef DetectMMOperationsAfterUninstall}
+{$IFDEF DetectMMOperationsAfterUninstall}
 
-function InvalidGetMem(ASize: {$ifdef XE2AndUp}NativeInt{$else}Integer{$endif}): Pointer;
-{$ifndef NoMessageBoxes}
+function InvalidGetMem(ASize: {$IFDEF XE2AndUp}NativeInt{$ELSE}Integer{$ENDIF}): Pointer;
+{$IFNDEF NoMessageBoxes}
 var
-  LErrorMessageTitle: array[0..1023] of AnsiChar;
-{$endif}
+  LErrorMessageTitle: array [0 .. 1023] of AnsiChar;
+{$ENDIF}
 begin
-{$ifdef UseOutputDebugString}
+{$IFDEF UseOutputDebugString}
   OutputDebugStringA(InvalidGetMemMsg);
-{$endif}
-{$ifndef NoMessageBoxes}
+{$ENDIF}
+{$IFNDEF NoMessageBoxes}
   AppendStringToModuleName(InvalidOperationTitle, LErrorMessageTitle);
   ShowMessageBox(InvalidGetMemMsg, LErrorMessageTitle);
-{$endif}
+{$ENDIF}
   Result := nil;
 end;
 
 function InvalidFreeMem(APointer: Pointer): Integer;
-{$ifndef NoMessageBoxes}
+{$IFNDEF NoMessageBoxes}
 var
-  LErrorMessageTitle: array[0..1023] of AnsiChar;
-{$endif}
+  LErrorMessageTitle: array [0 .. 1023] of AnsiChar;
+{$ENDIF}
 begin
-{$ifdef UseOutputDebugString}
+{$IFDEF UseOutputDebugString}
   OutputDebugStringA(InvalidFreeMemMsg);
-{$endif}
-{$ifndef NoMessageBoxes}
+{$ENDIF}
+{$IFNDEF NoMessageBoxes}
   AppendStringToModuleName(InvalidOperationTitle, LErrorMessageTitle);
   ShowMessageBox(InvalidFreeMemMsg, LErrorMessageTitle);
-{$endif}
+{$ENDIF}
   Result := -1;
 end;
 
-function InvalidReallocMem(APointer: Pointer; ANewSize: {$ifdef XE2AndUp}NativeInt{$else}Integer{$endif}): Pointer;
-{$ifndef NoMessageBoxes}
+function InvalidReallocMem(APointer: Pointer; ANewSize:
+  {$IFDEF XE2AndUp}NativeInt{$ELSE}Integer{$ENDIF}): Pointer;
+{$IFNDEF NoMessageBoxes}
 var
-  LErrorMessageTitle: array[0..1023] of AnsiChar;
-{$endif}
+  LErrorMessageTitle: array [0 .. 1023] of AnsiChar;
+{$ENDIF}
 begin
-{$ifdef UseOutputDebugString}
+{$IFDEF UseOutputDebugString}
   OutputDebugStringA(InvalidReallocMemMsg);
-{$endif}
-{$ifndef NoMessageBoxes}
+{$ENDIF}
+{$IFNDEF NoMessageBoxes}
   AppendStringToModuleName(InvalidOperationTitle, LErrorMessageTitle);
   ShowMessageBox(InvalidReallocMemMsg, LErrorMessageTitle);
-{$endif}
+{$ENDIF}
   Result := nil;
 end;
 
-function InvalidAllocMem(ASize: {$ifdef XE2AndUp}NativeInt{$else}Cardinal{$endif}): Pointer;
-{$ifndef NoMessageBoxes}
+function InvalidAllocMem(ASize: {$IFDEF XE2AndUp}NativeInt{$ELSE}Cardinal{$ENDIF}): Pointer;
+{$IFNDEF NoMessageBoxes}
 var
-  LErrorMessageTitle: array[0..1023] of AnsiChar;
-{$endif}
+  LErrorMessageTitle: array [0 .. 1023] of AnsiChar;
+{$ENDIF}
 begin
-{$ifdef UseOutputDebugString}
+{$IFDEF UseOutputDebugString}
   OutputDebugStringA(InvalidAllocMemMsg);
-{$endif}
-{$ifndef NoMessageBoxes}
+{$ENDIF}
+{$IFNDEF NoMessageBoxes}
   AppendStringToModuleName(InvalidOperationTitle, LErrorMessageTitle);
   ShowMessageBox(InvalidAllocMemMsg, LErrorMessageTitle);
-{$endif}
+{$ENDIF}
   Result := nil;
 end;
 
@@ -7808,32 +7871,31 @@ begin
   Result := False;
 end;
 
-{$endif}
-
+{$ENDIF}
 {-----------------Full Debug Mode Memory Manager Interface--------------------}
 
-{$ifdef FullDebugMode}
+{$IFDEF FullDebugMode}
 
 {Compare [AAddress], CompareVal:
  If Equal: [AAddress] := NewVal and result = CompareVal
  If Unequal: Result := [AAddress]}
 function LockCmpxchg32(CompareVal, NewVal: Integer; AAddress: PInteger): Integer;
 asm
-{$ifdef 32Bit}
+  {$IFDEF 32Bit}
   {On entry:
-    eax = CompareVal,
-    edx = NewVal,
-    ecx = AAddress}
+  eax = CompareVal,
+  edx = NewVal,
+  ecx = AAddress}
   lock cmpxchg [ecx], edx
-{$else}
-.noframe
+  {$ELSE}
+  .noframe
   {On entry:
-    ecx = CompareVal,
-    edx = NewVal,
-    r8 = AAddress}
+  ecx = CompareVal,
+  edx = NewVal,
+  r8 = AAddress}
   mov eax, ecx
   lock cmpxchg [r8], edx
-{$endif}
+  {$ENDIF}
 end;
 
 {Called by DebugGetMem, DebugFreeMem and DebugReallocMem in order to block a
@@ -7846,50 +7908,50 @@ begin
   begin
     {Get the old thread count}
     LOldCount := ThreadsInFullDebugModeRoutine;
-    if (LOldCount >= 0)
-      and (LockCmpxchg32(LOldCount, LOldCount + 1, @ThreadsInFullDebugModeRoutine) = LOldCount) then
+    if (LOldCount >= 0) and (LockCmpxchg32(LOldCount, LOldCount + 1,
+        @ThreadsInFullDebugModeRoutine) = LOldCount) then
     begin
       Break;
     end;
-  {$ifdef NeverSleepOnThreadContention}
-    {$ifdef UseSwitchToThread}
+{$IFDEF NeverSleepOnThreadContention}
+{$IFDEF UseSwitchToThread}
     SwitchToThread;
-    {$endif}
-  {$else}
+{$ENDIF}
+{$ELSE}
     Sleep(InitialSleepTime);
     {Try again}
     LOldCount := ThreadsInFullDebugModeRoutine;
-    if (LOldCount >= 0)
-      and (LockCmpxchg32(LOldCount, LOldCount + 1, @ThreadsInFullDebugModeRoutine) = LOldCount) then
+    if (LOldCount >= 0) and (LockCmpxchg32(LOldCount, LOldCount + 1,
+        @ThreadsInFullDebugModeRoutine) = LOldCount) then
     begin
       Break;
     end;
     Sleep(AdditionalSleepTime);
-  {$endif}
+{$ENDIF}
   end;
 end;
 
 procedure DoneChangingFullDebugModeBlock;
 asm
-{$ifdef 32Bit}
+  {$IFDEF 32Bit}
   lock dec ThreadsInFullDebugModeRoutine
-{$else}
-.noframe
+  {$ELSE}
+  .noframe
   lea rax, ThreadsInFullDebugModeRoutine
   lock dec dword ptr [rax]
-{$endif}
+  {$ENDIF}
 end;
 
 {Increments the allocation number}
 procedure IncrementAllocationNumber;
 asm
-{$ifdef 32Bit}
+  {$IFDEF 32Bit}
   lock inc CurrentAllocationNumber
-{$else}
-.noframe
+  {$ELSE}
+  .noframe
   lea rax, CurrentAllocationNumber
   lock inc dword ptr [rax]
-{$endif}
+  {$ENDIF}
 end;
 
 {Called by a routine wanting to lock the entire memory pool in FullDebugMode, e.g. before scanning the memory
@@ -7901,17 +7963,17 @@ begin
     {Get the old thread count}
     if LockCmpxchg32(0, -1, @ThreadsInFullDebugModeRoutine) = 0 then
       Break;
-{$ifdef NeverSleepOnThreadContention}
-  {$ifdef UseSwitchToThread}
+{$IFDEF NeverSleepOnThreadContention}
+{$IFDEF UseSwitchToThread}
     SwitchToThread;
-  {$endif}
-{$else}
+{$ENDIF}
+{$ELSE}
     Sleep(InitialSleepTime);
     {Try again}
     if LockCmpxchg32(0, -1, @ThreadsInFullDebugModeRoutine) = 0 then
       Break;
     Sleep(AdditionalSleepTime);
-{$endif}
+{$ENDIF}
   end;
 end;
 
@@ -7929,7 +7991,8 @@ begin
 end;
 
 {Finds the start and length of the file name given a full path.}
-procedure ExtractFileName(APFullPath: PAnsiChar; var APFileNameStart: PAnsiChar; var AFileNameLength: Integer);
+procedure ExtractFileName(APFullPath: PAnsiChar; var APFileNameStart: PAnsiChar;
+  var AFileNameLength: Integer);
 var
   LChar: AnsiChar;
 begin
@@ -7960,24 +8023,25 @@ const
   SHGFP_TYPE_CURRENT = 0;
 var
   LFileHandle, LBytesWritten: Cardinal;
-  LEventHeader: array[0..1023] of AnsiChar;
-  LAlternateLogFileName: array[0..2047] of AnsiChar;
+  LEventHeader: array [0 .. 1023] of AnsiChar;
+  LAlternateLogFileName: array [0 .. 2047] of AnsiChar;
   LPathLen, LNameLength: Integer;
   LMsgPtr, LPFileName: PAnsiChar;
   LSystemTime: TSystemTime;
 begin
   {Try to open the log file in read/write mode.}
-  LFileHandle := CreateFileA(MMLogFileName, GENERIC_READ or GENERIC_WRITE,
-    0, nil, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+  LFileHandle := CreateFileA(MMLogFileName, GENERIC_READ or GENERIC_WRITE, 0, nil, OPEN_ALWAYS,
+    FILE_ATTRIBUTE_NORMAL, 0);
   {Did log file creation fail? If so, the destination folder is perhaps read-only:
    Try to redirect logging to a file in the user's "My Documents" folder.}
   if (LFileHandle = INVALID_HANDLE_VALUE)
-{$ifdef Delphi4or5}
+{$IFDEF Delphi4or5}
     and SHGetSpecialFolderPathA(0, @LAlternateLogFileName, CSIDL_PERSONAL, True) then
-{$else}
-    and (SHGetFolderPathA(0, CSIDL_PERSONAL or CSIDL_FLAG_CREATE, 0,
-      SHGFP_TYPE_CURRENT, @LAlternateLogFileName) = S_OK) then
-{$endif}
+{$ELSE}
+    and (SHGetFolderPathA(0, CSIDL_PERSONAL or CSIDL_FLAG_CREATE, 0, SHGFP_TYPE_CURRENT,
+      @LAlternateLogFileName) = S_OK) then
+{$ENDIF}
+
   begin
     {Extract the filename part from MMLogFileName and append it to the path of
      the "My Documents" folder.}
@@ -7992,8 +8056,8 @@ begin
     ExtractFileName(@MMLogFileName, LPFileName, LNameLength);
     System.Move(LPFileName^, LAlternateLogFileName[LPathLen], LNameLength + 1);
     {Try to open the alternate log file}
-    LFileHandle := CreateFileA(LAlternateLogFileName, GENERIC_READ or GENERIC_WRITE,
-      0, nil, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+    LFileHandle := CreateFileA(LAlternateLogFileName, GENERIC_READ or GENERIC_WRITE, 0, nil,
+      OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
   end;
   {Was the log file opened/created successfully?}
   if LFileHandle <> INVALID_HANDLE_VALUE then
@@ -8001,8 +8065,8 @@ begin
     {Seek to the end of the file}
     SetFilePointer(LFileHandle, 0, nil, FILE_END);
     {Set the separator}
-    LMsgPtr := AppendStringToBuffer(CRLF, @LEventHeader[0], Length(CRLF));
-    LMsgPtr := AppendStringToBuffer(EventSeparator, LMsgPtr, Length(EventSeparator));
+    LMsgPtr := AppendStringToBuffer(CRLF, @LEventHeader[0], length(CRLF));
+    LMsgPtr := AppendStringToBuffer(EventSeparator, LMsgPtr, length(EventSeparator));
     {Set the date & time}
     GetLocalTime(LSystemTime);
     LMsgPtr := NativeUIntToStrBuf(LSystemTime.wYear, LMsgPtr);
@@ -8030,11 +8094,12 @@ begin
       LMsgPtr^ := '0';
       Inc(LMsgPtr);
     end;
-    LMsgPtr := NativeUIntToStrBuf(LSystemTime.WSecond, LMsgPtr);
+    LMsgPtr := NativeUIntToStrBuf(LSystemTime.wSecond, LMsgPtr);
     {Write the header}
-    LMsgPtr := AppendStringToBuffer(EventSeparator, LMsgPtr, Length(EventSeparator));
-    LMsgPtr := AppendStringToBuffer(CRLF, LMsgPtr, Length(CRLF));
-    WriteFile(LFileHandle, LEventHeader[0], NativeUInt(LMsgPtr) - NativeUInt(@LEventHeader[0]), LBytesWritten, nil);
+    LMsgPtr := AppendStringToBuffer(EventSeparator, LMsgPtr, length(EventSeparator));
+    LMsgPtr := AppendStringToBuffer(CRLF, LMsgPtr, length(CRLF));
+    WriteFile(LFileHandle, LEventHeader[0], NativeUInt(LMsgPtr) - NativeUInt(@LEventHeader[0]),
+      LBytesWritten, nil);
     {Write the data}
     WriteFile(LFileHandle, ABuffer^, ACount, LBytesWritten, nil);
     {Close the file}
@@ -8048,7 +8113,7 @@ const
   LogFileExtAnsi: PAnsiChar = LogFileExtension;
 var
   LEnvVarLength, LModuleNameLength: Cardinal;
-  LPathOverride: array[0..2047] of AnsiChar;
+  LPathOverride: array [0 .. 2047] of AnsiChar;
   LPFileName: PAnsiChar;
   LFileNameLength: Integer;
 begin
@@ -8062,8 +8127,7 @@ begin
     System.Move(LogFileExtAnsi^, MMLogFileName[LModuleNameLength - 4],
       StrLen(LogFileExtAnsi) + 1);
     {Try to read the FastMMLogFilePath environment variable}
-    LEnvVarLength := GetEnvironmentVariableA('FastMMLogFilePath',
-      @LPathOverride, 1023);
+    LEnvVarLength := GetEnvironmentVariableA('FastMMLogFilePath', @LPathOverride, 1023);
     {Does the environment variable exist? If so, override the log file path.}
     if LEnvVarLength > 0 then
     begin
@@ -8093,7 +8157,7 @@ begin
   if (ALogFileName <> nil) and (ALogFileName^ <> #0) then
   begin
     LLogFileNameLen := StrLen(ALogFileName);
-    if LLogFileNameLen < Length(MMLogFileName) then
+    if LLogFileNameLen < length(MMLogFileName) then
     begin
       {Set the log file name}
       System.Move(ALogFileName^, MMLogFileName, LLogFileNameLen + 1);
@@ -8127,11 +8191,11 @@ begin
   else
   begin
     {Raise a runtime error if the stack overflows}
-  {$ifdef BCB6OrDelphi7AndUp}
+{$IFDEF BCB6OrDelphi7AndUp}
     System.Error(reInvalidPtr);
-  {$else}
+{$ELSE}
     System.RunError(reInvalidPtr);
-  {$endif}
+{$ENDIF}
   end;
 end;
 
@@ -8144,11 +8208,11 @@ begin
   else
   begin
     {Raise a runtime error if the stack underflows}
-  {$ifdef BCB6OrDelphi7AndUp}
+{$IFDEF BCB6OrDelphi7AndUp}
     System.Error(reInvalidPtr);
-  {$else}
+{$ELSE}
     System.RunError(reInvalidPtr);
-  {$endif}
+{$ENDIF}
   end;
 end;
 
@@ -8157,7 +8221,7 @@ end;
 function SumNativeUInts(AStartValue: NativeUInt; APointer: PNativeUInt;
   ACount: NativeUInt): NativeUInt;
 asm
-{$ifdef 32Bit}
+  {$IFDEF 32Bit}
   {On entry: eax = AStartValue, edx = APointer; ecx = ACount}
   add edx, ecx
   neg ecx
@@ -8165,7 +8229,7 @@ asm
   add eax, [edx + ecx]
   add ecx, 4
   js @AddLoop
-{$else}
+  {$ELSE}
   {On entry: rcx = AStartValue, rdx = APointer; r8 = ACount}
   add rdx, r8
   neg r8
@@ -8174,7 +8238,7 @@ asm
   add rax, [rdx + r8]
   add r8, 8
   js @AddLoop
-{$endif}
+  {$ENDIF}
 end;
 
 {Checks the memory starting at the given address for the fill pattern.
@@ -8183,7 +8247,7 @@ end;
 function CheckFillPattern(APointer: Pointer; ACount: NativeUInt;
   AFillPattern: NativeUInt): Boolean;
 asm
-{$ifdef 32Bit}
+  {$IFDEF 32Bit}
   {On entry: eax = APointer; edx = ACount; ecx = AFillPattern}
   add eax, edx
   neg edx
@@ -8194,7 +8258,7 @@ asm
   js @CheckLoop
 @Done:
   sete al
-{$else}
+  {$ELSE}
   {On entry: rcx = APointer; rdx = ACount; r8 = AFillPattern}
   add rcx, rdx
   neg rdx
@@ -8205,17 +8269,16 @@ asm
   js @CheckLoop
 @Done:
   sete al
-{$endif}
+  {$ENDIF}
 end;
 
 {Calculates the checksum for the debug header. Adds all dwords in the debug
  header to the start address of the block.}
 function CalculateHeaderCheckSum(APointer: PFullDebugBlockHeader): NativeUInt;
 begin
-  Result := SumNativeUInts(
-    NativeUInt(APointer),
-    PNativeUInt(PByte(APointer) + 2 * SizeOf(Pointer)),
-    SizeOf(TFullDebugBlockHeader) - 2 * SizeOf(Pointer) - SizeOf(NativeUInt));
+  Result := SumNativeUInts(NativeUInt(APointer),
+    PNativeUInt(PByte(APointer) + 2 * SizeOf(Pointer)), SizeOf(TFullDebugBlockHeader) - 2 *
+      SizeOf(Pointer) - SizeOf(NativeUInt));
 end;
 
 procedure UpdateHeaderAndFooterCheckSums(APointer: PFullDebugBlockHeader);
@@ -8224,7 +8287,8 @@ var
 begin
   LHeaderCheckSum := CalculateHeaderCheckSum(APointer);
   APointer.HeaderCheckSum := LHeaderCheckSum;
-  PNativeUInt(PByte(APointer) + SizeOf(TFullDebugBlockHeader) + APointer.UserSize)^ := not LHeaderCheckSum;
+  PNativeUInt(PByte(APointer) + SizeOf(TFullDebugBlockHeader) + APointer.UserSize)^ :=
+    not LHeaderCheckSum;
 end;
 
 function LogCurrentThreadAndStackTrace(ASkipFrames: Cardinal; ABuffer: PAnsiChar): PAnsiChar;
@@ -8234,20 +8298,21 @@ begin
   {Get the current call stack}
   GetStackTrace(@LCurrentStackTrace[0], StackTraceDepth, ASkipFrames);
   {Log the thread ID}
-  Result := AppendStringToBuffer(CurrentThreadIDMsg, ABuffer, Length(CurrentThreadIDMsg));
+  Result := AppendStringToBuffer(CurrentThreadIDMsg, ABuffer, length(CurrentThreadIDMsg));
   Result := NativeUIntToHexBuf(GetThreadID, Result);
   {List the stack trace}
-  Result := AppendStringToBuffer(CurrentStackTraceMsg, Result, Length(CurrentStackTraceMsg));
+  Result := AppendStringToBuffer(CurrentStackTraceMsg, Result, length(CurrentStackTraceMsg));
   Result := LogStackTrace(@LCurrentStackTrace, StackTraceDepth, Result);
 end;
 
-{$ifndef DisableLoggingOfMemoryDumps}
+{$IFNDEF DisableLoggingOfMemoryDumps}
+
 function LogMemoryDump(APointer: PFullDebugBlockHeader; ABuffer: PAnsiChar): PAnsiChar;
 var
   LByteNum, LVal: Cardinal;
   LDataPtr: PByte;
 begin
-  Result := AppendStringToBuffer(MemoryDumpMsg, ABuffer, Length(MemoryDumpMsg));
+  Result := AppendStringToBuffer(MemoryDumpMsg, ABuffer, length(MemoryDumpMsg));
   Result := NativeUIntToHexBuf(NativeUInt(APointer) + SizeOf(TFullDebugBlockHeader), Result);
   Result^ := ':';
   Inc(Result);
@@ -8271,7 +8336,7 @@ begin
     LVal := Byte(LDataPtr^);
     Result^ := HexTable[LVal shr 4];
     Inc(Result);
-    Result^ := HexTable[LVal and $f];
+    Result^ := HexTable[LVal and $F];
     Inc(Result);
     {Next byte}
     Inc(LDataPtr);
@@ -8305,24 +8370,25 @@ begin
     Inc(LDataPtr);
   end;
 end;
-{$endif}
+{$ENDIF}
 
 {Rotates AValue ABitCount bits to the right}
 function RotateRight(AValue, ABitCount: NativeUInt): NativeUInt;
 asm
-{$ifdef 32Bit}
+  {$IFDEF 32Bit}
   mov ecx, edx
   ror eax, cl
-{$else}
+  {$ELSE}
   mov rax, rcx
   mov rcx, rdx
   ror rax, cl
-{$endif}
+  {$ENDIF}
 end;
 
 {Determines whether a byte in the user portion of the freed block has been modified. Does not work beyond
  the end of the user portion (i.e. footer and beyond).}
-function FreeBlockByteWasModified(APointer: PFullDebugBlockHeader; AUserOffset: NativeUInt): Boolean;
+function FreeBlockByteWasModified(APointer: PFullDebugBlockHeader;
+  AUserOffset: NativeUInt): Boolean;
 var
   LFillPattern: NativeUInt;
 begin
@@ -8333,11 +8399,11 @@ begin
   end
   else
   begin
-{$ifndef CatchUseOfFreedInterfaces}
+{$IFNDEF CatchUseOfFreedInterfaces}
     LFillPattern := DebugFillPattern;
-{$else}
+{$ELSE}
     LFillPattern := NativeUInt(@VMTBadInterface);
-{$endif}
+{$ENDIF}
   end;
   {Compare the byte value}
   Result := Byte(PByte(PByte(APointer) + SizeOf(TFullDebugBlockHeader) + AUserOffset)^) <>
@@ -8365,8 +8431,8 @@ begin
       begin
         Inc(LCount);
         Inc(LOffset);
-        if (LOffset >= APointer.UserSize)
-          or (not FreeBlockByteWasModified(APointer, LOffset)) then
+        if (LOffset >= APointer.UserSize) or (not FreeBlockByteWasModified(APointer, LOffset))
+        then
         begin
           Break;
         end;
@@ -8374,7 +8440,8 @@ begin
       {Got the offset and length, now log it.}
       if LLogCount = 0 then
       begin
-        ABuffer := AppendStringToBuffer(FreeModifiedDetailMsg, ABuffer, Length(FreeModifiedDetailMsg));
+        ABuffer := AppendStringToBuffer(FreeModifiedDetailMsg, ABuffer,
+          length(FreeModifiedDetailMsg));
       end
       else
       begin
@@ -8399,27 +8466,32 @@ begin
   Result := ABuffer;
 end;
 
-procedure LogBlockError(APointer: PFullDebugBlockHeader; AOperation: TBlockOperation; LHeaderValid, LFooterValid: Boolean);
+procedure LogBlockError(APointer: PFullDebugBlockHeader; AOperation: TBlockOperation;
+  LHeaderValid, LFooterValid: Boolean);
 var
   LMsgPtr: PAnsiChar;
-  LErrorMessage: array[0..32767] of AnsiChar;
-{$ifndef NoMessageBoxes}
-  LErrorMessageTitle: array[0..1023] of AnsiChar;
-{$endif}
+  LErrorMessage: array [0 .. 32767] of AnsiChar;
+{$IFNDEF NoMessageBoxes}
+  LErrorMessageTitle: array [0 .. 1023] of AnsiChar;
+{$ENDIF}
   LClass: TClass;
-  {$ifdef CheckCppObjectTypeEnabled}
+{$IFDEF CheckCppObjectTypeEnabled}
   LCppObjectTypeName: PAnsiChar;
-  {$endif}
+{$ENDIF}
 begin
   {Display the error header and the operation type.}
-  LMsgPtr := AppendStringToBuffer(ErrorMsgHeader, @LErrorMessage[0], Length(ErrorMsgHeader));
+  LMsgPtr := AppendStringToBuffer(ErrorMsgHeader, @LErrorMessage[0], length(ErrorMsgHeader));
   case AOperation of
-    boGetMem: LMsgPtr := AppendStringToBuffer(GetMemMsg, LMsgPtr, Length(GetMemMsg));
-    boFreeMem: LMsgPtr := AppendStringToBuffer(FreeMemMsg, LMsgPtr, Length(FreeMemMsg));
-    boReallocMem: LMsgPtr := AppendStringToBuffer(ReallocMemMsg, LMsgPtr, Length(ReallocMemMsg));
-    boBlockCheck: LMsgPtr := AppendStringToBuffer(BlockCheckMsg, LMsgPtr, Length(BlockCheckMsg));
+    boGetMem:
+      LMsgPtr := AppendStringToBuffer(GetMemMsg, LMsgPtr, length(GetMemMsg));
+    boFreeMem:
+      LMsgPtr := AppendStringToBuffer(FreeMemMsg, LMsgPtr, length(FreeMemMsg));
+    boReallocMem:
+      LMsgPtr := AppendStringToBuffer(ReallocMemMsg, LMsgPtr, length(ReallocMemMsg));
+    boBlockCheck:
+      LMsgPtr := AppendStringToBuffer(BlockCheckMsg, LMsgPtr, length(BlockCheckMsg));
   end;
-  LMsgPtr := AppendStringToBuffer(OperationMsg, LMsgPtr, Length(OperationMsg));
+  LMsgPtr := AppendStringToBuffer(OperationMsg, LMsgPtr, length(OperationMsg));
   {Is the header still intact?}
   if LHeaderValid then
   begin
@@ -8431,7 +8503,8 @@ begin
        instance of FastMM.}
       if AOperation <= boGetMem then
       begin
-        LMsgPtr := AppendStringToBuffer(FreeModifiedErrorMsg, LMsgPtr, Length(FreeModifiedErrorMsg));
+        LMsgPtr := AppendStringToBuffer(FreeModifiedErrorMsg, LMsgPtr,
+          length(FreeModifiedErrorMsg));
         {Log the exact changes that caused the error.}
         LMsgPtr := LogBlockChanges(APointer, LMsgPtr);
       end
@@ -8440,66 +8513,79 @@ begin
         {It is either a double free, or an attempt was made to free a block
          that was allocated via a different memory manager.}
         if APointer.AllocatedByRoutine = nil then
-          LMsgPtr := AppendStringToBuffer(DoubleFreeErrorMsg, LMsgPtr, Length(DoubleFreeErrorMsg))
+          LMsgPtr := AppendStringToBuffer(DoubleFreeErrorMsg, LMsgPtr,
+            length(DoubleFreeErrorMsg))
         else
-          LMsgPtr := AppendStringToBuffer(WrongMMFreeErrorMsg, LMsgPtr, Length(WrongMMFreeErrorMsg));
+          LMsgPtr := AppendStringToBuffer(WrongMMFreeErrorMsg, LMsgPtr,
+            length(WrongMMFreeErrorMsg));
       end;
     end
     else
     begin
-      LMsgPtr := AppendStringToBuffer(BlockFooterCorruptedMsg, LMsgPtr, Length(BlockFooterCorruptedMsg))
+      LMsgPtr := AppendStringToBuffer(BlockFooterCorruptedMsg, LMsgPtr,
+        length(BlockFooterCorruptedMsg))
     end;
     {Set the block size message}
     if AOperation <= boGetMem then
-      LMsgPtr := AppendStringToBuffer(PreviousBlockSizeMsg, LMsgPtr, Length(PreviousBlockSizeMsg))
+      LMsgPtr := AppendStringToBuffer(PreviousBlockSizeMsg, LMsgPtr,
+        length(PreviousBlockSizeMsg))
     else
-      LMsgPtr := AppendStringToBuffer(CurrentBlockSizeMsg, LMsgPtr, Length(CurrentBlockSizeMsg));
+      LMsgPtr := AppendStringToBuffer(CurrentBlockSizeMsg, LMsgPtr,
+        length(CurrentBlockSizeMsg));
     LMsgPtr := NativeUIntToStrBuf(APointer.UserSize, LMsgPtr);
     {The header is still intact - display info about the this/previous allocation}
     if APointer.AllocationStackTrace[0] <> 0 then
     begin
       if AOperation <= boGetMem then
-        LMsgPtr := AppendStringToBuffer(ThreadIDPrevAllocMsg, LMsgPtr, Length(ThreadIDPrevAllocMsg))
+        LMsgPtr := AppendStringToBuffer(ThreadIDPrevAllocMsg, LMsgPtr,
+          length(ThreadIDPrevAllocMsg))
       else
-        LMsgPtr := AppendStringToBuffer(ThreadIDAtAllocMsg, LMsgPtr, Length(ThreadIDAtAllocMsg));
+        LMsgPtr := AppendStringToBuffer(ThreadIDAtAllocMsg, LMsgPtr,
+          length(ThreadIDAtAllocMsg));
       LMsgPtr := NativeUIntToHexBuf(APointer.AllocatedByThread, LMsgPtr);
-      LMsgPtr := AppendStringToBuffer(StackTraceMsg, LMsgPtr, Length(StackTraceMsg));
+      LMsgPtr := AppendStringToBuffer(StackTraceMsg, LMsgPtr, length(StackTraceMsg));
       LMsgPtr := LogStackTrace(@APointer.AllocationStackTrace, StackTraceDepth, LMsgPtr);
     end;
     {Get the class this block was used for previously}
     LClass := DetectClassInstance(@APointer.PreviouslyUsedByClass);
     if (LClass <> nil) and (IntPtr(LClass) <> IntPtr(@FreedObjectVMT.VMTMethods[0])) then
     begin
-      LMsgPtr := AppendStringToBuffer(PreviousObjectClassMsg, LMsgPtr, Length(PreviousObjectClassMsg));
+      LMsgPtr := AppendStringToBuffer(PreviousObjectClassMsg, LMsgPtr,
+        length(PreviousObjectClassMsg));
       LMsgPtr := AppendClassNameToBuffer(LClass, LMsgPtr);
     end;
-    {$ifdef CheckCppObjectTypeEnabled}
+{$IFDEF CheckCppObjectTypeEnabled}
     if (LClass = nil) and Assigned(GetCppVirtObjTypeNameByVTablePtrFunc) then
     begin
-      LCppObjectTypeName := GetCppVirtObjTypeNameByVTablePtrFunc(Pointer(APointer.PreviouslyUsedByClass), 0);
+      LCppObjectTypeName := GetCppVirtObjTypeNameByVTablePtrFunc
+        (Pointer(APointer.PreviouslyUsedByClass), 0);
       if Assigned(LCppObjectTypeName) then
       begin
-        LMsgPtr := AppendStringToBuffer(PreviousObjectClassMsg, LMsgPtr, Length(PreviousObjectClassMsg));
-        LMsgPtr := AppendStringToBuffer(LCppObjectTypeName, LMsgPtr, StrLen(LCppObjectTypeName));
+        LMsgPtr := AppendStringToBuffer(PreviousObjectClassMsg, LMsgPtr,
+          length(PreviousObjectClassMsg));
+        LMsgPtr := AppendStringToBuffer(LCppObjectTypeName, LMsgPtr,
+          StrLen(LCppObjectTypeName));
       end;
     end;
-    {$endif}
+{$ENDIF}
     {Get the current class for this block}
     if (AOperation > boGetMem) and (APointer.AllocatedByRoutine <> nil) then
     begin
-      LMsgPtr := AppendStringToBuffer(CurrentObjectClassMsg, LMsgPtr, Length(CurrentObjectClassMsg));
+      LMsgPtr := AppendStringToBuffer(CurrentObjectClassMsg, LMsgPtr,
+        length(CurrentObjectClassMsg));
       LClass := DetectClassInstance(Pointer(PByte(APointer) + SizeOf(TFullDebugBlockHeader)));
       if IntPtr(LClass) = IntPtr(@FreedObjectVMT.VMTMethods[0]) then
         LClass := nil;
-      {$ifndef CheckCppObjectTypeEnabled}
+{$IFNDEF CheckCppObjectTypeEnabled}
       LMsgPtr := AppendClassNameToBuffer(LClass, LMsgPtr);
-      {$else}
+{$ELSE}
       if (LClass = nil) and Assigned(GetCppVirtObjTypeNameFunc) then
       begin
-        LCppObjectTypeName := GetCppVirtObjTypeNameFunc(Pointer(PByte(APointer) + SizeOf(TFullDebugBlockHeader)),
-          APointer.UserSize);
+        LCppObjectTypeName := GetCppVirtObjTypeNameFunc
+          (Pointer(PByte(APointer) + SizeOf(TFullDebugBlockHeader)), APointer.UserSize);
         if LCppObjectTypeName <> nil then
-          LMsgPtr := AppendStringToBuffer(LCppObjectTypeName, LMsgPtr, StrLen(LCppObjectTypeName))
+          LMsgPtr := AppendStringToBuffer(LCppObjectTypeName, LMsgPtr,
+            StrLen(LCppObjectTypeName))
         else
           LMsgPtr := AppendClassNameToBuffer(LClass, LMsgPtr);
       end
@@ -8507,15 +8593,17 @@ begin
       begin
         LMsgPtr := AppendClassNameToBuffer(LClass, LMsgPtr);
       end;
-      {$endif}
+{$ENDIF}
       {Log the allocation group}
       if APointer.AllocationGroup > 0 then
       begin
-        LMsgPtr := AppendStringToBuffer(CurrentAllocationGroupMsg, LMsgPtr, Length(CurrentAllocationGroupMsg));
+        LMsgPtr := AppendStringToBuffer(CurrentAllocationGroupMsg, LMsgPtr,
+          length(CurrentAllocationGroupMsg));
         LMsgPtr := NativeUIntToStrBuf(APointer.AllocationGroup, LMsgPtr);
       end;
       {Log the allocation number}
-      LMsgPtr := AppendStringToBuffer(CurrentAllocationNumberMsg, LMsgPtr, Length(CurrentAllocationNumberMsg));
+      LMsgPtr := AppendStringToBuffer(CurrentAllocationNumberMsg, LMsgPtr,
+        length(CurrentAllocationNumberMsg));
       LMsgPtr := NativeUIntToStrBuf(APointer.AllocationNumber, LMsgPtr);
     end
     else
@@ -8523,33 +8611,37 @@ begin
       {Log the allocation group}
       if APointer.AllocationGroup > 0 then
       begin
-        LMsgPtr := AppendStringToBuffer(PreviousAllocationGroupMsg, LMsgPtr, Length(PreviousAllocationGroupMsg));
+        LMsgPtr := AppendStringToBuffer(PreviousAllocationGroupMsg, LMsgPtr,
+          length(PreviousAllocationGroupMsg));
         LMsgPtr := NativeUIntToStrBuf(APointer.AllocationGroup, LMsgPtr);
       end;
       {Log the allocation number}
-      LMsgPtr := AppendStringToBuffer(PreviousAllocationNumberMsg, LMsgPtr, Length(PreviousAllocationNumberMsg));
+      LMsgPtr := AppendStringToBuffer(PreviousAllocationNumberMsg, LMsgPtr,
+        length(PreviousAllocationNumberMsg));
       LMsgPtr := NativeUIntToStrBuf(APointer.AllocationNumber, LMsgPtr);
     end;
     {Get the call stack for the previous free}
     if APointer.FreeStackTrace[0] <> 0 then
     begin
-      LMsgPtr := AppendStringToBuffer(ThreadIDAtFreeMsg, LMsgPtr, Length(ThreadIDAtFreeMsg));
+      LMsgPtr := AppendStringToBuffer(ThreadIDAtFreeMsg, LMsgPtr, length(ThreadIDAtFreeMsg));
       LMsgPtr := NativeUIntToHexBuf(APointer.FreedByThread, LMsgPtr);
-      LMsgPtr := AppendStringToBuffer(StackTraceMsg, LMsgPtr, Length(StackTraceMsg));
+      LMsgPtr := AppendStringToBuffer(StackTraceMsg, LMsgPtr, length(StackTraceMsg));
       LMsgPtr := LogStackTrace(@APointer.FreeStackTrace, StackTraceDepth, LMsgPtr);
     end;
   end
   else
   begin
     {Header has been corrupted}
-    LMsgPtr := AppendStringToBuffer(BlockHeaderCorruptedMsg, LMsgPtr, Length(BlockHeaderCorruptedMsg));
+    LMsgPtr := AppendStringToBuffer(BlockHeaderCorruptedMsg, LMsgPtr,
+      length(BlockHeaderCorruptedMsg));
   end;
   {Add the current stack trace}
-  LMsgPtr := LogCurrentThreadAndStackTrace(3 + Ord(AOperation <> boGetMem) + Ord(AOperation = boReallocMem), LMsgPtr);
-{$ifndef DisableLoggingOfMemoryDumps}
+  LMsgPtr := LogCurrentThreadAndStackTrace(3 + Ord(AOperation <> boGetMem) +
+      Ord(AOperation = boReallocMem), LMsgPtr);
+{$IFNDEF DisableLoggingOfMemoryDumps}
   {Add the memory dump}
   LMsgPtr := LogMemoryDump(APointer, LMsgPtr);
-{$endif}
+{$ENDIF}
   {Trailing CRLF}
   LMsgPtr^ := #13;
   Inc(LMsgPtr);
@@ -8557,18 +8649,18 @@ begin
   Inc(LMsgPtr);
   {Trailing #0}
   LMsgPtr^ := #0;
-{$ifdef LogErrorsToFile}
+{$IFDEF LogErrorsToFile}
   {Log the error}
   AppendEventLog(@LErrorMessage[0], NativeUInt(LMsgPtr) - NativeUInt(@LErrorMessage[0]));
-{$endif}
-{$ifdef UseOutputDebugString}
+{$ENDIF}
+{$IFDEF UseOutputDebugString}
   OutputDebugStringA(LErrorMessage);
-{$endif}
+{$ENDIF}
   {Show the message}
-{$ifndef NoMessageBoxes}
+{$IFNDEF NoMessageBoxes}
   AppendStringToModuleName(BlockErrorMsgTitle, LErrorMessageTitle);
   ShowMessageBox(LErrorMessage, LErrorMessageTitle);
-{$endif}
+{$ENDIF}
 end;
 
 {Logs the stack traces for a memory leak to file}
@@ -8576,18 +8668,20 @@ procedure LogMemoryLeakOrAllocatedBlock(APointer: PFullDebugBlockHeader; IsALeak
 var
   LHeaderValid: Boolean;
   LMsgPtr: PAnsiChar;
-  LErrorMessage: array[0..32767] of AnsiChar;
+  LErrorMessage: array [0 .. 32767] of AnsiChar;
   LClass: TClass;
-  {$ifdef CheckCppObjectTypeEnabled}
+{$IFDEF CheckCppObjectTypeEnabled}
   LCppObjectTypeName: PAnsiChar;
-  {$endif}
+{$ENDIF}
 begin
   {Display the error header and the operation type.}
   if IsALeak then
-    LMsgPtr := AppendStringToBuffer(LeakLogHeader, @LErrorMessage[0], Length(LeakLogHeader))
+    LMsgPtr := AppendStringToBuffer(LeakLogHeader, @LErrorMessage[0], length(LeakLogHeader))
   else
-    LMsgPtr := AppendStringToBuffer(BlockScanLogHeader, @LErrorMessage[0], Length(BlockScanLogHeader));
-  LMsgPtr := NativeUIntToStrBuf(GetAvailableSpaceInBlock(APointer) - FullDebugBlockOverhead, LMsgPtr);
+    LMsgPtr := AppendStringToBuffer(BlockScanLogHeader, @LErrorMessage[0],
+      length(BlockScanLogHeader));
+  LMsgPtr := NativeUIntToStrBuf(GetAvailableSpaceInBlock(APointer) -
+      FullDebugBlockOverhead, LMsgPtr);
   {Is the debug info surrounding the block valid?}
   LHeaderValid := CalculateHeaderCheckSum(APointer) = APointer.HeaderCheckSum;
   {Is the header still intact?}
@@ -8596,56 +8690,72 @@ begin
     {The header is still intact - display info about this/previous allocation}
     if APointer.AllocationStackTrace[0] <> 0 then
     begin
-      LMsgPtr := AppendStringToBuffer(ThreadIDAtAllocMsg, LMsgPtr, Length(ThreadIDAtAllocMsg));
+      LMsgPtr := AppendStringToBuffer(ThreadIDAtAllocMsg, LMsgPtr, length(ThreadIDAtAllocMsg));
       LMsgPtr := NativeUIntToHexBuf(APointer.AllocatedByThread, LMsgPtr);
-      LMsgPtr := AppendStringToBuffer(StackTraceMsg, LMsgPtr, Length(StackTraceMsg));
+      LMsgPtr := AppendStringToBuffer(StackTraceMsg, LMsgPtr, length(StackTraceMsg));
       LMsgPtr := LogStackTrace(@APointer.AllocationStackTrace, StackTraceDepth, LMsgPtr);
     end;
-    LMsgPtr := AppendStringToBuffer(CurrentObjectClassMsg, LMsgPtr, Length(CurrentObjectClassMsg));
+    LMsgPtr := AppendStringToBuffer(CurrentObjectClassMsg, LMsgPtr,
+      length(CurrentObjectClassMsg));
     {Get the current class for this block}
     LClass := DetectClassInstance(Pointer(PByte(APointer) + SizeOf(TFullDebugBlockHeader)));
     if IntPtr(LClass) = IntPtr(@FreedObjectVMT.VMTMethods[0]) then
       LClass := nil;
-    {$ifndef CheckCppObjectTypeEnabled}
+{$IFNDEF CheckCppObjectTypeEnabled}
     if LClass <> nil then
     begin
       LMsgPtr := AppendClassNameToBuffer(LClass, LMsgPtr);
     end
     else
     begin
-      case DetectStringData(Pointer(PByte(APointer) + SizeOf(TFullDebugBlockHeader)), APointer.UserSize) of
-        stUnknown: LMsgPtr := AppendClassNameToBuffer(nil, LMsgPtr);
-        stAnsiString: LMsgPtr := AppendStringToBuffer(AnsiStringBlockMessage, LMsgPtr, Length(AnsiStringBlockMessage));
-        stUnicodeString: LMsgPtr := AppendStringToBuffer(UnicodeStringBlockMessage, LMsgPtr, Length(UnicodeStringBlockMessage));
+      case DetectStringData(Pointer(PByte(APointer) + SizeOf(TFullDebugBlockHeader)),
+        APointer.UserSize) of
+        stUnknown:
+          LMsgPtr := AppendClassNameToBuffer(nil, LMsgPtr);
+        stAnsiString:
+          LMsgPtr := AppendStringToBuffer(AnsiStringBlockMessage, LMsgPtr,
+            length(AnsiStringBlockMessage));
+        stUnicodeString:
+          LMsgPtr := AppendStringToBuffer(UnicodeStringBlockMessage, LMsgPtr,
+            length(UnicodeStringBlockMessage));
       end;
     end;
-    {$else}
+{$ELSE}
     if (LClass = nil) and Assigned(GetCppVirtObjTypeNameFunc) then
     begin
-      LCppObjectTypeName := GetCppVirtObjTypeNameFunc(Pointer(PByte(APointer) + SizeOf(TFullDebugBlockHeader)),
-        APointer.UserSize);
+      LCppObjectTypeName := GetCppVirtObjTypeNameFunc
+        (Pointer(PByte(APointer) + SizeOf(TFullDebugBlockHeader)), APointer.UserSize);
       if LCppObjectTypeName <> nil then
-        LMsgPtr := AppendStringToBuffer(LCppObjectTypeName, LMsgPtr, StrLen(LCppObjectTypeName))
+        LMsgPtr := AppendStringToBuffer(LCppObjectTypeName, LMsgPtr,
+          StrLen(LCppObjectTypeName))
       else
       begin
-        case DetectStringData(Pointer(PByte(APointer) + SizeOf(TFullDebugBlockHeader)), APointer.UserSize) of
-          stUnknown: LMsgPtr := AppendClassNameToBuffer(nil, LMsgPtr);
-          stAnsiString: LMsgPtr := AppendStringToBuffer(AnsiStringBlockMessage, LMsgPtr, Length(AnsiStringBlockMessage));
-          stUnicodeString: LMsgPtr := AppendStringToBuffer(UnicodeStringBlockMessage, LMsgPtr, Length(UnicodeStringBlockMessage));
+        case DetectStringData(Pointer(PByte(APointer) + SizeOf(TFullDebugBlockHeader)),
+          APointer.UserSize) of
+          stUnknown:
+            LMsgPtr := AppendClassNameToBuffer(nil, LMsgPtr);
+          stAnsiString:
+            LMsgPtr := AppendStringToBuffer(AnsiStringBlockMessage, LMsgPtr,
+              length(AnsiStringBlockMessage));
+          stUnicodeString:
+            LMsgPtr := AppendStringToBuffer(UnicodeStringBlockMessage, LMsgPtr,
+              length(UnicodeStringBlockMessage));
         end;
       end;
     end
     else
       LMsgPtr := AppendClassNameToBuffer(LClass, LMsgPtr);
-    {$endif}
+{$ENDIF}
     {Log the allocation group}
     if APointer.AllocationGroup > 0 then
     begin
-      LMsgPtr := AppendStringToBuffer(CurrentAllocationGroupMsg, LMsgPtr, Length(CurrentAllocationGroupMsg));
+      LMsgPtr := AppendStringToBuffer(CurrentAllocationGroupMsg, LMsgPtr,
+        length(CurrentAllocationGroupMsg));
       LMsgPtr := NativeUIntToStrBuf(APointer.AllocationGroup, LMsgPtr);
     end;
     {Log the allocation number}
-    LMsgPtr := AppendStringToBuffer(CurrentAllocationNumberMsg, LMsgPtr, Length(CurrentAllocationNumberMsg));
+    LMsgPtr := AppendStringToBuffer(CurrentAllocationNumberMsg, LMsgPtr,
+      length(CurrentAllocationNumberMsg));
     LMsgPtr := NativeUIntToStrBuf(APointer.AllocationNumber, LMsgPtr);
   end
   else
@@ -8655,12 +8765,13 @@ begin
     Inc(LMsgPtr);
     LMsgPtr^ := ' ';
     Inc(LMsgPtr);
-    LMsgPtr := AppendStringToBuffer(BlockHeaderCorruptedMsg, LMsgPtr, Length(BlockHeaderCorruptedMsg));
+    LMsgPtr := AppendStringToBuffer(BlockHeaderCorruptedMsg, LMsgPtr,
+      length(BlockHeaderCorruptedMsg));
   end;
-{$ifndef DisableLoggingOfMemoryDumps}
+{$IFNDEF DisableLoggingOfMemoryDumps}
   {Add the memory dump}
   LMsgPtr := LogMemoryDump(APointer, LMsgPtr);
-{$endif}
+{$ENDIF}
   {Trailing CRLF}
   LMsgPtr^ := #13;
   Inc(LMsgPtr);
@@ -8682,27 +8793,33 @@ begin
   LHeaderCheckSum := CalculateHeaderCheckSum(APBlock);
   LHeaderValid := LHeaderCheckSum = APBlock.HeaderCheckSum;
   {Is the footer itself still in place}
-  LFooterValid := LHeaderValid
-    and (PNativeUInt(PByte(APBlock) + SizeOf(TFullDebugBlockHeader) + APBlock.UserSize)^ = (not LHeaderCheckSum));
+  LFooterValid := LHeaderValid and
+    (PNativeUInt(PByte(APBlock) + SizeOf(TFullDebugBlockHeader) + APBlock.UserSize)
+      ^ = (not LHeaderCheckSum));
   {Is the footer and debug VMT in place? The debug VMT is only valid if the user size is greater than the size of a pointer.}
-  if LFooterValid
-    and (APBlock.UserSize < SizeOf(Pointer)) or (PNativeUInt(PByte(APBlock) + SizeOf(TFullDebugBlockHeader))^ = NativeUInt(@FreedObjectVMT.VMTMethods[0])) then
+  if LFooterValid and (APBlock.UserSize < SizeOf(Pointer)) or
+    (PNativeUInt(PByte(APBlock) + SizeOf(TFullDebugBlockHeader))
+      ^ = NativeUInt(@FreedObjectVMT.VMTMethods[0])) then
   begin
     {Store the debug fill pattern in place of the footer in order to simplify
      checking for block modifications.}
     PNativeUInt(PByte(APBlock) + SizeOf(TFullDebugBlockHeader) + APBlock.UserSize)^ :=
-    {$ifndef CatchUseOfFreedInterfaces}
+{$IFNDEF CatchUseOfFreedInterfaces}
       DebugFillPattern;
-    {$else}
-      RotateRight(NativeUInt(@VMTBadInterface), (APBlock.UserSize and (SizeOf(Pointer) - 1)) * 8);
-    {$endif}
+{$ELSE}
+      RotateRight(NativeUInt(@VMTBadInterface),
+      (APBlock.UserSize and (SizeOf(Pointer) - 1)) * 8);
+{$ENDIF}
     {Check that all the filler bytes are valid inside the block, except for
      the "dummy" class header}
-    LBlockUnmodified := CheckFillPattern(PNativeUInt(PByte(APBlock) + (SizeOf(TFullDebugBlockHeader) + SizeOf(Pointer))),
+    LBlockUnmodified := CheckFillPattern
+      (PNativeUInt(PByte(APBlock) + (SizeOf(TFullDebugBlockHeader) + SizeOf(Pointer))),
       ABlockSize - (FullDebugBlockOverhead + SizeOf(Pointer)),
-      {$ifndef CatchUseOfFreedInterfaces}DebugFillPattern{$else}NativeUInt(@VMTBadInterface){$endif});
+{$IFNDEF CatchUseOfFreedInterfaces}DebugFillPattern{$ELSE}NativeUInt
+        (@VMTBadInterface){$ENDIF});
     {Reset the old footer}
-    PNativeUInt(PByte(APBlock) + SizeOf(TFullDebugBlockHeader) + APBlock.UserSize)^ := not LHeaderCheckSum;
+    PNativeUInt(PByte(APBlock) + SizeOf(TFullDebugBlockHeader) + APBlock.UserSize)^ :=
+      not LHeaderCheckSum;
   end
   else
     LBlockUnmodified := False;
@@ -8715,7 +8832,7 @@ begin
     Result := True;
 end;
 
-function DebugGetMem(ASize: {$ifdef XE2AndUp}NativeInt{$else}Integer{$endif}): Pointer;
+function DebugGetMem(ASize: {$IFDEF XE2AndUp}NativeInt{$ELSE}Integer{$ENDIF}): Pointer;
 begin
   {Scan the entire memory pool first?}
   if FullDebugModeScanMemoryPoolBeforeEveryOperation then
@@ -8730,8 +8847,9 @@ begin
     begin
       {Large blocks are always newly allocated (and never reused), so checking
        for a modify-after-free is not necessary.}
-      if (ASize > (MaximumMediumBlockSize - BlockHeaderSize - FullDebugBlockOverhead))
-        or CheckFreeBlockUnmodified(Result, GetAvailableSpaceInBlock(Result) + BlockHeaderSize, boGetMem) then
+      if (ASize > (MaximumMediumBlockSize - BlockHeaderSize - FullDebugBlockOverhead)) or
+        CheckFreeBlockUnmodified(Result, GetAvailableSpaceInBlock(Result) + BlockHeaderSize,
+        boGetMem) then
       begin
         {Set the allocation call stack}
         GetStackTrace(@PFullDebugBlockHeader(Result).AllocationStackTrace, StackTraceDepth, 1);
@@ -8740,32 +8858,35 @@ begin
         {Block is now in use: It was allocated by this routine}
         PFullDebugBlockHeader(Result).AllocatedByRoutine := @DebugGetMem;
         {Set the group number}
-        PFullDebugBlockHeader(Result).AllocationGroup := AllocationGroupStack[AllocationGroupStackTop];
+        PFullDebugBlockHeader(Result).AllocationGroup := AllocationGroupStack
+          [AllocationGroupStackTop];
         {Set the allocation number}
         IncrementAllocationNumber;
         PFullDebugBlockHeader(Result).AllocationNumber := CurrentAllocationNumber;
         {Clear the previous block trailer}
-        PNativeUInt(PByte(Result) + SizeOf(TFullDebugBlockHeader) + PFullDebugBlockHeader(Result).UserSize)^ :=
-        {$ifndef CatchUseOfFreedInterfaces}
+        PNativeUInt(PByte(Result) + SizeOf(TFullDebugBlockHeader) +
+            PFullDebugBlockHeader(Result).UserSize)^ :=
+{$IFNDEF CatchUseOfFreedInterfaces}
           DebugFillPattern;
-        {$else}
-          RotateRight(NativeUInt(@VMTBadInterface), (PFullDebugBlockHeader(Result).UserSize and (SizeOf(Pointer) - 1)) * 8);
-        {$endif}
+{$ELSE}
+          RotateRight(NativeUInt(@VMTBadInterface),
+          (PFullDebugBlockHeader(Result).UserSize and (SizeOf(Pointer) - 1)) * 8);
+{$ENDIF}
         {Set the user size for the block}
         PFullDebugBlockHeader(Result).UserSize := ASize;
         {Set the checksums}
         UpdateHeaderAndFooterCheckSums(Result);
-        {$ifdef FullDebugModeCallBacks}
+{$IFDEF FullDebugModeCallBacks}
         if Assigned(OnDebugGetMemFinish) then
           OnDebugGetMemFinish(PFullDebugBlockHeader(Result), ASize);
-        {$endif}
+{$ENDIF}
         {Return the start of the actual block}
         Result := Pointer(PByte(Result) + SizeOf(TFullDebugBlockHeader));
-{$ifdef EnableMemoryLeakReporting}
+{$IFDEF EnableMemoryLeakReporting}
         {Should this block be marked as an expected leak automatically?}
         if FullDebugModeRegisterAllAllocsAsExpectedMemoryLeak then
           RegisterExpectedMemoryLeak(Result);
-{$endif}
+{$ENDIF}
       end
       else
       begin
@@ -8783,10 +8904,10 @@ function CheckBlockBeforeFreeOrRealloc(APBlock: PFullDebugBlockHeader;
 var
   LHeaderValid, LFooterValid: Boolean;
   LPFooter: PNativeUInt;
-{$ifndef CatchUseOfFreedInterfaces}
+{$IFNDEF CatchUseOfFreedInterfaces}
   LBlockSize: NativeUInt;
   LPTrailingByte, LPFillPatternEnd: PByte;
-{$endif}
+{$ENDIF}
 begin
   {Is the checksum for the block header valid?}
   LHeaderValid := CalculateHeaderCheckSum(APBlock) = APBlock.HeaderCheckSum;
@@ -8795,13 +8916,15 @@ begin
   begin
     {Check the footer checksum: The footer checksum should equal the header
      checksum with all bits inverted.}
-    LPFooter := PNativeUInt(PByte(APBlock) + SizeOf(TFullDebugBlockHeader) + PFullDebugBlockHeader(APBlock).UserSize);
-    if APBlock.HeaderCheckSum = (not (LPFooter^)) then
+    LPFooter := PNativeUInt(PByte(APBlock) + SizeOf(TFullDebugBlockHeader) +
+        PFullDebugBlockHeader(APBlock).UserSize);
+    if APBlock.HeaderCheckSum = (not(LPFooter^)) then
     begin
       LFooterValid := True;
-{$ifndef CatchUseOfFreedInterfaces}
+{$IFNDEF CatchUseOfFreedInterfaces}
       {Large blocks do not have the debug fill pattern, since they are never reused.}
-      if PNativeUInt(PByte(APBlock) - BlockHeaderSize)^ and (IsMediumBlockFlag or IsLargeBlockFlag) <> IsLargeBlockFlag then
+      if PNativeUInt(PByte(APBlock) - BlockHeaderSize)^ and
+        (IsMediumBlockFlag or IsLargeBlockFlag) <> IsLargeBlockFlag then
       begin
         {Check that the application has not modified bytes beyond the block
          footer. The $80 fill pattern should extend up to 2 nativeints before
@@ -8820,7 +8943,7 @@ begin
           Inc(LPTrailingByte);
         end;
       end;
-{$endif}
+{$ENDIF}
     end
     else
       LFooterValid := False;
@@ -8851,22 +8974,22 @@ begin
   if FullDebugModeScanMemoryPoolBeforeEveryOperation then
     ScanMemoryPoolForCorruptions;
   {Get a pointer to the start of the actual block}
-  LActualBlock := PFullDebugBlockHeader(PByte(APointer)
-    - SizeOf(TFullDebugBlockHeader));
+  LActualBlock := PFullDebugBlockHeader(PByte(APointer) - SizeOf(TFullDebugBlockHeader));
   {Is the debug info surrounding the block valid?}
   if CheckBlockBeforeFreeOrRealloc(LActualBlock, boFreeMem) then
   begin
     {Enter the memory manager: block scans may not be performed now}
     StartChangingFullDebugModeBlock;
     try
-      {$ifdef FullDebugModeCallBacks}
+{$IFDEF FullDebugModeCallBacks}
       if Assigned(OnDebugFreeMemStart) then
         OnDebugFreeMemStart(LActualBlock);
-      {$endif}
+{$ENDIF}
       {Large blocks are never reused, so there is no point in updating their
        headers and fill pattern.}
       LBlockHeader := PNativeUInt(PByte(LActualBlock) - BlockHeaderSize)^;
-      if LBlockHeader and (IsFreeBlockFlag or IsMediumBlockFlag or IsLargeBlockFlag) <> IsLargeBlockFlag then
+      if LBlockHeader and (IsFreeBlockFlag or IsMediumBlockFlag or IsLargeBlockFlag) <> IsLargeBlockFlag
+      then
       begin
         {Get the class the block was used for}
         LActualBlock.PreviouslyUsedByClass := PNativeUInt(APointer)^;
@@ -8878,23 +9001,24 @@ begin
         LActualBlock.AllocatedByRoutine := nil;
         {Clear the user area of the block}
         DebugFillMem(APointer^, LActualBlock.UserSize,
-          {$ifndef CatchUseOfFreedInterfaces}DebugFillPattern{$else}NativeUInt(@VMTBadInterface){$endif});
+{$IFNDEF CatchUseOfFreedInterfaces}DebugFillPattern{$ELSE}NativeUInt
+            (@VMTBadInterface){$ENDIF});
         {Set a pointer to the dummy VMT}
         PNativeUInt(APointer)^ := NativeUInt(@FreedObjectVMT.VMTMethods[0]);
         {Recalculate the checksums}
         UpdateHeaderAndFooterCheckSums(LActualBlock);
       end;
-{$ifdef EnableMemoryLeakReporting}
+{$IFDEF EnableMemoryLeakReporting}
       {Automatically deregister the expected memory leak?}
       if FullDebugModeRegisterAllAllocsAsExpectedMemoryLeak then
         UnregisterExpectedMemoryLeak(APointer);
-{$endif}
+{$ENDIF}
       {Free the actual block}
       Result := FastFreeMem(LActualBlock);
-      {$ifdef FullDebugModeCallBacks}
+{$IFDEF FullDebugModeCallBacks}
       if Assigned(OnDebugFreeMemFinish) then
         OnDebugFreeMemFinish(LActualBlock, Result);
-      {$endif}
+{$ENDIF}
     finally
       {Leaving the memory manager routine: Block scans may be performed again.}
       DoneChangingFullDebugModeBlock;
@@ -8902,16 +9026,17 @@ begin
   end
   else
   begin
-{$ifdef SuppressFreeMemErrorsInsideException}
-    if {$ifdef BDS2006AndUp}ExceptObject{$else}RaiseList{$endif} <> nil then
+{$IFDEF SuppressFreeMemErrorsInsideException}
+    if {$IFDEF BDS2006AndUp}ExceptObject{$ELSE}RaiseList{$ENDIF} <> nil then
       Result := 0
     else
-{$endif}
+{$ENDIF}
       Result := -1;
   end;
 end;
 
-function DebugReallocMem(APointer: Pointer; ANewSize: {$ifdef XE2AndUp}NativeInt{$else}Integer{$endif}): Pointer;
+function DebugReallocMem(APointer: Pointer; ANewSize:
+  {$IFDEF XE2AndUp}NativeInt{$ELSE}Integer{$ENDIF}): Pointer;
 var
   LMoveSize, LBlockSpace: NativeUInt;
   LActualBlock, LNewActualBlock: PFullDebugBlockHeader;
@@ -8920,8 +9045,7 @@ begin
   if FullDebugModeScanMemoryPoolBeforeEveryOperation then
     ScanMemoryPoolForCorruptions;
   {Get a pointer to the start of the actual block}
-  LActualBlock := PFullDebugBlockHeader(PByte(APointer)
-    - SizeOf(TFullDebugBlockHeader));
+  LActualBlock := PFullDebugBlockHeader(PByte(APointer) - SizeOf(TFullDebugBlockHeader));
   {Is the debug info surrounding the block valid?}
   if CheckBlockBeforeFreeOrRealloc(LActualBlock, boReallocMem) then
   begin
@@ -8938,23 +9062,23 @@ begin
         {Block scans may not be performed now}
         StartChangingFullDebugModeBlock;
         try
-          {$ifdef FullDebugModeCallBacks}
+{$IFDEF FullDebugModeCallBacks}
           if Assigned(OnDebugReallocMemStart) then
             OnDebugReallocMemStart(LActualBlock, ANewSize);
-          {$endif}
+{$ENDIF}
           {We reuse the old allocation number. Since DebugGetMem always bumps
            CurrentAllocationGroup, there may be gaps in the sequence of
            allocation numbers.}
-          LNewActualBlock := PFullDebugBlockHeader(PByte(Result)
-            - SizeOf(TFullDebugBlockHeader));
+          LNewActualBlock := PFullDebugBlockHeader
+            (PByte(Result) - SizeOf(TFullDebugBlockHeader));
           LNewActualBlock.AllocationGroup := LActualBlock.AllocationGroup;
           LNewActualBlock.AllocationNumber := LActualBlock.AllocationNumber;
           {Recalculate the header and footer checksums}
           UpdateHeaderAndFooterCheckSums(LNewActualBlock);
-          {$ifdef FullDebugModeCallBacks}
+{$IFDEF FullDebugModeCallBacks}
           if Assigned(OnDebugReallocMemFinish) then
             OnDebugReallocMemFinish(LNewActualBlock, ANewSize);
-          {$endif}
+{$ENDIF}
         finally
           {Block scans can again be performed safely}
           DoneChangingFullDebugModeBlock;
@@ -8978,27 +9102,27 @@ begin
       {Block scans may not be performed now}
       StartChangingFullDebugModeBlock;
       try
-        {$ifdef FullDebugModeCallBacks}
+{$IFDEF FullDebugModeCallBacks}
         if Assigned(OnDebugReallocMemStart) then
           OnDebugReallocMemStart(LActualBlock, ANewSize);
-        {$endif}
+{$ENDIF}
         {Clear all data after the new end of the block up to the old end of the
          block, including the trailer.}
         DebugFillMem(Pointer(PByte(APointer) + NativeUInt(ANewSize) + SizeOf(NativeUInt))^,
           NativeInt(LActualBlock.UserSize) - ANewSize,
-{$ifndef CatchUseOfFreedInterfaces}
+{$IFNDEF CatchUseOfFreedInterfaces}
           DebugFillPattern);
-{$else}
+{$ELSE}
           RotateRight(NativeUInt(@VMTBadInterface), (ANewSize and (SizeOf(Pointer) - 1)) * 8));
-{$endif}
+{$ENDIF}
         {Update the user size}
         LActualBlock.UserSize := ANewSize;
         {Set the new checksums}
         UpdateHeaderAndFooterCheckSums(LActualBlock);
-        {$ifdef FullDebugModeCallBacks}
+{$IFDEF FullDebugModeCallBacks}
         if Assigned(OnDebugReallocMemFinish) then
           OnDebugReallocMemFinish(LActualBlock, ANewSize);
-        {$endif}
+{$ENDIF}
       finally
         {Block scans can again be performed safely}
         DoneChangingFullDebugModeBlock;
@@ -9014,11 +9138,11 @@ begin
 end;
 
 {Allocates a block and fills it with zeroes}
-function DebugAllocMem(ASize: {$ifdef XE2AndUp}NativeInt{$else}Cardinal{$endif}): Pointer;
+function DebugAllocMem(ASize: {$IFDEF XE2AndUp}NativeInt{$ELSE}Cardinal{$ENDIF}): Pointer;
 begin
   Result := DebugGetMem(ASize);
   {Clear the block}
-  if Result <>  nil then
+  if Result <> nil then
     FillChar(Result^, ASize, 0);
 end;
 
@@ -9032,11 +9156,11 @@ begin
    causes an attempt to be made to allocate memory.}
   UnblockFullDebugModeMMRoutines;
   {Raise the runtime error}
-{$ifdef BCB6OrDelphi7AndUp}
+{$IFDEF BCB6OrDelphi7AndUp}
   System.Error(reOutOfMemory);
-{$else}
+{$ELSE}
   System.RunError(reOutOfMemory);
-{$endif}
+{$ENDIF}
 end;
 
 {Subroutine for InternalScanMemoryPool: Checks the given small block pool for
@@ -9056,8 +9180,8 @@ begin
     begin
       if CheckBlockBeforeFreeOrRealloc(LCurPtr, boBlockCheck) then
       begin
-        if (PFullDebugBlockHeader(LCurPtr).AllocationGroup >= AFirstAllocationGroupToLog)
-          and (PFullDebugBlockHeader(LCurPtr).AllocationGroup <= ALastAllocationGroupToLog) then
+        if (PFullDebugBlockHeader(LCurPtr).AllocationGroup >= AFirstAllocationGroupToLog) and
+          (PFullDebugBlockHeader(LCurPtr).AllocationGroup <= ALastAllocationGroupToLog) then
         begin
           LogMemoryLeakOrAllocatedBlock(LCurPtr, False);
         end;
@@ -9068,7 +9192,8 @@ begin
     else
     begin
       {Check that the block has not been modified since being freed}
-      if not CheckFreeBlockUnmodified(LCurPtr, APSmallBlockPool.BlockType.BlockSize, boBlockCheck) then
+      if not CheckFreeBlockUnmodified(LCurPtr, APSmallBlockPool.BlockType.BlockSize,
+        boBlockCheck) then
         RaiseMemoryCorruptionError;
     end;
     {Next block}
@@ -9079,7 +9204,8 @@ end;
 {Subroutine for LogAllocatedBlocksToFile and ScanMemoryPoolForCorruptions:
  Scans the memory pool for corruptions and optionally logs allocated blocks
  in the allocation group range.}
-procedure InternalScanMemoryPool(AFirstAllocationGroupToLog, ALastAllocationGroupToLog: Cardinal);
+procedure InternalScanMemoryPool(AFirstAllocationGroupToLog, ALastAllocationGroupToLog
+    : Cardinal);
 var
   LPLargeBlock: PLargeBlockHeader;
   LPMediumBlock: Pointer;
@@ -9106,14 +9232,17 @@ begin
           if (LMediumBlockHeader and IsSmallBlockPoolInUseFlag) <> 0 then
           begin
             {Get all the leaks for the small block pool}
-            InternalScanSmallBlockPool(LPMediumBlock, AFirstAllocationGroupToLog, ALastAllocationGroupToLog);
+            InternalScanSmallBlockPool(LPMediumBlock, AFirstAllocationGroupToLog,
+              ALastAllocationGroupToLog);
           end
           else
           begin
             if CheckBlockBeforeFreeOrRealloc(LPMediumBlock, boBlockCheck) then
             begin
-              if (PFullDebugBlockHeader(LPMediumBlock).AllocationGroup >= AFirstAllocationGroupToLog)
-                and (PFullDebugBlockHeader(LPMediumBlock).AllocationGroup <= ALastAllocationGroupToLog) then
+              if (PFullDebugBlockHeader(LPMediumBlock).AllocationGroup >=
+                  AFirstAllocationGroupToLog) and
+                (PFullDebugBlockHeader(LPMediumBlock).AllocationGroup <=
+                  ALastAllocationGroupToLog) then
               begin
                 LogMemoryLeakOrAllocatedBlock(LPMediumBlock, False);
               end;
@@ -9125,7 +9254,8 @@ begin
         else
         begin
           {Check that the block has not been modified since being freed}
-          if not CheckFreeBlockUnmodified(LPMediumBlock, LMediumBlockHeader and DropMediumAndLargeFlagsMask, boBlockCheck) then
+          if not CheckFreeBlockUnmodified(LPMediumBlock, LMediumBlockHeader and
+              DropMediumAndLargeFlagsMask, boBlockCheck) then
             RaiseMemoryCorruptionError;
         end;
         {Next medium block}
@@ -9138,12 +9268,16 @@ begin
     LPLargeBlock := LargeBlocksCircularList.NextLargeBlockHeader;
     while LPLargeBlock <> @LargeBlocksCircularList do
     begin
-      if CheckBlockBeforeFreeOrRealloc(Pointer(PByte(LPLargeBlock) + LargeBlockHeaderSize), boBlockCheck) then
+      if CheckBlockBeforeFreeOrRealloc(Pointer(PByte(LPLargeBlock) + LargeBlockHeaderSize),
+        boBlockCheck) then
       begin
-        if (PFullDebugBlockHeader(PByte(LPLargeBlock) + LargeBlockHeaderSize).AllocationGroup >= AFirstAllocationGroupToLog)
-          and (PFullDebugBlockHeader(PByte(LPLargeBlock) + LargeBlockHeaderSize).AllocationGroup <= ALastAllocationGroupToLog) then
+        if (PFullDebugBlockHeader(PByte(LPLargeBlock) + LargeBlockHeaderSize).AllocationGroup
+            >= AFirstAllocationGroupToLog) and
+          (PFullDebugBlockHeader(PByte(LPLargeBlock) + LargeBlockHeaderSize).AllocationGroup <=
+            ALastAllocationGroupToLog) then
         begin
-          LogMemoryLeakOrAllocatedBlock(Pointer(PByte(LPLargeBlock) + LargeBlockHeaderSize), False);
+          LogMemoryLeakOrAllocatedBlock
+            (Pointer(PByte(LPLargeBlock) + LargeBlockHeaderSize), False);
         end;
       end
       else
@@ -9162,14 +9296,16 @@ end;
  AFirstAllocationGroupToLog or it is zero, then all allocation groups are
  logged. This routine also checks the memory pool for consistency at the same
  time, raising an "Out of Memory" error if the check fails.}
-procedure LogAllocatedBlocksToFile(AFirstAllocationGroupToLog, ALastAllocationGroupToLog: Cardinal);
+procedure LogAllocatedBlocksToFile(AFirstAllocationGroupToLog, ALastAllocationGroupToLog
+    : Cardinal);
 begin
   {Validate input}
-  if (ALastAllocationGroupToLog = 0) or (ALastAllocationGroupToLog < AFirstAllocationGroupToLog) then
+  if (ALastAllocationGroupToLog = 0) or (ALastAllocationGroupToLog < AFirstAllocationGroupToLog)
+  then
   begin
     {Bad input: log all groups}
     AFirstAllocationGroupToLog := 0;
-    ALastAllocationGroupToLog := $ffffffff;
+    ALastAllocationGroupToLog := $FFFFFFFF;
   end;
   {Scan the memory pool, logging allocated blocks in the requested range.}
   InternalScanMemoryPool(AFirstAllocationGroupToLog, ALastAllocationGroupToLog);
@@ -9180,7 +9316,7 @@ end;
 procedure ScanMemoryPoolForCorruptions;
 begin
   {Scan the memory pool for corruptions, but don't log any allocated blocks}
-  InternalScanMemoryPool($ffffffff, 0);
+  InternalScanMemoryPool($FFFFFFFF, 0);
 end;
 
 {-----------------------Invalid Virtual Method Calls-------------------------}
@@ -9246,10 +9382,10 @@ procedure TFreedObject.VirtualMethodError;
 var
   LVMOffset: Integer;
   LMsgPtr: PAnsiChar;
-  LErrorMessage: array[0..32767] of AnsiChar;
-{$ifndef NoMessageBoxes}
-  LErrorMessageTitle: array[0..1023] of AnsiChar;
-{$endif}
+  LErrorMessage: array [0 .. 32767] of AnsiChar;
+{$IFNDEF NoMessageBoxes}
+  LErrorMessageTitle: array [0 .. 1023] of AnsiChar;
+{$ENDIF}
   LClass: TClass;
   LActualBlock: PFullDebugBlockHeader;
 begin
@@ -9260,7 +9396,8 @@ begin
   {Get the address of the actual block}
   LActualBlock := PFullDebugBlockHeader(PByte(Self) - SizeOf(TFullDebugBlockHeader));
   {Display the error header}
-  LMsgPtr := AppendStringToBuffer(VirtualMethodErrorHeader, @LErrorMessage[0], Length(VirtualMethodErrorHeader));
+  LMsgPtr := AppendStringToBuffer(VirtualMethodErrorHeader, @LErrorMessage[0],
+    length(VirtualMethodErrorHeader));
   {Is the debug info surrounding the block valid?}
   if CalculateHeaderCheckSum(LActualBlock) = LActualBlock.HeaderCheckSum then
   begin
@@ -9268,63 +9405,72 @@ begin
     LClass := DetectClassInstance(@LActualBlock.PreviouslyUsedByClass);
     if (LClass <> nil) and (IntPtr(LClass) <> IntPtr(@FreedObjectVMT.VMTMethods[0])) then
     begin
-      LMsgPtr := AppendStringToBuffer(FreedObjectClassMsg, LMsgPtr, Length(FreedObjectClassMsg));
+      LMsgPtr := AppendStringToBuffer(FreedObjectClassMsg, LMsgPtr,
+        length(FreedObjectClassMsg));
       LMsgPtr := AppendClassNameToBuffer(LClass, LMsgPtr);
     end;
     {Get the virtual method name}
-    LMsgPtr := AppendStringToBuffer(VirtualMethodName, LMsgPtr, Length(VirtualMethodName));
+    LMsgPtr := AppendStringToBuffer(VirtualMethodName, LMsgPtr, length(VirtualMethodName));
     if LVMOffset < 0 then
     begin
-      LMsgPtr := AppendStringToBuffer(StandardVirtualMethodNames[LVMOffset div SizeOf(Pointer)], LMsgPtr, Length(StandardVirtualMethodNames[LVMOffset div SizeOf(Pointer)]));
+      LMsgPtr := AppendStringToBuffer(StandardVirtualMethodNames[LVMOffset div SizeOf(Pointer)
+          ], LMsgPtr, length(StandardVirtualMethodNames[LVMOffset div SizeOf(Pointer)]));
     end
     else
     begin
-      LMsgPtr := AppendStringToBuffer(VirtualMethodOffset, LMsgPtr, Length(VirtualMethodOffset));
+      LMsgPtr := AppendStringToBuffer(VirtualMethodOffset, LMsgPtr,
+        length(VirtualMethodOffset));
       LMsgPtr := NativeUIntToStrBuf(LVMOffset, LMsgPtr);
     end;
     {Virtual method address}
     if (LClass <> nil) and (IntPtr(LClass) <> IntPtr(@FreedObjectVMT.VMTMethods[0])) then
     begin
-      LMsgPtr := AppendStringToBuffer(VirtualMethodAddress, LMsgPtr, Length(VirtualMethodAddress));
+      LMsgPtr := AppendStringToBuffer(VirtualMethodAddress, LMsgPtr,
+        length(VirtualMethodAddress));
       LMsgPtr := NativeUIntToHexBuf(PNativeUInt(PByte(LClass) + LVMOffset)^, LMsgPtr);
     end;
     {Log the allocation group}
     if LActualBlock.AllocationGroup > 0 then
     begin
-      LMsgPtr := AppendStringToBuffer(PreviousAllocationGroupMsg, LMsgPtr, Length(PreviousAllocationGroupMsg));
+      LMsgPtr := AppendStringToBuffer(PreviousAllocationGroupMsg, LMsgPtr,
+        length(PreviousAllocationGroupMsg));
       LMsgPtr := NativeUIntToStrBuf(LActualBlock.AllocationGroup, LMsgPtr);
     end;
     {Log the allocation number}
-    LMsgPtr := AppendStringToBuffer(PreviousAllocationNumberMsg, LMsgPtr, Length(PreviousAllocationNumberMsg));
+    LMsgPtr := AppendStringToBuffer(PreviousAllocationNumberMsg, LMsgPtr,
+      length(PreviousAllocationNumberMsg));
     LMsgPtr := NativeUIntToStrBuf(LActualBlock.AllocationNumber, LMsgPtr);
     {The header is still intact - display info about the this/previous allocation}
     if LActualBlock.AllocationStackTrace[0] <> 0 then
     begin
-      LMsgPtr := AppendStringToBuffer(ThreadIDAtObjectAllocMsg, LMsgPtr, Length(ThreadIDAtObjectAllocMsg));
+      LMsgPtr := AppendStringToBuffer(ThreadIDAtObjectAllocMsg, LMsgPtr,
+        length(ThreadIDAtObjectAllocMsg));
       LMsgPtr := NativeUIntToHexBuf(LActualBlock.AllocatedByThread, LMsgPtr);
-      LMsgPtr := AppendStringToBuffer(StackTraceMsg, LMsgPtr, Length(StackTraceMsg));
+      LMsgPtr := AppendStringToBuffer(StackTraceMsg, LMsgPtr, length(StackTraceMsg));
       LMsgPtr := LogStackTrace(@LActualBlock.AllocationStackTrace, StackTraceDepth, LMsgPtr);
     end;
     {Get the call stack for the previous free}
     if LActualBlock.FreeStackTrace[0] <> 0 then
     begin
-      LMsgPtr := AppendStringToBuffer(ThreadIDAtObjectFreeMsg, LMsgPtr, Length(ThreadIDAtObjectFreeMsg));
+      LMsgPtr := AppendStringToBuffer(ThreadIDAtObjectFreeMsg, LMsgPtr,
+        length(ThreadIDAtObjectFreeMsg));
       LMsgPtr := NativeUIntToHexBuf(LActualBlock.FreedByThread, LMsgPtr);
-      LMsgPtr := AppendStringToBuffer(StackTraceMsg, LMsgPtr, Length(StackTraceMsg));
+      LMsgPtr := AppendStringToBuffer(StackTraceMsg, LMsgPtr, length(StackTraceMsg));
       LMsgPtr := LogStackTrace(@LActualBlock.FreeStackTrace, StackTraceDepth, LMsgPtr);
     end;
   end
   else
   begin
     {Header has been corrupted}
-    LMsgPtr := AppendStringToBuffer(BlockHeaderCorruptedNoHistoryMsg, LMsgPtr, Length(BlockHeaderCorruptedNoHistoryMsg));
+    LMsgPtr := AppendStringToBuffer(BlockHeaderCorruptedNoHistoryMsg, LMsgPtr,
+      length(BlockHeaderCorruptedNoHistoryMsg));
   end;
   {Add the current stack trace}
   LMsgPtr := LogCurrentThreadAndStackTrace(2, LMsgPtr);
-{$ifndef DisableLoggingOfMemoryDumps}
+{$IFNDEF DisableLoggingOfMemoryDumps}
   {Add the pointer address}
   LMsgPtr := LogMemoryDump(LActualBlock, LMsgPtr);
-{$endif}
+{$ENDIF}
   {Trailing CRLF}
   LMsgPtr^ := #13;
   Inc(LMsgPtr);
@@ -9332,33 +9478,35 @@ begin
   Inc(LMsgPtr);
   {Trailing #0}
   LMsgPtr^ := #0;
-{$ifdef LogErrorsToFile}
+{$IFDEF LogErrorsToFile}
   {Log the error}
   AppendEventLog(@LErrorMessage[0], NativeUInt(LMsgPtr) - NativeUInt(@LErrorMessage[0]));
-{$endif}
-{$ifdef UseOutputDebugString}
+{$ENDIF}
+{$IFDEF UseOutputDebugString}
   OutputDebugStringA(LErrorMessage);
-{$endif}
-{$ifndef NoMessageBoxes}
+{$ENDIF}
+{$IFNDEF NoMessageBoxes}
   {Show the message}
   AppendStringToModuleName(BlockErrorMsgTitle, LErrorMessageTitle);
   ShowMessageBox(LErrorMessage, LErrorMessageTitle);
-{$endif}
+{$ENDIF}
   {Raise an access violation}
   RaiseException(EXCEPTION_ACCESS_VIOLATION, 0, 0, nil);
 end;
 
-{$ifdef CatchUseOfFreedInterfaces}
+{$IFDEF CatchUseOfFreedInterfaces}
+
 procedure TFreedObject.InterfaceError;
 var
   LMsgPtr: PAnsiChar;
-{$ifndef NoMessageBoxes}
-  LErrorMessageTitle: array[0..1023] of AnsiChar;
-{$endif}
-  LErrorMessage: array[0..4000] of AnsiChar;
+{$IFNDEF NoMessageBoxes}
+  LErrorMessageTitle: array [0 .. 1023] of AnsiChar;
+{$ENDIF}
+  LErrorMessage: array [0 .. 4000] of AnsiChar;
 begin
   {Display the error header}
-  LMsgPtr := AppendStringToBuffer(InterfaceErrorHeader, @LErrorMessage[0], Length(InterfaceErrorHeader));
+  LMsgPtr := AppendStringToBuffer(InterfaceErrorHeader, @LErrorMessage[0],
+    length(InterfaceErrorHeader));
   {Add the current stack trace}
   LMsgPtr := LogCurrentThreadAndStackTrace(2, LMsgPtr);
   {Trailing CRLF}
@@ -9368,28 +9516,26 @@ begin
   Inc(LMsgPtr);
   {Trailing #0}
   LMsgPtr^ := #0;
-{$ifdef LogErrorsToFile}
+{$IFDEF LogErrorsToFile}
   {Log the error}
   AppendEventLog(@LErrorMessage[0], NativeUInt(LMsgPtr) - NativeUInt(@LErrorMessage[0]));
-{$endif}
-{$ifdef UseOutputDebugString}
+{$ENDIF}
+{$IFDEF UseOutputDebugString}
   OutputDebugStringA(LErrorMessage);
-{$endif}
-{$ifndef NoMessageBoxes}
+{$ENDIF}
+{$IFNDEF NoMessageBoxes}
   {Show the message}
   AppendStringToModuleName(BlockErrorMsgTitle, LErrorMessageTitle);
   ShowMessageBox(LErrorMessage, LErrorMessageTitle);
-{$endif}
+{$ENDIF}
   {Raise an access violation}
   RaiseException(EXCEPTION_ACCESS_VIOLATION, 0, 0, nil);
 end;
-{$endif}
-
-{$endif}
-
+{$ENDIF}
+{$ENDIF}
 {----------------------------Memory Leak Checking-----------------------------}
 
-{$ifdef EnableMemoryLeakReporting}
+{$IFDEF EnableMemoryLeakReporting}
 
 {Adds a leak to the specified list}
 function UpdateExpectedLeakList(APLeakList: PPExpectedMemoryLeak;
@@ -9412,18 +9558,15 @@ begin
     {Find a matching entry. If an exact size match is not required and the leak
      is larger than the current entry, use it if the expected size of the next
      entry is too large.}
-    if (IntPtr(LPInsertAfter.LeakAddress) = IntPtr(APNewEntry.LeakAddress))
-      and ((IntPtr(LPInsertAfter.LeakedClass) = IntPtr(APNewEntry.LeakedClass))
-      {$ifdef CheckCppObjectTypeEnabled}
-       or (LPInsertAfter.LeakedCppTypeIdPtr = APNewEntry.LeakedCppTypeIdPtr)
-      {$endif}
-      )
-      and ((LPInsertAfter.LeakSize = APNewEntry.LeakSize)
-        or ((not AExactSizeMatch)
-          and (LPInsertAfter.LeakSize < APNewEntry.LeakSize)
-          and ((LPInsertAfter.NextLeak = nil)
-            or (LPInsertAfter.NextLeak.LeakSize > APNewEntry.LeakSize))
-          )) then
+    if (IntPtr(LPInsertAfter.LeakAddress) = IntPtr(APNewEntry.LeakAddress)) and
+      ((IntPtr(LPInsertAfter.LeakedClass) = IntPtr(APNewEntry.LeakedClass))
+{$IFDEF CheckCppObjectTypeEnabled}
+      or (LPInsertAfter.LeakedCppTypeIdPtr = APNewEntry.LeakedCppTypeIdPtr)
+{$ENDIF}
+      ) and ((LPInsertAfter.LeakSize = APNewEntry.LeakSize) or
+        ((not AExactSizeMatch) and (LPInsertAfter.LeakSize < APNewEntry.LeakSize) and
+          ((LPInsertAfter.NextLeak = nil) or (LPInsertAfter.NextLeak.LeakSize >
+              APNewEntry.LeakSize)))) then
     begin
       if (LPInsertAfter.LeakCount + APNewEntry.LeakCount) >= 0 then
       begin
@@ -9462,7 +9605,7 @@ begin
     end
     else
     begin
-      if ExpectedMemoryLeaks.EntriesUsed < Length(ExpectedMemoryLeaks.ExpectedLeaks) then
+      if ExpectedMemoryLeaks.EntriesUsed < length(ExpectedMemoryLeaks.ExpectedLeaks) then
       begin
         LPNewEntry := @ExpectedMemoryLeaks.ExpectedLeaks[ExpectedMemoryLeaks.EntriesUsed];
         Inc(ExpectedMemoryLeaks.EntriesUsed);
@@ -9499,27 +9642,28 @@ end;
 function LockExpectedMemoryLeaksList: Boolean;
 begin
   {Lock the expected leaks list}
-{$ifndef AssumeMultiThreaded}
+{$IFNDEF AssumeMultiThreaded}
   if IsMultiThread then
-{$endif}
+{$ENDIF}
   begin
     while LockCmpxchg(0, 1, @ExpectedMemoryLeaksListLocked) <> 0 do
     begin
-{$ifdef NeverSleepOnThreadContention}
-  {$ifdef UseSwitchToThread}
+{$IFDEF NeverSleepOnThreadContention}
+{$IFDEF UseSwitchToThread}
       SwitchToThread;
-  {$endif}
-{$else}
+{$ENDIF}
+{$ELSE}
       Sleep(InitialSleepTime);
       if LockCmpxchg(0, 1, @ExpectedMemoryLeaksListLocked) = 0 then
         Break;
       Sleep(AdditionalSleepTime);
-{$endif}
+{$ENDIF}
     end;
   end;
   {Allocate the list if it does not exist}
   if ExpectedMemoryLeaks = nil then
-    ExpectedMemoryLeaks := VirtualAlloc(nil, ExpectedMemoryLeaksListSize, MEM_COMMIT, PAGE_READWRITE);
+    ExpectedMemoryLeaks := VirtualAlloc(nil, ExpectedMemoryLeaksListSize, MEM_COMMIT,
+      PAGE_READWRITE);
   {Done}
   Result := ExpectedMemoryLeaks <> nil;
 end;
@@ -9531,43 +9675,46 @@ var
   LNewEntry: TExpectedMemoryLeak;
 begin
   {Fill out the structure}
-{$ifndef FullDebugMode}
+{$IFNDEF FullDebugMode}
   LNewEntry.LeakAddress := ALeakedPointer;
-{$else}
+{$ELSE}
   LNewEntry.LeakAddress := Pointer(PByte(ALeakedPointer) - SizeOf(TFullDebugBlockHeader));
-{$endif}
+{$ENDIF}
   LNewEntry.LeakedClass := nil;
-  {$ifdef CheckCppObjectTypeEnabled}
+{$IFDEF CheckCppObjectTypeEnabled}
   LNewEntry.LeakedCppTypeIdPtr := nil;
-  {$endif}
+{$ENDIF}
   LNewEntry.LeakSize := 0;
   LNewEntry.LeakCount := 1;
   {Add it to the correct list}
-  Result := LockExpectedMemoryLeaksList
-    and UpdateExpectedLeakList(@ExpectedMemoryLeaks.FirstEntryByAddress, @LNewEntry);
+  Result := LockExpectedMemoryLeaksList and
+    UpdateExpectedLeakList(@ExpectedMemoryLeaks.FirstEntryByAddress, @LNewEntry);
   ExpectedMemoryLeaksListLocked := False;
 end;
 
-function RegisterExpectedMemoryLeak(ALeakedObjectClass: TClass; ACount: Integer = 1): Boolean; overload;
+function RegisterExpectedMemoryLeak(ALeakedObjectClass: TClass; ACount: Integer = 1)
+  : Boolean; overload;
 var
   LNewEntry: TExpectedMemoryLeak;
 begin
   {Fill out the structure}
   LNewEntry.LeakAddress := nil;
   LNewEntry.LeakedClass := ALeakedObjectClass;
-  {$ifdef CheckCppObjectTypeEnabled}
+{$IFDEF CheckCppObjectTypeEnabled}
   LNewEntry.LeakedCppTypeIdPtr := nil;
-  {$endif}
+{$ENDIF}
   LNewEntry.LeakSize := ALeakedObjectClass.InstanceSize;
   LNewEntry.LeakCount := ACount;
   {Add it to the correct list}
-  Result := LockExpectedMemoryLeaksList
-    and UpdateExpectedLeakList(@ExpectedMemoryLeaks.FirstEntryByClass, @LNewEntry);
+  Result := LockExpectedMemoryLeaksList and
+    UpdateExpectedLeakList(@ExpectedMemoryLeaks.FirstEntryByClass, @LNewEntry);
   ExpectedMemoryLeaksListLocked := False;
 end;
 
-{$ifdef CheckCppObjectTypeEnabled}
-function RegisterExpectedMemoryLeak(ALeakedCppVirtObjTypeIdPtr: Pointer; ACount: Integer): Boolean; overload;
+{$IFDEF CheckCppObjectTypeEnabled}
+
+function RegisterExpectedMemoryLeak(ALeakedCppVirtObjTypeIdPtr: Pointer; ACount: Integer)
+  : Boolean; overload;
 var
   LNewEntry: TExpectedMemoryLeak;
 begin
@@ -9583,8 +9730,8 @@ begin
       LNewEntry.LeakedCppTypeIdPtr := ALeakedCppVirtObjTypeIdPtr;
       LNewEntry.LeakCount := ACount;
       {Add it to the correct list}
-      Result := LockExpectedMemoryLeaksList
-        and UpdateExpectedLeakList(@ExpectedMemoryLeaks.FirstEntryByClass, @LNewEntry);
+      Result := LockExpectedMemoryLeaksList and
+        UpdateExpectedLeakList(@ExpectedMemoryLeaks.FirstEntryByClass, @LNewEntry);
       ExpectedMemoryLeaksListLocked := False;
     end
     else
@@ -9597,23 +9744,24 @@ begin
     Result := False;
   end;
 end;
-{$endif}
+{$ENDIF}
 
-function RegisterExpectedMemoryLeak(ALeakedBlockSize: NativeInt; ACount: Integer = 1): Boolean; overload;
+function RegisterExpectedMemoryLeak(ALeakedBlockSize: NativeInt; ACount: Integer = 1)
+  : Boolean; overload;
 var
   LNewEntry: TExpectedMemoryLeak;
 begin
   {Fill out the structure}
   LNewEntry.LeakAddress := nil;
   LNewEntry.LeakedClass := nil;
-  {$ifdef CheckCppObjectTypeEnabled}
+{$IFDEF CheckCppObjectTypeEnabled}
   LNewEntry.LeakedCppTypeIdPtr := nil;
-  {$endif}
+{$ENDIF}
   LNewEntry.LeakSize := ALeakedBlockSize;
   LNewEntry.LeakCount := ACount;
   {Add it to the correct list}
-  Result := LockExpectedMemoryLeaksList
-    and UpdateExpectedLeakList(@ExpectedMemoryLeaks.FirstEntryBySizeOnly, @LNewEntry);
+  Result := LockExpectedMemoryLeaksList and
+    UpdateExpectedLeakList(@ExpectedMemoryLeaks.FirstEntryBySizeOnly, @LNewEntry);
   ExpectedMemoryLeaksListLocked := False;
 end;
 
@@ -9622,38 +9770,42 @@ var
   LNewEntry: TExpectedMemoryLeak;
 begin
   {Fill out the structure}
-{$ifndef FullDebugMode}
+{$IFNDEF FullDebugMode}
   LNewEntry.LeakAddress := ALeakedPointer;
-{$else}
+{$ELSE}
   LNewEntry.LeakAddress := Pointer(PByte(ALeakedPointer) - SizeOf(TFullDebugBlockHeader));
-{$endif}
+{$ENDIF}
   LNewEntry.LeakedClass := nil;
-  {$ifdef CheckCppObjectTypeEnabled}
+{$IFDEF CheckCppObjectTypeEnabled}
   LNewEntry.LeakedCppTypeIdPtr := nil;
-  {$endif}
+{$ENDIF}
   LNewEntry.LeakSize := 0;
   LNewEntry.LeakCount := -1;
   {Remove it from the list}
-  Result := LockExpectedMemoryLeaksList
-    and UpdateExpectedLeakList(@ExpectedMemoryLeaks.FirstEntryByAddress, @LNewEntry);
+  Result := LockExpectedMemoryLeaksList and
+    UpdateExpectedLeakList(@ExpectedMemoryLeaks.FirstEntryByAddress, @LNewEntry);
   ExpectedMemoryLeaksListLocked := False;
 end;
 
-function UnregisterExpectedMemoryLeak(ALeakedObjectClass: TClass; ACount: Integer = 1): Boolean; overload;
+function UnregisterExpectedMemoryLeak(ALeakedObjectClass: TClass; ACount: Integer = 1)
+  : Boolean; overload;
 begin
-  Result := RegisterExpectedMemoryLeak(ALeakedObjectClass, - ACount);
+  Result := RegisterExpectedMemoryLeak(ALeakedObjectClass, -ACount);
 end;
 
-{$ifdef CheckCppObjectTypeEnabled}
-function UnregisterExpectedMemoryLeak(ALeakedCppVirtObjTypeIdPtr: Pointer; ACount: Integer): Boolean; overload;
-begin
-  Result := RegisterExpectedMemoryLeak(ALeakedCppVirtObjTypeIdPtr, - ACount);
-end;
-{$endif}
+{$IFDEF CheckCppObjectTypeEnabled}
 
-function UnregisterExpectedMemoryLeak(ALeakedBlockSize: NativeInt; ACount: Integer = 1): Boolean; overload;
+function UnregisterExpectedMemoryLeak(ALeakedCppVirtObjTypeIdPtr: Pointer; ACount: Integer)
+  : Boolean; overload;
 begin
-  Result := RegisterExpectedMemoryLeak(ALeakedBlockSize, - ACount);
+  Result := RegisterExpectedMemoryLeak(ALeakedCppVirtObjTypeIdPtr, -ACount);
+end;
+{$ENDIF}
+
+function UnregisterExpectedMemoryLeak(ALeakedBlockSize: NativeInt; ACount: Integer = 1)
+  : Boolean; overload;
+begin
+  Result := RegisterExpectedMemoryLeak(ALeakedBlockSize, -ACount);
 end;
 
 {Returns a list of all expected memory leaks}
@@ -9665,18 +9817,19 @@ function GetRegisteredMemoryLeaks: TRegisteredMemoryLeaks;
   begin
     while AEntry <> nil do
     begin
-      LInd := Length(Result);
+      LInd := length(Result);
       SetLength(Result, LInd + 1);
       {Add the entry}
-{$ifndef FullDebugMode}
+{$IFNDEF FullDebugMode}
       Result[LInd].LeakAddress := AEntry.LeakAddress;
-{$else}
-      Result[LInd].LeakAddress := Pointer(PByte(AEntry.LeakAddress) + SizeOf(TFullDebugBlockHeader));
-{$endif}
+{$ELSE}
+      Result[LInd].LeakAddress :=
+        Pointer(PByte(AEntry.LeakAddress) + SizeOf(TFullDebugBlockHeader));
+{$ENDIF}
       Result[LInd].LeakedClass := AEntry.LeakedClass;
-{$ifdef CheckCppObjectTypeEnabled}
+{$IFDEF CheckCppObjectTypeEnabled}
       Result[LInd].LeakedCppTypeIdPtr := AEntry.LeakedCppTypeIdPtr;
-{$endif}
+{$ENDIF}
       Result[LInd].LeakSize := AEntry.LeakSize;
       Result[LInd].LeakCount := AEntry.LeakCount;
       {Next entry}
@@ -9697,8 +9850,9 @@ begin
   end;
 end;
 
-{$else}
-  {$ifdef BDS2006AndUp}
+{$ELSE}
+{$IFDEF BDS2006AndUp}
+
 function NoOpRegisterExpectedMemoryLeak(ALeakedPointer: Pointer): Boolean;
 begin
   {Do nothing. Used when memory leak reporting is disabled under Delphi 2006 and later.}
@@ -9710,8 +9864,8 @@ begin
   {Do nothing. Used when memory leak reporting is disabled under Delphi 2006 and later.}
   Result := False;
 end;
-  {$endif}
-{$endif}
+{$ENDIF}
+{$ENDIF}
 
 {Detects the probable string data type for a memory block.}
 function DetectStringData(APMemoryBlock: Pointer;
@@ -9735,8 +9889,8 @@ begin
     Result := stUnknown;
     Exit;
   end;
-{$ifdef BCB6OrDelphi6AndUp}
-  {$if RTLVersion >= 20}
+{$IFDEF BCB6OrDelphi6AndUp}
+{$IF RTLVersion >= 20}
   LElemSize := PStrRec(APMemoryBlock).elemSize;
   {Element size must be either 1 (Ansi) or 2 (Unicode)}
   if (LElemSize <> 1) and (LElemSize <> 2) then
@@ -9744,18 +9898,18 @@ begin
     Result := stUnknown;
     Exit;
   end;
-  {$ifend}
-  {$if RTLVersion < 20}
+{$IFEND}
+{$IF RTLVersion < 20}
   LElemSize := 1;
-  {$ifend}
-{$else}
+{$IFEND}
+{$ELSE}
   LElemSize := 1;
-{$endif}
+{$ENDIF}
   {Get the string length}
   LStringLength := PStrRec(APMemoryBlock).length;
   {Does the string fit?}
-  if (LStringLength <= 0)
-    or (LStringLength >= (AAvailableSpaceInBlock - SizeOf(StrRec)) div LElemSize) then
+  if (LStringLength <= 0) or (LStringLength >= (AAvailableSpaceInBlock - SizeOf(StrRec))
+      div LElemSize) then
   begin
     Result := stUnknown;
     Exit;
@@ -9806,8 +9960,8 @@ end;
  Important note: All block types will be locked during the callback, so the memory manager cannot be used inside it.}
 procedure WalkAllocatedBlocks(ACallBack: TWalkAllocatedBlocksCallback; AUserData: Pointer);
 const
-  DebugHeaderSize = {$ifdef FullDebugMode}SizeOf(TFullDebugBlockHeader){$else}0{$endif};
-  TotalDebugOverhead = {$ifdef FullDebugMode}FullDebugBlockOverhead{$else}0{$endif};
+  DebugHeaderSize = {$IFDEF FullDebugMode}SizeOf(TFullDebugBlockHeader){$ELSE}0{$ENDIF};
+  TotalDebugOverhead = {$IFDEF FullDebugMode}FullDebugBlockOverhead{$ELSE}0{$ENDIF};
 var
   LPMediumBlock: Pointer;
   LPMediumBlockPoolHeader: PMediumBlockPoolHeader;
@@ -9839,7 +9993,8 @@ begin
             {Step through all the blocks in the small block pool}
             LPSmallBlockPool := LPMediumBlock;
             {Get the useable size inside a block}
-            LBlockSize := LPSmallBlockPool.BlockType.BlockSize - BlockHeaderSize - TotalDebugOverhead;
+            LBlockSize := LPSmallBlockPool.BlockType.BlockSize - BlockHeaderSize -
+              TotalDebugOverhead;
             {Get the first and last pointer for the pool}
             GetFirstAndLastSmallBlockInPool(LPSmallBlockPool, LCurPtr, LEndPtr);
             {Step through all blocks}
@@ -9856,7 +10011,8 @@ begin
           end
           else
           begin
-            LBlockSize := (LMediumBlockHeader and DropMediumAndLargeFlagsMask) - BlockHeaderSize - TotalDebugOverhead;
+            LBlockSize := (LMediumBlockHeader and DropMediumAndLargeFlagsMask) -
+              BlockHeaderSize - TotalDebugOverhead;
             ACallBack(PByte(LPMediumBlock) + DebugHeaderSize, LBlockSize, AUserData);
           end;
         end;
@@ -9880,8 +10036,10 @@ begin
     LPLargeBlock := LargeBlocksCircularList.NextLargeBlockHeader;
     while LPLargeBlock <> @LargeBlocksCircularList do
     begin
-      LBlockSize := (LPLargeBlock.BlockSizeAndFlags and DropMediumAndLargeFlagsMask) - BlockHeaderSize - LargeBlockHeaderSize - TotalDebugOverhead;
-      ACallBack(PByte(LPLargeBlock) + LargeBlockHeaderSize + DebugHeaderSize, LBlockSize, AUserData);
+      LBlockSize := (LPLargeBlock.BlockSizeAndFlags and DropMediumAndLargeFlagsMask) -
+        BlockHeaderSize - LargeBlockHeaderSize - TotalDebugOverhead;
+      ACallBack(PByte(LPLargeBlock) + LargeBlockHeaderSize + DebugHeaderSize, LBlockSize,
+        AUserData);
       {Get the next large block}
       LPLargeBlock := LPLargeBlock.NextLargeBlockHeader;
     end;
@@ -9898,9 +10056,10 @@ const
 type
   {While scanning the memory pool the list of classes is built up in a binary search tree.}
   PMemoryLogNode = ^TMemoryLogNode;
+
   TMemoryLogNode = record
     {The left and right child nodes}
-    LeftAndRightNodePointers: array[Boolean] of PMemoryLogNode;
+    LeftAndRightNodePointers: array [Boolean] of PMemoryLogNode;
     {The class this node belongs to}
     ClassPtr: Pointer;
     {The number of instances of the class}
@@ -9908,7 +10067,8 @@ type
     {The total memory usage for this class}
     TotalMemoryUsage: NativeInt;
   end;
-  TMemoryLogNodes = array[0..MaxMemoryLogNodes - 1] of TMemoryLogNode;
+
+  TMemoryLogNodes = array [0 .. MaxMemoryLogNodes - 1] of TMemoryLogNode;
   PMemoryLogNodes = ^TMemoryLogNodes;
 
   TMemoryLogInfo = record
@@ -9919,10 +10079,12 @@ type
     RootNode: TMemoryLogNode;
     Nodes: TMemoryLogNodes;
   end;
+
   PMemoryLogInfo = ^TMemoryLogInfo;
 
-{LogMemoryManagerStateToFile callback subroutine}
-procedure LogMemoryManagerStateCallBack(APBlock: Pointer; ABlockSize: NativeInt; AUserData: Pointer);
+  {LogMemoryManagerStateToFile callback subroutine}
+procedure LogMemoryManagerStateCallBack(APBlock: Pointer; ABlockSize: NativeInt;
+  AUserData: Pointer);
 var
   LClass, LClassHashBits: NativeUInt;
   LPLogInfo: PMemoryLogInfo;
@@ -9934,8 +10096,7 @@ begin
    the "class" in the tree first.}
   LClass := PNativeUInt(APBlock)^;
   {Do some basic pointer checks: The "class" must be dword aligned and beyond 64K}
-  if (LClass > 65535)
-    and (LClass and 3 = 0) then
+  if (LClass > 65535) and (LClass and 3 = 0) then
   begin
     LPParentNode := @LPLogInfo.RootNode;
     LClassHashBits := LClass;
@@ -10034,7 +10195,7 @@ begin
     {Set up the loop counters}
     I := 0;
     J := ARightIndex - 1;
-    while true do
+    while True do
     begin
       {Find the first item from the left that is not smaller than the pivot}
       repeat
@@ -10088,22 +10249,24 @@ end;
 
 {Writes a log file containing a summary of the memory mananger state and a summary of allocated blocks grouped by
  class. The file will be saved in UTF-8 encoding (in supported Delphi versions). Returns True on success. }
-function LogMemoryManagerStateToFile(const AFileName: string; const AAdditionalDetails: string): Boolean;
+function LogMemoryManagerStateToFile(const AFileName: string;
+  const AAdditionalDetails: string): Boolean;
 const
   MsgBufferSize = 65536;
   MaxLineLength = 512;
   {Write the UTF-8 BOM in Delphi versions that support UTF-8 conversion.}
-  LogStateHeaderMsg = {$ifdef BCB6OrDelphi7AndUp}#$EF#$BB#$BF + {$endif}
+  LogStateHeaderMsg = {$IFDEF BCB6OrDelphi7AndUp}#$EF#$BB#$BF + {$ENDIF}
     'FastMM State Capture:'#13#10'---------------------'#13#10#13#10;
   LogStateAllocatedMsg = 'K Allocated'#13#10;
   LogStateOverheadMsg = 'K Overhead'#13#10;
   LogStateEfficiencyMsg = '% Efficiency'#13#10#13#10'Usage Detail:'#13#10;
-  LogStateAdditionalInfoMsg = #13#10'Additional Information:'#13#10'-----------------------'#13#10;
+  LogStateAdditionalInfoMsg =
+    #13#10'Additional Information:'#13#10'-----------------------'#13#10;
 var
   LPLogInfo: PMemoryLogInfo;
   LInd: Integer;
   LPNode: PMemoryLogNode;
-  LMsgBuffer: array[0..MsgBufferSize - 1] of AnsiChar;
+  LMsgBuffer: array [0 .. MsgBufferSize - 1] of AnsiChar;
   LPMsg: PAnsiChar;
   LBufferSpaceUsed, LBytesWritten: Cardinal;
   LFileHandle: NativeUInt;
@@ -10113,7 +10276,8 @@ begin
   {Get the current memory manager usage summary.}
   GetMemoryManagerUsageSummary(LMemoryManagerUsageSummary);
   {Allocate the memory required to capture detailed allocation information.}
-  LPLogInfo := VirtualAlloc(nil, SizeOf(TMemoryLogInfo), MEM_COMMIT or MEM_TOP_DOWN, PAGE_READWRITE);
+  LPLogInfo := VirtualAlloc(nil, SizeOf(TMemoryLogInfo), MEM_COMMIT or MEM_TOP_DOWN,
+    PAGE_READWRITE);
   if LPLogInfo <> nil then
   begin
     try
@@ -10126,24 +10290,28 @@ begin
       {Do the final InsertionSort pass.}
       InsertionSortLogNodes(@LPLogInfo.Nodes[0], LPLogInfo.NodeCount - 1);
       {Create the output file}
-      {$ifdef POSIX}
-      lFileHandle := FileCreate(AFilename);
-      {$else}
-      LFileHandle := CreateFile(PChar(AFilename), GENERIC_READ or GENERIC_WRITE, 0,
-        nil, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
-      {$endif}
+{$IFDEF POSIX}
+      LFileHandle := FileCreate(AFileName);
+{$ELSE}
+      LFileHandle := CreateFile(PChar(AFileName), GENERIC_READ or GENERIC_WRITE, 0, nil,
+        CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+{$ENDIF}
       if LFileHandle <> INVALID_HANDLE_VALUE then
       begin
         try
           {Log the usage summary}
           LPMsg := @LMsgBuffer;
-          LPMsg := AppendStringToBuffer(LogStateHeaderMsg, LPMsg, Length(LogStateHeaderMsg));
+          LPMsg := AppendStringToBuffer(LogStateHeaderMsg, LPMsg, length(LogStateHeaderMsg));
           LPMsg := NativeUIntToStrBuf(LMemoryManagerUsageSummary.AllocatedBytes shr 10, LPMsg);
-          LPMsg := AppendStringToBuffer(LogStateAllocatedMsg, LPMsg, Length(LogStateAllocatedMsg));
+          LPMsg := AppendStringToBuffer(LogStateAllocatedMsg, LPMsg,
+            length(LogStateAllocatedMsg));
           LPMsg := NativeUIntToStrBuf(LMemoryManagerUsageSummary.OverheadBytes shr 10, LPMsg);
-          LPMsg := AppendStringToBuffer(LogStateOverheadMsg, LPMsg, Length(LogStateOverheadMsg));
-          LPMsg := NativeUIntToStrBuf(Round(LMemoryManagerUsageSummary.EfficiencyPercentage), LPMsg);
-          LPMsg := AppendStringToBuffer(LogStateEfficiencyMsg, LPMsg, Length(LogStateEfficiencyMsg));
+          LPMsg := AppendStringToBuffer(LogStateOverheadMsg, LPMsg,
+            length(LogStateOverheadMsg));
+          LPMsg := NativeUIntToStrBuf
+            (Round(LMemoryManagerUsageSummary.EfficiencyPercentage), LPMsg);
+          LPMsg := AppendStringToBuffer(LogStateEfficiencyMsg, LPMsg,
+            length(LogStateEfficiencyMsg));
           {Log the allocation detail}
           for LInd := LPLogInfo.NodeCount - 1 downto 0 do
           begin
@@ -10152,24 +10320,27 @@ begin
             LPMsg^ := ' ';
             Inc(LPMsg);
             LPMsg := NativeUIntToStrBuf(LPNode.TotalMemoryUsage, LPMsg);
-            LPMsg := AppendStringToBuffer(BytesMessage, LPMsg, Length(BytesMessage));
+            LPMsg := AppendStringToBuffer(BytesMessage, LPMsg, length(BytesMessage));
             {Add the class type}
             case NativeInt(LPNode.ClassPtr) of
               {Unknown}
               0:
-              begin
-                LPMsg := AppendStringToBuffer(UnknownClassNameMsg, LPMsg, Length(UnknownClassNameMsg));
-              end;
+                begin
+                  LPMsg := AppendStringToBuffer(UnknownClassNameMsg, LPMsg,
+                    length(UnknownClassNameMsg));
+                end;
               {AnsiString}
               1:
-              begin
-                LPMsg := AppendStringToBuffer(AnsiStringBlockMessage, LPMsg, Length(AnsiStringBlockMessage));
-              end;
+                begin
+                  LPMsg := AppendStringToBuffer(AnsiStringBlockMessage, LPMsg,
+                    length(AnsiStringBlockMessage));
+                end;
               {UnicodeString}
               2:
-              begin
-                LPMsg := AppendStringToBuffer(UnicodeStringBlockMessage, LPMsg, Length(UnicodeStringBlockMessage));
-              end;
+                begin
+                  LPMsg := AppendStringToBuffer(UnicodeStringBlockMessage, LPMsg,
+                    length(UnicodeStringBlockMessage));
+                end;
               {Classes}
             else
               begin
@@ -10197,7 +10368,8 @@ begin
             end;
           end;
           if AAdditionalDetails <> '' then
-            LPMsg := AppendStringToBuffer(LogStateAdditionalInfoMsg, LPMsg, Length(LogStateAdditionalInfoMsg));
+            LPMsg := AppendStringToBuffer(LogStateAdditionalInfoMsg, LPMsg,
+              length(LogStateAdditionalInfoMsg));
           {Flush any remaining bytes}
           LBufferSpaceUsed := NativeInt(LPMsg) - NativeInt(@LMsgBuffer);
           if LBufferSpaceUsed > 0 then
@@ -10205,22 +10377,22 @@ begin
           {Write the additional info}
           if AAdditionalDetails <> '' then
           begin
-            {$ifdef BCB6OrDelphi7AndUp}
+{$IFDEF BCB6OrDelphi7AndUp}
             LUTF8Str := UTF8Encode(AAdditionalDetails);
-            {$else}
+{$ELSE}
             LUTF8Str := AAdditionalDetails;
-            {$endif}
-            WriteFile(LFileHandle, LUTF8Str[1], Length(LUTF8Str), LBytesWritten, nil);
+{$ENDIF}
+            WriteFile(LFileHandle, LUTF8Str[1], length(LUTF8Str), LBytesWritten, nil);
           end;
           {Success}
           Result := True;
         finally
           {Close the file}
-          {$ifdef POSIX}
+{$IFDEF POSIX}
           __close(LFileHandle)
-          {$else}
+{$ELSE}
           CloseHandle(LFileHandle);
-          {$endif}
+{$ENDIF}
         end;
       end
       else
@@ -10237,52 +10409,54 @@ end;
 
 {Checks blocks for modification after free and also for memory leaks}
 procedure CheckBlocksOnShutdown(ACheckForLeakedBlocks: Boolean);
-{$ifdef EnableMemoryLeakReporting}
+{$IFDEF EnableMemoryLeakReporting}
 type
   {Leaked class type}
   TLeakedClass = record
     ClassPointer: TClass;
-    {$ifdef CheckCppObjectTypeEnabled}
+{$IFDEF CheckCppObjectTypeEnabled}
     CppTypeIdPtr: Pointer;
-    {$endif}
+{$ENDIF}
     NumLeaks: Cardinal;
   end;
-  TLeakedClasses = array[0..255] of TLeakedClass;
+
+  TLeakedClasses = array [0 .. 255] of TLeakedClass;
   PLeakedClasses = ^TLeakedClasses;
   {Leak statistics for a small block type}
-  TSmallBlockLeaks = array[0..NumSmallBlockTypes - 1] of TLeakedClasses;
+  TSmallBlockLeaks = array [0 .. NumSmallBlockTypes - 1] of TLeakedClasses;
   {A leaked medium or large block}
-  TMediumAndLargeBlockLeaks = array[0..4095] of NativeUInt;
-{$endif}
+  TMediumAndLargeBlockLeaks = array [0 .. 4095] of NativeUInt;
+{$ENDIF}
 var
-{$ifdef EnableMemoryLeakReporting}
+{$IFDEF EnableMemoryLeakReporting}
   {The leaked classes for small blocks}
   LSmallBlockLeaks: TSmallBlockLeaks;
   LLeakType: TMemoryLeakType;
-  {$ifdef CheckCppObjectTypeEnabled}
+{$IFDEF CheckCppObjectTypeEnabled}
   LLeakedCppTypeIdPtr: Pointer;
   LCppTypeName: PAnsiChar;
-  {$endif}
+{$ENDIF}
   LMediumAndLargeBlockLeaks: TMediumAndLargeBlockLeaks;
   LNumMediumAndLargeLeaks: Integer;
   LPLargeBlock: PLargeBlockHeader;
-  LLeakMessage: array[0..32767] of AnsiChar;
-  {$ifndef NoMessageBoxes}
-  LMessageTitleBuffer: array[0..1023] of AnsiChar;
-  {$endif}
+  LLeakMessage: array [0 .. 32767] of AnsiChar;
+{$IFNDEF NoMessageBoxes}
+  LMessageTitleBuffer: array [0 .. 1023] of AnsiChar;
+{$ENDIF}
   LMsgPtr: PAnsiChar;
   LExpectedLeaksOnly, LSmallLeakHeaderAdded, LBlockSizeHeaderAdded: Boolean;
   LBlockTypeInd, LClassInd, LBlockInd: Cardinal;
   LMediumBlockSize, LPreviousBlockSize, LLargeBlockSize, LThisBlockSize: NativeUInt;
-{$endif}
+{$ENDIF}
   LPMediumBlock: Pointer;
   LPMediumBlockPoolHeader: PMediumBlockPoolHeader;
   LMediumBlockHeader: NativeUInt;
 
-{$ifdef EnableMemoryLeakReporting}
+{$IFDEF EnableMemoryLeakReporting}
   {Tries to account for a memory leak. Returns true if the leak is expected and
    removes the leak from the list}
-  function GetMemoryLeakType(AAddress: Pointer; ASpaceInsideBlock: NativeUInt): TMemoryLeakType;
+  function GetMemoryLeakType(AAddress: Pointer; ASpaceInsideBlock: NativeUInt)
+    : TMemoryLeakType;
   var
     LLeak: TExpectedMemoryLeak;
   begin
@@ -10293,9 +10467,9 @@ var
       {Check by pointer address}
       LLeak.LeakAddress := AAddress;
       LLeak.LeakedClass := nil;
-      {$ifdef CheckCppObjectTypeEnabled}
+{$IFDEF CheckCppObjectTypeEnabled}
       LLeak.LeakedCppTypeIdPtr := nil;
-      {$endif}
+{$ENDIF}
       LLeak.LeakSize := 0;
       LLeak.LeakCount := -1;
       if UpdateExpectedLeakList(@ExpectedMemoryLeaks.FirstEntryByAddress, @LLeak, False) then
@@ -10305,23 +10479,24 @@ var
       end;
       {Check by class}
       LLeak.LeakAddress := nil;
-      {$ifdef FullDebugMode}
-      LLeak.LeakedClass := TClass(PNativeUInt(PByte(AAddress)+ SizeOf(TFullDebugBlockHeader))^);
-      {$else}
+{$IFDEF FullDebugMode}
+      LLeak.LeakedClass :=
+        TClass(PNativeUInt(PByte(AAddress) + SizeOf(TFullDebugBlockHeader))^);
+{$ELSE}
       LLeak.LeakedClass := TClass(PNativeUInt(AAddress)^);
-      {$endif}
-      {$ifdef CheckCppObjectTypeEnabled}
+{$ENDIF}
+{$IFDEF CheckCppObjectTypeEnabled}
       if Assigned(GetCppVirtObjTypeIdPtrFunc) then
       begin
-        {$ifdef FullDebugMode}
-        LLeak.LeakedCppTypeIdPtr := GetCppVirtObjTypeIdPtrFunc(Pointer(PByte(AAddress)
-          + SizeOf(TFullDebugBlockHeader)), ASpaceInsideBlock);
-        {$else}
+{$IFDEF FullDebugMode}
+        LLeak.LeakedCppTypeIdPtr := GetCppVirtObjTypeIdPtrFunc
+          (Pointer(PByte(AAddress) + SizeOf(TFullDebugBlockHeader)), ASpaceInsideBlock);
+{$ELSE}
         LLeak.LeakedCppTypeIdPtr := GetCppVirtObjTypeIdPtrFunc(AAddress, ASpaceInsideBlock);
-        {$endif}
+{$ENDIF}
       end;
       LLeakedCppTypeIdPtr := LLeak.LeakedCppTypeIdPtr;
-      {$endif}
+{$ENDIF}
       LLeak.LeakSize := ASpaceInsideBlock;
       if UpdateExpectedLeakList(@ExpectedMemoryLeaks.FirstEntryByClass, @LLeak, False) then
       begin
@@ -10335,13 +10510,13 @@ var
     end;
   end;
 
-  {Checks the small block pool for leaks.}
+{Checks the small block pool for leaks.}
   procedure CheckSmallBlockPoolForLeaks(APSmallBlockPool: PSmallBlockPoolHeader);
   var
     LLeakedClass: TClass;
-    {$ifdef CheckCppObjectTypeEnabled}
+{$IFDEF CheckCppObjectTypeEnabled}
     LLeakedCppObjectTypeId: Pointer;
-    {$endif}
+{$ENDIF}
     LSmallBlockLeakType: TMemoryLeakType;
     LClassIndex: Integer;
     LCurPtr, LEndPtr, LDataPtr: Pointer;
@@ -10351,11 +10526,12 @@ var
   begin
     {Get the useable size inside a block}
     LSmallBlockSize := APSmallBlockPool.BlockType.BlockSize - BlockHeaderSize;
-  {$ifdef FullDebugMode}
+{$IFDEF FullDebugMode}
     Dec(LSmallBlockSize, FullDebugBlockOverhead);
-  {$endif}
+{$ENDIF}
     {Get the block type index}
-    LBlockTypeIndex := (UIntPtr(APSmallBlockPool.BlockType) - UIntPtr(@SmallBlockTypes[0])) div SizeOf(TSmallBlockType);
+    LBlockTypeIndex := (UIntPtr(APSmallBlockPool.BlockType) - UIntPtr(@SmallBlockTypes[0]))
+      div SizeOf(TSmallBlockType);
     LPLeakedClasses := @LSmallBlockLeaks[LBlockTypeIndex];
     {Get the first and last pointer for the pool}
     GetFirstAndLastSmallBlockInPool(APSmallBlockPool, LCurPtr, LEndPtr);
@@ -10365,33 +10541,34 @@ var
       {Is this block in use? If so, is the debug info intact?}
       if ((PNativeUInt(PByte(LCurPtr) - BlockHeaderSize)^ and IsFreeBlockFlag) = 0) then
       begin
-  {$ifdef FullDebugMode}
+{$IFDEF FullDebugMode}
         if CheckBlockBeforeFreeOrRealloc(LCurPtr, boBlockCheck) then
-  {$endif}
+{$ENDIF}
         begin
-          {$ifdef CheckCppObjectTypeEnabled}
+{$IFDEF CheckCppObjectTypeEnabled}
           LLeakedCppTypeIdPtr := nil;
-          {$endif}
+{$ENDIF}
           {Get the leak type}
           LSmallBlockLeakType := GetMemoryLeakType(LCurPtr, LSmallBlockSize);
-    {$ifdef LogMemoryLeakDetailToFile}
-      {$ifdef HideExpectedLeaksRegisteredByPointer}
+{$IFDEF LogMemoryLeakDetailToFile}
+{$IFDEF HideExpectedLeaksRegisteredByPointer}
           if LSmallBlockLeakType <> mltExpectedLeakRegisteredByPointer then
-      {$endif}
+{$ENDIF}
             LogMemoryLeakOrAllocatedBlock(LCurPtr, True);
-    {$endif}
+{$ENDIF}
           {Only expected leaks?}
-          LExpectedLeaksOnly := LExpectedLeaksOnly and (LSmallBlockLeakType <> mltUnexpectedLeak);
-    {$ifdef HideExpectedLeaksRegisteredByPointer}
+          LExpectedLeaksOnly := LExpectedLeaksOnly and
+            (LSmallBlockLeakType <> mltUnexpectedLeak);
+{$IFDEF HideExpectedLeaksRegisteredByPointer}
           if LSmallBlockLeakType <> mltExpectedLeakRegisteredByPointer then
-    {$endif}
+{$ENDIF}
           begin
             {Get a pointer to the user data}
-    {$ifndef FullDebugMode}
+{$IFNDEF FullDebugMode}
             LDataPtr := LCurPtr;
-    {$else}
+{$ELSE}
             LDataPtr := Pointer(PByte(LCurPtr) + SizeOf(TFullDebugBlockHeader));
-    {$endif}
+{$ENDIF}
             {Default to an unknown block}
             LClassIndex := 0;
             {Get the class contained by the block}
@@ -10399,13 +10576,14 @@ var
             {Not a Delphi class? -> is it perhaps a string or C++ object type?}
             if LLeakedClass = nil then
             begin
-              {$ifdef CheckCppObjectTypeEnabled}
+{$IFDEF CheckCppObjectTypeEnabled}
               LLeakedCppObjectTypeId := LLeakedCppTypeIdPtr;
               if (LLeakedCppObjectTypeId = nil) and (ExpectedMemoryLeaks = nil) then
               begin
                 if Assigned(GetCppVirtObjTypeIdPtrFunc) then
                 begin
-                  LLeakedCppObjectTypeId := GetCppVirtObjTypeIdPtrFunc(LDataPtr, LSmallBlockSize);
+                  LLeakedCppObjectTypeId := GetCppVirtObjTypeIdPtrFunc(LDataPtr,
+                    LSmallBlockSize);
                 end;
               end;
               if Assigned(LLeakedCppObjectTypeId) then
@@ -10413,9 +10591,10 @@ var
                 LClassIndex := 3;
                 while LClassIndex <= High(TLeakedClasses) do
                 begin
-                  if (Pointer(LPLeakedClasses[LClassIndex].CppTypeIdPtr) = LLeakedCppObjectTypeId)
-                    or ((LPLeakedClasses[LClassIndex].CppTypeIdPtr = nil)
-                    and (LPLeakedClasses[LClassIndex].ClassPointer = nil)) then
+                  if (Pointer(LPLeakedClasses[LClassIndex].CppTypeIdPtr)
+                      = LLeakedCppObjectTypeId) or
+                    ((LPLeakedClasses[LClassIndex].CppTypeIdPtr = nil) and
+                      (LPLeakedClasses[LClassIndex].ClassPointer = nil)) then
                   begin
                     Break;
                   end;
@@ -10428,26 +10607,30 @@ var
               end
               else
               begin
-              {$endif}
+{$ENDIF}
                 {Not a known class: Is it perhaps string data?}
-                case DetectStringData(LDataPtr, APSmallBlockPool.BlockType.BlockSize - (BlockHeaderSize {$ifdef FullDebugMode} + FullDebugBlockOverhead{$endif})) of
-                  stAnsiString: LClassIndex := 1;
-                  stUnicodeString: LClassIndex := 2;
+                case DetectStringData(LDataPtr, APSmallBlockPool.BlockType.BlockSize -
+                    (BlockHeaderSize
+                    {$IFDEF FullDebugMode} + FullDebugBlockOverhead{$ENDIF})) of
+                  stAnsiString:
+                    LClassIndex := 1;
+                  stUnicodeString:
+                    LClassIndex := 2;
                 end;
-              {$ifdef CheckCppObjectTypeEnabled}
+{$IFDEF CheckCppObjectTypeEnabled}
               end;
-              {$endif}
+{$ENDIF}
             end
             else
             begin
               LClassIndex := 3;
               while LClassIndex <= High(TLeakedClasses) do
               begin
-                if (LPLeakedClasses[LClassIndex].ClassPointer = LLeakedClass)
-                  or ((LPLeakedClasses[LClassIndex].ClassPointer = nil)
-                  {$ifdef CheckCppObjectTypeEnabled}
+                if (LPLeakedClasses[LClassIndex].ClassPointer = LLeakedClass) or
+                  ((LPLeakedClasses[LClassIndex].ClassPointer = nil)
+{$IFDEF CheckCppObjectTypeEnabled}
                   and (LPLeakedClasses[LClassIndex].CppTypeIdPtr = nil)
-                  {$endif}
+{$ENDIF}
                   ) then
                 begin
                   Break;
@@ -10466,19 +10649,19 @@ var
       end
       else
       begin
-  {$ifdef CheckUseOfFreedBlocksOnShutdown}
+{$IFDEF CheckUseOfFreedBlocksOnShutdown}
         {Check that the block has not been modified since being freed}
         CheckFreeBlockUnmodified(LCurPtr, APSmallBlockPool.BlockType.BlockSize, boBlockCheck);
-  {$endif}
+{$ENDIF}
       end;
       {Next block}
       Inc(PByte(LCurPtr), APSmallBlockPool.BlockType.BlockSize);
     end;
   end;
-{$endif}
+{$ENDIF}
 
 begin
-{$ifdef EnableMemoryLeakReporting}
+{$IFDEF EnableMemoryLeakReporting}
   {Clear the leak arrays}
   FillChar(LSmallBlockLeaks, SizeOf(LSmallBlockLeaks), 0);
   FillChar(LMediumAndLargeBlockLeaks, SizeOf(LMediumAndLargeBlockLeaks), 0);
@@ -10486,7 +10669,7 @@ begin
   LNumMediumAndLargeLeaks := 0;
   {No unexpected leaks so far}
   LExpectedLeaksOnly := True;
-{$endif}
+{$ENDIF}
   {Step through all the medium block pools}
   LPMediumBlockPoolHeader := MediumBlockPoolsCircularList.NextMediumBlockPoolHeader;
   while LPMediumBlockPoolHeader <> @MediumBlockPoolsCircularList do
@@ -10498,7 +10681,7 @@ begin
       {Is the block in use?}
       if LMediumBlockHeader and IsFreeBlockFlag = 0 then
       begin
-{$ifdef EnableMemoryLeakReporting}
+{$IFDEF EnableMemoryLeakReporting}
         if ACheckForLeakedBlocks then
         begin
           if (LMediumBlockHeader and IsSmallBlockPoolInUseFlag) <> 0 then
@@ -10508,29 +10691,30 @@ begin
           end
           else
           begin
-            if (LNumMediumAndLargeLeaks < Length(LMediumAndLargeBlockLeaks))
-  {$ifdef FullDebugMode}
+            if (LNumMediumAndLargeLeaks < length(LMediumAndLargeBlockLeaks))
+{$IFDEF FullDebugMode}
               and CheckBlockBeforeFreeOrRealloc(LPMediumBlock, boBlockCheck)
-  {$endif}
+{$ENDIF}
             then
             begin
-              LMediumBlockSize := (LMediumBlockHeader and DropMediumAndLargeFlagsMask) - BlockHeaderSize;
-  {$ifdef FullDebugMode}
+              LMediumBlockSize := (LMediumBlockHeader and DropMediumAndLargeFlagsMask) -
+                BlockHeaderSize;
+{$IFDEF FullDebugMode}
               Dec(LMediumBlockSize, FullDebugBlockOverhead);
-  {$endif}
+{$ENDIF}
               {Get the leak type}
               LLeakType := GetMemoryLeakType(LPMediumBlock, LMediumBlockSize);
               {Is it an expected leak?}
               LExpectedLeaksOnly := LExpectedLeaksOnly and (LLeakType <> mltUnexpectedLeak);
-  {$ifdef LogMemoryLeakDetailToFile}
-    {$ifdef HideExpectedLeaksRegisteredByPointer}
+{$IFDEF LogMemoryLeakDetailToFile}
+{$IFDEF HideExpectedLeaksRegisteredByPointer}
               if LLeakType <> mltExpectedLeakRegisteredByPointer then
-    {$endif}
+{$ENDIF}
                 LogMemoryLeakOrAllocatedBlock(LPMediumBlock, True);
-  {$endif}
-  {$ifdef HideExpectedLeaksRegisteredByPointer}
+{$ENDIF}
+{$IFDEF HideExpectedLeaksRegisteredByPointer}
               if LLeakType <> mltExpectedLeakRegisteredByPointer then
-  {$endif}
+{$ENDIF}
               begin
                 {Add the leak to the list}
                 LMediumAndLargeBlockLeaks[LNumMediumAndLargeLeaks] := LMediumBlockSize;
@@ -10539,14 +10723,15 @@ begin
             end;
           end;
         end;
-{$endif}
+{$ENDIF}
       end
       else
       begin
-{$ifdef CheckUseOfFreedBlocksOnShutdown}
+{$IFDEF CheckUseOfFreedBlocksOnShutdown}
         {Check that the block has not been modified since being freed}
-        CheckFreeBlockUnmodified(LPMediumBlock, LMediumBlockHeader and DropMediumAndLargeFlagsMask, boBlockCheck);
-{$endif}
+        CheckFreeBlockUnmodified(LPMediumBlock, LMediumBlockHeader and
+            DropMediumAndLargeFlagsMask, boBlockCheck);
+{$ENDIF}
       end;
       {Next medium block}
       LPMediumBlock := NextMediumBlock(LPMediumBlock);
@@ -10554,7 +10739,7 @@ begin
     {Get the next medium block pool}
     LPMediumBlockPoolHeader := LPMediumBlockPoolHeader.NextMediumBlockPoolHeader;
   end;
-{$ifdef EnableMemoryLeakReporting}
+{$IFDEF EnableMemoryLeakReporting}
   if ACheckForLeakedBlocks then
   begin
     {Get all leaked large blocks}
@@ -10562,28 +10747,32 @@ begin
     while LPLargeBlock <> @LargeBlocksCircularList do
     begin
       if (LNumMediumAndLargeLeaks < length(LMediumAndLargeBlockLeaks))
-  {$ifdef FullDebugMode}
-        and CheckBlockBeforeFreeOrRealloc(Pointer(PByte(LPLargeBlock) + LargeBlockHeaderSize), boBlockCheck)
-  {$endif}
+{$IFDEF FullDebugMode}
+        and CheckBlockBeforeFreeOrRealloc(Pointer(PByte(LPLargeBlock) + LargeBlockHeaderSize),
+        boBlockCheck)
+{$ENDIF}
       then
       begin
-        LLargeBlockSize := (LPLargeBlock.BlockSizeAndFlags and DropMediumAndLargeFlagsMask) - BlockHeaderSize - LargeBlockHeaderSize;
-  {$ifdef FullDebugMode}
+        LLargeBlockSize := (LPLargeBlock.BlockSizeAndFlags and DropMediumAndLargeFlagsMask) -
+          BlockHeaderSize - LargeBlockHeaderSize;
+{$IFDEF FullDebugMode}
         Dec(LLargeBlockSize, FullDebugBlockOverhead);
-  {$endif}
+{$ENDIF}
         {Get the leak type}
-        LLeakType := GetMemoryLeakType(Pointer(PByte(LPLargeBlock) + LargeBlockHeaderSize), LLargeBlockSize);
+        LLeakType := GetMemoryLeakType(Pointer(PByte(LPLargeBlock) + LargeBlockHeaderSize),
+          LLargeBlockSize);
         {Is it an expected leak?}
         LExpectedLeaksOnly := LExpectedLeaksOnly and (LLeakType <> mltUnexpectedLeak);
-  {$ifdef LogMemoryLeakDetailToFile}
-    {$ifdef HideExpectedLeaksRegisteredByPointer}
+{$IFDEF LogMemoryLeakDetailToFile}
+{$IFDEF HideExpectedLeaksRegisteredByPointer}
         if LLeakType <> mltExpectedLeakRegisteredByPointer then
-    {$endif}
-          LogMemoryLeakOrAllocatedBlock(Pointer(PByte(LPLargeBlock) + LargeBlockHeaderSize), True);
-  {$endif}
-  {$ifdef HideExpectedLeaksRegisteredByPointer}
+{$ENDIF}
+          LogMemoryLeakOrAllocatedBlock
+            (Pointer(PByte(LPLargeBlock) + LargeBlockHeaderSize), True);
+{$ENDIF}
+{$IFDEF HideExpectedLeaksRegisteredByPointer}
         if LLeakType <> mltExpectedLeakRegisteredByPointer then
-  {$endif}
+{$ENDIF}
         begin
           {Add the leak}
           LMediumAndLargeBlockLeaks[LNumMediumAndLargeLeaks] := LLargeBlockSize;
@@ -10600,16 +10789,17 @@ begin
       LSmallLeakHeaderAdded := False;
       LPreviousBlockSize := 0;
       {Set up the leak message header so long}
-      LMsgPtr := AppendStringToBuffer(LeakMessageHeader, @LLeakMessage[0], length(LeakMessageHeader));
+      LMsgPtr := AppendStringToBuffer(LeakMessageHeader, @LLeakMessage[0],
+        length(LeakMessageHeader));
       {Step through all the small block types}
       for LBlockTypeInd := 0 to NumSmallBlockTypes - 1 do
       begin
         LThisBlockSize := SmallBlockTypes[LBlockTypeInd].BlockSize - BlockHeaderSize;
-  {$ifdef FullDebugMode}
+{$IFDEF FullDebugMode}
         Dec(LThisBlockSize, FullDebugBlockOverhead);
         if NativeInt(LThisBlockSize) < 0 then
           LThisBlockSize := 0;
-  {$endif}
+{$ENDIF}
         LBlockSizeHeaderAdded := False;
         {Any leaks?}
         for LClassInd := High(LSmallBlockLeaks[LBlockTypeInd]) downto 0 do
@@ -10624,7 +10814,8 @@ begin
             {Need to add the header?}
             if not LSmallLeakHeaderAdded then
             begin
-              LMsgPtr := AppendStringToBuffer(SmallLeakDetail, LMsgPtr, Length(SmallLeakDetail));
+              LMsgPtr := AppendStringToBuffer(SmallLeakDetail, LMsgPtr,
+                length(SmallLeakDetail));
               LSmallLeakHeaderAdded := True;
             end;
             {Need to add the size header?}
@@ -10642,7 +10833,7 @@ begin
               LMsgPtr^ := ' ';
               Inc(LMsgPtr);
               LMsgPtr := NativeUIntToStrBuf(LThisBlockSize, LMsgPtr);
-              LMsgPtr := AppendStringToBuffer(BytesMessage, LMsgPtr, Length(BytesMessage));
+              LMsgPtr := AppendStringToBuffer(BytesMessage, LMsgPtr, length(BytesMessage));
               LBlockSizeHeaderAdded := True;
             end
             else
@@ -10656,40 +10847,46 @@ begin
             case LClassInd of
               {Unknown}
               0:
-              begin
-                LMsgPtr := AppendStringToBuffer(UnknownClassNameMsg, LMsgPtr, Length(UnknownClassNameMsg));
-              end;
+                begin
+                  LMsgPtr := AppendStringToBuffer(UnknownClassNameMsg, LMsgPtr,
+                    length(UnknownClassNameMsg));
+                end;
               {AnsiString}
               1:
-              begin
-                LMsgPtr := AppendStringToBuffer(AnsiStringBlockMessage, LMsgPtr, Length(AnsiStringBlockMessage));
-              end;
+                begin
+                  LMsgPtr := AppendStringToBuffer(AnsiStringBlockMessage, LMsgPtr,
+                    length(AnsiStringBlockMessage));
+                end;
               {UnicodeString}
               2:
-              begin
-                LMsgPtr := AppendStringToBuffer(UnicodeStringBlockMessage, LMsgPtr, Length(UnicodeStringBlockMessage));
-              end;
+                begin
+                  LMsgPtr := AppendStringToBuffer(UnicodeStringBlockMessage, LMsgPtr,
+                    length(UnicodeStringBlockMessage));
+                end;
               {Classes}
             else
               begin
-                {$ifdef CheckCppObjectTypeEnabled}
+{$IFDEF CheckCppObjectTypeEnabled}
                 if LSmallBlockLeaks[LBlockTypeInd][LClassInd].CppTypeIdPtr <> nil then
                 begin
                   if Assigned(GetCppVirtObjTypeNameByTypeIdPtrFunc) then
                   begin
-                    LCppTypeName := GetCppVirtObjTypeNameByTypeIdPtrFunc(LSmallBlockLeaks[LBlockTypeInd][LClassInd].CppTypeIdPtr);
-                    LMsgPtr := AppendStringToBuffer(LCppTypeName, LMsgPtr, StrLen(LCppTypeName));
+                    LCppTypeName := GetCppVirtObjTypeNameByTypeIdPtrFunc
+                      (LSmallBlockLeaks[LBlockTypeInd][LClassInd].CppTypeIdPtr);
+                    LMsgPtr := AppendStringToBuffer(LCppTypeName, LMsgPtr,
+                      StrLen(LCppTypeName));
                   end
                   else
                     LMsgPtr := AppendClassNameToBuffer(nil, LMsgPtr);
                 end
                 else
                 begin
-                {$endif}
-                  LMsgPtr := AppendClassNameToBuffer(LSmallBlockLeaks[LBlockTypeInd][LClassInd].ClassPointer, LMsgPtr);
-                {$ifdef CheckCppObjectTypeEnabled}
+{$ENDIF}
+                  LMsgPtr := AppendClassNameToBuffer(LSmallBlockLeaks[LBlockTypeInd][LClassInd]
+                      .ClassPointer, LMsgPtr);
+{$IFDEF CheckCppObjectTypeEnabled}
                 end;
-                {$endif}
+{$ENDIF}
               end;
             end;
             {Add the count}
@@ -10699,7 +10896,8 @@ begin
             Inc(LMsgPtr);
             LMsgPtr^ := ' ';
             Inc(LMsgPtr);
-            LMsgPtr := NativeUIntToStrBuf(LSmallBlockLeaks[LBlockTypeInd][LClassInd].NumLeaks, LMsgPtr);
+            LMsgPtr := NativeUIntToStrBuf(LSmallBlockLeaks[LBlockTypeInd][LClassInd]
+                .NumLeaks, LMsgPtr);
           end;
         end;
         LPreviousBlockSize := LThisBlockSize;
@@ -10720,7 +10918,7 @@ begin
           Inc(LMsgPtr);
         end;
         {Add the medium/large block leak message}
-        LMsgPtr := AppendStringToBuffer(LargeLeakDetail, LMsgPtr, Length(LargeLeakDetail));
+        LMsgPtr := AppendStringToBuffer(LargeLeakDetail, LMsgPtr, length(LargeLeakDetail));
         {List all the blocks}
         for LBlockInd := 0 to LNumMediumAndLargeLeaks - 1 do
         begin
@@ -10728,7 +10926,7 @@ begin
           begin
             LMsgPtr^ := ',';
             Inc(LMsgPtr);
-            LMsgPtr^ :=  ' ';
+            LMsgPtr^ := ' ';
             Inc(LMsgPtr);
           end;
           LMsgPtr := NativeUIntToStrBuf(LMediumAndLargeBlockLeaks[LBlockInd], LMsgPtr);
@@ -10738,26 +10936,26 @@ begin
             Break;
         end;
       end;
-  {$ifdef LogErrorsToFile}
-     {Set the message footer}
-      LMsgPtr := AppendStringToBuffer(LeakMessageFooter, LMsgPtr, Length(LeakMessageFooter));
+{$IFDEF LogErrorsToFile}
+      {Set the message footer}
+      LMsgPtr := AppendStringToBuffer(LeakMessageFooter, LMsgPtr, length(LeakMessageFooter));
       {Append the message to the memory errors file}
       AppendEventLog(@LLeakMessage[0], UIntPtr(LMsgPtr) - UIntPtr(@LLeakMessage[1]));
-  {$else}
+{$ELSE}
       {Set the message footer}
-      AppendStringToBuffer(LeakMessageFooter, LMsgPtr, Length(LeakMessageFooter));
-  {$endif}
-  {$ifdef UseOutputDebugString}
+      AppendStringToBuffer(LeakMessageFooter, LMsgPtr, length(LeakMessageFooter));
+{$ENDIF}
+{$IFDEF UseOutputDebugString}
       OutputDebugStringA(LLeakMessage);
-  {$endif}
-  {$ifndef NoMessageBoxes}
+{$ENDIF}
+{$IFNDEF NoMessageBoxes}
       {Show the message}
       AppendStringToModuleName(LeakMessageTitle, LMessageTitleBuffer);
       ShowMessageBox(LLeakMessage, LMessageTitleBuffer);
-  {$endif}
+{$ENDIF}
     end;
   end;
-{$endif}
+{$ENDIF}
 end;
 
 {Returns statistics about the current state of the memory manager}
@@ -10778,7 +10976,8 @@ begin
     AMemoryManagerState.SmallBlockTypeStates[LInd].InternalBlockSize :=
       SmallBlockTypes[LInd].BlockSize;
     AMemoryManagerState.SmallBlockTypeStates[LInd].UseableBlockSize :=
-      SmallBlockTypes[LInd].BlockSize - BlockHeaderSize{$ifdef FullDebugMode} - FullDebugBlockOverhead{$endif};
+      SmallBlockTypes[LInd].BlockSize - BlockHeaderSize{$IFDEF FullDebugMode} -
+      FullDebugBlockOverhead{$ENDIF};
     if NativeInt(AMemoryManagerState.SmallBlockTypeStates[LInd].UseableBlockSize) < 0 then
       AMemoryManagerState.SmallBlockTypeStates[LInd].UseableBlockSize := 0;
   end;
@@ -10804,22 +11003,25 @@ begin
         if (LMediumBlockHeader and IsSmallBlockPoolInUseFlag) <> 0 then
         begin
           {Get the block type index}
-          LBlockTypeIndex := (UIntPtr(PSmallBlockPoolHeader(LPMediumBlock).BlockType) - UIntPtr(@SmallBlockTypes[0])) div SizeOf(TSmallBlockType);
+          LBlockTypeIndex := (UIntPtr(PSmallBlockPoolHeader(LPMediumBlock).BlockType) -
+              UIntPtr(@SmallBlockTypes[0])) div SizeOf(TSmallBlockType);
           {Subtract from medium block usage}
           Dec(AMemoryManagerState.ReservedMediumBlockAddressSpace, LMediumBlockSize);
           {Add it to the reserved space for the block size}
-          Inc(AMemoryManagerState.SmallBlockTypeStates[LBlockTypeIndex].ReservedAddressSpace, LMediumBlockSize);
+          Inc(AMemoryManagerState.SmallBlockTypeStates[LBlockTypeIndex].ReservedAddressSpace,
+            LMediumBlockSize);
           {Add the usage for the pool}
           Inc(AMemoryManagerState.SmallBlockTypeStates[LBlockTypeIndex].AllocatedBlockCount,
             PSmallBlockPoolHeader(LPMediumBlock).BlocksInUse);
         end
         else
         begin
-{$ifdef FullDebugMode}
+{$IFDEF FullDebugMode}
           Dec(LMediumBlockSize, FullDebugBlockOverhead);
-{$endif}
+{$ENDIF}
           Inc(AMemoryManagerState.AllocatedMediumBlockCount);
-          Inc(AMemoryManagerState.TotalAllocatedMediumBlockSize, LMediumBlockSize - BlockHeaderSize);
+          Inc(AMemoryManagerState.TotalAllocatedMediumBlockSize,
+            LMediumBlockSize - BlockHeaderSize);
         end;
       end;
       {Next medium block}
@@ -10849,8 +11051,8 @@ begin
 end;
 
 {Returns a summary of the information returned by GetMemoryManagerState}
-procedure GetMemoryManagerUsageSummary(
-  var AMemoryManagerUsageSummary: TMemoryManagerUsageSummary);
+procedure GetMemoryManagerUsageSummary(var AMemoryManagerUsageSummary
+    : TMemoryManagerUsageSummary);
 var
   LMMS: TMemoryManagerState;
   LAllocatedBytes, LReservedBytes: NativeUInt;
@@ -10859,14 +11061,12 @@ begin
   {Get the memory manager state}
   GetMemoryManagerState(LMMS);
   {Add up the totals}
-  LAllocatedBytes := LMMS.TotalAllocatedMediumBlockSize
-    + LMMS.TotalAllocatedLargeBlockSize;
-  LReservedBytes := LMMS.ReservedMediumBlockAddressSpace
-    + LMMS.ReservedLargeBlockAddressSpace;
+  LAllocatedBytes := LMMS.TotalAllocatedMediumBlockSize + LMMS.TotalAllocatedLargeBlockSize;
+  LReservedBytes := LMMS.ReservedMediumBlockAddressSpace + LMMS.ReservedLargeBlockAddressSpace;
   for LSBTIndex := 0 to NumSmallBlockTypes - 1 do
   begin
-    Inc(LAllocatedBytes, LMMS.SmallBlockTypeStates[LSBTIndex].UseableBlockSize
-      * LMMS.SmallBlockTypeStates[LSBTIndex].AllocatedBlockCount);
+    Inc(LAllocatedBytes, LMMS.SmallBlockTypeStates[LSBTIndex].UseableBlockSize *
+        LMMS.SmallBlockTypeStates[LSBTIndex].AllocatedBlockCount);
     Inc(LReservedBytes, LMMS.SmallBlockTypeStates[LSBTIndex].ReservedAddressSpace);
   end;
   {Set the structure values}
@@ -10874,14 +11074,14 @@ begin
   AMemoryManagerUsageSummary.OverheadBytes := LReservedBytes - LAllocatedBytes;
   if LReservedBytes > 0 then
   begin
-    AMemoryManagerUsageSummary.EfficiencyPercentage :=
-      LAllocatedBytes / LReservedBytes * 100;
+    AMemoryManagerUsageSummary.EfficiencyPercentage := LAllocatedBytes / LReservedBytes * 100;
   end
   else
     AMemoryManagerUsageSummary.EfficiencyPercentage := 100;
 end;
 
-{$ifndef POSIX}
+{$IFNDEF POSIX}
+
 {Gets the state of every 64K block in the 4GB address space. Under 64-bit this
  returns only the state for the low 4GB.}
 procedure GetMemoryMap(var AMemoryMap: TMemoryMap);
@@ -10967,7 +11167,7 @@ begin
     end;
   end;
 end;
-{$endif}
+{$ENDIF}
 
 {Returns summarised information about the state of the memory manager. (For
  backward compatibility.)}
@@ -10991,11 +11191,11 @@ begin
   while LPMediumBlockPoolHeader <> @MediumBlockPoolsCircularList do
   begin
     {Add to the total and committed address space}
-    Inc(Result.TotalAddrSpace, ((MediumBlockPoolSize + $ffff) and $ffff0000));
-    Inc(Result.TotalCommitted, ((MediumBlockPoolSize + $ffff) and $ffff0000));
+    Inc(Result.TotalAddrSpace, ((MediumBlockPoolSize + $FFFF) and $FFFF0000));
+    Inc(Result.TotalCommitted, ((MediumBlockPoolSize + $FFFF) and $FFFF0000));
     {Add the medium block pool overhead}
-    Inc(Result.Overhead, (((MediumBlockPoolSize + $ffff) and $ffff0000)
-      - MediumBlockPoolSize + MediumBlockPoolHeaderSize));
+    Inc(Result.Overhead, (((MediumBlockPoolSize + $FFFF) and $FFFF0000) - MediumBlockPoolSize +
+          MediumBlockPoolHeaderSize));
     {Get the first medium block in the pool}
     LPMediumBlock := GetFirstMediumBlockInPool(LPMediumBlockPoolHeader);
     while LPMediumBlock <> nil do
@@ -11010,13 +11210,14 @@ begin
         if (LMediumBlockHeader and IsSmallBlockPoolInUseFlag) <> 0 then
         begin
           {Get the block type index}
-          LBlockTypeIndex := (UIntPtr(PSmallBlockPoolHeader(LPMediumBlock).BlockType) - UIntPtr(@SmallBlockTypes[0])) div SizeOf(TSmallBlockType);
+          LBlockTypeIndex := (UIntPtr(PSmallBlockPoolHeader(LPMediumBlock).BlockType) -
+              UIntPtr(@SmallBlockTypes[0])) div SizeOf(TSmallBlockType);
           {Get the usage in the block}
-          LSmallBlockUsage := PSmallBlockPoolHeader(LPMediumBlock).BlocksInUse
-            * SmallBlockTypes[LBlockTypeIndex].BlockSize;
+          LSmallBlockUsage := PSmallBlockPoolHeader(LPMediumBlock).BlocksInUse *
+            SmallBlockTypes[LBlockTypeIndex].BlockSize;
           {Get the total overhead for all the small blocks}
-          LSmallBlockOverhead := PSmallBlockPoolHeader(LPMediumBlock).BlocksInUse
-              * (BlockHeaderSize{$ifdef FullDebugMode} + FullDebugBlockOverhead{$endif});
+          LSmallBlockOverhead := PSmallBlockPoolHeader(LPMediumBlock).BlocksInUse *
+            (BlockHeaderSize{$IFDEF FullDebugMode} + FullDebugBlockOverhead{$ENDIF});
           {Add to the totals}
           Inc(Result.FreeSmall, LMediumBlockSize - LSmallBlockUsage - BlockHeaderSize);
           Inc(Result.Overhead, LSmallBlockOverhead + BlockHeaderSize);
@@ -11024,10 +11225,10 @@ begin
         end
         else
         begin
-{$ifdef FullDebugMode}
+{$IFDEF FullDebugMode}
           Dec(LMediumBlockSize, FullDebugBlockOverhead);
           Inc(Result.Overhead, FullDebugBlockOverhead);
-{$endif}
+{$ENDIF}
           {Add to the result}
           Inc(Result.TotalAllocated, LMediumBlockSize - BlockHeaderSize);
           Inc(Result.Overhead, BlockHeaderSize);
@@ -11060,9 +11261,9 @@ begin
     Inc(Result.TotalAddrSpace, LLargeBlockSize);
     Inc(Result.TotalCommitted, LLargeBlockSize);
     Inc(Result.TotalAllocated, LPLargeBlock.UserAllocatedSize
-      {$ifdef FullDebugMode} - FullDebugBlockOverhead{$endif});
+{$IFDEF FullDebugMode} - FullDebugBlockOverhead{$ENDIF});
     Inc(Result.Overhead, LLargeBlockSize - LPLargeBlock.UserAllocatedSize
-      {$ifdef FullDebugMode} + FullDebugBlockOverhead{$endif});
+{$IFDEF FullDebugMode} + FullDebugBlockOverhead{$ENDIF});
     {Get the next large block}
     LPLargeBlock := LPLargeBlock.NextLargeBlockHeader;
   end;
@@ -11085,13 +11286,13 @@ begin
   begin
     {Get the next medium block pool so long}
     LPNextMediumBlockPoolHeader := LPMediumBlockPoolHeader.NextMediumBlockPoolHeader;
-{$ifdef ClearMediumBlockPoolsBeforeReturningToOS}
+{$IFDEF ClearMediumBlockPoolsBeforeReturningToOS}
     FillChar(LPMediumBlockPoolHeader^, MediumBlockPoolSize, 0);
-{$else}
-    {$ifdef ClearSmallAndMediumBlocksInFreeMem}
+{$ELSE}
+{$IFDEF ClearSmallAndMediumBlocksInFreeMem}
     FillChar(LPMediumBlockPoolHeader^, MediumBlockPoolSize, 0);
-    {$endif}
-{$endif}
+{$ENDIF}
+{$ENDIF}
     {Free this pool}
     VirtualFree(LPMediumBlockPoolHeader, 0, MEM_RELEASE);
     {Next pool}
@@ -11100,10 +11301,10 @@ begin
   {Clear all small block types}
   for LInd := 0 to High(SmallBlockTypes) do
   begin
-    SmallBlockTypes[Lind].PreviousPartiallyFreePool := @SmallBlockTypes[Lind];
-    SmallBlockTypes[Lind].NextPartiallyFreePool := @SmallBlockTypes[Lind];
-    SmallBlockTypes[Lind].NextSequentialFeedBlockAddress := Pointer(1);
-    SmallBlockTypes[Lind].MaxSequentialFeedBlockAddress := nil;
+    SmallBlockTypes[LInd].PreviousPartiallyFreePool := @SmallBlockTypes[LInd];
+    SmallBlockTypes[LInd].NextPartiallyFreePool := @SmallBlockTypes[LInd];
+    SmallBlockTypes[LInd].NextSequentialFeedBlockAddress := Pointer(1);
+    SmallBlockTypes[LInd].MaxSequentialFeedBlockAddress := nil;
   end;
   {Clear all medium block pools}
   MediumBlockPoolsCircularList.PreviousMediumBlockPoolHeader := @MediumBlockPoolsCircularList;
@@ -11124,10 +11325,9 @@ begin
   begin
     {Get the next large block}
     LPNextLargeBlock := LPLargeBlock.NextLargeBlockHeader;
-{$ifdef ClearLargeBlocksBeforeReturningToOS}
-    FillChar(LPLargeBlock^,
-      LPLargeBlock.BlockSizeAndFlags and DropMediumAndLargeFlagsMask, 0);
-{$endif}
+{$IFDEF ClearLargeBlocksBeforeReturningToOS}
+    FillChar(LPLargeBlock^, LPLargeBlock.BlockSizeAndFlags and DropMediumAndLargeFlagsMask, 0);
+{$ENDIF}
     {Free this large block}
     VirtualFree(LPLargeBlock, 0, MEM_RELEASE);
     {Next large block}
@@ -11143,33 +11343,33 @@ end;
 {Checks that no other memory manager has been installed after the RTL MM and
  that there are currently no live pointers allocated through the RTL MM.}
 function CheckCanInstallMemoryManager: Boolean;
-{$ifndef NoMessageBoxes}
+{$IFNDEF NoMessageBoxes}
 var
-  LErrorMessageTitle: array[0..1023] of AnsiChar;
-{$endif}
+  LErrorMessageTitle: array [0 .. 1023] of AnsiChar;
+{$ENDIF}
 begin
   {Default to error}
   Result := False;
-{$ifdef FullDebugMode}
-  {$ifdef LoadDebugDLLDynamically}
-    {$ifdef DoNotInstallIfDLLMissing}
+{$IFDEF FullDebugMode}
+{$IFDEF LoadDebugDLLDynamically}
+{$IFDEF DoNotInstallIfDLLMissing}
   {Should FastMM be installed only if the FastMM_FullDebugMode.dll file is
    available?}
   if FullDebugModeDLL = 0 then
     Exit;
-    {$endif}
-  {$endif}
-{$endif}
+{$ENDIF}
+{$ENDIF}
+{$ENDIF}
   {Is FastMM already installed?}
   if FastMMIsInstalled then
   begin
-{$ifdef UseOutputDebugString}
+{$IFDEF UseOutputDebugString}
     OutputDebugStringA(AlreadyInstalledMsg);
-{$endif}
-{$ifndef NoMessageBoxes}
+{$ENDIF}
+{$IFNDEF NoMessageBoxes}
     AppendStringToModuleName(AlreadyInstalledTitle, LErrorMessageTitle);
     ShowMessageBox(AlreadyInstalledMsg, LErrorMessageTitle);
-{$endif}
+{$ENDIF}
     Exit;
   end;
   {Has another MM been set, or has the Embarcadero MM been used? If so, this
@@ -11178,32 +11378,32 @@ begin
   begin
     {When using runtime packages, another library may already have installed
      FastMM: Silently ignore the installation request.}
-{$ifndef UseRuntimePackages}
+{$IFNDEF UseRuntimePackages}
     {Another memory manager has been set.}
-  {$ifdef UseOutputDebugString}
+{$IFDEF UseOutputDebugString}
     OutputDebugStringA(OtherMMInstalledMsg);
-  {$endif}
-  {$ifndef NoMessageBoxes}
+{$ENDIF}
+{$IFNDEF NoMessageBoxes}
     AppendStringToModuleName(OtherMMInstalledTitle, LErrorMessageTitle);
     ShowMessageBox(OtherMMInstalledMsg, LErrorMessageTitle);
-  {$endif}
-{$endif}
+{$ENDIF}
+{$ENDIF}
     Exit;
   end;
-{$ifndef POSIX}
+{$IFNDEF POSIX}
   if GetHeapStatus.TotalAllocated <> 0 then
   begin
     {Memory has been already been allocated with the RTL MM}
-{$ifdef UseOutputDebugString}
+{$IFDEF UseOutputDebugString}
     OutputDebugStringA(MemoryAllocatedMsg);
-{$endif}
-  {$ifndef NoMessageBoxes}
+{$ENDIF}
+{$IFNDEF NoMessageBoxes}
     AppendStringToModuleName(MemoryAllocatedTitle, LErrorMessageTitle);
     ShowMessageBox(MemoryAllocatedMsg, LErrorMessageTitle);
-  {$endif}
+{$ENDIF}
     Exit;
   end;
-{$endif}
+{$ENDIF}
   {All OK}
   Result := True;
 end;
@@ -11214,117 +11414,123 @@ const
   {The size of the Inc(VMTIndex) code in TFreedObject.GetVirtualMethodIndex}
   VMTIndexIncCodeSize = 6;
 var
-  LInd, LSizeInd, LMinimumPoolSize, LOptimalPoolSize, LGroupNumber,
-    LBlocksPerPool, LPreviousBlockSize: Cardinal;
+  LInd, LSizeInd, LMinimumPoolSize, LOptimalPoolSize, LGroupNumber, LBlocksPerPool,
+    LPreviousBlockSize: Cardinal;
   LPMediumFreeBlock: PMediumFreeBlock;
 begin
-{$ifdef FullDebugMode}
-  {$ifdef LoadDebugDLLDynamically}
+{$IFDEF FullDebugMode}
+{$IFDEF LoadDebugDLLDynamically}
   {Attempt to load the FullDebugMode DLL dynamically.}
   FullDebugModeDLL := LoadLibrary(FullDebugModeLibraryName);
   if FullDebugModeDLL <> 0 then
   begin
     GetStackTrace := GetProcAddress(FullDebugModeDLL,
-      {$ifdef RawStackTraces}'GetRawStackTrace'{$else}'GetFrameBasedStackTrace'{$endif});
+{$IFDEF RawStackTraces}'GetRawStackTrace'{$ELSE}'GetFrameBasedStackTrace'{$ENDIF});
     LogStackTrace := GetProcAddress(FullDebugModeDLL, 'LogStackTrace');
   end;
-  {$endif}
-{$endif}
-{$ifdef EnableMMX}
-  {$ifndef ForceMMX}
+{$ENDIF}
+{$ENDIF}
+{$IFDEF EnableMMX}
+{$IFNDEF ForceMMX}
   UseMMX := MMX_Supported;
-  {$endif}
-{$endif}
+{$ENDIF}
+{$ENDIF}
   {Initialize the memory manager}
   {-------------Set up the small block types-------------}
   LPreviousBlockSize := 0;
   for LInd := 0 to High(SmallBlockTypes) do
   begin
     {Set the move procedure}
-{$ifdef UseCustomFixedSizeMoveRoutines}
+{$IFDEF UseCustomFixedSizeMoveRoutines}
     {The upsize move procedure may move chunks in 16 bytes even with 8-byte
-    alignment, since the new size will always be at least 8 bytes bigger than
-    the old size.}
+     alignment, since the new size will always be at least 8 bytes bigger than
+     the old size.}
     if not Assigned(SmallBlockTypes[LInd].UpsizeMoveProcedure) then
-  {$ifdef UseCustomVariableSizeMoveRoutines}
+{$IFDEF UseCustomVariableSizeMoveRoutines}
       SmallBlockTypes[LInd].UpsizeMoveProcedure := MoveX16LP;
-  {$else}
+{$ELSE}
       SmallBlockTypes[LInd].UpsizeMoveProcedure := @System.Move;
-  {$endif}
-{$endif}
+{$ENDIF}
+{$ENDIF}
     {Set the first "available pool" to the block type itself, so that the
      allocation routines know that there are currently no pools with free
      blocks of this size.}
     SmallBlockTypes[LInd].PreviousPartiallyFreePool := @SmallBlockTypes[LInd];
     SmallBlockTypes[LInd].NextPartiallyFreePool := @SmallBlockTypes[LInd];
     {Set the block size to block type index translation table}
-    for LSizeInd := (LPreviousBlockSize div SmallBlockGranularity) to ((SmallBlockTypes[LInd].BlockSize - 1) div SmallBlockGranularity) do
+    for LSizeInd := (LPreviousBlockSize div SmallBlockGranularity)
+      to ((SmallBlockTypes[LInd].BlockSize - 1) div SmallBlockGranularity) do
       AllocSize2SmallBlockTypeIndX4[LSizeInd] := LInd * 4;
     {Cannot sequential feed yet: Ensure that the next address is greater than
      the maximum address}
     SmallBlockTypes[LInd].MaxSequentialFeedBlockAddress := Pointer(0);
     SmallBlockTypes[LInd].NextSequentialFeedBlockAddress := Pointer(1);
     {Get the mask to use for finding a medium block suitable for a block pool}
-    LMinimumPoolSize :=
-      ((SmallBlockTypes[LInd].BlockSize * MinimumSmallBlocksPerPool
-        + SmallBlockPoolHeaderSize + MediumBlockGranularity - 1 - MediumBlockSizeOffset)
-      and -MediumBlockGranularity) + MediumBlockSizeOffset;
+    LMinimumPoolSize := ((SmallBlockTypes[LInd].BlockSize * MinimumSmallBlocksPerPool +
+          SmallBlockPoolHeaderSize + MediumBlockGranularity - 1 - MediumBlockSizeOffset) and
+        -MediumBlockGranularity) + MediumBlockSizeOffset;
     if LMinimumPoolSize < MinimumMediumBlockSize then
       LMinimumPoolSize := MinimumMediumBlockSize;
     {Get the closest group number for the minimum pool size}
-    LGroupNumber := (LMinimumPoolSize - MinimumMediumBlockSize + MediumBlockBinsPerGroup * MediumBlockGranularity div 2)
-      div (MediumBlockBinsPerGroup * MediumBlockGranularity);
+    LGroupNumber := (LMinimumPoolSize - MinimumMediumBlockSize + MediumBlockBinsPerGroup *
+        MediumBlockGranularity div 2) div (MediumBlockBinsPerGroup * MediumBlockGranularity);
     {Too large?}
     if LGroupNumber > 7 then
       LGroupNumber := 7;
     {Set the bitmap}
-    SmallBlockTypes[LInd].AllowedGroupsForBlockPoolBitmap := Byte(-(1 shl LGroupNumber));
+    SmallBlockTypes[LInd].AllowedGroupsForBlockPoolBitmap := Byte( -(1 shl LGroupNumber));
     {Set the minimum pool size}
-    SmallBlockTypes[LInd].MinimumBlockPoolSize := MinimumMediumBlockSize + LGroupNumber * (MediumBlockBinsPerGroup * MediumBlockGranularity);
+    SmallBlockTypes[LInd].MinimumBlockPoolSize := MinimumMediumBlockSize + LGroupNumber *
+      (MediumBlockBinsPerGroup * MediumBlockGranularity);
     {Get the optimal block pool size}
-    LOptimalPoolSize := ((SmallBlockTypes[LInd].BlockSize * TargetSmallBlocksPerPool
-        + SmallBlockPoolHeaderSize + MediumBlockGranularity - 1 - MediumBlockSizeOffset)
-      and -MediumBlockGranularity) + MediumBlockSizeOffset;
+    LOptimalPoolSize := ((SmallBlockTypes[LInd].BlockSize * TargetSmallBlocksPerPool +
+          SmallBlockPoolHeaderSize + MediumBlockGranularity - 1 - MediumBlockSizeOffset) and
+        -MediumBlockGranularity) + MediumBlockSizeOffset;
     {Limit the optimal pool size to within range}
     if LOptimalPoolSize < OptimalSmallBlockPoolSizeLowerLimit then
       LOptimalPoolSize := OptimalSmallBlockPoolSizeLowerLimit;
     if LOptimalPoolSize > OptimalSmallBlockPoolSizeUpperLimit then
       LOptimalPoolSize := OptimalSmallBlockPoolSizeUpperLimit;
     {How many blocks will fit in the adjusted optimal size?}
-    LBlocksPerPool := (LOptimalPoolSize - SmallBlockPoolHeaderSize) div SmallBlockTypes[LInd].BlockSize;
+    LBlocksPerPool := (LOptimalPoolSize - SmallBlockPoolHeaderSize) div SmallBlockTypes[LInd]
+      .BlockSize;
     {Recalculate the optimal pool size to minimize wastage due to a partial
      last block.}
     SmallBlockTypes[LInd].OptimalBlockPoolSize :=
-      ((LBlocksPerPool * SmallBlockTypes[LInd].BlockSize + SmallBlockPoolHeaderSize + MediumBlockGranularity - 1 - MediumBlockSizeOffset) and -MediumBlockGranularity) + MediumBlockSizeOffset;
-{$ifdef CheckHeapForCorruption}
+      ((LBlocksPerPool * SmallBlockTypes[LInd].BlockSize + SmallBlockPoolHeaderSize +
+          MediumBlockGranularity - 1 - MediumBlockSizeOffset) and -MediumBlockGranularity) +
+      MediumBlockSizeOffset;
+{$IFDEF CheckHeapForCorruption}
     {Debug checks}
-    if (SmallBlockTypes[LInd].OptimalBlockPoolSize < MinimumMediumBlockSize)
-      or (SmallBlockTypes[LInd].BlockSize div SmallBlockGranularity * SmallBlockGranularity <> SmallBlockTypes[LInd].BlockSize) then
+    if (SmallBlockTypes[LInd].OptimalBlockPoolSize < MinimumMediumBlockSize) or
+      (SmallBlockTypes[LInd].BlockSize div SmallBlockGranularity * SmallBlockGranularity <>
+        SmallBlockTypes[LInd].BlockSize) then
     begin
-  {$ifdef BCB6OrDelphi7AndUp}
+{$IFDEF BCB6OrDelphi7AndUp}
       System.Error(reInvalidPtr);
-  {$else}
+{$ELSE}
       System.RunError(reInvalidPtr);
-  {$endif}
+{$ENDIF}
     end;
-{$endif}
+{$ENDIF}
     {Set the previous small block size}
     LPreviousBlockSize := SmallBlockTypes[LInd].BlockSize;
   end;
   {-------------------Set up the medium blocks-------------------}
-{$ifdef CheckHeapForCorruption}
+{$IFDEF CheckHeapForCorruption}
   {Check that there are no gaps between where the small blocks end and the
    medium blocks start}
-  if (((MaximumSmallBlockSize - 3) + (MediumBlockGranularity - 1 + BlockHeaderSize - MediumBlockSizeOffset))
-    and -MediumBlockGranularity) + MediumBlockSizeOffset < MinimumMediumBlockSize then
+  if (((MaximumSmallBlockSize - 3) + (MediumBlockGranularity - 1 + BlockHeaderSize -
+          MediumBlockSizeOffset)) and -MediumBlockGranularity) + MediumBlockSizeOffset < MinimumMediumBlockSize
+  then
   begin
-  {$ifdef BCB6OrDelphi7AndUp}
+{$IFDEF BCB6OrDelphi7AndUp}
     System.Error(reInvalidPtr);
-  {$else}
+{$ELSE}
     System.RunError(reInvalidPtr);
-  {$endif}
+{$ENDIF}
   end;
-{$endif}
+{$ENDIF}
   {There are currently no medium block pools}
   MediumBlockPoolsCircularList.PreviousMediumBlockPoolHeader := @MediumBlockPoolsCircularList;
   MediumBlockPoolsCircularList.NextMediumBlockPoolHeader := @MediumBlockPoolsCircularList;
@@ -11339,93 +11545,96 @@ begin
   LargeBlocksCircularList.PreviousLargeBlockHeader := @LargeBlocksCircularList;
   LargeBlocksCircularList.NextLargeBlockHeader := @LargeBlocksCircularList;
   {------------------Set up the debugging structures---------------------}
-{$ifdef FullDebugMode}
+{$IFDEF FullDebugMode}
   {Set up the fake VMT}
   {Copy the basic info from the TFreedObject class}
   System.Move(Pointer(PByte(TFreedObject) + vmtSelfPtr + SizeOf(Pointer))^,
     FreedObjectVMT.VMTData[vmtSelfPtr + SizeOf(Pointer)], vmtParent - vmtSelfPtr);
-  PNativeUInt(@FreedObjectVMT.VMTData[vmtSelfPtr])^ := NativeUInt(@FreedObjectVMT.VMTMethods[0]);
+  PNativeUInt(@FreedObjectVMT.VMTData[vmtSelfPtr])^ :=
+    NativeUInt(@FreedObjectVMT.VMTMethods[0]);
   {Set up the virtual method table}
   for LInd := 0 to MaxFakeVMTEntries - 1 do
   begin
-    PNativeUInt(@FreedObjectVMT.VMTMethods[Low(FreedObjectVMT.VMTMethods) + Integer(LInd * SizeOf(Pointer))])^ :=
-      NativeUInt(@TFreedObject.GetVirtualMethodIndex) + LInd * VMTIndexIncCodeSize;
-  {$ifdef CatchUseOfFreedInterfaces}
+    PNativeUInt(@FreedObjectVMT.VMTMethods[Low(FreedObjectVMT.VMTMethods) +
+          Integer(LInd * SizeOf(Pointer))])^ := NativeUInt(@TFreedObject.GetVirtualMethodIndex)
+      + LInd * VMTIndexIncCodeSize;
+{$IFDEF CatchUseOfFreedInterfaces}
     VMTBadInterface[LInd] := @TFreedObject.InterfaceError;
-  {$endif}
+{$ENDIF}
   end;
   {Set up the default log file name}
   SetDefaultMMLogFileName;
-{$endif}
+{$ENDIF}
 end;
 
 {Installs the memory manager (InitializeMemoryManager should be called first)}
 procedure InstallMemoryManager;
-{$ifdef MMSharingEnabled}
+{$IFDEF MMSharingEnabled}
 var
-  i, LCurrentProcessID: Cardinal;
+  I, LCurrentProcessID: Cardinal;
   LPMapAddress: PPointer;
   LChar: AnsiChar;
-{$endif}
+{$ENDIF}
 begin
   if not FastMMIsInstalled then
   begin
-{$ifdef FullDebugMode}
-  {$ifdef 32Bit}
+{$IFDEF FullDebugMode}
+{$IFDEF 32Bit}
     {Try to reserve the 64K block covering address $80808080}
-    ReservedBlock := VirtualAlloc(Pointer(DebugReservedAddress), 65536, MEM_RESERVE, PAGE_NOACCESS);
-  {$endif}
-{$endif}
-{$ifdef MMSharingEnabled}
+    ReservedBlock := VirtualAlloc(Pointer(DebugReservedAddress), 65536, MEM_RESERVE,
+      PAGE_NOACCESS);
+{$ENDIF}
+{$ENDIF}
+{$IFDEF MMSharingEnabled}
     {Build a string identifying the current process}
     LCurrentProcessID := GetCurrentProcessId;
-    for i := 0 to 7 do
+    for I := 0 to 7 do
     begin
-      LChar := HexTable[((LCurrentProcessID shr (i * 4)) and $F)];
-      MappingObjectName[(High(MappingObjectName) - 1) - i] := LChar;
-  {$ifdef EnableBackwardCompatibleMMSharing}
-      UniqueProcessIDString[8 - i] := LChar;
-      UniqueProcessIDStringBE[8 - i] := LChar;
-  {$endif}
+      LChar := HexTable[((LCurrentProcessID shr (I * 4)) and $F)];
+      MappingObjectName[(High(MappingObjectName) - 1) - I] := LChar;
+{$IFDEF EnableBackwardCompatibleMMSharing}
+      UniqueProcessIDString[8 - I] := LChar;
+      UniqueProcessIDStringBE[8 - I] := LChar;
+{$ENDIF}
     end;
-{$endif}
-{$ifdef AttemptToUseSharedMM}
+{$ENDIF}
+{$IFDEF AttemptToUseSharedMM}
     {Is the replacement memory manager already installed for this process?}
-{$ifdef EnableBackwardCompatibleMMSharing}
+{$IFDEF EnableBackwardCompatibleMMSharing}
     MMWindow := FindWindowA('STATIC', PAnsiChar(@UniqueProcessIDString[1]));
     MMWindowBE := FindWindowA('STATIC', PAnsiChar(@UniqueProcessIDStringBE[1]));
-{$endif}
+{$ENDIF}
     MappingObjectHandle := OpenFileMappingA(FILE_MAP_READ, False, MappingObjectName);
     {Is no MM being shared?}
-{$ifdef EnableBackwardCompatibleMMSharing}
+{$IFDEF EnableBackwardCompatibleMMSharing}
     if (MMWindow or MMWindowBE or MappingObjectHandle) = 0 then
-{$else}
+{$ELSE}
     if MappingObjectHandle = 0 then
-{$endif}
+{$ENDIF}
     begin
-{$endif}
-{$ifdef ShareMM}
+{$ENDIF}
+{$IFDEF ShareMM}
       {Share the MM with other DLLs? - if this DLL is unloaded, then
        dependent DLLs will cause a crash.}
-  {$ifndef ShareMMIfLibrary}
+{$IFNDEF ShareMMIfLibrary}
       if not IsLibrary then
-  {$endif}
+{$ENDIF}
       begin
-  {$ifdef EnableBackwardCompatibleMMSharing}
+{$IFDEF EnableBackwardCompatibleMMSharing}
         {No memory manager installed yet - create the invisible window}
-        MMWindow := CreateWindowA('STATIC', PAnsiChar(@UniqueProcessIDString[1]),
-          WS_POPUP, 0, 0, 0, 0, 0, 0, hInstance, nil);
-        MMWindowBE := CreateWindowA('STATIC', PAnsiChar(@UniqueProcessIDStringBE[1]),
-          WS_POPUP, 0, 0, 0, 0, 0, 0, hInstance, nil);
+        MMWindow := CreateWindowA('STATIC', PAnsiChar(@UniqueProcessIDString[1]), WS_POPUP, 0,
+          0, 0, 0, 0, 0, HInstance, nil);
+        MMWindowBE := CreateWindowA('STATIC', PAnsiChar(@UniqueProcessIDStringBE[1]), WS_POPUP,
+          0, 0, 0, 0, 0, 0, HInstance, nil);
         {The window data is a pointer to this memory manager}
         if MMWindow <> 0 then
           SetWindowLongA(MMWindow, GWL_USERDATA, NativeInt(@NewMemoryManager));
         if MMWindowBE <> 0 then
           SetWindowLongA(MMWindowBE, GWL_USERDATA, NativeInt(@NewMemoryManager));
-  {$endif}
+{$ENDIF}
         {Create the memory mapped file}
-        MappingObjectHandle := CreateFileMappingA(INVALID_HANDLE_VALUE, nil,
-          PAGE_READWRITE, 0, SizeOf(Pointer), MappingObjectName);
+        MappingObjectHandle := CreateFileMappingA(INVALID_HANDLE_VALUE, nil, PAGE_READWRITE, 0,
+          SizeOf(Pointer), MappingObjectName);
         {Map a view of the memory}
         LPMapAddress := MapViewOfFile(MappingObjectHandle, FILE_MAP_WRITE, 0, 0, 0);
         {Set a pointer to the new memory manager}
@@ -11433,50 +11642,50 @@ begin
         {Unmap the file}
         UnmapViewOfFile(LPMapAddress);
       end;
-{$endif}
+{$ENDIF}
       {We will be using this memory manager}
-{$ifndef FullDebugMode}
+{$IFNDEF FullDebugMode}
       NewMemoryManager.GetMem := FastGetMem;
       NewMemoryManager.FreeMem := FastFreeMem;
       NewMemoryManager.ReallocMem := FastReallocMem;
-{$else}
+{$ELSE}
       NewMemoryManager.GetMem := DebugGetMem;
       NewMemoryManager.FreeMem := DebugFreeMem;
       NewMemoryManager.ReallocMem := DebugReallocMem;
-{$endif}
-{$ifdef BDS2006AndUp}
-  {$ifndef FullDebugMode}
+{$ENDIF}
+{$IFDEF BDS2006AndUp}
+{$IFNDEF FullDebugMode}
       NewMemoryManager.AllocMem := FastAllocMem;
-  {$else}
+{$ELSE}
       NewMemoryManager.AllocMem := DebugAllocMem;
-  {$endif}
-  {$ifdef EnableMemoryLeakReporting}
+{$ENDIF}
+{$IFDEF EnableMemoryLeakReporting}
       NewMemoryManager.RegisterExpectedMemoryLeak := RegisterExpectedMemoryLeak;
-      NewMemoryManager.UnRegisterExpectedMemoryLeak := UnRegisterExpectedMemoryLeak;
-  {$else}
+      NewMemoryManager.UnregisterExpectedMemoryLeak := UnregisterExpectedMemoryLeak;
+{$ELSE}
       NewMemoryManager.RegisterExpectedMemoryLeak := NoOpRegisterExpectedMemoryLeak;
-      NewMemoryManager.UnRegisterExpectedMemoryLeak := NoOpUnRegisterExpectedMemoryLeak;
-  {$endif}
-{$endif}
+      NewMemoryManager.UnregisterExpectedMemoryLeak := NoOpUnregisterExpectedMemoryLeak;
+{$ENDIF}
+{$ENDIF}
       {Owns the memory manager}
       IsMemoryManagerOwner := True;
-{$ifdef AttemptToUseSharedMM}
+{$IFDEF AttemptToUseSharedMM}
     end
     else
     begin
       {Get the address of the shared memory manager}
-  {$ifndef BDS2006AndUp}
-    {$ifdef EnableBackwardCompatibleMMSharing}
+{$IFNDEF BDS2006AndUp}
+{$IFDEF EnableBackwardCompatibleMMSharing}
       if MappingObjectHandle <> 0 then
       begin
-    {$endif}
+{$ENDIF}
         {Map a view of the memory}
         LPMapAddress := MapViewOfFile(MappingObjectHandle, FILE_MAP_READ, 0, 0, 0);
         {Set the new memory manager}
         NewMemoryManager := PMemoryManager(LPMapAddress^)^;
         {Unmap the file}
         UnmapViewOfFile(LPMapAddress);
-    {$ifdef EnableBackwardCompatibleMMSharing}
+{$IFDEF EnableBackwardCompatibleMMSharing}
       end
       else
       begin
@@ -11489,19 +11698,19 @@ begin
           NewMemoryManager := PMemoryManager(GetWindowLong(MMWindowBE, GWL_USERDATA))^;
         end;
       end;
-    {$endif}
-  {$else}
-    {$ifdef EnableBackwardCompatibleMMSharing}
+{$ENDIF}
+{$ELSE}
+{$IFDEF EnableBackwardCompatibleMMSharing}
       if MappingObjectHandle <> 0 then
       begin
-    {$endif}
+{$ENDIF}
         {Map a view of the memory}
         LPMapAddress := MapViewOfFile(MappingObjectHandle, FILE_MAP_READ, 0, 0, 0);
         {Set the new memory manager}
         NewMemoryManager := PMemoryManagerEx(LPMapAddress^)^;
         {Unmap the file}
         UnmapViewOfFile(LPMapAddress);
-    {$ifdef EnableBackwardCompatibleMMSharing}
+{$IFDEF EnableBackwardCompatibleMMSharing}
       end
       else
       begin
@@ -11514,27 +11723,27 @@ begin
           NewMemoryManager := PMemoryManagerEx(GetWindowLong(MMWindowBE, GWL_USERDATA))^;
         end;
       end;
-    {$endif}
-  {$endif}
+{$ENDIF}
+{$ENDIF}
       {Close the file mapping handle}
       CloseHandle(MappingObjectHandle);
       MappingObjectHandle := 0;
       {The memory manager is not owned by this module}
       IsMemoryManagerOwner := False;
     end;
-{$endif}
+{$ENDIF}
     {Save the old memory manager}
     GetMemoryManager(OldMemoryManager);
     {Replace the memory manager with either this one or the shared one.}
     SetMemoryManager(NewMemoryManager);
     {FastMM is now installed}
     FastMMIsInstalled := True;
-{$ifdef UseOutputDebugString}
+{$IFDEF UseOutputDebugString}
     if IsMemoryManagerOwner then
       OutputDebugStringA(FastMMInstallMsg)
     else
       OutputDebugStringA(FastMMInstallSharedMsg);
-{$endif}
+{$ENDIF}
   end;
 end;
 
@@ -11543,8 +11752,8 @@ begin
   {Is this the owner of the shared MM window?}
   if IsMemoryManagerOwner then
   begin
-{$ifdef ShareMM}
-  {$ifdef EnableBackwardCompatibleMMSharing}
+{$IFDEF ShareMM}
+{$IFDEF EnableBackwardCompatibleMMSharing}
     {Destroy the window}
     if MMWindow <> 0 then
     begin
@@ -11556,38 +11765,38 @@ begin
       DestroyWindow(MMWindowBE);
       MMWindowBE := 0;
     end;
-  {$endif}
+{$ENDIF}
     {Destroy the memory mapped file handle}
     if MappingObjectHandle <> 0 then
     begin
       CloseHandle(MappingObjectHandle);
       MappingObjectHandle := 0;
     end;
-{$endif}
-{$ifdef FullDebugMode}
+{$ENDIF}
+{$IFDEF FullDebugMode}
     {Release the reserved block}
     if ReservedBlock <> nil then
     begin
       VirtualFree(ReservedBlock, 0, MEM_RELEASE);
       ReservedBlock := nil;
     end;
-{$endif}
+{$ENDIF}
   end;
-{$ifndef DetectMMOperationsAfterUninstall}
+{$IFNDEF DetectMMOperationsAfterUninstall}
   {Restore the old memory manager}
   SetMemoryManager(OldMemoryManager);
-{$else}
+{$ELSE}
   {Set the invalid memory manager: no more MM operations allowed}
   SetMemoryManager(InvalidMemoryManager);
-{$endif}
+{$ENDIF}
   {Memory manager has been uninstalled}
   FastMMIsInstalled := False;
-{$ifdef UseOutputDebugString}
+{$IFDEF UseOutputDebugString}
   if IsMemoryManagerOwner then
     OutputDebugStringA(FastMMUninstallMsg)
   else
     OutputDebugStringA(FastMMUninstallSharedMsg);
-{$endif}
+{$ENDIF}
 end;
 
 procedure FinalizeMemoryManager;
@@ -11595,68 +11804,68 @@ begin
   {Restore the old memory manager if FastMM has been installed}
   if FastMMIsInstalled then
   begin
-{$ifndef NeverUninstall}
+{$IFNDEF NeverUninstall}
     {Uninstall FastMM}
     UninstallMemoryManager;
-{$endif}
+{$ENDIF}
     {Do we own the memory manager, or are we just sharing it?}
     if IsMemoryManagerOwner then
     begin
-{$ifdef CheckUseOfFreedBlocksOnShutdown}
+{$IFDEF CheckUseOfFreedBlocksOnShutdown}
       CheckBlocksOnShutdown(
-  {$ifdef EnableMemoryLeakReporting}
+{$IFDEF EnableMemoryLeakReporting}
         True
-    {$ifdef RequireIDEPresenceForLeakReporting}
+{$IFDEF RequireIDEPresenceForLeakReporting}
         and DelphiIsRunning
-    {$endif}
-    {$ifdef RequireDebuggerPresenceForLeakReporting}
+{$ENDIF}
+{$IFDEF RequireDebuggerPresenceForLeakReporting}
         and ((DebugHook <> 0)
-        {$ifdef PatchBCBTerminate}
-        or (Assigned(pCppDebugHook) and (pCppDebugHook^ <> 0))
-        {$endif PatchBCBTerminate}
+{$IFDEF PatchBCBTerminate}
+          or (Assigned(pCppDebugHook) and (pCppDebugHook^ <> 0))
+{$ENDIF PatchBCBTerminate}
         )
-    {$endif}
-    {$ifdef ManualLeakReportingControl}
+{$ENDIF}
+{$IFDEF ManualLeakReportingControl}
         and ReportMemoryLeaksOnShutdown
-    {$endif}
-  {$else}
+{$ENDIF}
+{$ELSE}
         False
-  {$endif}
-      );
-{$else}
-  {$ifdef EnableMemoryLeakReporting}
+{$ENDIF}
+        );
+{$ELSE}
+{$IFDEF EnableMemoryLeakReporting}
       if True
-    {$ifdef RequireIDEPresenceForLeakReporting}
+{$IFDEF RequireIDEPresenceForLeakReporting}
         and DelphiIsRunning
-    {$endif}
-    {$ifdef RequireDebuggerPresenceForLeakReporting}
+{$ENDIF}
+{$IFDEF RequireDebuggerPresenceForLeakReporting}
         and ((DebugHook <> 0)
-        {$ifdef PatchBCBTerminate}
+{$IFDEF PatchBCBTerminate}
         or (Assigned(pCppDebugHook) and (pCppDebugHook^ <> 0))
-        {$endif PatchBCBTerminate}
+{$ENDIF PatchBCBTerminate}
         )
-    {$endif}
-    {$ifdef ManualLeakReportingControl}
+{$ENDIF}
+{$IFDEF ManualLeakReportingControl}
         and ReportMemoryLeaksOnShutdown
-    {$endif}
+{$ENDIF}
       then
         CheckBlocksOnShutdown(True);
-  {$endif}
-{$endif}
-{$ifdef EnableMemoryLeakReporting}
+{$ENDIF}
+{$ENDIF}
+{$IFDEF EnableMemoryLeakReporting}
       {Free the expected memory leaks list}
       if ExpectedMemoryLeaks <> nil then
       begin
         VirtualFree(ExpectedMemoryLeaks, 0, MEM_RELEASE);
         ExpectedMemoryLeaks := nil;
       end;
-{$endif}
-{$ifndef NeverUninstall}
+{$ENDIF}
+{$IFNDEF NeverUninstall}
       {Clean up: Free all memory. If this is a .DLL that owns its own MM, then
        it is necessary to prevent the main application from running out of
        address space.}
       FreeAllMemory;
-{$endif}
+{$ENDIF}
     end;
   end;
 end;
@@ -11667,10 +11876,10 @@ begin
   if InitializationCodeHasRun then
     Exit;
   InitializationCodeHasRun := True;
-{$ifndef BCB}
-  {$ifdef InstallOnlyIfRunningInIDE}
+{$IFNDEF BCB}
+{$IFDEF InstallOnlyIfRunningInIDE}
   if (DebugHook <> 0) and DelphiIsRunning then
-  {$endif}
+{$ENDIF}
   begin
     {Initialize all the lookup tables, etc. for the memory manager}
     InitializeMemoryManager;
@@ -11679,21 +11888,23 @@ begin
      file.}
     if CheckCanInstallMemoryManager then
     begin
-    {$ifdef ClearLogFileOnStartup}
+{$IFDEF ClearLogFileOnStartup}
       DeleteEventLog;
-    {$endif}
+{$ENDIF}
       InstallMemoryManager;
     end;
   end;
-{$endif}
+{$ENDIF}
 end;
 
 initialization
-  RunInitializationCode;
+
+RunInitializationCode;
 
 finalization
-{$ifndef PatchBCBTerminate}
+
+{$IFNDEF PatchBCBTerminate}
   FinalizeMemoryManager;
-{$endif}
+{$ENDIF}
 
 end.

@@ -134,7 +134,7 @@ end;
 
 procedure TD2XParam.Convert(pStr: string);
 begin
-// Nothing
+  // Nothing
 end;
 
 constructor TD2XParam.Create(pCode, pLabel, pSample, pDescr: string;
@@ -237,10 +237,10 @@ begin
     []);
   pL.Log('    <f/e> If value begins with "." is appended to global name to give file name', []
     );
-  pL.Log('    <d/e> [<dir>][,<extn>] <dir> has trailing delimiter stripped and <extn> has leading dot stripped', []
-    );
-  pL.Log('            Either of <dir> and/or <extn> can be "!" to specify the default value', []
-    );
+  pL.Log('    <d/e> [<dir>][,<extn>] <dir> has trailing delimiter stripped and <extn> has leading dot stripped',
+    []);
+  pL.Log('            Either of <dir> and/or <extn> can be "!" to specify the default value',
+    []);
 end;
 
 function TD2XParams.ForCode(pCode: string): TD2XParam;

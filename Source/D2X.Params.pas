@@ -76,7 +76,7 @@ type
       pFlagDefault: Boolean; pStrConverter: TD2XSingleParam<String>.TspConverter;
       pStrValidator: TD2XSingleParam<String>.TspValidator; pFormatter: TfspFormatter);
 
-    procedure Convert(pStr: string); override;
+    procedure Convert(pStr: String); override;
     procedure Reset; override;
     function IsDefault: Boolean; override;
     procedure Zero; override;
@@ -209,17 +209,17 @@ end;
 
 { TD2XFlaggedStringParam }
 
-procedure TD2XFlaggedStringParam.Convert(pStr: string);
+procedure TD2XFlaggedStringParam.Convert(pStr: String);
 var
   lVal: String;
 begin
-    if Assigned(fStrConverter) then
-    begin
-      if fStrConverter(pStr, fDefault, lVal) then
-        Value := lVal;
-    end
-    else
-      Value := pStr;
+  if Assigned(fStrConverter) then
+  begin
+    if fStrConverter(pStr, fDefault, lVal) then
+      Value := lVal;
+  end
+  else
+    Value := pStr;
 end;
 
 function TD2XFlaggedStringParam.ConvertString(pStr: String; pDflt: String;

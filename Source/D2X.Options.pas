@@ -761,7 +761,8 @@ begin
   fDefinesUsedHandler := TD2XDefinesUsedHandler.Create;
 
   lWriteXml := TD2XFlaggedStringParam.CreateFlagStr('X', 'Generate XML', '<d/e>',
-    'Generate XML files into current or given <d/e>', 'Xml,xml', True, ConvertDirExtn, nil, nil);
+    'Generate XML files into current or given <d/e>', 'Xml,xml', True, ConvertDirExtn,
+    nil, nil);
   lWriteDefines := TD2XFlaggedStringParam.CreateFlagStr('W', 'Write Defines', '<d/e>',
     'Generate Final Defines files into current or given <d/e>', 'Defines,def', False,
     ConvertDirExtn, nil, nil);

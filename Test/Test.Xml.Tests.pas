@@ -66,7 +66,7 @@ type
     procedure TestAddChild;
   end;
 
-{ TestTD2XmlNode }
+  { TestTD2XmlNode }
 
 procedure TestTD2XmlNode.SetUp;
 begin
