@@ -126,6 +126,8 @@ type
     procedure TestInvalidCreateFlags;
 
     procedure TestParse;
+    procedure TestParseCode;
+    procedure TestParseLabel;
     procedure TestReset;
     procedure TestZero;
     procedure TestDescribe;
@@ -215,6 +217,7 @@ type
     procedure TestParse;
     procedure TestReset;
     procedure TestZero;
+    procedure TestConvert;
     procedure TestDescribe;
     procedure TestReport;
     procedure TestOutput;
@@ -1258,6 +1261,16 @@ begin
   inherited;
 end;
 
+procedure TestTD2XFlaggedStringParam.TestConvert;
+begin
+  CheckEqualsString('Tst', fFlagP.Value, 'Default Value Set');
+  CheckEquals(False, ID2XFlag(fFlagP).Flag, 'Default Flag Set');
+
+  fFlagP.Convert('Simple');
+  CheckEqualsString('Simple', fFlagP.Value, 'Simple Value Set');
+  CheckEquals(False, ID2XFlag(fFlagP).Flag, 'Other Flag Set');
+end;
+
 procedure TestTD2XFlaggedStringParam.TestDescribe;
 begin
   fFlagP.Describe(fLog);
@@ -1768,7 +1781,10 @@ begin
   CheckFalse(fFlagsP.Parse('F'), 'Parse right code with No value');
 
   CheckFalse(fFlagsP.Parse('F?'), 'Parse right code with Bad value');
+end;
 
+procedure TestTD2XFlagsParam.TestParseCode;
+begin
   Check(fFlagsP.Parse('F+1'), 'Parse right code with True code');
   CheckEquals(True, fFlagsP.ByCode['1'].Flag, 'Frue Value');
 
@@ -1790,6 +1806,41 @@ begin
   Check(fFlagsP.Parse('F-U'), 'Parse right code with Uppercase code');
   CheckEquals(False, fFlagsP.ByCode['u'].Flag, 'False Lowercase Value');
   CheckEquals(False, fFlagsP.ByCode['U'].Flag, 'False Uppercase Value');
+
+  Check(fFlagsP.Parse('F+l'), 'Parse right code with Lowercase code');
+  CheckEquals(True, fFlagsP.ByCode['l'].Flag, 'True Lowercase Value');
+  CheckEquals(True, fFlagsP.ByCode['L'].Flag, 'True Uppercase Value');
+
+  Check(fFlagsP.Parse('F-L'), 'Parse right code with Uppercase code');
+  CheckEquals(False, fFlagsP.ByCode['l'].Flag, 'False Lowercase Value');
+  CheckEquals(False, fFlagsP.ByCode['L'].Flag, 'False Uppercase Value');
+end;
+
+procedure TestTD2XFlagsParam.TestParseLabel;
+begin
+  Check(fFlagsP.Parse('F:Test1'), 'Parse right label with True label');
+  CheckEquals(True, fFlagsP.ByLabel['Test1'].Flag, 'Frue Value');
+
+  Check(fFlagsP.Parse('F:Test1-,-Test2'), 'Parse right label with multiple False labels');
+  CheckEquals(False, fFlagsP.ByLabel['Test1'].Flag, 'False 1 Value');
+  CheckEquals(False, fFlagsP.ByLabel['Test2'].Flag, 'False 2 Value');
+
+  Check(fFlagsP.Parse('F:+Test1,Test2+'), 'Parse right label with multiple True labels');
+  CheckEquals(True, fFlagsP.ByLabel['Test1'].Flag, 'Frue 1 Value');
+  CheckEquals(True, fFlagsP.ByLabel['Test2'].Flag, 'Frue 2 Value');
+
+  Check(fFlagsP.Parse('F:-Test1'), 'Parse right label with False label');
+  CheckEquals(False, fFlagsP.ByLabel['Test1'].Flag, 'False Value');
+
+  Check(fFlagsP.Parse('F:testu'), 'Parse right label with Lowercase label');
+  CheckEquals(True, fFlagsP.ByLabel['testu'].Flag, 'True Lowercase Value');
+  CheckEquals(True, fFlagsP.ByLabel['TestU'].Flag, 'True Uppercase Value');
+  CheckEquals(True, fFlagsP.ByLabel['TESTU'].Flag, 'True Uppercase Value');
+
+  Check(fFlagsP.Parse('F:TESTL-'), 'Parse right label with Uppercase label');
+  CheckEquals(False, fFlagsP.ByLabel['testl'].Flag, 'False Lowercase Value');
+  CheckEquals(False, fFlagsP.ByLabel['Testl'].Flag, 'False Lowercase Value');
+  CheckEquals(False, fFlagsP.ByLabel['TESTL'].Flag, 'False Uppercase Value');
 end;
 
 procedure TestTD2XFlagsParam.TestReport;

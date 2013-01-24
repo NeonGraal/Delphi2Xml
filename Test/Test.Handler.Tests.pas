@@ -5,6 +5,7 @@ interface
 implementation
 
 uses
+  CastaliaPasLexTypes,
   D2X.Handler,
   System.SysUtils,
   Test.Handler,
@@ -32,6 +33,8 @@ type
     procedure TestBeginMethod;
     procedure TestEndMethod;
     procedure TestCopy;
+    procedure TestParserMessage;
+    procedure TestLexerInclude;
   end;
 
   { TestTD2XHandler }
@@ -113,6 +116,20 @@ begin
   FD2XHandler.EndResults(nil);
 
   CheckTrue(FD2XTester.CalledEndResults, 'Called End Results');
+end;
+
+procedure TestTD2XHandler.TestLexerInclude;
+begin
+  FD2XHandler.LexerInclude('', 0, 0);
+
+  CheckTrue(FD2XTester.CalledLexerInclude, 'Called Lexer Include');
+end;
+
+procedure TestTD2XHandler.TestParserMessage;
+begin
+  FD2XHandler.ParserMessage(meError, '', 0, 0);
+
+  CheckTrue(FD2XTester.CalledParserMessage, 'Called Parser Message');
 end;
 
 procedure TestTD2XHandler.TestUseProxy;

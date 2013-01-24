@@ -8,7 +8,7 @@
 			<Platform Condition="'$(Platform)'==''">Win32</Platform>
 			<TargetedPlatforms>1</TargetedPlatforms>
 			<AppType>Console</AppType>
-			<MainSource>Delphi2XmlTests.dpr</MainSource>
+			<MainSource>Delphi2Xml.Tests.dpr</MainSource>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
 			<Base>true</Base>
@@ -185,7 +185,7 @@
 			<DCCReference Include="Source\Test.Xml.pas"/>
 			<DCCReference Include="Test.Xml.Tests.pas"/>
 			<DCCReference Include="Source\Test.Global.pas"/>
-			<None Include="Profiling\Delphi2XmlTest.aqt"/>
+			<None Include="Profiling\Delphi2Xml.Test.aqt"/>
 			<None Include="Config\Test.def"/>
 			<None Include="Config\Test.prm"/>
 			<None Include="..\TODO.txt"/>
@@ -243,7 +243,7 @@
 						<Excluded_Packages Name="$(BDSBIN)\dclofficexp160.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
 					</Excluded_Packages>
 					<Source>
-						<Source Name="MainSource">Delphi2XmlTests.dpr</Source>
+						<Source Name="MainSource">Delphi2Xml.Tests.dpr</Source>
 					</Source>
 				</Delphi.Personality>
 				<Deployment>

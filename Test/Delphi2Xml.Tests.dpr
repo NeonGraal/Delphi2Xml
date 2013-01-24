@@ -1,4 +1,4 @@
-program Delphi2XmlTests;
+program Delphi2Xml.Tests;
 
 {$APPTYPE CONSOLE}
 

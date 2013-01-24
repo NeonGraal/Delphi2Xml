@@ -165,7 +165,7 @@ function TD2XFileOptions.ConfigFileOrExtn(pFileOrExtn: string): ID2XFile;
   function GlobalFileOrExtn(pFileOrExtn: string): string;
   begin
     if StartsText('.', pFileOrExtn) then
-      Result := ChangeFileExt(fGlobalName.Value, pFileOrExtn)
+      Result := fGlobalName.Value + pFileOrExtn
     else
       Result := pFileOrExtn;
   end;
@@ -185,9 +185,9 @@ function TD2XFileOptions.LogFileOrExtn(pFileOrExtn: string): ID2XFile;
   begin
     if StartsText('.', pFileOrExtn) then
       if fTimestampFiles.Flag then
-        Result := ChangeFileExt(fGlobalName.Value, fOutputTimestamp + pFileOrExtn)
+        Result := fGlobalName.Value + fOutputTimestamp + pFileOrExtn
       else
-        Result := ChangeFileExt(fGlobalName.Value, pFileOrExtn)
+        Result := fGlobalName.Value + pFileOrExtn
     else
       if fTimestampFiles.Flag then
       begin

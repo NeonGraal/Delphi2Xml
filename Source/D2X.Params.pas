@@ -695,7 +695,7 @@ var
 begin
   Result := -1;
   for i := 0 to High(fFlags) do
-    if pLabel = fFlags[i].FlagLabel then
+    if CompareText(pLabel, fFlags[i].FlagLabel) = 0 then
       Result := i;
 end;
 
@@ -787,7 +787,7 @@ var
   lVal: Boolean;
   lFlag: ID2XFlag;
 begin
-  Result := True;
+    Result := True;
   lSL := TStringList.Create;
   try
     lSL.CommaText := pStr;

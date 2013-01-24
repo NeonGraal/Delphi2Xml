@@ -1,15 +1,15 @@
-program Delphi2XmlSingle;
+program Delphi2Xml.IO.Actual.Tests;
 
 {$APPTYPE CONSOLE}
 
 uses
-  FastMM4 in '..\FastMM4\FastMM4.pas',
+  FastMM4 in '..\..\FastMM4\FastMM4.pas',
   GuiTestRunner,
   TextTestRunner,
   System.StrUtils,
   Winapi.Windows,
-  FastMM4Messages in '..\FastMM4\FastMM4Messages.pas',
-  Test.Params.Tests in 'Test.Params.Tests.pas';
+  FastMM4Messages in '..\..\FastMM4\FastMM4Messages.pas',
+  Test.IO.Actual.Tests in '..\Test.IO.Actual.Tests.pas';
 
 {$R *.RES}
 

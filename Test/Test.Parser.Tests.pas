@@ -43,6 +43,7 @@ type
     procedure TestMainUnitName;
     procedure TestMainUsedUnit;
     procedure TestMainUsedUnitExpression;
+    procedure TestContainsExpression;
   end;
 
   TestTD2XFullParser = class(TD2XParserTestCase)
@@ -222,6 +223,20 @@ begin
 
   CheckText('Test1', 'Used Unit Name');
   CheckAttribute('', '', 'Blank');
+end;
+
+procedure TestTD2XUsesParser.TestContainsExpression;
+var
+  pContents: string;
+  pFilename: string;
+begin
+  pFilename := 'TestContainsExpression';
+  pContents := 'package Test; contains Test2 in ''Test2.pas''; end.';
+
+  FD2XUsesParser.ProcessString(pFilename, pContents);
+
+  CheckText('Test2', 'Main Used Unit Name');
+  CheckAttribute('file', '''Test2.pas''', 'Blank');
 end;
 
 procedure TestTD2XUsesParser.TestMainUnitName;
