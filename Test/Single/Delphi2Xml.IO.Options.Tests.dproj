@@ -28,14 +28,8 @@
 			<CfgParent>Base</CfgParent>
 			<Base>true</Base>
 		</PropertyGroup>
-		<PropertyGroup Condition="('$(Platform)'=='Win64' and '$(Cfg_1)'=='true') or '$(CfgIO.OptionsWin64)'!=''">
-			<CfgIO.OptionsWin64>true</CfgIO.OptionsWin64>
-			<CfgParent>Cfg_1</CfgParent>
-			<Cfg_1>true</Cfg_1>
-			<Base>true</Base>
-		</PropertyGroup>
-		<PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Cfg_1)'=='true') or '$(CfgIO.OptionsWin32)'!=''">
-			<CfgIO.OptionsWin32>true</CfgIO.OptionsWin32>
+		<PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Cfg_1)'=='true') or '$(Cfg_1_Win32)'!=''">
+			<Cfg_1_Win32>true</Cfg_1_Win32>
 			<CfgParent>Cfg_1</CfgParent>
 			<Cfg_1>true</Cfg_1>
 			<Base>true</Base>
@@ -71,20 +65,9 @@
 			<DCC_DebugInfoInExe>true</DCC_DebugInfoInExe>
 			<DCC_RemoteDebug>true</DCC_RemoteDebug>
 		</PropertyGroup>
-		<PropertyGroup Condition="'$(CfgIO.OptionsWin64)'!=''">
-			<ILINK_FullDebugInfo>true</ILINK_FullDebugInfo>
-			<BCC_DebugLineNumbers>true</BCC_DebugLineNumbers>
-			<BCC_SourceDebuggingOn>true</BCC_SourceDebuggingOn>
-			<VerInfo_Locale>1033</VerInfo_Locale>
-		</PropertyGroup>
-		<PropertyGroup Condition="'$(CfgIO.OptionsWin32)'!=''">
+		<PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
 			<Debugger_CWD>..</Debugger_CWD>
-			<ILINK_FullDebugInfo>true</ILINK_FullDebugInfo>
-			<BCC_SourceDebuggingOn>true</BCC_SourceDebuggingOn>
-			<BCC_DebugLineNumbers>true</BCC_DebugLineNumbers>
-			<VerInfo_Locale>1033</VerInfo_Locale>
 			<Debugger_RunParams></Debugger_RunParams>
-			<DCC_RemoteDebug>false</DCC_RemoteDebug>
 		</PropertyGroup>
 		<Import Condition="'$(Base)'!='' And Exists('..\Warnings.optset')" Project="..\Warnings.optset"/>
 		<Import Condition="'$(Base)'!='' And Exists('..\CastaliaParser.optset')" Project="..\CastaliaParser.optset"/>
