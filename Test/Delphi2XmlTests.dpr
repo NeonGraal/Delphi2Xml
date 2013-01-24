@@ -24,7 +24,7 @@ uses
   D2X.RunParam in '..\Source\D2X.RunParam.pas',
   D2X.Xml in '..\Source\D2X.Xml.pas',
   Test.Constants in 'Source\Test.Constants.pas',
-  Test.Global in 'Source\Test.Global.pas',
+  Test.Global.Tests in 'Test.Global.Tests.pas',
   Test.Handler in 'Source\Test.Handler.pas',
   Test.Handler.Tests in 'Test.Handler.Tests.pas',
   Test.Handlers in 'Source\Test.Handlers.pas',
@@ -45,7 +45,8 @@ uses
   Test.RunParam.Tests in 'Test.RunParam.Tests.pas',
   Test.Utils in 'Source\Test.Utils.pas',
   Test.Xml in 'Source\Test.Xml.pas',
-  Test.Xml.Tests in 'Test.Xml.Tests.pas';
+  Test.Xml.Tests in 'Test.Xml.Tests.pas',
+  Test.Global in 'Source\Test.Global.pas';
 
 {$R *.RES}
 

@@ -59,6 +59,7 @@ type
 
     fGlobalName: string;
     fValidator: TD2XSingleParam<string>.TspValidator;
+    fTimestampFlag: ID2XFlag;
 
     procedure InitFiles;
 
@@ -381,6 +382,7 @@ begin
   fConfigFiles.Add('File.Extn', '');
   fConfigFiles.Add('.skip', '');
 
+  fBaseFiles.Add('File', '');
   fBaseFiles.Add('Testing.Test*', '');
   fBaseFiles.Add('Testing.Test.AUnit.pas', TESTING_UNIT);
   fBaseFiles.Add('Testing.Test.AProgram.dpr', TESTING_PROGRAM);
@@ -400,8 +402,16 @@ end;
 function TTestFactory.LogFileOrExtn(pFileOrExtn: string): ID2XFile;
 var
   lInput: string;
+  lExtn: string;
 begin
-  Result := TTestFile.Create(pFileOrExtn, True, lInput, Self);
+  if Assigned(fTimestampFlag) and fTimestampFlag.Flag then
+  begin
+    lExtn := ExtractFileExt(pFileOrExtn);
+    Result := TTestFile.Create(ChangeFileExt(pFileOrExtn, '-Timestamp' + lExtn), True,
+      lInput, Self);
+  end
+  else
+    Result := TTestFile.Create(pFileOrExtn, True, lInput, Self);
 end;
 
 procedure TTestFactory.RegisterParams(pParams: TD2XParams);
@@ -427,7 +437,7 @@ end;
 
 procedure TTestFactory.SetTimestampFlag(pFlag: ID2XFlag);
 begin
-
+  fTimestampFlag := pFlag;
 end;
 
 function TTestFactory.SimpleFile(pFile: string): ID2XFile;

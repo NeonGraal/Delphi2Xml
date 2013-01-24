@@ -64,6 +64,30 @@ type
 
   end;
 
+  TestID2XIOFactory = class(TTestCase)
+  private
+    fFact: TTestFactory;
+  public
+    procedure SetUp; override;
+    procedure TearDown; override;
+  published
+    procedure TestConfigFileOrExtn;
+    procedure TestLogFileOrExtn;
+    procedure TestBaseFile;
+    procedure TestBaseDir;
+    procedure TestSimpleFile;
+
+    procedure TestSetGlobalName;
+    procedure TestSetGlobalValidator;
+    procedure TestSetTimestampFlag;
+    procedure TestRegisterParams;
+    procedure TestGetNow;
+    procedure TestGetDuration;
+
+
+    procedure TestCheckOutput;
+  end;
+
   { TestTD2XFile }
 
 procedure TestID2XFile.SetUp;
@@ -183,8 +207,175 @@ begin
   CheckFalse(fDir.Next, 'Next');
 end;
 
+{ TestID2XIOFactory }
+
+procedure TestID2XIOFactory.SetUp;
+begin
+  inherited;
+
+  fFact := TTestFactory.Create;
+end;
+
+procedure TestID2XIOFactory.TearDown;
+begin
+  FreeAndNil(fFact);
+
+  inherited;
+end;
+
+procedure TestID2XIOFactory.TestBaseDir;
+var
+  lDir: ID2XDir;
+begin
+  lDir := fFact.BaseDir('Test');
+  try
+    CheckEqualsString('Test', lDir.Description, 'Base Dir Description');
+  finally
+    DisposeOf(lDir);
+  end;
+end;
+
+procedure TestID2XIOFactory.TestBaseFile;
+var
+  lFile: ID2XFile;
+begin
+  lFile := fFact.BaseFile('File');
+  try
+    CheckEqualsString('File', lFile.Description, 'Base File Description');
+  finally
+    DisposeOf(lFile);
+  end;
+end;
+
+procedure TestID2XIOFactory.TestCheckOutput;
+var
+  lFile: ID2XFile;
+begin
+  lFile := fFact.SimpleFile('File');
+  try
+    lFile.WriteTo.Write('Test');
+  finally
+    DisposeOf(lFile);
+  end;
+  CheckEquals(1, Length(fFact.CheckFiles), 'Files output');
+  CheckEqualsString('Test', fFact.CheckOutput('File'), 'Simple File Output');
+end;
+
+procedure TestID2XIOFactory.TestConfigFileOrExtn;
+var
+  lFile: ID2XFile;
+begin
+  lFile := fFact.ConfigFileOrExtn('File');
+  try
+    CheckEqualsString('File', lFile.Description, 'Config File Description');
+  finally
+    DisposeOf(lFile);
+  end;
+end;
+
+procedure TestID2XIOFactory.TestGetDuration;
+var
+  lWatch: TStopwatch;
+begin
+  lWatch := TStopwatch.Create.StartNew;
+  lWatch.Stop;
+
+  CheckEquals(1.234, fFact.GetDuration(lWatch), 0.0001, 'Get Duration');
+end;
+
+procedure TestID2XIOFactory.TestGetNow;
+begin
+  CheckEqualsString('2011-Nov-11 11:11:11.111', fFact.GetNow, 'Get Now')
+end;
+
+procedure TestID2XIOFactory.TestLogFileOrExtn;
+var
+  lFile: ID2XFile;
+begin
+  lFile := fFact.LogFileOrExtn('File');
+  try
+    CheckEqualsString('File', lFile.Description, 'Log File Description');
+  finally
+    DisposeOf(lFile);
+  end;
+end;
+
+procedure TestID2XIOFactory.TestRegisterParams;
+var
+  lParams: TD2XParams;
+begin
+  lParams := TD2XParams.Create;
+  try
+    fFact.RegisterParams(lParams);
+    CheckEquals(0, lParams.Count, 'No params created');
+  finally
+    FreeAndNil(lParams);
+  end;
+end;
+
+procedure TestID2XIOFactory.TestSetGlobalName;
+begin
+  fFact.SetGlobalName('Test');
+  CheckEqualsString('Test', fFact.GlobalName, 'Global name');
+end;
+
+procedure TestID2XIOFactory.TestSetGlobalValidator;
+var
+  lGVCalled: Boolean;
+begin
+  lGVCalled := False;
+  fFact.SetGlobalValidator(
+      function(pVal: string): Boolean
+    begin
+      lGVCalled := True;
+      Result := True;
+    end);
+
+  CheckFalse(lGVCalled, 'Validator not called yet');
+  fFact.SetGlobalName('Test');
+  CheckTrue(lGVCalled, 'Validator called');
+end;
+
+procedure TestID2XIOFactory.TestSetTimestampFlag;
+var
+  lFlag: TD2XBoolFlag;
+  lFile: ID2XFile;
+begin
+  lFlag := TD2XBoolFlag.Create;
+  try
+    fFact.SetTimestampFlag(lFlag);
+
+    ID2XFlag(lFlag).Flag := False;
+    lFile := fFact.LogFileOrExtn('File.Extn');
+    CheckEqualsString('File.Extn', lFile.Description, 'Log File not Timestamped');
+    DisposeOf(lFile);
+
+    ID2XFlag(lFlag).Flag := True;
+    lFile := fFact.LogFileOrExtn('File.Extn');
+    CheckEqualsString('File-Timestamp.Extn', lFile.Description, 'Log File Timestamped');
+
+    fFact.SetTimestampFlag(nil);
+  finally
+    DisposeOf(lFile);
+    FreeAndNil(lFlag);
+  end;
+end;
+
+procedure TestID2XIOFactory.TestSimpleFile;
+var
+  lFile: ID2XFile;
+begin
+  lFile := fFact.SimpleFile('File');
+  try
+    CheckEqualsString('File', lFile.Description, 'Simple File Description');
+  finally
+    DisposeOf(lFile);
+  end;
+end;
+
 initialization
 
-RegisterTests('IO', [TestID2XIO.Suite, TestID2XFile.Suite, TestID2XDir.Suite]);
+RegisterTests('IO', [TestID2XIO.Suite, TestID2XFile.Suite, TestID2XDir.Suite,
+  TestID2XIOFactory.Suite]);
 
 end.
