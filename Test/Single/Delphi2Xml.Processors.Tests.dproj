@@ -66,6 +66,9 @@
 			<DCC_RemoteDebug>true</DCC_RemoteDebug>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+			<ILINK_FullDebugInfo>true</ILINK_FullDebugInfo>
+			<BCC_SourceDebuggingOn>true</BCC_SourceDebuggingOn>
+			<BCC_DebugLineNumbers>true</BCC_DebugLineNumbers>
 			<VerInfo_Locale>1033</VerInfo_Locale>
 			<Debugger_RunParams></Debugger_RunParams>
 			<Debugger_CWD>..</Debugger_CWD>
