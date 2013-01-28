@@ -16,7 +16,8 @@ uses
 type
   TD2XProcessor = class abstract(TD2XLogger)
   public
-    constructor Create(pActive: ID2XFlag);
+    constructor Create; override;
+    constructor CreateActive(pActive: ID2XFlag); virtual;
     destructor Destroy; override;
 
     function UseProxy: Boolean; virtual;
@@ -81,7 +82,12 @@ begin
   Result := True;
 end;
 
-constructor TD2XProcessor.Create(pActive: ID2XFlag);
+constructor TD2XProcessor.Create;
+begin
+  raise EInvalidParam.Create('Need to use correct constructor');
+end;
+
+constructor TD2XProcessor.CreateActive(pActive: ID2XFlag);
 begin
   Assert(Assigned(pActive), 'Active Flag must exist');
 

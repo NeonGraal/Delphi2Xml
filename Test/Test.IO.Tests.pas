@@ -83,7 +83,7 @@ type
     procedure TestRegisterParams;
     procedure TestGetNow;
     procedure TestGetDuration;
-
+    procedure TestGetInputStream;
 
     procedure TestCheckOutput;
   end;
@@ -281,6 +281,18 @@ begin
   lWatch.Stop;
 
   CheckEquals(1.234, fFact.GetDuration(lWatch), 0.0001, 'Get Duration');
+end;
+
+procedure TestID2XIOFactory.TestGetInputStream;
+var
+  lSR: TStreamReader;
+begin
+  lSR := fFact.GetInputStream;
+  try
+    CheckEqualsString('', lSR.ReadToEnd, 'Read Test Input Stream');
+  finally
+    FreeAndNil(lSR);
+  end;
 end;
 
 procedure TestID2XIOFactory.TestGetNow;

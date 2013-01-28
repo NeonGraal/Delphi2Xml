@@ -9,10 +9,12 @@ uses
   D2X.IO,
   D2X.IO.Options,
   D2X.Param,
+  System.Classes,
   System.Diagnostics,
   System.SysUtils,
   Test.Param,
-  TestFramework;
+  TestFramework,
+  Winapi.Windows;
 
 type
   TD2XFileOptionsTest = class(TD2XFileOptions)
@@ -45,6 +47,7 @@ type
     procedure TestSimpleFile;
     procedure TestGetNow;
     procedure TestGetDuration;
+    procedure TestGetInputStream;
 
     procedure TestFull;
     procedure TestFullBase;
@@ -290,6 +293,19 @@ begin
   Sleep(1234);
   lW.Stop;
   CheckEquals(lW.Elapsed.TotalSeconds, fFileOpts.GetDuration(lW), 'Duration seconds');
+end;
+
+procedure TestTD2XFileOptions.TestGetInputStream;
+var
+  lSR: TStreamReader;
+begin
+  lSR := fFileOpts.GetInputStream;
+  try
+    CloseHandle(GetStdHandle(STD_INPUT_HANDLE));
+    CheckEqualsString('', lSR.ReadToEnd, 'Read Closed Standard Input');
+  finally
+    FreeAndNil(lSR);
+  end;
 end;
 
 procedure TestTD2XFileOptions.TestGetNow;
@@ -603,6 +619,6 @@ end;
 
 initialization
 
-RegisterTests('IO', [TestTD2XOptionGeneral.Suite, TestTD2XFileOptions.Suite]);
+RegisterTests('IO Options', [TestTD2XOptionGeneral.Suite, TestTD2XFileOptions.Suite]);
 
 end.

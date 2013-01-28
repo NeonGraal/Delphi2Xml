@@ -30,7 +30,9 @@ type
     procedure SetUp; override;
     procedure TearDown; override;
   published
+    procedure TestInvalidCreate;
     procedure TestUseProxy;
+    procedure TestSetParser;
     procedure TestBeginProcessing;
     procedure TestEndProcessing;
     procedure TestBeginFile;
@@ -51,7 +53,7 @@ procedure TestTD2XProcessor.SetUp;
 begin
   inherited;
 
-  FD2XProcessor := TTestProcessor.Create(fActive);
+  FD2XProcessor := TTestProcessor.CreateActive(fActive);
 end;
 
 procedure TestTD2XProcessor.TearDown;
@@ -131,6 +133,20 @@ begin
   CheckTrue(FD2XProcessor.CalledEndResults, 'Called End Results');
 end;
 
+procedure TestTD2XProcessor.TestInvalidCreate;
+begin
+  StartExpectingException(EInvalidParam);
+  try
+    TTestProcessor.Create;
+  except
+    on E: EInvalidParam do
+    begin
+      CheckEqualsString('Need to use correct constructor', E.Message, 'Exception message');
+      raise;
+    end;
+  end;
+end;
+
 procedure TestTD2XProcessor.TestLexerInclude;
 begin
   FD2XProcessor.LexerInclude('Test', 0, 0);
@@ -145,6 +161,13 @@ begin
   CheckTrue(FD2XProcessor.CalledParserMessage, 'Called Parser Message');
 end;
 
+procedure TestTD2XProcessor.TestSetParser;
+begin
+  FD2XProcessor.SetParser(nil);
+
+  CheckTrue(FD2XProcessor.CalledSetParser, 'Called Set Parser');
+end;
+
 procedure TestTD2XProcessor.TestUseProxy;
 begin
   CheckFalse(FD2XProcessor.UseProxy, 'Call Use Proxy');
@@ -155,6 +178,6 @@ end;
 initialization
 
 // Register any test cases with the test runner
-RegisterTests('Processors', [TestTD2XProcessor.Suite]);
+RegisterTests('Processor', [TestTD2XProcessor.Suite]);
 
 end.

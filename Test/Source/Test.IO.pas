@@ -81,6 +81,7 @@ type
     procedure RegisterParams(pParams: TD2XParams);
     function GetNow: string;
     function GetDuration(pWatch: TStopwatch): Double;
+    function GetInputStream: TStreamReader;
 
     function CheckFiles: TArray<string>;
     function CheckOutput(pFile: string): string;
@@ -366,6 +367,12 @@ end;
 function TTestFactory.GetDuration(pWatch: TStopwatch): Double;
 begin
   Result := 1.234;
+end;
+
+function TTestFactory.GetInputStream: TStreamReader;
+begin
+  Result := TStreamReader.Create(TStringStream.Create(''));
+  Result.OwnStream;
 end;
 
 function TTestFactory.GetNow: string;

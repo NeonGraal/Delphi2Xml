@@ -5,6 +5,7 @@ interface
 uses
   CastaliaPasLexTypes,
   D2X.Param,
+  D2X.Parser,
   D2X.Processor,
   Test.Global;
 
@@ -12,6 +13,7 @@ type
   TTestProcessor = class(TD2XProcessor)
   public
     CalledUseProxy: Boolean;
+    CalledSetParser: Boolean;
     CalledBeginProcessing: Boolean;
     CalledEndProcessing: Boolean;
     CalledBeginFile: Boolean;
@@ -26,6 +28,7 @@ type
     CalledLexerInclude: Boolean;
 
     function UseProxy: Boolean; override;
+    procedure SetParser(pParser: TD2XDefinesParser); override;
     procedure BeginProcessing; override;
     procedure EndProcessing; override;
     procedure BeginFile(pFile: string); override;
@@ -130,6 +133,12 @@ procedure TTestProcessor.ParserMessage(const pTyp: TMessageEventType;
   const pMsg: string; pX, pY: Integer);
 begin
   CalledParserMessage := True;
+  inherited;
+end;
+
+procedure TTestProcessor.SetParser(pParser: TD2XDefinesParser);
+begin
+  CalledSetParser := True;
   inherited;
 end;
 

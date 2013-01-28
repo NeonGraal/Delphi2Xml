@@ -36,6 +36,8 @@ type
     procedure TestOutputStrIntDictNoFunc;
     procedure TestOutputStrIntDictNoDict;
     procedure TestOutputStrIntDict;
+
+    procedure TestTestStream;
   end;
 
   TestID2XLogger = class(TLoggerTestCase)
@@ -115,7 +117,7 @@ begin
 
   try
     lSB := TStringBuilder.Create;
-    pLogger := TD2XLogger.Create(lSB);
+    pLogger := TD2XLogger.Create.StartLog(lSB);
     pLogger.Log('Log String1', [], False);
     CheckBuilder('Log String1', 'Check Logging 1', lSB);
     CheckLog('', 'Check Not Logging 1');
@@ -217,7 +219,7 @@ begin
     CheckBuilder('Log check 1', 'Log check 1');
     CheckBuilder('', 'Log check 1', lLogBuilder);
 
-    pLogger := TD2XLogger.Create(lLogBuilder);
+    pLogger := TD2XLogger.Create.StartLog(lLogBuilder);
 
     pLogger.Log('Log check 2', [], False);
     CheckBuilder('Log check 2', 'Log check 2', lLogBuilder);
@@ -322,7 +324,7 @@ begin
     CheckBuilder('Log check 1', 'Log check 1', lMyBuilder);
     CheckBuilder('', 'Log check 1', lLogBuilder);
 
-    pLogger := TD2XLogger.Create(lLogBuilder);
+    pLogger := TD2XLogger.Create.StartLog(lLogBuilder);
 
     pLogger.Log('Log check 2', [], False);
     CheckBuilder('Log check 2', 'Log check 2', lLogBuilder);
@@ -392,7 +394,7 @@ begin
   FD2XLogger.Free;
   pBuilder := TStringBuilder.Create;
   try
-    FD2XLogger := TD2XLogger.Create(pBuilder);
+    FD2XLogger := TD2XLogger.Create.StartLog(pBuilder);
 
     FD2XLogger.Log('Log simple', [], False);
     CheckBuilder('Log simple', 'Log simple', pBuilder);
@@ -415,11 +417,11 @@ begin
   try
     lMyBuilder := TStringBuilder.Create;
     lLogBuilder := TStringBuilder.Create;
-    FD2XLogger := TD2XLogger.Create(lMyBuilder);
+    FD2XLogger := TD2XLogger.Create.StartLog(lMyBuilder);
     FD2XLogger.Log('Log check', [], False);
     CheckBuilder('Log check', 'Log check', lMyBuilder);
 
-    pLogger := TD2XLogger.Create(FD2XLogger);
+    pLogger := TD2XLogger.Create.StartLog(FD2XLogger);
     FD2XLogger.Log('Log simple', [], False);
     CheckBuilder('Log simple', 'Log simple', lMyBuilder);
   finally
@@ -436,7 +438,7 @@ begin
   FD2XLogger.Free;
   pStream := TStringStream.Create;
   try
-    FD2XLogger := TD2XLogger.Create(pStream);
+    FD2XLogger := TD2XLogger.Create.StartLog(pStream);
 
     FD2XLogger.Log('Log simple', [], False);
     CheckStream('Log simple', 'Log simple', pStream);
@@ -452,7 +454,7 @@ begin
   FD2XLogger.Free;
   pWriter := TStringWriter.Create;
   try
-    FD2XLogger := TD2XLogger.Create(pWriter);
+    FD2XLogger := TD2XLogger.Create.StartLog(pWriter);
 
     FD2XLogger.Log('Log simple', [], False);
     CheckEqualsString('Log simple', pWriter.ToString, 'Log simple');
@@ -478,7 +480,7 @@ begin
     CheckBuilder('Log check 1', 'Log check 1', lMyBuilder);
     CheckBuilder('', 'Log check 1', lLogBuilder);
 
-    pLogger := TD2XLogger.Create(lLogBuilder);
+    pLogger := TD2XLogger.Create.StartLog(lLogBuilder);
 
     pLogger.Log('Log check 2', [], False);
     CheckBuilder('Log check 2', 'Log check 2', lLogBuilder);
@@ -530,11 +532,11 @@ begin
     FD2XLogger.Log('Log check', [], False);
     CheckLogs('Log check', 0);
 
-    pLogger1 := TD2XLogger.Create(lLogBuilder1);
+    pLogger1 := TD2XLogger.Create.StartLog(lLogBuilder1);
     pLogger1.Log('Log check 1', [], False);
     CheckLogs('Log check 1', 1);
 
-    pLogger2 := TD2XLogger.Create(lLogBuilder2);
+    pLogger2 := TD2XLogger.Create.StartLog(lLogBuilder2);
     pLogger2.Log('Log check 2', [], False);
     CheckLogs('Log check 2', 2);
 
@@ -650,6 +652,13 @@ begin
   CheckEqualsString('A', ReduceString(#9'A'#10), 'Leading and Trailing');
   CheckEqualsString('A B', ReduceString('A '#13#10' B'), 'Extended');
   CheckEqualsString('A B C D', ReduceString('A  B'#13#10'C'#9#9'D'), 'Extended');
+end;
+
+procedure TestTD2XUtils.TestTestStream;
+begin
+  CheckEqualsString('Test', fDS.Description, 'Test Stream Description');
+  CheckTrue(fDS.Exists, 'Test Stream Exists');
+  fDS.ReadFrom;
 end;
 
 procedure TestTD2XUtils.TestTidyFilename;

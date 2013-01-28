@@ -68,7 +68,6 @@
 		<PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
 			<ILINK_FullDebugInfo>true</ILINK_FullDebugInfo>
 			<BCC_DebugLineNumbers>true</BCC_DebugLineNumbers>
-			<Debugger_RunParams></Debugger_RunParams>
 			<BCC_SourceDebuggingOn>true</BCC_SourceDebuggingOn>
 			<VerInfo_Locale>1033</VerInfo_Locale>
 			<Debugger_CWD>..</Debugger_CWD>

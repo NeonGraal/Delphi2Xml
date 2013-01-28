@@ -35,6 +35,8 @@ type
 
   TD2XHandlerProcessor = class(TD2XProcessor)
   public
+    constructor Create; override;
+    constructor CreateActive(pActive: ID2XFlag); override;
     constructor CreateHandler(pActive: ID2XFlag; pHandler: TD2XHandler; pMine: Boolean);
     constructor CreateClass(pActive: ID2XFlag; pHandler: TD2XHandlerClass);
     destructor Destroy; override;
@@ -68,6 +70,7 @@ type
     function SetFileInput(pFilename: TD2XFileRef): TD2XHandlerProcessor;
     function SetFileOutput(pFilename: TD2XFileRef): TD2XHandlerProcessor;
 
+    function HandlerIs(pHandler: TD2XHandlerClass): Boolean;
   private
     fMyHandler: Boolean;
     fHandler: TD2XHandler;
@@ -164,10 +167,20 @@ begin
   Result := not fActive.Flag or fHandler.CheckBeforeMethod(pMethod);
 end;
 
+constructor TD2XHandlerProcessor.Create;
+begin
+  raise EInvalidParam.Create('Need to use correct constructor');
+end;
+
+constructor TD2XHandlerProcessor.CreateActive(pActive: ID2XFlag);
+begin
+  raise EInvalidParam.Create('Need to use correct constructor');
+end;
+
 constructor TD2XHandlerProcessor.CreateClass(pActive: ID2XFlag;
   pHandler: TD2XHandlerClass);
 begin
-  inherited Create(pActive);
+  inherited CreateActive(pActive);
 
   fMyHandler := True;
   fHandler := pHandler.Create;
@@ -176,7 +189,7 @@ end;
 constructor TD2XHandlerProcessor.CreateHandler(pActive: ID2XFlag; pHandler: TD2XHandler;
   pMine: Boolean);
 begin
-  inherited Create(pActive);
+  inherited CreateActive(pActive);
 
   fMyHandler := pMine;
   fHandler := pHandler;
@@ -266,6 +279,11 @@ begin
       end
     else
       fHandler.EndResults(nil);
+end;
+
+function TD2XHandlerProcessor.HandlerIs(pHandler: TD2XHandlerClass): Boolean;
+begin
+  Result := fHandler is pHandler;
 end;
 
 procedure TD2XHandlerProcessor.LexerInclude(const pFile: string; pX, pY: Integer);

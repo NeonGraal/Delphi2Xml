@@ -39,7 +39,7 @@ begin
   try
     sOut := THandleStream.Create(GetStdHandle(STD_OUTPUT_HANDLE));
     opts := TD2XRunParam.Create;
-    opts.JoinLog(TD2XLogger.Create(sOut));
+    opts.JoinLog(TD2XLogger.Create.StartLog(sOut));
     opts.InitOptions(TD2XFileOptions.Create);
     if ParamCount > 0 then
     begin

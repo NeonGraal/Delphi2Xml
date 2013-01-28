@@ -138,7 +138,7 @@ procedure TLoggerTestCase.SetUp;
 begin
   inherited;
 
-  fLog := TD2XLogger.Create(fB);
+  fLog := TD2XLogger.Create.StartLog(fB);
 end;
 
 procedure TLoggerTestCase.TearDown;

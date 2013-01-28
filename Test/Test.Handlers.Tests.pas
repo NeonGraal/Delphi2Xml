@@ -82,6 +82,7 @@ type
   published
     procedure TestInvalidCreate;
     procedure TestDescription;
+    procedure TestUseProxy;
     procedure TestParserMessage;
   end;
 
@@ -181,6 +182,7 @@ type
     procedure TestRollbackTo;
     procedure TestLexerInclude;
     procedure TestParserMessage;
+    procedure TestTrimChildren;
 
     procedure TestProcessing;
   end;
@@ -620,6 +622,26 @@ begin
     'End Results');
 end;
 
+procedure TestTD2XXmlHandler.TestTrimChildren;
+begin
+  fHndlr.BeginResults;
+  fHndlr.HasFiles := True;
+  fHndlr.BeginMethod('Test');
+  fHndlr.BeginMethod('Test1');
+  fHndlr.BeginMethod('Test2');
+  fHndlr.BeginMethod('Test3');
+  fHndlr.RollbackTo('Test1');
+  fHndlr.BeginMethod('Test4');
+  fHndlr.EndMethod('Test4');
+  fHndlr.BeginMethod('Test5');
+  fHndlr.EndMethod('Test5');
+  fHndlr.TrimChildren('Test4');
+  fHndlr.EndResults(FileWriterRef(fDS));
+  CheckStream
+    ('<?xml version="1.0"?> <Test parseMode="ParseMode"> <Test1> <Test2> <Test3 /> </Test2> <Test5 /> </Test1> </Test>',
+    'End Results');
+end;
+
 procedure TestTD2XXmlHandler.TestUseProxy;
 begin
   CheckTrue(fHndlr.UseProxy, 'Uses proxy');
@@ -882,6 +904,11 @@ procedure TestTD2XErrorHandler.TestParserMessage;
 begin
   fHndlr.ParserMessage(meError, 'Test', 1, 2);
   CheckBuilder('Error: Test (1,2)', 'Correct Parser Message');
+end;
+
+procedure TestTD2XErrorHandler.TestUseProxy;
+begin
+  CheckFalse(fHndlr.UseProxy, 'Uses proxy');
 end;
 
 { TestTD2XCountDefinesHandler }

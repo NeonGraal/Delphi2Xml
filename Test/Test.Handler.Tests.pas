@@ -154,6 +154,6 @@ end;
 initialization
 
 // Register any test cases with the test runner
-RegisterTests('Handlers', [TestTD2XHandler.Suite]);
+RegisterTests('Handler', [TestTD2XHandler.Suite]);
 
 end.

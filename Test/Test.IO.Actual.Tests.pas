@@ -136,6 +136,6 @@ end;
 
 initialization
 
-RegisterTests('IO', [TestTD2XFileStream.Suite, TestTD2XDirPath.Suite]);
+RegisterTests('IO Actual', [TestTD2XFileStream.Suite, TestTD2XDirPath.Suite]);
 
 end.

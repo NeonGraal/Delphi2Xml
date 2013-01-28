@@ -26,6 +26,7 @@ type
     procedure RegisterParams(pParams: TD2XParams);
     function GetNow: string;
     function GetDuration(pWatch: TStopwatch): Double;
+    function GetInputStream: TStreamReader;
 
   private
     fLogBase: TD2XFlaggedStringParam;
@@ -56,7 +57,8 @@ implementation
 
 uses
   D2X.IO.Actual,
-  System.StrUtils;
+  System.StrUtils,
+  Winapi.Windows;
 
 procedure SplitDirExtn(pStr: string; out pDir, pExtn: string);
 var
@@ -132,6 +134,12 @@ end;
 function TD2XFileOptions.GetGlobalName: string;
 begin
   Result := fGlobalName.Value;
+end;
+
+function TD2XFileOptions.GetInputStream: TStreamReader;
+begin
+  Result := TStreamReader.Create(THandleStream.Create(GetStdHandle(STD_INPUT_HANDLE)));
+  Result.OwnStream;
 end;
 
 function TD2XFileOptions.GetNow: string;

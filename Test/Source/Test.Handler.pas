@@ -5,11 +5,13 @@ interface
 uses
   CastaliaPasLexTypes,
   D2X.Handler,
-  D2X.IO;
+  D2X.IO,
+  D2X.Parser;
 
 type
   TD2XHandlerTester = class(TD2XHandler)
   public
+    CalledUseProxy: Boolean;
     CalledBeginProcessing: Boolean;
     CalledEndProcessing: Boolean;
     CalledBeginFile: Boolean;
@@ -43,6 +45,13 @@ type
       pX, pY: Integer); override;
     procedure LexerInclude(const pFile: String; pX, pY: Integer); override;
 
+  end;
+
+  TD2XParserHandlerTester = class(TD2XParserHandler)
+  public
+    CalledInitParser: Boolean;
+
+    procedure InitParser(pParser: TD2XDefinesParser); override;
   end;
 
 implementation
@@ -148,7 +157,16 @@ end;
 
 function TD2XHandlerTester.UseProxy: Boolean;
 begin
+  CalledUseProxy := True;
   Result := inherited UseProxy;
+end;
+
+{ TD2XParserHandlerTester }
+
+procedure TD2XParserHandlerTester.InitParser(pParser: TD2XDefinesParser);
+begin
+  CalledInitParser := True;
+  inherited;
 end;
 
 end.

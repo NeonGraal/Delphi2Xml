@@ -47,6 +47,7 @@ type
     procedure RegisterParams(pParams: TD2XParams);
     function GetNow: String;
     function GetDuration(pWatch: TStopwatch): Double;
+    function GetInputStream: TStreamReader;
   end;
 
   TD2XFileRef = reference to function: ID2XFile;

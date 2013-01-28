@@ -17,8 +17,6 @@ type
   end;
 
   TTestOptions = class(TD2XOptions)
-    function ParamValue(pOpt: string): string;
-
     property ParserDefines: TStringList read GetParserDefines;
     property HeldDefines: TStringList read GetHeldDefines;
   end;
@@ -35,19 +33,6 @@ end;
 procedure TTestBoolFlag.SetFlag(pVal: Boolean);
 begin
   fFlag := pVal;
-end;
-
-{ TTestOptions }
-
-function TTestOptions.ParamValue(pOpt: string): string;
-var
-  lPrm: TD2XParam;
-begin
-  lPrm := fParams.ForCode(Copy(pOpt, 1, 1));
-  if Assigned(lPrm) then
-    Result := lPrm.ToString
-  else
-    Result := '';
 end;
 
 end.

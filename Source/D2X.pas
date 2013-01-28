@@ -42,17 +42,13 @@ type
     fLogger: ID2XLogger;
 
   public
-    constructor Create; overload; virtual;
-    constructor Create(pStream: TStream); overload;
-    constructor Create(pString: TStringBuilder); overload;
-    constructor Create(pWriter: TTextWriter); overload;
-    constructor Create(pLogger: ID2XLogger); overload;
+    constructor Create; virtual;
     destructor Destroy; override;
 
-    procedure StartLog(pStream: TStream); overload;
-    procedure StartLog(pString: TStringBuilder); overload;
-    procedure StartLog(pWriter: TTextWriter); overload;
-    procedure StartLog(pLogger: ID2XLogger); overload;
+    function StartLog(pStream: TStream): TD2XLogger; overload;
+    function StartLog(pString: TStringBuilder): TD2XLogger; overload;
+    function StartLog(pWriter: TTextWriter): TD2XLogger; overload;
+    function StartLog(pLogger: ID2XLogger): TD2XLogger; overload;
     procedure StopLog;
 
     procedure JoinLog(pLogger: ID2XLogger);
@@ -177,34 +173,6 @@ begin
   fLogger := nil;
 end;
 
-constructor TD2XLogger.Create(pStream: TStream);
-begin
-  Create;
-
-  StartLog(pStream);
-end;
-
-constructor TD2XLogger.Create(pWriter: TTextWriter);
-begin
-  Create;
-
-  StartLog(pWriter);
-end;
-
-constructor TD2XLogger.Create(pLogger: ID2XLogger);
-begin
-  Create;
-
-  StartLog(pLogger);
-end;
-
-constructor TD2XLogger.Create(pString: TStringBuilder);
-begin
-  Create;
-
-  StartLog(pString);
-end;
-
 destructor TD2XLogger.Destroy;
 begin
   StopLog;
@@ -229,8 +197,9 @@ begin
         fLog.Write(pFmt, pArgs);
 end;
 
-procedure TD2XLogger.StartLog(pStream: TStream);
+function TD2XLogger.StartLog(pStream: TStream): TD2XLogger;
 begin
+  Result := Self;
   StopLog;
   if Assigned(pStream) then
   begin
@@ -239,20 +208,23 @@ begin
   end;
 end;
 
-procedure TD2XLogger.StartLog(pWriter: TTextWriter);
+function TD2XLogger.StartLog(pWriter: TTextWriter): TD2XLogger;
 begin
+  Result := Self;
   StopLog;
   fLog := pWriter;
 end;
 
-procedure TD2XLogger.StartLog(pLogger: ID2XLogger);
+function TD2XLogger.StartLog(pLogger: ID2XLogger): TD2XLogger;
 begin
+  Result := Self;
   StopLog;
   JoinLog(pLogger);
 end;
 
-procedure TD2XLogger.StartLog(pString: TStringBuilder);
+function TD2XLogger.StartLog(pString: TStringBuilder): TD2XLogger;
 begin
+  Result := Self;
   StopLog;
   if Assigned(pString) then
   begin

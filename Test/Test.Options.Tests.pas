@@ -157,6 +157,8 @@ type
     procedure TestParseOptionEValue;
     procedure TestParseOptionMValue;
     procedure TestParseOptionPValue;
+
+    procedure TestConvertEnumerated;
   end;
 
   TestTD2XOptionsParseFlags = class(TOptionsTestCase)
@@ -1387,6 +1389,42 @@ begin
 end;
 
 { TestTD2XOptionsParseEnumerated }
+
+procedure TestTD2XOptionsParseEnumerated.TestConvertEnumerated;
+var
+  lPM: TD2XSingleParam<TD2XParseMode>;
+  lRP: TD2XSingleParam<TD2XResultPer>;
+  lEM: TD2XSingleParam<TD2XElapsedMode>;
+begin
+  lPM := TD2XSingleParam<TD2XParseMode>.CreateParam('M', 'Parse mode', '<mode>',
+    'Parser type (F[ull], U[ses])', pmFull, TD2X.CnvEnum<TD2XParseMode>,
+    TD2X.ToLabel<TD2XParseMode>, nil);
+  try
+    lPM.Convert('Uses');
+    Check(pmUses = lPM.Value, 'Parse mode convert');
+  finally
+    FreeAndNil(lPM);
+  end;
+
+  lRP := TD2XSingleParam<TD2XResultPer>.CreateParam('P', 'Results per', '<per>',
+    'Result per (F[ile], S[ubdir], D[ir], W[ildcard], P[aram], R[un])', rpFile,
+    TD2X.CnvEnum<TD2XResultPer>, TD2X.ToLabel<TD2XResultPer>, nil);
+  try
+    lRP.Convert('Dir');
+    Check(rpDir = lRP.Value, 'Results per convert');
+  finally
+    FreeAndNil(lRP);
+  end;
+  lEM := TD2XSingleParam<TD2XElapsedMode>.CreateParam('E', 'Show elapsed', '<mode>',
+    'Elapsed time display (N[one], T[otal], D[ir], F[ile], P[rocessing], [Q]uiet)', emQuiet,
+    TD2X.CnvEnum<TD2XElapsedMode>, TD2X.ToLabel<TD2XElapsedMode>, nil);
+  try
+    lEM.Convert('Dir');
+    Check(emDir = lEM.Value, 'Elapsed mode convert');
+  finally
+    FreeAndNil(lEM);
+  end;
+end;
 
 procedure TestTD2XOptionsParseEnumerated.TestParseOptionEValue;
 begin

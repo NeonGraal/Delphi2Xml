@@ -29,7 +29,7 @@ type
     procedure SetUp; override;
     procedure TearDown; override;
   published
-    procedure TestSetLexer;
+    procedure TestSetParser;
     procedure TestUseProxy;
     procedure TestBeginMethod;
     procedure TestEndMethod;
@@ -45,11 +45,19 @@ type
     procedure SetUp; override;
     procedure TearDown; override;
   published
+    procedure TestInvalidCreate;
+    procedure TestInvalidCreateActive;
+
+    procedure TestCreateClass;
+
     procedure TestSetProcessingInput;
     procedure TestSetProcessingOutput;
     procedure TestSetResultsOutput;
     procedure TestSetFileInput;
     procedure TestSetFileOutput;
+
+    procedure TestSetParser;
+    procedure TestUseProxy;
 
     procedure TestBeginProcessing;
     procedure TestEndProcessing;
@@ -68,6 +76,17 @@ type
 
     procedure TestLexerInclude;
     procedure TestParserMessage;
+  end;
+
+  TestTD2XParserHandlerProcessor = class(TFlagTestCase)
+  strict private
+    FHandler: TD2XParserHandlerTester;
+    FD2XProcessor: TD2XHandlerProcessor;
+  public
+    procedure SetUp; override;
+    procedure TearDown; override;
+  published
+    procedure TestSetParser;
   end;
 
 function NilFile: ID2XFile;
@@ -161,6 +180,13 @@ begin
   CheckTrue(FHandler.CalledCheckBeforeMethod, 'Called Check Before Method');
 end;
 
+procedure TestTD2XHandlerProcessor.TestCreateClass;
+begin
+  FreeAndNil(FD2XProcessor);
+  FD2XProcessor := TD2XHandlerProcessor.CreateClass(fActive, TD2XHandlerTester);
+  CheckTrue(FD2XProcessor.HandlerIs(TD2XHandlerTester), 'Check Handler class');
+end;
+
 procedure TestTD2XHandlerProcessor.TestEndFile;
 begin
   FD2XProcessor.SetFileOutput(NilFile);
@@ -205,6 +231,34 @@ begin
   fActive.Flag := True;
   FD2XProcessor.EndResults('');
   CheckTrue(FHandler.CalledEndResults, 'Called End Results');
+end;
+
+procedure TestTD2XHandlerProcessor.TestInvalidCreate;
+begin
+  StartExpectingException(EInvalidParam);
+  try
+    TD2XHandlerProcessor.Create;
+  except
+    on E: EInvalidParam do
+    begin
+      CheckEqualsString('Need to use correct constructor', E.Message, 'Exception message');
+      raise;
+    end;
+  end;
+end;
+
+procedure TestTD2XHandlerProcessor.TestInvalidCreateActive;
+begin
+  StartExpectingException(EInvalidParam);
+  try
+    TD2XHandlerProcessor.CreateActive(fActive);
+  except
+    on E: EInvalidParam do
+    begin
+      CheckEqualsString('Need to use correct constructor', E.Message, 'Exception message');
+      raise;
+    end;
+  end;
 end;
 
 procedure TestTD2XHandlerProcessor.TestLexerInclude;
@@ -271,6 +325,12 @@ begin
   CheckTrue(lCalled, 'Called File Output');
 end;
 
+procedure TestTD2XHandlerProcessor.TestSetParser;
+begin
+  FD2XProcessor.SetParser(nil);
+  CheckTrue(True, 'Init Parser missing');
+end;
+
 procedure TestTD2XHandlerProcessor.TestSetProcessingInput;
 var
   lCalled: Boolean;
@@ -334,6 +394,16 @@ begin
   CheckTrue(lCalled, 'Called Results Output');
 end;
 
+procedure TestTD2XHandlerProcessor.TestUseProxy;
+begin
+  CheckFalse(FD2XProcessor.UseProxy, 'Dont Use Proxy');
+  CheckFalse(FHandler.CalledUseProxy, 'Ignored Use Proxy');
+
+  fActive.Flag := True;
+  CheckFalse(FD2XProcessor.UseProxy, 'Use Proxy');
+  CheckTrue(FHandler.CalledUseProxy, 'Allowed Use Proxy');
+end;
+
 { TestTD2XLogProcessor }
 
 procedure TestTD2XLogProcessor.SetUp;
@@ -342,7 +412,7 @@ begin
 
   fFlag := TD2XBoolFlag.Create;
   fActive := fFlag;
-  FD2XProcessor := TD2XLogProcessor.Create(fActive);
+  FD2XProcessor := TD2XLogProcessor.CreateActive(fActive);
 end;
 
 procedure TestTD2XLogProcessor.TearDown;
@@ -405,7 +475,7 @@ begin
   CheckLog('ERROR @ 1,2: Test', 'Error Parser Message');
 end;
 
-procedure TestTD2XLogProcessor.TestSetLexer;
+procedure TestTD2XLogProcessor.TestSetParser;
 begin
   FD2XProcessor.JoinLog(fLog);
   fActive.Flag := True;
@@ -423,8 +493,32 @@ begin
   CheckTrue(FD2XProcessor.UseProxy, 'Allowed Use Proxy');
 end;
 
+{ TestTD2XParserHandlerProcessor }
+
+procedure TestTD2XParserHandlerProcessor.SetUp;
+begin
+  inherited;
+
+  FHandler := TD2XParserHandlerTester.Create;
+  FD2XProcessor := TD2XHandlerProcessor.CreateHandler(fActive, FHandler, True);
+end;
+
+procedure TestTD2XParserHandlerProcessor.TearDown;
+begin
+  FreeAndNil(FD2XProcessor);
+
+  inherited;
+end;
+
+procedure TestTD2XParserHandlerProcessor.TestSetParser;
+begin
+  FD2XProcessor.SetParser(nil);
+  CheckTrue(FHandler.CalledInitParser, 'Called Init Parser');
+end;
+
 initialization
 
-RegisterTests('Processors', [TestTD2XLogProcessor.Suite, TestTD2XHandlerProcessor.Suite]);
+RegisterTests('Processors', [TestTD2XLogProcessor.Suite, TestTD2XHandlerProcessor.Suite,
+  TestTD2XParserHandlerProcessor.Suite]);
 
 end.

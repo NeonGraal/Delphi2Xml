@@ -128,6 +128,6 @@ end;
 
 initialization
 
-RegisterTests('Run Params', [TestTD2XRunParam.Suite]);
+RegisterTests('RunParam', [TestTD2XRunParam.Suite]);
 
 end.

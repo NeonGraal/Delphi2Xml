@@ -126,8 +126,7 @@ uses
   D2X.IO.Options,
   System.IOUtils,
   System.StrUtils,
-  System.TypInfo,
-  Winapi.Windows;
+  System.TypInfo;
 
 { TD2XOptions }
 
@@ -388,10 +387,8 @@ function TD2XOptions.ProcessInput: Boolean;
 var
   lSR: TStreamReader;
 begin
+  lSR := fIOFact.GetInputStream;
   try
-    lSR := TStreamReader.Create(THandleStream.Create(GetStdHandle(STD_INPUT_HANDLE)));
-    lSR.OwnStream;
-
     Result := ProcessStream('(Input)', lSR);
   finally
     FreeAndNil(lSR);
@@ -537,7 +534,7 @@ begin
   fProcs.Add(TD2XHandlerProcessor.CreateHandler(fFlags.ByLabel['LogNotSupp'],
       TD2XErrorHandler.CreateError(meNotSupported, LogMessage), True));
 
-  lLogProcessor := TD2XLogProcessor.Create(fFlags.ByLabel['Verbose']);
+  lLogProcessor := TD2XLogProcessor.CreateActive(fFlags.ByLabel['Verbose']);
   lLogProcessor.JoinLog(Self);
   fProcs.Add(lLogProcessor);
 
