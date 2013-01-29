@@ -31,9 +31,9 @@ const
     'E<mode> Quiet Elapsed time display (N[one], T[otal], D[ir], F[ile], P[rocessing], [Q]uiet) '
     + 'X[+-]:<d/e> :Xml,xml Generate XML files into current or given <d/e> ' +
     'W[+-]:<d/e> -(Defines,def) Generate Final Defines files into current or given <d/e> ' +
-    'U[+-]:<f/e> :.used Report Defines Used into <f/e> ' +
     'CC[+-]:<f/e> :.chld Report Min/Max Children into <f/e> ' +
-    'CD[+-]:<f/e> :.defs Report Defines Used into <f/e> ' +
+    'CF[+-]:<f/e> :.final Count Final Defines into <f/e> ' +
+    'CU[+-]:<f/e> :.used Count Defines Used into <f/e> ' +
     'S[+-]:<f/e> -(.skip) Load Skipped Methods from <f/e> ' +
     'D[+-!:]<def> Add(+), Remove(-), Clear(!) or Load(:) Defines ' +
     'H[+-!:]<def> Add(+), Remove(-), Clear(!) or Load(:) Held Defines' + DESCRIPTION_SUFFIX;
@@ -44,8 +44,8 @@ const
   //    'Recurse - Timestamp - Global name Delphi2XmlTests Config dir :Config\ ' +
   //    'Log dir :Log\ Base dir -(.\) Parse mode Full Results per File Show elapsed Quiet ' +
     'Parse mode Full Results per File Show elapsed Quiet ' +
-    'Generate XML :Xml,xml Write Defines -(Defines,def) Defines Used :.used ' +
-    'Count Children :.chld Count Defines :.defs Skipped Methods -(.skip) ';
+    'Generate XML :Xml,xml Write Defines -(Defines,def) Count Children :.chld ' +
+    'Count Final Defines :.final Count Defines Used :.used Skipped Methods -(.skip) ';
   DEFAULT_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Defines Default Held Defines Default';
 {$IFDEF WIN32}
   EXPECTED_DEFINES = 'CONDITIONALEXPRESSIONS,CPU386,MSWINDOWS,UNICODE,VER230,WIN32';

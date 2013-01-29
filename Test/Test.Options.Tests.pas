@@ -67,8 +67,8 @@ type
     procedure TestElapsedMode;
 
     procedure TestCountChildren;
-    procedure TestCountDefines;
-    procedure TestDefinesUsed;
+    procedure TestCountFinalDefines;
+    procedure TestCountDefinesUsed;
     procedure TestLoadSkipped;
     procedure TestWriteDefines;
   end;
@@ -119,7 +119,8 @@ type
   published
     //    procedure TestParseOptionB; // Tested in Test.IO.Options
     procedure TestParseOptionCC;
-    procedure TestParseOptionCD;
+    procedure TestParseOptionCF;
+    procedure TestParseOptionCU;
     procedure TestParseOptionD;
     procedure TestParseOptionE;
     procedure TestParseOptionF;
@@ -131,7 +132,6 @@ type
     procedure TestParseOptionP;
     procedure TestParseOptionS;
     //    procedure TestParseOptionT; // Tested in Test.IO.Options
-    procedure TestParseOptionU;
     procedure TestParseOptionW;
     procedure TestParseOptionX;
   end;
@@ -147,6 +147,7 @@ type
     procedure TestParseOptionN;
     procedure TestParseOptionQ;
     procedure TestParseOptionR;
+    procedure TestParseOptionU;
     procedure TestParseOptionV;
     procedure TestParseOptionY;
     procedure TestParseOptionZ;
@@ -182,13 +183,13 @@ type
     procedure TestParseOptionCCFile;
   end;
 
-  TestTD2XOptionsParseCountDefines = class(TOptionsParseTestCase)
+  TestTD2XOptionsParseCountFinalDefines = class(TOptionsParseTestCase)
   published
-    procedure TestParseOptionCDBlank;
-    procedure TestParseOptionCDExtn;
-    procedure TestParseOptionCDOff;
-    procedure TestParseOptionCDOn;
-    procedure TestParseOptionCDFile;
+    procedure TestParseOptionCFBlank;
+    procedure TestParseOptionCFExtn;
+    procedure TestParseOptionCFOff;
+    procedure TestParseOptionCFOn;
+    procedure TestParseOptionCFFile;
   end;
 
   TestTD2XOptionsParseDefines = class(TOptionsParseDefinesTestCase)
@@ -233,13 +234,13 @@ type
     procedure TestParseOptionSSimple;
   end;
 
-  TestTD2XOptionsParseDefinesUsed = class(TOptionsParseTestCase)
+  TestTD2XOptionsParseCountDefinesUsed = class(TOptionsParseTestCase)
   published
-    procedure TestParseOptionUBlank;
-    procedure TestParseOptionUExtn;
-    procedure TestParseOptionUFile;
-    procedure TestParseOptionUOff;
-    procedure TestParseOptionUOn;
+    procedure TestParseOptionCUBlank;
+    procedure TestParseOptionCUExtn;
+    procedure TestParseOptionCUFile;
+    procedure TestParseOptionCUOff;
+    procedure TestParseOptionCUOn;
   end;
 
   TestTD2XOptionsParseWriteDefines = class(TOptionsParseTestCase)
@@ -293,15 +294,15 @@ const
   //    'Recurse + Timestamp - Global name :Test Config dir :Test\ Log dir :Test\ ' +
   //    'Base dir :Test\ Parse mode Full Results per File Show elapsed Quiet ' +
     'Parse mode Full Results per File Show elapsed Quiet ' +
-    'Generate XML :Test,xml Write Defines :Test,def Defines Used :.Test ' +
-    'Count Children :.Test Count Defines :.Test Skipped Methods :Test.skip ' +
+    'Generate XML :Test,xml Write Defines :Test,def Count Children :.Test ' +
+    'Count Final Defines :.Test Count Defines Used :.Test Skipped Methods :Test.skip ' +
     'Defines TANGO, UNIFORM, VICTOR Held Defines TANGO, UNIFORM, VICTOR';
   ZERO_REPORT_OPTIONS = REPORT_HEADING + ' Flags ' +
     'FinalToken-,LogErrors-,LogNotSupp-,Recurse-,Timestamp-,Verbose- ' +
   //    'Recurse - Timestamp - Global name Config dir - Log dir - Base dir - ' +
   //    'Parse mode Full Results per File Show elapsed None Generate XML - ' +
-    'Parse mode Full Results per File Show elapsed None Generate XML - ' +
-    'Write Defines - Defines Used - Count Children - Count Defines - Skipped Methods - ' +
+    'Parse mode Full Results per File Show elapsed None Generate XML - Write Defines - ' +
+    'Count Children - Count Final Defines - Count Defines Used - Skipped Methods - ' +
     'Defines Default Held Defines Default';
   EMPTY_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Defines NONE Held Defines Default';
 {$IFDEF WIN32}
@@ -564,9 +565,9 @@ begin
   CheckSimple('CC', 'Count Children :.chld');
 end;
 
-procedure TestTD2XOptionsParseAll.TestParseOptionCD;
+procedure TestTD2XOptionsParseAll.TestParseOptionCF;
 begin
-  CheckSimple('CD', 'Count Defines :.defs');
+  CheckSimple('CF', 'Count Final Defines :.final');
 end;
 
 procedure TestTD2XOptionsParseAll.TestParseOptionD;
@@ -604,9 +605,9 @@ begin
   CheckSimple('S', 'Skipped Methods :.skip');
 end;
 
-procedure TestTD2XOptionsParseAll.TestParseOptionU;
+procedure TestTD2XOptionsParseAll.TestParseOptionCU;
 begin
-  CheckSimple('U', 'Defines Used :.used');
+  CheckSimple('CU', 'Count Defines Used :.used');
 end;
 
 procedure TestTD2XOptionsParseAll.TestParseOptionW;
@@ -869,9 +870,9 @@ begin
   fOpts.EndProcessing;
 end;
 
-procedure TestTD2XOptionsSpecific.TestCountDefines;
+procedure TestTD2XOptionsSpecific.TestCountFinalDefines;
 begin
-  Check(fOpts.ProcessOption('CD'), 'Return Value 2');
+  Check(fOpts.ProcessOption('CF'), 'Return Value 2');
   fB.Clear;
 
   Check(fOpts.ProcessParam('Testing.Test*', 'Count Defines'), 'Process Unit');
@@ -880,9 +881,9 @@ begin
   fOpts.EndProcessing;
 end;
 
-procedure TestTD2XOptionsSpecific.TestDefinesUsed;
+procedure TestTD2XOptionsSpecific.TestCountDefinesUsed;
 begin
-  Check(fOpts.ProcessOption('U'), 'Return Value 2');
+  Check(fOpts.ProcessOption('CU'), 'Return Value 2');
   fB.Clear;
 
   Check(fOpts.ProcessParam('Testing.Test*', 'Defines Used'), 'Process Unit');
@@ -1149,29 +1150,29 @@ end;
 
 { TestTD2XOptionsParseDefinesUsed }
 
-procedure TestTD2XOptionsParseDefinesUsed.TestParseOptionUBlank;
+procedure TestTD2XOptionsParseCountDefinesUsed.TestParseOptionCUBlank;
 begin
-  CheckSimple('U:', 'Defines Used :.used');
+  CheckSimple('CU:', 'Count Defines Used :.used');
 end;
 
-procedure TestTD2XOptionsParseDefinesUsed.TestParseOptionUExtn;
+procedure TestTD2XOptionsParseCountDefinesUsed.TestParseOptionCUExtn;
 begin
-  CheckSimple('U:Extn', 'Defines Used :.Extn');
+  CheckSimple('CU:Extn', 'Count Defines Used :.Extn');
 end;
 
-procedure TestTD2XOptionsParseDefinesUsed.TestParseOptionUFile;
+procedure TestTD2XOptionsParseCountDefinesUsed.TestParseOptionCUFile;
 begin
-  CheckSimple('U:File.Extn', 'Defines Used :File.Extn');
+  CheckSimple('CU:File.Extn', 'Count Defines Used :File.Extn');
 end;
 
-procedure TestTD2XOptionsParseDefinesUsed.TestParseOptionUOff;
+procedure TestTD2XOptionsParseCountDefinesUsed.TestParseOptionCUOff;
 begin
-  CheckSimple('U-', 'Defines Used -(.used)');
+  CheckSimple('CU-', 'Count Defines Used -(.used)');
 end;
 
-procedure TestTD2XOptionsParseDefinesUsed.TestParseOptionUOn;
+procedure TestTD2XOptionsParseCountDefinesUsed.TestParseOptionCUOn;
 begin
-  CheckSimple('U+', 'Defines Used :.used');
+  CheckSimple('CU+', 'Count Defines Used :.used');
 end;
 
 { TestTD2XOptionsParseSkippedMethods }
@@ -1278,29 +1279,29 @@ end;
 
 { TestTD2XOptionsParseCountDefines }
 
-procedure TestTD2XOptionsParseCountDefines.TestParseOptionCDBlank;
+procedure TestTD2XOptionsParseCountFinalDefines.TestParseOptionCFBlank;
 begin
-  CheckSimple('CD:', 'Count Defines :.defs');
+  CheckSimple('CF:', 'Count Final Defines :.final');
 end;
 
-procedure TestTD2XOptionsParseCountDefines.TestParseOptionCDExtn;
+procedure TestTD2XOptionsParseCountFinalDefines.TestParseOptionCFExtn;
 begin
-  CheckSimple('CD:Extn', 'Count Defines :.Extn');
+  CheckSimple('CF:Extn', 'Count Final Defines :.Extn');
 end;
 
-procedure TestTD2XOptionsParseCountDefines.TestParseOptionCDFile;
+procedure TestTD2XOptionsParseCountFinalDefines.TestParseOptionCFFile;
 begin
-  CheckSimple('CD:File.Extn', 'Count Defines :File.Extn');
+  CheckSimple('CF:File.Extn', 'Count Final Defines :File.Extn');
 end;
 
-procedure TestTD2XOptionsParseCountDefines.TestParseOptionCDOff;
+procedure TestTD2XOptionsParseCountFinalDefines.TestParseOptionCFOff;
 begin
-  CheckSimple('CD-', 'Count Defines -(.defs)');
+  CheckSimple('CF-', 'Count Final Defines -(.final)');
 end;
 
-procedure TestTD2XOptionsParseCountDefines.TestParseOptionCDOn;
+procedure TestTD2XOptionsParseCountFinalDefines.TestParseOptionCFOn;
 begin
-  CheckSimple('CD+', 'Count Defines :.defs');
+  CheckSimple('CF+', 'Count Final Defines :.final');
 end;
 
 { TestTD2XOptionsParseCountChildren }
@@ -1371,6 +1372,11 @@ end;
 procedure TestTD2XOptionsParseUnused.TestParseOptionR;
 begin
   CheckUnknown('R');
+end;
+
+procedure TestTD2XOptionsParseUnused.TestParseOptionU;
+begin
+  CheckUnknown('U');
 end;
 
 procedure TestTD2XOptionsParseUnused.TestParseOptionV;
@@ -1707,9 +1713,9 @@ initialization
 RegisterTests('Options', [TestTD2XOptionEnums.Suite, TestTD2XOptions.Suite,
     TestTD2XOptionsParseAll.Suite, TestTD2XOptionsParseUnused.Suite,
     TestTD2XOptionsParseEnumerated.Suite, TestTD2XOptionsParseFlags.Suite,
-    TestTD2XOptionsParseCountChildren.Suite, TestTD2XOptionsParseCountDefines.Suite,
+    TestTD2XOptionsParseCountChildren.Suite, TestTD2XOptionsParseCountFinalDefines.Suite,
     TestTD2XOptionsParseDefines.Suite, TestTD2XOptionsParseHeldDefines.Suite,
-    TestTD2XOptionsParseSkippedMethods.Suite, TestTD2XOptionsParseDefinesUsed.Suite,
+    TestTD2XOptionsParseSkippedMethods.Suite, TestTD2XOptionsParseCountDefinesUsed.Suite,
     TestTD2XOptionsParseWriteDefines.Suite, TestTD2XOptionsParseWriteXml.Suite,
     TestTD2XOptionsGeneral.Suite, TestTD2XOptionsSpecific.Suite, TestTD2XOptionsXmlPer.Suite]);
 

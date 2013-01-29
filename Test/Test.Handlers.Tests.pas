@@ -40,9 +40,9 @@ type
     procedure TestProcessing;
   end;
 
-  TestTD2XCountDefinesHandler = class(TParserTestCase)
+  TestTD2XCountFinalDefinesHandler = class(TParserTestCase)
   strict private
-    fHndlr: TD2XCountDefinesHandler;
+    fHndlr: TD2XCountFinalDefinesHandler;
   public
     procedure SetUp; override;
     procedure TearDown; override;
@@ -55,9 +55,9 @@ type
     procedure TestProcessing;
   end;
 
-  TestTD2XDefinesUsedHandler = class(TStringTestCase)
+  TestTD2XCountDefinesUsedHandler = class(TStringTestCase)
   strict private
-    fHndlr: TD2XDefinesUsedHandler;
+    fHndlr: TD2XCountDefinesUsedHandler;
   public
     procedure SetUp; override;
     procedure TearDown; override;
@@ -713,21 +713,21 @@ end;
 
 { TestTD2XDefinesUsedHandler }
 
-procedure TestTD2XDefinesUsedHandler.SetUp;
+procedure TestTD2XCountDefinesUsedHandler.SetUp;
 begin
   inherited;
 
-  fHndlr := TD2XDefinesUsedHandler.Create;
+  fHndlr := TD2XCountDefinesUsedHandler.Create;
 end;
 
-procedure TestTD2XDefinesUsedHandler.TearDown;
+procedure TestTD2XCountDefinesUsedHandler.TearDown;
 begin
   FreeAndNil(fHndlr);
 
   inherited;
 end;
 
-procedure TestTD2XDefinesUsedHandler.TestDefineUsed;
+procedure TestTD2XCountDefinesUsedHandler.TestDefineUsed;
 begin
   fHndlr.DefineUsed('Test');
   fHndlr.DefineUsed(' Test');
@@ -737,12 +737,12 @@ begin
   CheckStream('Test=3', 'Define Used');
 end;
 
-procedure TestTD2XDefinesUsedHandler.TestDescription;
+procedure TestTD2XCountDefinesUsedHandler.TestDescription;
 begin
   CheckEqualsString('Defines Used', fHndlr.Description, 'Description');
 end;
 
-procedure TestTD2XDefinesUsedHandler.TestEndProcessing;
+procedure TestTD2XCountDefinesUsedHandler.TestEndProcessing;
 var
   lCalled: Boolean;
 begin
@@ -765,7 +765,7 @@ begin
   end;
 end;
 
-procedure TestTD2XDefinesUsedHandler.TestProcessing;
+procedure TestTD2XCountDefinesUsedHandler.TestProcessing;
 begin
   fHndlr.DefineUsed('Alpha');
   fHndlr.DefineUsed('Beta');
@@ -778,7 +778,7 @@ begin
   CheckStream('Alpha=3 Beta=2 Gamma=1', 'Define Used');
 end;
 
-procedure TestTD2XDefinesUsedHandler.TestUseProxy;
+procedure TestTD2XCountDefinesUsedHandler.TestUseProxy;
 begin
   CheckFalse(fHndlr.UseProxy, 'Uses proxy');
 end;
@@ -913,26 +913,26 @@ end;
 
 { TestTD2XCountDefinesHandler }
 
-procedure TestTD2XCountDefinesHandler.SetUp;
+procedure TestTD2XCountFinalDefinesHandler.SetUp;
 begin
   inherited;
 
-  fHndlr := TD2XCountDefinesHandler.Create;
+  fHndlr := TD2XCountFinalDefinesHandler.Create;
 end;
 
-procedure TestTD2XCountDefinesHandler.TearDown;
+procedure TestTD2XCountFinalDefinesHandler.TearDown;
 begin
   FreeAndNil(fHndlr);
 
   inherited;
 end;
 
-procedure TestTD2XCountDefinesHandler.TestDescription;
+procedure TestTD2XCountFinalDefinesHandler.TestDescription;
 begin
   CheckEqualsString('Count Defines', fHndlr.Description, 'Description');
 end;
 
-procedure TestTD2XCountDefinesHandler.TestEndFile;
+procedure TestTD2XCountFinalDefinesHandler.TestEndFile;
 var
   lCalled: Boolean;
 begin
@@ -952,7 +952,7 @@ begin
   CheckStream('', 'End File');
 end;
 
-procedure TestTD2XCountDefinesHandler.TestEndProcessing;
+procedure TestTD2XCountFinalDefinesHandler.TestEndProcessing;
 var
   lCalled: Boolean;
 begin
@@ -979,7 +979,7 @@ begin
   end;
 end;
 
-procedure TestTD2XCountDefinesHandler.TestProcessing;
+procedure TestTD2XCountFinalDefinesHandler.TestProcessing;
 begin
   fHndlr.InitParser(fParser);
   fParser.GetLexerDefines(fParser.StartDefines);
@@ -1001,7 +1001,7 @@ begin
   CheckStream('Alpha=1 Test=4', 'Processing');
 end;
 
-procedure TestTD2XCountDefinesHandler.TestUseProxy;
+procedure TestTD2XCountFinalDefinesHandler.TestUseProxy;
 begin
   CheckTrue(fHndlr.UseProxy, 'Uses proxy');
 end;
@@ -1086,7 +1086,7 @@ initialization
 
 // Register any test cases with the test runner
 RegisterTests('Handlers', [TestTD2XCountChildrenHandler.Suite,
-  TestTD2XCountDefinesHandler.Suite, TestTD2XDefinesUsedHandler.Suite,
+  TestTD2XCountFinalDefinesHandler.Suite, TestTD2XCountDefinesUsedHandler.Suite,
   TestTD2XParserDefinesHandler.Suite, TestTD2XHeldDefinesHandler.Suite,
   TestTD2XErrorHandler.Suite, TestTD2XSkipHandler.Suite, TestTD2XWriteDefinesHandler.Suite,
   TestTD2XXmlHandler.Suite]);

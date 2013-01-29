@@ -2,9 +2,9 @@
 -F+VRN
 -X:Test,xml
 -W:Test,def
--U:.Test
 -CC:.Test
--CD:.Test
+-CF:.Test
+-CU:.Test
 -S:Test.skip
 -D:
 -D+TANGO,UNIFORM,VICTOR

@@ -35,7 +35,7 @@ type
     fCurrentMethod: string;
 
     fXmlHandler: TD2XXmlHandler;
-    fDefinesUsedHandler: TD2XDefinesUsedHandler;
+    fCountDefinesUsedHandler: TD2XCountDefinesUsedHandler;
 
     fIOFact: ID2XIOFactory;
 
@@ -424,7 +424,7 @@ end;
 
 procedure TD2XOptions.LexerOnIfDef(pLex: TD2XLexer);
 begin
-  fDefinesUsedHandler.DefineUsed(pLex.DirectiveParam);
+  fCountDefinesUsedHandler.DefineUsed(pLex.DirectiveParam);
   pLex.Next;
 end;
 
@@ -436,7 +436,7 @@ end;
 *)
 procedure TD2XOptions.LexerOnIfNDef(pLex: TD2XLexer);
 begin
-  fDefinesUsedHandler.DefineUsed(pLex.DirectiveParam);
+  fCountDefinesUsedHandler.DefineUsed(pLex.DirectiveParam);
   pLex.Next;
 end;
 
@@ -613,10 +613,10 @@ var
   lParserDefinesHandler: TD2XParserDefinesHandler;
   lHeldDefinesHandler: TD2XHeldDefinesHandler;
 
-  lDefinesUsed: TD2XFlaggedStringParam;
+  lCountDefinesUsed: TD2XFlaggedStringParam;
   lSkipMethods: TD2XFlaggedStringParam;
   lCountChildren: TD2XFlaggedStringParam;
-  lCountDefines: TD2XFlaggedStringParam;
+  lCountFinalDefines: TD2XFlaggedStringParam;
 
   function NilFileRef: TD2XFileRef;
   begin
@@ -630,20 +630,18 @@ begin
   fParserDefines := TD2XDefinesParam.CreateDefines('D', 'Defines', ConfigFileOrExtn);
   fHeldDefines := TD2XDefinesParam.CreateDefines('H', 'Held Defines', ConfigFileOrExtn);
 
-  lDefinesUsed := TD2XFlaggedStringParam.CreateFlagStr('U', 'Defines Used', '<f/e>',
-    'Report Defines Used into <f/e>', '.used', True, ConvertExtn, nil, nil);
+  lCountDefinesUsed := TD2XFlaggedStringParam.CreateFlagStr('CU', 'Count Defines Used', '<f/e>',
+    'Count Defines Used into <f/e>', '.used', True, ConvertExtn, nil, nil);
   lSkipMethods := TD2XFlaggedStringParam.CreateFlagStr('S', 'Skipped Methods', '<f/e>',
     'Load Skipped Methods from <f/e>', '.skip', False, ConvertFile, nil, nil);
   lCountChildren := TD2XFlaggedStringParam.CreateFlagStr('CC', 'Count Children', '<f/e>',
     'Report Min/Max Children into <f/e>', '.chld', True, ConvertExtn, nil, nil);
-  lCountDefines := TD2XFlaggedStringParam.CreateFlagStr('CD', 'Count Defines', '<f/e>',
-    'Report Defines Used into <f/e>', '.defs', True, ConvertExtn, nil, nil);
+  lCountFinalDefines := TD2XFlaggedStringParam.CreateFlagStr('CF', 'Count Final Defines', '<f/e>',
+    'Count Final Defines into <f/e>', '.final', True, ConvertExtn, nil, nil);
 
   lParserDefinesHandler := TD2XParserDefinesHandler.CreateDefines(fParserDefines.Defines);
   lHeldDefinesHandler := TD2XHeldDefinesHandler.CreateDefines(fHeldDefines.Defines);
 
-  fProcs.Add(TD2XHandlerProcessor.CreateHandler(lDefinesUsed, fDefinesUsedHandler, True)
-    .SetProcessingOutput(MakeFileRef(lDefinesUsed)));
   fProcs.Add(TD2XHandlerProcessor.CreateClass(lSkipMethods, TD2XSkipHandler).SetFileInput(
     function: ID2XFile
     begin
@@ -652,12 +650,14 @@ begin
   fProcs.Add(TD2XHandlerProcessor.CreateClass(lCountChildren, TD2XCountChildrenHandler)
     .SetFileInput(NilFileRef()).SetFileOutput(NilFileRef())
     .SetProcessingOutput(MakeFileRef(lCountChildren)));
-  fProcs.Add(TD2XHandlerProcessor.CreateClass(lCountDefines, TD2XCountDefinesHandler)
-    .SetFileOutput(NilFileRef()).SetProcessingOutput(MakeFileRef(lCountDefines)));
+  fProcs.Add(TD2XHandlerProcessor.CreateClass(lCountFinalDefines, TD2XCountFinalDefinesHandler)
+    .SetFileOutput(NilFileRef()).SetProcessingOutput(MakeFileRef(lCountFinalDefines)));
+  fProcs.Add(TD2XHandlerProcessor.CreateHandler(lCountDefinesUsed, fCountDefinesUsedHandler, True)
+    .SetProcessingOutput(MakeFileRef(lCountDefinesUsed)));
   fProcs.Add(TD2XHandlerProcessor.CreateHandler(fParserDefines, lParserDefinesHandler, True));
   fProcs.Add(TD2XHandlerProcessor.CreateHandler(fHeldDefines, lHeldDefinesHandler, True));
 
-  fParams.AddRange([lDefinesUsed, lCountChildren, lCountDefines, lSkipMethods, fParserDefines,
+  fParams.AddRange([lCountChildren, lCountFinalDefines, lCountDefinesUsed, lSkipMethods, fParserDefines,
     fHeldDefines]);
 end;
 
@@ -755,7 +755,7 @@ begin
     begin
       Result := TD2X.ToLabel(fParseMode.Value);
     end);
-  fDefinesUsedHandler := TD2XDefinesUsedHandler.Create;
+  fCountDefinesUsedHandler := TD2XCountDefinesUsedHandler.Create;
 
   lWriteXml := TD2XFlaggedStringParam.CreateFlagStr('X', 'Generate XML', '<d/e>',
     'Generate XML files into current or given <d/e>', 'Xml,xml', True, ConvertDirExtn,

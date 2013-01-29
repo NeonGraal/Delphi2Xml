@@ -5,7 +5,7 @@ Improvements
   - probably "dir,extn" with default extn and dir and comma only required when setting extn
     eg: if defaults are "Define,def" then "Def" -> "Def,def", ",df" -> ",df", "!,!" -> "Define,def"
 
-    - Direct Xslt Transforms of the xmlfiles (-T?)
+- Direct Xslt Transforms of the xmlfiles (-T?)
   - Need to specify transform file and output directory and/or extension
   - Default directory to be base file of transform file and default extension to be from output type of transform
     - xml, html, txt, ...?
