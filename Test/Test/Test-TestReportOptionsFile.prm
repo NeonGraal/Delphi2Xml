@@ -1,7 +1,7 @@
 -F!
 -F+VRN
--X:Test,xml
--W:Test,def
+-WX:Test,xml
+-WD:Test,def
 -CC:.Test
 -CF:.Test
 -CU:.Test

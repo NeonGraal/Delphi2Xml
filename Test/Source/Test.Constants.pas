@@ -29,8 +29,8 @@ const
     'M<mode> Full Parser type (F[ull], U[ses]) ' +
     'P<per> File Result per (F[ile], S[ubdir], D[ir], W[ildcard], P[aram], R[un]) ' +
     'E<mode> Quiet Elapsed time display (N[one], T[otal], D[ir], F[ile], P[rocessing], [Q]uiet) '
-    + 'X[+-]:<d/e> :Xml,xml Generate XML files into current or given <d/e> ' +
-    'W[+-]:<d/e> -(Defines,def) Generate Final Defines files into current or given <d/e> ' +
+    + 'WX[+-]:<d/e> :Xml,xml Write XML files into current or given <d/e> ' +
+    'WD[+-]:<d/e> -(Defines,def) Write Final Defines files into current or given <d/e> ' +
     'CC[+-]:<f/e> :.chld Report Min/Max Children into <f/e> ' +
     'CF[+-]:<f/e> :.final Count Final Defines into <f/e> ' +
     'CU[+-]:<f/e> :.used Count Defines Used into <f/e> ' +
@@ -44,7 +44,7 @@ const
   //    'Recurse - Timestamp - Global name Delphi2XmlTests Config dir :Config\ ' +
   //    'Log dir :Log\ Base dir -(.\) Parse mode Full Results per File Show elapsed Quiet ' +
     'Parse mode Full Results per File Show elapsed Quiet ' +
-    'Generate XML :Xml,xml Write Defines -(Defines,def) Count Children :.chld ' +
+    'Write XML :Xml,xml Write Defines -(Defines,def) Count Children :.chld ' +
     'Count Final Defines :.final Count Defines Used :.used Skipped Methods -(.skip) ';
   DEFAULT_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Defines Default Held Defines Default';
 {$IFDEF WIN32}

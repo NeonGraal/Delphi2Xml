@@ -132,8 +132,8 @@ type
     procedure TestParseOptionP;
     procedure TestParseOptionS;
     //    procedure TestParseOptionT; // Tested in Test.IO.Options
-    procedure TestParseOptionW;
-    procedure TestParseOptionX;
+    procedure TestParseOptionWD;
+    procedure TestParseOptionWX;
   end;
 
   TestTD2XOptionsParseUnused = class(TOptionsParseTestCase)
@@ -141,6 +141,7 @@ type
     procedure CheckUnknown(pOpt: string);
   published
     procedure TestParseOptionA;
+    procedure TestParseOptionC;
     procedure TestParseOptionJ;
     procedure TestParseOptionK;
     procedure TestParseOptionL;
@@ -149,6 +150,8 @@ type
     procedure TestParseOptionR;
     procedure TestParseOptionU;
     procedure TestParseOptionV;
+    procedure TestParseOptionW;
+    procedure TestParseOptionX;
     procedure TestParseOptionY;
     procedure TestParseOptionZ;
   end;
@@ -245,22 +248,22 @@ type
 
   TestTD2XOptionsParseWriteDefines = class(TOptionsParseTestCase)
   published
-    procedure TestParseOptionWOff;
-    procedure TestParseOptionWOn;
-    procedure TestParseOptionWBlank;
-    procedure TestParseOptionWDir;
-    procedure TestParseOptionWExtn;
-    procedure TestParseOptionWValue;
+    procedure TestParseOptionWDOff;
+    procedure TestParseOptionWDOn;
+    procedure TestParseOptionWDBlank;
+    procedure TestParseOptionWDDir;
+    procedure TestParseOptionWDExtn;
+    procedure TestParseOptionWDValue;
   end;
 
   TestTD2XOptionsParseWriteXml = class(TOptionsParseTestCase)
   published
-    procedure TestParseOptionXOff;
-    procedure TestParseOptionXOn;
-    procedure TestParseOptionXBlank;
-    procedure TestParseOptionXDir;
-    procedure TestParseOptionXExtn;
-    procedure TestParseOptionXValue;
+    procedure TestParseOptionWXOff;
+    procedure TestParseOptionWXOn;
+    procedure TestParseOptionWXBlank;
+    procedure TestParseOptionWXDir;
+    procedure TestParseOptionWXExtn;
+    procedure TestParseOptionWXValue;
   end;
 
   TestTD2XOptionsGeneral = class(TOptionsTestCase)
@@ -294,14 +297,14 @@ const
   //    'Recurse + Timestamp - Global name :Test Config dir :Test\ Log dir :Test\ ' +
   //    'Base dir :Test\ Parse mode Full Results per File Show elapsed Quiet ' +
     'Parse mode Full Results per File Show elapsed Quiet ' +
-    'Generate XML :Test,xml Write Defines :Test,def Count Children :.Test ' +
+    'Write XML :Test,xml Write Defines :Test,def Count Children :.Test ' +
     'Count Final Defines :.Test Count Defines Used :.Test Skipped Methods :Test.skip ' +
     'Defines TANGO, UNIFORM, VICTOR Held Defines TANGO, UNIFORM, VICTOR';
   ZERO_REPORT_OPTIONS = REPORT_HEADING + ' Flags ' +
     'FinalToken-,LogErrors-,LogNotSupp-,Recurse-,Timestamp-,Verbose- ' +
   //    'Recurse - Timestamp - Global name Config dir - Log dir - Base dir - ' +
-  //    'Parse mode Full Results per File Show elapsed None Generate XML - ' +
-    'Parse mode Full Results per File Show elapsed None Generate XML - Write Defines - ' +
+  //    'Parse mode Full Results per File Show elapsed None Write XML - ' +
+    'Parse mode Full Results per File Show elapsed None Write XML - Write Defines - ' +
     'Count Children - Count Final Defines - Count Defines Used - Skipped Methods - ' +
     'Defines Default Held Defines Default';
   EMPTY_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Defines NONE Held Defines Default';
@@ -610,14 +613,14 @@ begin
   CheckSimple('CU', 'Count Defines Used :.used');
 end;
 
-procedure TestTD2XOptionsParseAll.TestParseOptionW;
+procedure TestTD2XOptionsParseAll.TestParseOptionWD;
 begin
-  CheckSimple('W', 'Write Defines :Defines,def');
+  CheckSimple('WD', 'Write Defines :Defines,def');
 end;
 
-procedure TestTD2XOptionsParseAll.TestParseOptionX;
+procedure TestTD2XOptionsParseAll.TestParseOptionWX;
 begin
-  CheckSimple('X', 'Generate XML :Xml,xml');
+  CheckSimple('WX', 'Write XML :Xml,xml');
 end;
 
 { TOptionsTestCase }
@@ -1065,7 +1068,7 @@ end;
 
 procedure TestTD2XOptionsSpecific.TestWriteDefines;
 begin
-  Check(fOpts.ProcessOption('W'), 'Return Value 2');
+  Check(fOpts.ProcessOption('WD'), 'Return Value 2');
   fB.Clear;
 
   Check(fOpts.ProcessParam('Testing.Test*', 'Write Defines'), 'Process Unit');
@@ -1086,66 +1089,66 @@ end;
 
 { TestTD2XOptionsParseXml }
 
-procedure TestTD2XOptionsParseWriteXml.TestParseOptionXBlank;
+procedure TestTD2XOptionsParseWriteXml.TestParseOptionWXBlank;
 begin
-  CheckSimple('X:', 'Generate XML :,xml');
+  CheckSimple('WX:', 'Write XML :,xml');
 end;
 
-procedure TestTD2XOptionsParseWriteXml.TestParseOptionXDir;
+procedure TestTD2XOptionsParseWriteXml.TestParseOptionWXDir;
 begin
-  CheckSimple('X:Value', 'Generate XML :Value,xml');
+  CheckSimple('WX:Value', 'Write XML :Value,xml');
 end;
 
-procedure TestTD2XOptionsParseWriteXml.TestParseOptionXExtn;
+procedure TestTD2XOptionsParseWriteXml.TestParseOptionWXExtn;
 begin
-  CheckSimple('X:,val', 'Generate XML :,val');
+  CheckSimple('WX:,val', 'Write XML :,val');
 end;
 
-procedure TestTD2XOptionsParseWriteXml.TestParseOptionXOff;
+procedure TestTD2XOptionsParseWriteXml.TestParseOptionWXOff;
 begin
-  CheckSimple('X-', 'Generate XML -(Xml,xml)');
+  CheckSimple('WX-', 'Write XML -(Xml,xml)');
 end;
 
-procedure TestTD2XOptionsParseWriteXml.TestParseOptionXOn;
+procedure TestTD2XOptionsParseWriteXml.TestParseOptionWXOn;
 begin
-  CheckSimple('X+', 'Generate XML :Xml,xml');
+  CheckSimple('WX+', 'Write XML :Xml,xml');
 end;
 
-procedure TestTD2XOptionsParseWriteXml.TestParseOptionXValue;
+procedure TestTD2XOptionsParseWriteXml.TestParseOptionWXValue;
 begin
-  CheckSimple('X:Value,val', 'Generate XML :Value,val');
+  CheckSimple('WX:Value,val', 'Write XML :Value,val');
 end;
 
 { TestTD2XOptionsParseWriteDefines }
 
-procedure TestTD2XOptionsParseWriteDefines.TestParseOptionWBlank;
+procedure TestTD2XOptionsParseWriteDefines.TestParseOptionWDBlank;
 begin
-  CheckSimple('W:', 'Write Defines :,def');
+  CheckSimple('WD:', 'Write Defines :,def');
 end;
 
-procedure TestTD2XOptionsParseWriteDefines.TestParseOptionWDir;
+procedure TestTD2XOptionsParseWriteDefines.TestParseOptionWDDir;
 begin
-  CheckSimple('W:Write', 'Write Defines :Write,def');
+  CheckSimple('WD:Write', 'Write Defines :Write,def');
 end;
 
-procedure TestTD2XOptionsParseWriteDefines.TestParseOptionWExtn;
+procedure TestTD2XOptionsParseWriteDefines.TestParseOptionWDExtn;
 begin
-  CheckSimple('W:,wrt', 'Write Defines :,wrt');
+  CheckSimple('WD:,wrt', 'Write Defines :,wrt');
 end;
 
-procedure TestTD2XOptionsParseWriteDefines.TestParseOptionWOff;
+procedure TestTD2XOptionsParseWriteDefines.TestParseOptionWDOff;
 begin
-  CheckSimple('W-', 'Write Defines -(Defines,def)');
+  CheckSimple('WD-', 'Write Defines -(Defines,def)');
 end;
 
-procedure TestTD2XOptionsParseWriteDefines.TestParseOptionWOn;
+procedure TestTD2XOptionsParseWriteDefines.TestParseOptionWDOn;
 begin
-  CheckSimple('W+', 'Write Defines :Defines,def');
+  CheckSimple('WD+', 'Write Defines :Defines,def');
 end;
 
-procedure TestTD2XOptionsParseWriteDefines.TestParseOptionWValue;
+procedure TestTD2XOptionsParseWriteDefines.TestParseOptionWDValue;
 begin
-  CheckSimple('W:Write,wrt', 'Write Defines :Write,wrt');
+  CheckSimple('WD:Write,wrt', 'Write Defines :Write,wrt');
 end;
 
 { TestTD2XOptionsParseDefinesUsed }
@@ -1344,6 +1347,11 @@ begin
   CheckUnknown('A');
 end;
 
+procedure TestTD2XOptionsParseUnused.TestParseOptionC;
+begin
+  CheckUnknown('C');
+end;
+
 procedure TestTD2XOptionsParseUnused.TestParseOptionJ;
 begin
   CheckUnknown('J');
@@ -1382,6 +1390,16 @@ end;
 procedure TestTD2XOptionsParseUnused.TestParseOptionV;
 begin
   CheckUnknown('V');
+end;
+
+procedure TestTD2XOptionsParseUnused.TestParseOptionW;
+begin
+  CheckUnknown('W');
+end;
+
+procedure TestTD2XOptionsParseUnused.TestParseOptionX;
+begin
+  CheckUnknown('X');
 end;
 
 procedure TestTD2XOptionsParseUnused.TestParseOptionY;
@@ -1577,7 +1595,7 @@ end;
 
 procedure TestTD2XOptionsXmlPer.TestProcessXmlPerDir;
 begin
-  fOpts.ProcessOption('X:');
+  fOpts.ProcessOption('WX:');
   fOpts.ProcessOption('PD');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Dir');
   CheckLog(ALL_PROCESSING, 'Processing Xml per Dir');
@@ -1587,7 +1605,7 @@ end;
 
 procedure TestTD2XOptionsXmlPer.TestProcessXmlPerFile;
 begin
-  fOpts.ProcessOption('X:');
+  fOpts.ProcessOption('WX:');
   fOpts.ProcessOption('PF');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per File');
   CheckLog(ALL_PROCESSING, 'Processing Xml per File');
@@ -1597,7 +1615,7 @@ end;
 
 procedure TestTD2XOptionsXmlPer.TestProcessXmlPerParam;
 begin
-  fOpts.ProcessOption('X:');
+  fOpts.ProcessOption('WX:');
   fOpts.ProcessOption('PP');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per FilParam');
   CheckLog(ALL_PROCESSING, 'Processing Xml per Param');
@@ -1607,7 +1625,7 @@ end;
 
 procedure TestTD2XOptionsXmlPer.TestProcessXmlPerRun;
 begin
-  fOpts.ProcessOption('X:');
+  fOpts.ProcessOption('WX:');
   fOpts.ProcessOption('PR');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Run');
   CheckLog(ALL_PROCESSING, 'Processing Xml per Run');
@@ -1617,7 +1635,7 @@ end;
 
 procedure TestTD2XOptionsXmlPer.TestProcessXmlPerSubDir;
 begin
-  fOpts.ProcessOption('X:');
+  fOpts.ProcessOption('WX:');
   fOpts.ProcessOption('PS');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per SubDir');
   CheckLog(ALL_PROCESSING, 'Processing Xml per SubDir');
@@ -1627,7 +1645,7 @@ end;
 
 procedure TestTD2XOptionsXmlPer.TestProcessXmlPerWildcard;
 begin
-  fOpts.ProcessOption('X:');
+  fOpts.ProcessOption('WX:');
   fOpts.ProcessOption('PW');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Wildcard');
   CheckLog(ALL_PROCESSING, 'Processing Xml per Wildcard');
@@ -1638,7 +1656,7 @@ end;
 procedure TestTD2XOptionsXmlPer.TestProcessXmlUsesPerDir;
 begin
   fOpts.ProcessOption('MU');
-  fOpts.ProcessOption('X:');
+  fOpts.ProcessOption('WX:');
   fOpts.ProcessOption('PD');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Dir');
   CheckLog(ALL_PROCESSING, 'Processing Xml per Dir');
@@ -1649,7 +1667,7 @@ end;
 procedure TestTD2XOptionsXmlPer.TestProcessXmlUsesPerFile;
 begin
   fOpts.ProcessOption('MU');
-  fOpts.ProcessOption('X:');
+  fOpts.ProcessOption('WX:');
   fOpts.ProcessOption('PF');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per File');
   CheckLog(ALL_PROCESSING, 'Processing Xml per File');
@@ -1660,7 +1678,7 @@ end;
 procedure TestTD2XOptionsXmlPer.TestProcessXmlUsesPerParam;
 begin
   fOpts.ProcessOption('MU');
-  fOpts.ProcessOption('X:');
+  fOpts.ProcessOption('WX:');
   fOpts.ProcessOption('PP');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per FilParam');
   CheckLog(ALL_PROCESSING, 'Processing Xml per Param');
@@ -1671,7 +1689,7 @@ end;
 procedure TestTD2XOptionsXmlPer.TestProcessXmlUsesPerRun;
 begin
   fOpts.ProcessOption('MU');
-  fOpts.ProcessOption('X:');
+  fOpts.ProcessOption('WX:');
   fOpts.ProcessOption('PR');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Run');
   CheckLog(ALL_PROCESSING, 'Processing Xml per Run');
@@ -1682,7 +1700,7 @@ end;
 procedure TestTD2XOptionsXmlPer.TestProcessXmlUsesPerSubDir;
 begin
   fOpts.ProcessOption('MU');
-  fOpts.ProcessOption('X:');
+  fOpts.ProcessOption('WX:');
   fOpts.ProcessOption('PS');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per SubDir');
   CheckLog(ALL_PROCESSING, 'Processing Xml per SubDir');
@@ -1693,7 +1711,7 @@ end;
 procedure TestTD2XOptionsXmlPer.TestProcessXmlUsesPerWildcard;
 begin
   fOpts.ProcessOption('MU');
-  fOpts.ProcessOption('X:');
+  fOpts.ProcessOption('WX:');
   fOpts.ProcessOption('PW');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Wildcard');
   CheckLog(ALL_PROCESSING, 'Processing Xml per Wildcard');

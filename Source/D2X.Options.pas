@@ -757,11 +757,11 @@ begin
     end);
   fCountDefinesUsedHandler := TD2XCountDefinesUsedHandler.Create;
 
-  lWriteXml := TD2XFlaggedStringParam.CreateFlagStr('X', 'Generate XML', '<d/e>',
-    'Generate XML files into current or given <d/e>', 'Xml,xml', True, ConvertDirExtn,
+  lWriteXml := TD2XFlaggedStringParam.CreateFlagStr('WX', 'Write XML', '<d/e>',
+    'Write XML files into current or given <d/e>', 'Xml,xml', True, ConvertDirExtn,
     nil, nil);
-  lWriteDefines := TD2XFlaggedStringParam.CreateFlagStr('W', 'Write Defines', '<d/e>',
-    'Generate Final Defines files into current or given <d/e>', 'Defines,def', False,
+  lWriteDefines := TD2XFlaggedStringParam.CreateFlagStr('WD', 'Write Defines', '<d/e>',
+    'Write Final Defines files into current or given <d/e>', 'Defines,def', False,
     ConvertDirExtn, nil, nil);
 
   fProcs.Add(TD2XHandlerProcessor.CreateHandler(lWriteXml, fXmlHandler, True)
