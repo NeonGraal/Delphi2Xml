@@ -46,7 +46,8 @@ uses
   Test.Utils in 'Source\Test.Utils.pas',
   Test.Xml in 'Source\Test.Xml.pas',
   Test.Xml.Tests in 'Test.Xml.Tests.pas',
-  Test.Global in 'Source\Test.Global.pas';
+  Test.Global in 'Source\Test.Global.pas',
+  Test.IO.Options in 'Source\Test.IO.Options.pas';
 
 {$R *.RES}
 

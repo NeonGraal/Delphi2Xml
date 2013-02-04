@@ -34,6 +34,7 @@ type
     fInputBase: TD2XFlaggedStringParam;
     fGlobalName: TD2XStringParam;
     fTimestampFiles: ID2XFlag;
+    fExcludeDirs: TD2XListParam;
 
     function GetGlobalName: string;
 
@@ -155,9 +156,9 @@ end;
 function TD2XFileOptions.BaseDir(pFileOrDir: string): ID2XDir;
 begin
   if fInputBase.FlagValue then
-    Result := TD2XDirPath.Create(fInputBase.Value, pFileOrDir)
+    Result := TD2XDirPath.Create(fInputBase.Value, pFileOrDir, fExcludeDirs.List)
   else
-    Result := TD2XDirPath.Create('', pFileOrDir);
+    Result := TD2XDirPath.Create('', pFileOrDir, fExcludeDirs.List);
 end;
 
 function TD2XFileOptions.BaseFile(pFileOrDir: string): ID2XFile;
@@ -220,6 +221,7 @@ begin
   pParams.Add(fConfigBase);
   pParams.Add(fLogBase);
   pParams.Add(fInputBase);
+  pParams.Add(fExcludeDirs);
 end;
 
 procedure TD2XFileOptions.SetGlobalName(const pName: string);
@@ -245,6 +247,8 @@ begin
       else
         pVal := pStr;
     end, pValidator);
+  fExcludeDirs := TD2XListParam.CreateList('X', 'Exclude Dirs',
+    'Exclude dirs matching these strings', '.xdre', ConfigFileOrExtn);
 
   fOutputTimestamp := FormatDateTime('-HH-mm', Now);
 end;

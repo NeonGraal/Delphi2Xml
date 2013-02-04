@@ -24,7 +24,6 @@ type
     procedure Reset; override;
 
   protected
-    function GetSample: String; override;
     function GetFormatted(pDefault: Boolean): String; override;
     function GetReportDetails(pStr: String = ''): String; override;
 
@@ -46,6 +45,41 @@ type
   public
     property ByCode[pCode: Char]: ID2XFlag read GetByCode;
     property ByLabel[pLabel: String]: ID2XFlag read GetByLabel;
+  end;
+
+  TD2XListParam = class(TD2XParam)
+  public
+    constructor Create(pCode, pLabel, pSample, pDescr: String;
+      pParser: TD2XStringCheckRef); override;
+    constructor CreateList(pCode, pLabel, pDescr, pExtn: String;
+      pListFileName: TD2XNamedStreamRef);
+    destructor Destroy; override;
+
+    procedure Output(pSL: TStringList); override;
+    function IsDefault: Boolean; override;
+    procedure Zero; override;
+    procedure Reset; override;
+
+  protected type
+    TItemProc = procedure(pItem: String) of object;
+
+  protected
+    function GetReportDetails(pStr: String = ''): String; override;
+
+  private
+    fList: TStringList;
+    fExtn: String;
+    fListFileName: TD2XNamedStreamRef;
+
+    function ParseList(pStr: String): Boolean;
+
+    procedure LoadItems(pFilename: String; pFunc: TItemProc);
+    procedure ProcessItems(pItems: String; pFunc: TItemProc);
+
+    procedure AddItem(pItem: String);
+
+  public
+    property List: TStringList read fList;
   end;
 
   TD2XStringParam = class(TD2XSingleParam<String>)
@@ -674,11 +708,6 @@ begin
   end;
 end;
 
-function TD2XFlagsParam.GetSample: String;
-begin
-  Result := fSample;
-end;
-
 function TD2XFlagsParam.IndexCode(pCode: Char): Integer;
 var
   i: Integer;
@@ -787,7 +816,7 @@ var
   lVal: Boolean;
   lFlag: ID2XFlag;
 begin
-    Result := True;
+  Result := True;
   lSL := TStringList.Create;
   try
     lSL.CommaText := pStr;
@@ -832,6 +861,158 @@ var
 begin
   for i := 0 to High(fFlags) do
     ID2XFlag(fValues[i]).Flag := False;
+end;
+
+{ TD2XListParam }
+
+procedure TD2XListParam.AddItem(pItem: String);
+begin
+  if fList.IndexOf(pItem) < 0 then
+    fList.Add(pItem);
+end;
+
+procedure TD2XListParam.ProcessItems(pItems: String; pFunc: TItemProc);
+var
+  lSL: TStringList;
+  lS: String;
+begin
+  lSL := TStringList.Create;
+  try
+    lSL.CommaText := pItems;
+    for lS in lSL do
+      pFunc(lS);
+  finally
+    lSL.Free;
+  end;
+end;
+
+constructor TD2XListParam.Create(pCode, pLabel, pSample, pDescr: String;
+  pParser: TD2XStringCheckRef);
+begin
+  raise EInvalidParam.Create('Need to use correct constructor');
+end;
+
+constructor TD2XListParam.CreateList(pCode, pLabel, pDescr, pExtn: String;
+  pListFileName: TD2XNamedStreamRef);
+begin
+  inherited Create(pCode, pLabel, '[!:]<list>', 'Clear(!), Load(:,' + pExtn +
+      ') or Add items to ' + pDescr, ParseList);
+
+  fList := TStringList.Create;
+  fExtn := pExtn;
+  fListFileName := pListFileName;
+end;
+
+destructor TD2XListParam.Destroy;
+begin
+  FreeAndNil(fList);
+
+  inherited;
+end;
+
+function TD2XListParam.GetReportDetails(pStr: String): String;
+var
+  lS: String;
+  w: Integer;
+  lSW: TStringWriter;
+
+  procedure WriteWidth(pStr: String);
+  begin
+    lSW.Write(pStr);
+    Inc(w, Length(pStr));
+  end;
+
+begin
+  if fList.Count < 1 then
+    Result := ''
+  else
+    try
+      lSW := TStringWriter.Create;
+      w := 0;
+      fList.Sort;
+      for lS in fList do
+      begin
+        if w > 0 then
+          if (w + Length(lS)) > 78 then
+          begin
+            lSW.WriteLine(',');
+            w := 0;
+            WriteWidth('                       ');
+          end
+          else
+            WriteWidth(', ');
+        WriteWidth(lS);
+      end;
+      Result := lSW.ToString;
+    finally
+      lSW.Free;
+    end
+end;
+
+function TD2XListParam.IsDefault: Boolean;
+begin
+  Result := fList.Count = 0;
+end;
+
+procedure TD2XListParam.LoadItems(pFilename: String; pFunc: TItemProc);
+var
+  lF: ID2XFile;
+  lSL: TStringList;
+  lS: String;
+begin
+  lF := fListFileName(pFilename);
+  if Assigned(lF) then
+    try
+      lSL := TStringList.Create;
+      lSL.LoadFromStream(lF.ReadFrom.BaseStream);
+      for lS in lSL do
+        pFunc(lS);
+    finally
+      FreeAndNil(lSL);
+      DisposeOf(lF);
+    end;
+end;
+
+procedure TD2XListParam.Output(pSL: TStringList);
+begin
+  pSL.Add('-' + fCode + ':');
+  if fList.Count > 0 then
+  begin
+    fList.Sort;
+    pSL.Add('-' + fCode + '+' + fList.CommaText);
+  end;
+end;
+
+function TD2XListParam.ParseList(pStr: String): Boolean;
+begin
+  Result := False;
+  if (pStr = '!') or (pStr = ':') then
+  begin
+    Result := True;
+    fList.Clear;
+  end
+  else
+    if Length(pStr) > 1 then
+    begin
+      Result := True;
+      if pStr[1] = ':' then
+      begin
+        fList.Clear;
+        LoadItems(MakeFileName(System.Copy(pStr, 2, Length(pStr)), fExtn), AddItem);
+      end
+      else
+        ProcessItems(pStr, AddItem);
+    end;
+end;
+
+procedure TD2XListParam.Reset;
+begin
+  fList.Clear;
+end;
+
+procedure TD2XListParam.Zero;
+begin
+  fList.Clear;
 end;
 
 end.

@@ -30,10 +30,11 @@ type
     fBase, fPath: string;
     fSR: TSearchRec;
     fDirSearch: Boolean;
+    fDirExclude: TStrings;
 
     function SkipNonDirs: Boolean;
   public
-    constructor Create(pBase, pPath: string);
+    constructor Create(pBase, pPath: string; pDirExclude: TStrings);
     destructor Destroy; override;
 
     function Description: string;
@@ -48,6 +49,9 @@ type
   end;
 
 implementation
+
+uses
+  System.StrUtils;
 
 { TD2XFileStream }
 
@@ -96,12 +100,13 @@ begin
   FindClose(fSR);
 end;
 
-constructor TD2XDirPath.Create(pBase, pPath: string);
+constructor TD2XDirPath.Create(pBase, pPath: string; pDirExclude: TStrings);
 begin
   if pBase > '' then
     fBase := IncludeTrailingPathDelimiter(pBase);
   if pPath > '' then
     fPath := IncludeTrailingPathDelimiter(pPath);
+  fDirExclude := pDirExclude;
 end;
 
 function TD2XDirPath.Current: string;
@@ -151,9 +156,23 @@ begin
 end;
 
 function TD2XDirPath.SkipNonDirs: Boolean;
+  function ExcludeDir(pDir: string): Boolean;
+  var
+    lS: string;
+  begin
+    Result := (pDir = '.') or (pDir = '..');
+    if Assigned(fDirExclude) and not Result then
+      for lS in fDirExclude do
+        if ContainsStr(pDir, lS) then
+        begin
+          Result := True;
+          Exit;
+        end;
+  end;
+
 begin
   Result := True;
-  while (fSR.Name = '.') or (fSR.Name = '..') or ((fSR.Attr and faDirectory) = 0) do
+  while ((fSR.Attr and faDirectory) = 0) or ExcludeDir(fSR.Name) do
     if FindNext(fSR) <> 0 then
     begin
       Result := False;

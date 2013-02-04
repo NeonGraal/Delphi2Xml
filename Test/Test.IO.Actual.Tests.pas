@@ -33,6 +33,7 @@ type
   TestTD2XDirPath = class(TTestCase)
   private
     fDir: TD2XDirPath;
+    fExcludes: TStringList;
   public
     procedure SetUp; override;
     procedure TearDown; override;
@@ -42,6 +43,7 @@ type
 
     procedure TestFiles;
     procedure TestDirs;
+    procedure TestExcludes;
 
   end;
 
@@ -98,12 +100,14 @@ procedure TestTD2XDirPath.SetUp;
 begin
   inherited;
 
-  fDir := TD2XDirPath.Create('', 'Test');
+  fExcludes := TStringList.Create;
+  fDir := TD2XDirPath.Create('', 'Test', fExcludes);
 end;
 
 procedure TestTD2XDirPath.TearDown;
 begin
   FreeAndNil(fDir);
+  FreeAndNil(fExcludes);
 
   inherited;
 end;
@@ -111,6 +115,15 @@ end;
 procedure TestTD2XDirPath.TestDescription;
 begin
   CheckEqualsString('Test\', fDir.Description);
+end;
+
+procedure TestTD2XDirPath.TestExcludes;
+begin
+  fExcludes.CommaText := 'Exclude';
+  CheckTrue(fDir.FirstDir, 'First Dir');
+  CheckEqualsString('Test\DirTest', fDir.Current, 'First Dir Current');
+  CheckFalse(fDir.Next, 'First Dir Next');
+  fDir.Close;
 end;
 
 procedure TestTD2XDirPath.TestExists;
@@ -121,8 +134,10 @@ end;
 procedure TestTD2XDirPath.TestDirs;
 begin
   CheckTrue(fDir.FirstDir, 'First Dir');
+  CheckEqualsString('Test\DirExclude', fDir.Current, 'Exclude Dir Current');
+  CheckTrue(fDir.Next, 'First Dir Next');
   CheckEqualsString('Test\DirTest', fDir.Current, 'First Dir Current');
-  CheckFalse(fDir.Next, 'First Dir Next');
+  CheckFalse(fDir.Next, 'First Dir Last');
   fDir.Close;
 end;
 

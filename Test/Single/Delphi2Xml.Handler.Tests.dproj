@@ -82,6 +82,8 @@
 			<DCCReference Include="..\..\FastMM4\FastMM4.pas"/>
 			<DCCReference Include="..\..\FastMM4\FastMM4Messages.pas"/>
 			<DCCReference Include="..\Test.Handler.Tests.pas"/>
+			<DCCReference Include="..\..\Source\D2X.Handler.pas"/>
+			<DCCReference Include="..\Source\Test.Handler.pas"/>
 			<None Include="Profiling\Delphi2Xml.Handler.Tests.aqt"/>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>

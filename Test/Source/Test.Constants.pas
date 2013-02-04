@@ -17,15 +17,16 @@ const
     ' <d/e> [<dir>][,<extn>] <dir> has trailing delimiter stripped and <extn> has leading' +
     ' dot stripped Either of <dir> and/or <extn> can be "!" to specify the default value';
 
+  FILE_SHOW_OPTIONS = 'I[+-]:<dir> :Config\ Use <dir> as a base for all Config files ' +
+    'O[+-]:<dir> :Log\ Use <dir> as a base for all Log files ' +
+    'B[+-]:<dir> -(.\) Use <dir> as a base for all Input files ' +
+    'X[!:]<list> Clear(!), Load(:,.xdre) or Add items to Exclude dirs matching these strings';
+
   EXPECTED_SHOW_OPTIONS = ' ? Show valid options ! Reset all options to defaults ' +
     '@<file> Report/Output Current options F<codes> | :<labels> Flags ' +
     'V Verbose - Log all Parser methods called T Timestamp - Timestamp global output files ' +
     'R Recurse - Recurse into subdirectories N LogNotSupp - Log Not Supported messages ' +
     'F FinalToken + Record Final Token E LogErrors + Log Error messages ' +
-  //    'G<str> Delphi2XmlTests Sets global name ' +
-  //    'I[+-]:<dir> :Config\ Use <dir> as a base for all Config files ' +
-  //    'O[+-]:<dir> :Log\ Use <dir> as a base for all Log files ' +
-  //    'B[+-]:<dir> -(.\) Use <dir> as a base for all Input files ' +
     'M<mode> Full Parser type (F[ull], U[ses]) ' +
     'P<per> File Result per (F[ile], S[ubdir], D[ir], W[ildcard], P[aram], R[un]) ' +
     'E<mode> Quiet Elapsed time display (N[one], T[otal], D[ir], F[ile], P[rocessing], [Q]uiet) '
@@ -38,11 +39,12 @@ const
     'D[+-!:]<def> Add(+), Remove(-), Clear(!) or Load(:) Defines ' +
     'H[+-!:]<def> Add(+), Remove(-), Clear(!) or Load(:) Held Defines' + DESCRIPTION_SUFFIX;
 
-  REPORT_HEADING = 'Current option settings:';
+  REPORT_HEADING = 'Current option settings: ';
+
+  FILE_REPORT_OPTIONS = 'Global name %s Config dir :Config\ Log dir :Log\ Base dir -(.\) Exclude Dirs';
+
   BASE_REPORT_OPTIONS = REPORT_HEADING +
-    ' Flags FinalToken+,LogErrors+,LogNotSupp-,Recurse-,Timestamp-,Verbose- ' +
-  //    'Recurse - Timestamp - Global name Delphi2XmlTests Config dir :Config\ ' +
-  //    'Log dir :Log\ Base dir -(.\) Parse mode Full Results per File Show elapsed Quiet ' +
+    'Flags FinalToken+,LogErrors+,LogNotSupp-,Recurse-,Timestamp-,Verbose- ' +
     'Parse mode Full Results per File Show elapsed Quiet ' +
     'Write XML :Xml,xml Write Defines -(Defines,def) Count Children :.chld ' +
     'Count Final Defines :.final Count Defines Used :.used Skipped Methods -(.skip) ';
@@ -64,6 +66,7 @@ const
     'contains Testing.Test.AUnit in ''Testing.Test.AUnit.pas''; end.';
 
 function UsageDescription: string;
+function GlobalDescription: string;
 
 implementation
 
@@ -73,10 +76,17 @@ uses
 const
   DESCRIPTION_PREFIX = 'Usage: %s [ Option | @Params | mFilename | Wildcard ] ... ' +
     'Options: Default Description';
+  GLOBAL_DESCRIPTION = ' G<str> %s Sets global name ';
 
 function UsageDescription: string;
 begin
   Result := Format(DESCRIPTION_PREFIX, [ChangeFileExt(ExtractFilename(ParamStr(0)), '')]);
 end;
+
+function GlobalDescription: string;
+begin
+  Result := Format(GLOBAL_DESCRIPTION, [ChangeFileExt(ExtractFilename(ParamStr(0)), '')]);
+end;
+
 
 end.

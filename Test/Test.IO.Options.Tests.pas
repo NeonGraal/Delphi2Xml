@@ -12,31 +12,17 @@ uses
   System.Classes,
   System.Diagnostics,
   System.SysUtils,
+  Test.Constants,
+  Test.IO.Options,
   Test.Param,
   TestFramework,
   Winapi.Windows;
 
 type
-  TD2XFileOptionsTest = class(TD2XFileOptions)
-  public
-    property OutputTimestamp: string read fOutputTimestamp;
-    property TimestampFiles: Boolean read GetTimestampFiles;
-
-  end;
-
-  TestTD2XFileOptions = class(TParamsTestCase)
+  TestTD2XFileFactory = class(TFileFactoryTestCase)
   private
-    fFileOpts: TD2XFileOptionsTest;
-    fValidatorCalled: Boolean;
-    fTimeBool: TD2XBoolFlag;
-    fTimeFlag: ID2XFlag;
-
     procedure CheckIO(var pDS: ID2XIO; pExp, pLabel: string);
     procedure CheckValidator(pLabel: string);
-    function TestValidator(pStr: string): Boolean;
-  public
-    procedure SetUp; override;
-    procedure TearDown; override;
   published
     procedure TestGobalName;
     procedure TestTimestampFiles;
@@ -51,6 +37,23 @@ type
 
     procedure TestFull;
     procedure TestFullBase;
+    procedure TestFullExcluding;
+  end;
+
+  TestTD2XFileOptions = class(TFileFactoryTestCase)
+  published
+    procedure TestParseB;
+    procedure TestParseG;
+    procedure TestParseI;
+    procedure TestParseO;
+    procedure TestParseX;
+
+    procedure TestForCode;
+    procedure TestDescribeAll;
+    procedure TestOutputAll;
+    procedure TestReportAll;
+    procedure TestResetAll;
+    procedure TestZeroAll;
 
   end;
 
@@ -64,9 +67,12 @@ type
     procedure TestConvertFile;
   end;
 
+const
+  FILE_CHANGED_OPTIONS = 'Global name :Test Config dir ::Test Log dir ::Test ' +
+    'Base dir -(:Test) Exclude Dirs';
   { TestTD2XFileOptions }
 
-procedure TestTD2XFileOptions.CheckIO(var pDS: ID2XIO; pExp, pLabel: string);
+procedure TestTD2XFileFactory.CheckIO(var pDS: ID2XIO; pExp, pLabel: string);
 begin
   try
     CheckEqualsString(pExp, pDS.Description, pLabel);
@@ -75,40 +81,18 @@ begin
   end;
 end;
 
-procedure TestTD2XFileOptions.CheckValidator(pLabel: string);
+procedure TestTD2XFileFactory.CheckValidator(pLabel: string);
 begin
   CheckTrue(fValidatorCalled, pLabel);
   fValidatorCalled := False;
 end;
 
-procedure TestTD2XFileOptions.SetUp;
-begin
-  inherited;
-
-  fTimeBool := TD2XBoolFlag.Create;
-  fTimeFlag := fTimeBool;
-
-  fFileOpts := TD2XFileOptionsTest.Create;
-  fFileOpts.SetGlobalValidator(TestValidator);
-  fFileOpts.SetTimestampFlag(fTimeFlag);
-  fFileOpts.RegisterParams(fParams);
-end;
-
-procedure TestTD2XFileOptions.TearDown;
-begin
-  FreeAndNil(fFileOpts);
-  fTimeFlag := nil;
-  FreeAndNil(fTimeBool);
-
-  inherited;
-end;
-
-procedure TestTD2XFileOptions.TestBaseDir;
+procedure TestTD2XFileFactory.TestBaseDir;
 var
   lBase: TD2XParam;
   lDS: ID2XIO;
 begin
-  lBase := fParams.ForCode('B');
+  lBase := ForCode('B');
 
   lDS := fFileOpts.BaseDir('Config');
   CheckIO(lDS, 'Config\', 'Default Dir');
@@ -129,12 +113,12 @@ begin
   CheckIO(lDS, 'Base\Config\', 'Base Dir');
 end;
 
-procedure TestTD2XFileOptions.TestBaseFile;
+procedure TestTD2XFileFactory.TestBaseFile;
 var
   lBase: TD2XParam;
   lDS: ID2XIO;
 begin
-  lBase := fParams.ForCode('B');
+  lBase := ForCode('B');
 
   lDS := fFileOpts.BaseFile('File.Extn');
   CheckIO(lDS, 'File.Extn', 'Default File');
@@ -155,14 +139,14 @@ begin
   CheckIO(lDS, 'Base\File.Extn', 'Base File');
 end;
 
-procedure TestTD2XFileOptions.TestConfigFileOrExtn;
+procedure TestTD2XFileFactory.TestConfigFileOrExtn;
 var
   lGlobal, lInput: TD2XParam;
   lDS: ID2XIO;
   pExtn: string;
 begin
-  lGlobal := fParams.ForCode('G');
-  lInput := fParams.ForCode('I');
+  lGlobal := ForCode('G');
+  lInput := ForCode('I');
   pExtn := '.Extn';
 
   lDS := fFileOpts.ConfigFileOrExtn('File.Extn');
@@ -185,7 +169,7 @@ begin
   lDS := fFileOpts.ConfigFileOrExtn(pExtn);
   CheckIO(lDS, fFileOpts.GlobalName + '.Extn', 'Input Off Default .Extn ');
 
-  fParams.ForCode('G').Parse('GGlobal');
+  ForCode('G').Parse('GGlobal');
   lDS := fFileOpts.ConfigFileOrExtn(pExtn);
   CheckIO(lDS, 'Global.Extn', 'Input Off Global .Extn');
 
@@ -198,7 +182,7 @@ begin
   lDS := fFileOpts.ConfigFileOrExtn(pExtn);
   CheckIO(lDS, 'Config\' + fFileOpts.GlobalName + '.Extn', 'Input On Default .Extn ');
 
-  fParams.ForCode('G').Parse('GGlobal');
+  ForCode('G').Parse('GGlobal');
   lDS := fFileOpts.ConfigFileOrExtn(pExtn);
   CheckIO(lDS, 'Config\Global.Extn', 'Input On Global .Extn');
 
@@ -211,12 +195,12 @@ begin
   lDS := fFileOpts.ConfigFileOrExtn(pExtn);
   CheckIO(lDS, 'In\' + fFileOpts.GlobalName + '.Extn', 'Input Default .Extn ');
 
-  fParams.ForCode('G').Parse('GGlobal');
+  ForCode('G').Parse('GGlobal');
   lDS := fFileOpts.ConfigFileOrExtn(pExtn);
   CheckIO(lDS, 'In\Global.Extn', 'Input Global .Extn');
 end;
 
-procedure TestTD2XFileOptions.TestFull;
+procedure TestTD2XFileFactory.TestFull;
 var
   lD, lSD: ID2XDir;
 begin
@@ -236,11 +220,14 @@ begin
 
     CheckTrue(lD.FirstDir, 'First Dir');
     try
+      CheckEqualsString('Test\DirExclude', lD.Current, 'Exclude Dir Name');
+      CheckTrue(lD.Next, 'Next Dir');
+
       CheckEqualsString('Test\DirTest', lD.Current, 'First Dir Name');
       lSD := fFileOpts.BaseDir(lD.Current);
       CheckEqualsString('Test\DirTest\', lSD.Description);
 
-      CheckFalse(lD.Next, 'Next Dir');
+      CheckFalse(lD.Next, 'Last Dir');
     finally
       lD.Close;
     end;
@@ -250,11 +237,11 @@ begin
   end;
 end;
 
-procedure TestTD2XFileOptions.TestFullBase;
+procedure TestTD2XFileFactory.TestFullBase;
 var
   lD, lSD: ID2XDir;
 begin
-  fParams.ForCode('B').Parse('B:Test');
+  ForCode('B').Parse('B:Test');
 
   lD := fFileOpts.BaseDir('DirTest');
   try
@@ -271,9 +258,39 @@ begin
 
     CheckTrue(lD.FirstDir, 'First Dir');
     try
+      CheckEqualsString('DirTest\SubDirExclude', lD.Current, 'Exclude Dir Name');
+      CheckTrue(lD.Next, 'Next Dir');
+
       CheckEqualsString('DirTest\SubDirTest', lD.Current, 'First Dir Name');
       lSD := fFileOpts.BaseDir(lD.Current);
       CheckEqualsString('Test\DirTest\SubDirTest\', lSD.Description, 'First Dir Description');
+
+      CheckFalse(lD.Next, 'Last Dir');
+    finally
+      lD.Close;
+    end;
+  finally
+    DisposeOf(lSD);
+    DisposeOf(lD);
+  end;
+end;
+
+procedure TestTD2XFileFactory.TestFullExcluding;
+var
+  lD, lSD: ID2XDir;
+begin
+  ForCode('X').Parse('XExclude');
+
+  lSD := nil;
+  lD := fFileOpts.BaseDir('Test');
+  try
+    CheckEqualsString('Test\', lD.Description, 'Dir Description');
+
+    CheckTrue(lD.FirstDir, 'First Dir');
+    try
+      CheckEqualsString('Test\DirTest', lD.Current, 'First Dir Name');
+      lSD := fFileOpts.BaseDir(lD.Current);
+      CheckEqualsString('Test\DirTest\', lSD.Description);
 
       CheckFalse(lD.Next, 'Next Dir');
     finally
@@ -285,7 +302,7 @@ begin
   end;
 end;
 
-procedure TestTD2XFileOptions.TestGetDuration;
+procedure TestTD2XFileFactory.TestGetDuration;
 var
   lW: TStopWatch;
 begin
@@ -295,7 +312,7 @@ begin
   CheckEquals(lW.Elapsed.TotalSeconds, fFileOpts.GetDuration(lW), 'Duration seconds');
 end;
 
-procedure TestTD2XFileOptions.TestGetInputStream;
+procedure TestTD2XFileFactory.TestGetInputStream;
 var
   lSR: TStreamReader;
 begin
@@ -308,18 +325,18 @@ begin
   end;
 end;
 
-procedure TestTD2XFileOptions.TestGetNow;
+procedure TestTD2XFileFactory.TestGetNow;
 begin
   CheckEqualsString(FormatDateTime('yyyy-mmm-dd HH:nn:ss.zzz', Now), fFileOpts.GetNow,
     'Get Now');
 end;
 
-procedure TestTD2XFileOptions.TestGobalName;
+procedure TestTD2XFileFactory.TestGobalName;
 var
   lGlobal: TD2XParam;
   lDefault: string;
 begin
-  lGlobal := fParams.ForCode('G');
+  lGlobal := ForCode('G');
   lDefault := ChangeFileExt(ExtractFileName(ParamStr(0)), '');
 
   CheckEqualsString(lDefault, fFileOpts.GlobalName, 'Default Global Name');
@@ -337,15 +354,15 @@ begin
   CheckValidator('Reset Global Name');
 end;
 
-procedure TestTD2XFileOptions.TestLogFileOrExtn;
+procedure TestTD2XFileFactory.TestLogFileOrExtn;
 var
   lGlobal, lOutput: TD2XParam;
   pExtn: string;
   lDS: ID2XIO;
 begin
   pExtn := '.Extn';
-  lGlobal := fParams.ForCode('G');
-  lOutput := fParams.ForCode('O');
+  lGlobal := ForCode('G');
+  lOutput := ForCode('O');
 
   lDS := fFileOpts.LogFileOrExtn('File.Extn');
   CheckIO(lDS, 'Log\File.Extn', 'Log File');
@@ -398,7 +415,7 @@ begin
   CheckIO(lDS, 'Out\Global.Extn', 'Output Global Extn');
 end;
 
-procedure TestTD2XFileOptions.TestSimpleFile;
+procedure TestTD2XFileFactory.TestSimpleFile;
 var
   lDS: ID2XIO;
 begin
@@ -406,14 +423,14 @@ begin
   CheckIO(lDS, 'File.Extn', 'Simple File');
 end;
 
-procedure TestTD2XFileOptions.TestTimestampFiles;
+procedure TestTD2XFileFactory.TestTimestampFiles;
 var
   lGlobal: TD2XParam;
   pExtn: string;
   lDS: ID2XIO;
 begin
   pExtn := '.Extn';
-  lGlobal := fParams.ForCode('G');
+  lGlobal := ForCode('G');
 
   CheckFalse(fFileOpts.TimestampFiles, 'Timestamp Files Default');
 
@@ -438,7 +455,7 @@ begin
   CheckIO(lDS, 'Log\' + fFileOpts.GlobalName + fFileOpts.OutputTimestamp + '.Extn',
     'On Timestamp Default Extn');
 
-  fParams.ForCode('G').Parse('GGlobal');
+  ForCode('G').Parse('GGlobal');
   lDS := fFileOpts.LogFileOrExtn(pExtn);
   CheckIO(lDS, 'Log\Global' + fFileOpts.OutputTimestamp + '.Extn', 'On Timestamp Global Extn');
 
@@ -466,15 +483,131 @@ begin
   CheckIO(lDS, 'Log\' + fFileOpts.GlobalName + fFileOpts.OutputTimestamp + '.Extn',
     'Timestamp Default Extn');
 
-  fParams.ForCode('G').Parse('GGlobal');
+  ForCode('G').Parse('GGlobal');
   lDS := fFileOpts.LogFileOrExtn(pExtn);
   CheckIO(lDS, 'Log\Global' + fFileOpts.OutputTimestamp + '.Extn', 'Timestamp Global Extn');
 end;
 
-function TestTD2XFileOptions.TestValidator(pStr: string): Boolean;
+{ TestTD2XFileOptions }
+
+procedure TestTD2XFileOptions.TestDescribeAll;
 begin
-  fValidatorCalled := True;
-  Result := True;
+  fParams.DescribeAll(fLog);
+  CheckLog(UsageDescription + GlobalDescription + FILE_SHOW_OPTIONS + DESCRIPTION_SUFFIX,
+    'Describe No Params');
+end;
+
+procedure TestTD2XFileOptions.TestForCode;
+begin
+  Check(Assigned(ForCode('I')), 'Code found for Input Param');
+  Check(Assigned(ForCode('O')), 'Code found for Output Param');
+  Check(Assigned(ForCode('B')), 'Code found for Base Param');
+  Check(Assigned(ForCode('G')), 'Code found for Global Param');
+  Check(Assigned(ForCode('X')), 'Code found for Exclusions Param');
+end;
+
+procedure TestTD2XFileOptions.TestOutputAll;
+var
+  lPrm: TD2XParam;
+begin
+  fParams.OutputAll(fL);
+  CheckList('-X:', 'Output No Params');
+
+  for lPrm in fParams do
+    lPrm.Convert(':Test');
+
+  fParams.OutputAll(fL);
+  CheckList('-G:Test -I::Test -O::Test -B-(:Test) -X:', 'All Params Changed');
+
+  fParams.ZeroAll;
+
+  fParams.OutputAll(fL);
+  CheckList('-G -I- -O- -B- -X:', 'All Params Zeroed');
+end;
+
+procedure TestTD2XFileOptions.TestParseB;
+var
+  lBase: TD2XParam;
+begin
+  lBase := ForCode('B');
+  CheckTrue(lBase.Parse('B'), 'Parse just Base code');
+end;
+
+procedure TestTD2XFileOptions.TestParseG;
+var
+  lGlobal: TD2XParam;
+begin
+  lGlobal := ForCode('G');
+  CheckTrue(lGlobal.Parse('G'), 'Parse just Global code');
+end;
+
+procedure TestTD2XFileOptions.TestParseI;
+var
+  lInput: TD2XParam;
+begin
+  lInput := ForCode('I');
+  CheckTrue(lInput.Parse('I'), 'Parse just Input code');
+end;
+
+procedure TestTD2XFileOptions.TestParseO;
+var
+  lOutput: TD2XParam;
+begin
+  lOutput := ForCode('O');
+  CheckTrue(lOutput.Parse('O'), 'Parse just Output code');
+end;
+
+procedure TestTD2XFileOptions.TestParseX;
+var
+  lExclude: TD2XParam;
+begin
+  lExclude := ForCode('X');
+  CheckFalse(lExclude.Parse('X'), 'Parse just Exclude code');
+end;
+
+procedure TestTD2XFileOptions.TestReportAll;
+begin
+  fParams.ReportAll(fLog);
+  CheckLog(REPORT_HEADING + FILE_REPORT_OPTIONS, 'All Params Default');
+end;
+
+procedure TestTD2XFileOptions.TestResetAll;
+var
+  lPrm: TD2XParam;
+begin
+  fParams.ReportAll(fLog);
+  CheckLog(REPORT_HEADING + FILE_REPORT_OPTIONS, 'All Params Default');
+
+  for lPrm in fParams do
+    lPrm.Convert(':Test');
+
+  fParams.ReportAll(fLog);
+  CheckLog(REPORT_HEADING + FILE_CHANGED_OPTIONS, 'All Params Changed');
+
+  fParams.ResetAll;
+
+  fParams.ReportAll(fLog);
+  CheckLog(REPORT_HEADING + FILE_REPORT_OPTIONS, 'All Params Reset');
+end;
+
+procedure TestTD2XFileOptions.TestZeroAll;
+var
+  lPrm: TD2XParam;
+begin
+  fParams.ReportAll(fLog);
+  CheckLog(REPORT_HEADING + FILE_REPORT_OPTIONS, 'All Params Default');
+
+  for lPrm in fParams do
+    lPrm.Convert(':Test');
+
+  fParams.ReportAll(fLog);
+  CheckLog(REPORT_HEADING + FILE_CHANGED_OPTIONS, 'All Params Changed');
+
+  fParams.ZeroAll;
+
+  fParams.ReportAll(fLog);
+  CheckLog(REPORT_HEADING + 'Global name Config dir - Log dir - Base dir - Exclude Dirs',
+    'All Params Zeroed');
 end;
 
 { TestTD2XOptionGeneral }
@@ -619,6 +752,7 @@ end;
 
 initialization
 
-RegisterTests('IO Options', [TestTD2XOptionGeneral.Suite, TestTD2XFileOptions.Suite]);
+RegisterTests('IO Options', [TestTD2XOptionGeneral.Suite, TestTD2XFileFactory.Suite,
+    TestTD2XFileOptions.Suite]);
 
 end.

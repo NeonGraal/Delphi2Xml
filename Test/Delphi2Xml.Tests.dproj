@@ -185,6 +185,7 @@
 			<DCCReference Include="Source\Test.Xml.pas"/>
 			<DCCReference Include="Test.Xml.Tests.pas"/>
 			<DCCReference Include="Source\Test.Global.pas"/>
+			<DCCReference Include="Source\Test.IO.Options.pas"/>
 			<None Include="Profiling\Delphi2Xml.Test.aqt"/>
 			<None Include="Config\Test.def"/>
 			<None Include="Config\Test.prm"/>

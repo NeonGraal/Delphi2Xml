@@ -4,10 +4,11 @@ interface
 
 uses
   D2X.Param,
+  Test.Global,
   TestFramework;
 
 type
-  TParamsTestCase = class(TTestCase)
+  TParamsTestCase = class(TLoggerTestCase)
   protected
     fParams: TD2XParams;
   public

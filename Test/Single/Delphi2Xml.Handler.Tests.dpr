@@ -9,7 +9,9 @@ uses
   System.StrUtils,
   Winapi.Windows,
   FastMM4Messages in '..\..\FastMM4\FastMM4Messages.pas',
-  Test.Handler.Tests in '..\Test.Handler.Tests.pas';
+  Test.Handler.Tests in '..\Test.Handler.Tests.pas',
+  D2X.Handler in '..\..\Source\D2X.Handler.pas',
+  Test.Handler in '..\Source\Test.Handler.pas';
 
 {$R *.RES}
 

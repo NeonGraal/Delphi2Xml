@@ -44,7 +44,8 @@ type
 implementation
 
 uses
-  Test.Utils;
+  Test.Utils,
+  System.StrUtils;
 
 type
   TD2XTestStream = class(TD2XInterfaced, ID2XFile)
@@ -131,7 +132,10 @@ end;
 
 procedure TLoggerTestCase.CheckLog(pExp, pLabel: string);
 begin
-  CheckBuilder(Format(pExp, [ChangeFileExt(ExtractFileName(ParamStr(0)), '')]), pLabel, fB);
+  if ContainsStr(pExp, '%s') then
+    CheckBuilder(Format(pExp, [ChangeFileExt(ExtractFileName(ParamStr(0)), '')]), pLabel, fB)
+  else
+    CheckBuilder(pExp, pLabel, fB);
 end;
 
 procedure TLoggerTestCase.SetUp;

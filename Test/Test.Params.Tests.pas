@@ -137,6 +137,29 @@ type
     procedure TestIsDefault;
   end;
 
+  TestTD2XListParam = class(TLoggerTestCase)
+  strict private
+    fListP: TD2XListParam;
+
+    procedure CheckListParam(pExp, pLbl: string);
+
+  public
+    procedure SetUp; override;
+    procedure TearDown; override;
+
+  published
+    procedure TestInvalidCreate;
+
+    procedure TestParse;
+    procedure TestReset;
+    procedure TestZero;
+    procedure TestDescribe;
+    procedure TestReport;
+    procedure TestOutput;
+    procedure TestToString;
+    procedure TestIsDefault;
+  end;
+
   TestTD2XStringParam = class(TLoggerTestCase)
   strict private
     fStrP: TD2XStringParam;
@@ -1007,16 +1030,16 @@ end;
 procedure TestTD2XParams.TestReportAll;
 begin
   fPs.ReportAll(fLog);
-  CheckLog(REPORT_HEADING, 'Report No Params');
+  CheckLog(Trim(REPORT_HEADING), 'Report No Params');
 
   fPs.Add(TD2XParam.Create('T', 'Test', '<tst>', 'Testing', TstParser));
   fPs.ReportAll(fLog);
-  CheckLog(REPORT_HEADING, 'Report One Param');
+  CheckLog(Trim(REPORT_HEADING), 'Report One Param');
 
   fPs.Add(TD2XSingleParam<Boolean>.CreateParam('B', 'Boolean', '[+|-]', 'Boolean param', False,
     TD2X.CnvDflt<Boolean>, TstFormatter, nil));
   fPs.ReportAll(fLog);
-  CheckLog(REPORT_HEADING + ' Boolean -', 'Report Two Params');
+  CheckLog(REPORT_HEADING + 'Boolean -', 'Report Two Params');
 end;
 
 procedure TestTD2XParams.TestResetAll;
@@ -1036,19 +1059,19 @@ begin
   fPs.Add(lFP);
 
   fPs.ReportAll(fLog);
-  CheckLog(REPORT_HEADING + ' Boolean - String Str Flagged :Flg', 'All Params Default');
+  CheckLog(REPORT_HEADING + 'Boolean - String Str Flagged :Flg', 'All Params Default');
 
   lBP.Value := True;
   lSP.Value := 'Value';
   lFP.Value := 'Value';
   ID2XFlag(lFP).Flag := False;
   fPs.ReportAll(fLog);
-  CheckLog(REPORT_HEADING + ' Boolean + String Value Flagged -(Value)', 'All Params Changed');
+  CheckLog(REPORT_HEADING + 'Boolean + String Value Flagged -(Value)', 'All Params Changed');
 
   fPs.ResetAll;
 
   fPs.ReportAll(fLog);
-  CheckLog(REPORT_HEADING + ' Boolean - String Str Flagged :Flg', 'All Params Reset');
+  CheckLog(REPORT_HEADING + 'Boolean - String Str Flagged :Flg', 'All Params Reset');
 end;
 
 procedure TestTD2XParams.TestZeroAll;
@@ -1068,19 +1091,19 @@ begin
   fPs.Add(lFP);
 
   fPs.ReportAll(fLog);
-  CheckLog(REPORT_HEADING + ' Boolean - String Str Flagged -(Flg)', 'All Params Default');
+  CheckLog(REPORT_HEADING + 'Boolean - String Str Flagged -(Flg)', 'All Params Default');
 
   lBP.Value := True;
   lSP.Value := 'Value';
   lFP.Value := 'Value';
   ID2XFlag(lFP).Flag := True;
   fPs.ReportAll(fLog);
-  CheckLog(REPORT_HEADING + ' Boolean + String Value Flagged :Value', 'All Params Changed');
+  CheckLog(REPORT_HEADING + 'Boolean + String Value Flagged :Value', 'All Params Changed');
 
   fPs.ZeroAll;
 
   fPs.ReportAll(fLog);
-  CheckLog(REPORT_HEADING + ' Boolean - String Flagged -', 'All Params Zeroed');
+  CheckLog(REPORT_HEADING + 'Boolean - String Flagged -', 'All Params Zeroed');
 end;
 
 function TestTD2XParams.TstFormatter(pVal: Boolean): string;
@@ -1898,11 +1921,144 @@ begin
   CheckEquals(False, fFlagsP.ByCode['2'].Flag, 'Default Value Set');
 end;
 
+{ TestTD2XListParam }
+
+const
+  LIST_TEST_VALUE = 'Alpha,Beta,Gamma';
+
+procedure TestTD2XListParam.CheckListParam(pExp, pLbl: string);
+begin
+  CheckList(pExp, pLbl, fListP.List);
+end;
+
+procedure TestTD2XListParam.SetUp;
+begin
+  inherited;
+
+  fListP := TD2XListParam.CreateList('T', 'Test', 'Test', '.tst',
+    function(pFile: string): ID2XFile
+    begin
+      Result := TTestFile.Create('Config\' + pFile, True, 'Tango'#13#10'Uniform', nil);
+    end);
+end;
+
+procedure TestTD2XListParam.TearDown;
+begin
+  FreeAndNil(fListP);
+
+  inherited;
+end;
+
+procedure TestTD2XListParam.TestDescribe;
+begin
+  fListP.Describe(fLog);
+  CheckLog('T[!:]<list> Clear(!), Load(:,.tst) or Add items to Test', 'Describe Param');
+end;
+
+procedure TestTD2XListParam.TestInvalidCreate;
+begin
+  StartExpectingException(EInvalidParam);
+  try
+    TD2XListParam.Create('', '', '', '', nil);
+  except
+    on E: EInvalidParam do
+    begin
+      CheckEqualsString('Need to use correct constructor', E.Message, 'Exception message');
+      raise;
+    end;
+  end;
+end;
+
+procedure TestTD2XListParam.TestIsDefault;
+begin
+  Check(fListP.IsDefault, 'Check is Default');
+
+  fListP.List.CommaText := LIST_TEST_VALUE;
+  CheckFalse(fListP.IsDefault, 'Check is not Default');
+
+  fListP.Reset;
+  Check(fListP.IsDefault, 'Check is Default');
+end;
+
+procedure TestTD2XListParam.TestOutput;
+begin
+  fListP.Output(fL);
+  CheckList('-T:', 'Report Default Value');
+
+  fListP.List.CommaText := LIST_TEST_VALUE;
+  fListP.Output(fL);
+  CheckList('-T: -T+Alpha,Beta,Gamma', 'Report Blank value on');
+end;
+
+procedure TestTD2XListParam.TestParse;
+begin
+  CheckListParam('', 'Default Value Set');
+  fListP.Report(fLog);
+  CheckLog('Test', 'Report Default value');
+
+  CheckFalse(fListP.Parse('T'), 'Parse right code with No value');
+  fListP.Report(fLog);
+  CheckLog('Test', 'Report Default value');
+
+  Check(fListP.Parse('TTest'), 'Parse right code add value');
+  fListP.Report(fLog);
+  CheckLog('Test Test', 'Report add value');
+
+  Check(fListP.Parse('TTest1,Test2'), 'Parse right code add values');
+  fListP.Report(fLog);
+  CheckLog('Test Test, Test1, Test2', 'Report add values');
+
+  Check(fListP.Parse('T:Test'), 'Parse right code set file');
+  fListP.Report(fLog);
+  CheckLog('Test Tango, Uniform', 'Report set file');
+end;
+
+procedure TestTD2XListParam.TestReport;
+begin
+  fListP.Report(fLog);
+  CheckLog('Test', 'Report Default Value');
+
+  fListP.List.CommaText := LIST_TEST_VALUE;
+  fListP.Report(fLog);
+  CheckLog('Test Alpha, Beta, Gamma', 'Report Blank value on');
+end;
+
+procedure TestTD2XListParam.TestReset;
+begin
+  CheckList('', 'Default Value Set', fListP.List);
+
+  fListP.List.CommaText := LIST_TEST_VALUE;
+  CheckList('Alpha Beta Gamma', 'Simple Value Set', fListP.List);
+
+  fListP.Reset;
+  CheckList('', 'Default Value Reset', fListP.List);
+end;
+
+procedure TestTD2XListParam.TestToString;
+begin
+  CheckEqualsString('T', fListP.ToString, 'Check Default Value');
+
+  fListP.List.CommaText := LIST_TEST_VALUE;
+  CheckEqualsString('T', fListP.ToString, 'Blank value on');
+end;
+
+procedure TestTD2XListParam.TestZero;
+begin
+  CheckList('', 'Default Value Set', fListP.List);
+
+  fListP.List.CommaText := LIST_TEST_VALUE;
+  CheckList('Alpha Beta Gamma', 'Simple Value Set', fListP.List);
+
+  fListP.Zero;
+  CheckList('', 'Default Value Reset', fListP.List);
+end;
+
 initialization
 
 RegisterTests('Params', [TestTD2XParam.Suite, TestTD2XParams.Suite, TestTD2XSingleParam.Suite,
-  TestTD2XFlagsParam.Suite, TestTD2XStringParam.Suite, TestTD2XValidStringParam.Suite,
-  TestTD2XFormatStringParam.Suite, TestTD2XFormatValidStringParam.Suite,
-  TestTD2XFlaggedStringParam.Suite, TestTD2XDefinesParam.Suite]);
+  TestTD2XFlagsParam.Suite, TestTD2XListParam.Suite, TestTD2XStringParam.Suite,
+  TestTD2XValidStringParam.Suite, TestTD2XFormatStringParam.Suite,
+  TestTD2XFormatValidStringParam.Suite, TestTD2XFlaggedStringParam.Suite,
+  TestTD2XDefinesParam.Suite]);
 
 end.

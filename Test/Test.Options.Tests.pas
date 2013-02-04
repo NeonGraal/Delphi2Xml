@@ -292,7 +292,7 @@ const
   FULLDIR_PROCESSING = DIRECTORY_PROCESSING + ' ' + RECURSE_PROCESSING;
   END_PROCESSING = ' Processing finished!';
   ALL_PROCESSING = BOTH_PROCESSING + ' ' + FULLDIR_PROCESSING;
-  ALTERED_REPORT_OPTIONS = REPORT_HEADING + ' Flags ' +
+  ALTERED_REPORT_OPTIONS = REPORT_HEADING + 'Flags ' +
     'FinalToken+,LogErrors+,LogNotSupp+,Recurse+,Timestamp-,Verbose+ ' +
   //    'Recurse + Timestamp - Global name :Test Config dir :Test\ Log dir :Test\ ' +
   //    'Base dir :Test\ Parse mode Full Results per File Show elapsed Quiet ' +
@@ -300,7 +300,7 @@ const
     'Write XML :Test,xml Write Defines :Test,def Count Children :.Test ' +
     'Count Final Defines :.Test Count Defines Used :.Test Skipped Methods :Test.skip ' +
     'Defines TANGO, UNIFORM, VICTOR Held Defines TANGO, UNIFORM, VICTOR';
-  ZERO_REPORT_OPTIONS = REPORT_HEADING + ' Flags ' +
+  ZERO_REPORT_OPTIONS = REPORT_HEADING + 'Flags ' +
     'FinalToken-,LogErrors-,LogNotSupp-,Recurse-,Timestamp-,Verbose- ' +
   //    'Recurse - Timestamp - Global name Config dir - Log dir - Base dir - ' +
   //    'Parse mode Full Results per File Show elapsed None Write XML - ' +
@@ -931,7 +931,7 @@ procedure TestTD2XOptionsSpecific.TestElapsedMode;
   begin
     Result := pS + ' ';
     for lI in pPs do
-      Result := Result + Format('%3d%%%%'#8#8#8#8, [lI]);
+      Result := Result + Format('%3d%%'#8#8#8#8, [lI]);
     Result := Result + '1.234';
   end;
   function PD(pDir: string; pFiles: array of string): string;
