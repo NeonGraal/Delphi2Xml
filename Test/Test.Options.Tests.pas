@@ -304,8 +304,9 @@ const
     'FinalToken-,LogErrors-,LogNotSupp-,Recurse-,Timestamp-,Verbose- ' +
   //    'Recurse - Timestamp - Global name Config dir - Log dir - Base dir - ' +
   //    'Parse mode Full Results per File Show elapsed None Write XML - ' +
-    'Parse mode Full Results per File Show elapsed None Write XML - Write Defines - ' +
-    'Count Children - Count Final Defines - Count Defines Used - Skipped Methods - ' +
+    'Parse mode Full Results per File Show elapsed None Write XML -(,xml) ' +
+    'Write Defines -(,def) Count Children -(.chld) Count Final Defines -(.final) ' +
+    'Count Defines Used -(.used) Skipped Methods -(.skip) ' +
     'Defines Default Held Defines Default';
   EMPTY_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Defines NONE Held Defines Default';
 {$IFDEF WIN32}
@@ -338,7 +339,7 @@ var
 begin
   lPrm := TD2XSingleParam<TD2XElapsedMode>.CreateParam('T', 'Test', '<tst>',
     'Test Elapsed mode', emQuiet, TD2X.CnvDflt<TD2XElapsedMode>,
-    TD2X.ToLabel<TD2XElapsedMode>, nil);
+    TD2X.ToLabel<TD2XElapsedMode>, nil, nil);
   try
     lPrm.Describe(fLog);
     CheckLog('T<tst> Quiet Test Elapsed mode', 'Describe Param');
@@ -378,7 +379,7 @@ var
   lPrm: TD2XSingleParam<TD2XParseMode>;
 begin
   lPrm := TD2XSingleParam<TD2XParseMode>.CreateParam('T', 'Test', '<tst>', 'Test Parse mode',
-    pmFull, TD2X.CnvDflt<TD2XParseMode>, TD2X.ToLabel<TD2XParseMode>, nil);
+    pmFull, TD2X.CnvDflt<TD2XParseMode>, TD2X.ToLabel<TD2XParseMode>, nil, nil);
   try
     lPrm.Describe(fLog);
     CheckLog('T<tst> Full Test Parse mode', 'Describe Param');
@@ -418,7 +419,7 @@ var
   lPrm: TD2XSingleParam<TD2XResultPer>;
 begin
   lPrm := TD2XSingleParam<TD2XResultPer>.CreateParam('T', 'Test', '<tst>', 'Test Parse mode',
-    rpFile, TD2X.CnvDflt<TD2XResultPer>, TD2X.ToLabel<TD2XResultPer>, nil);
+    rpFile, TD2X.CnvDflt<TD2XResultPer>, TD2X.ToLabel<TD2XResultPer>, nil, nil);
   try
     lPrm.Describe(fLog);
     CheckLog('T<tst> File Test Parse mode', 'Describe Param');
@@ -1422,7 +1423,7 @@ var
 begin
   lPM := TD2XSingleParam<TD2XParseMode>.CreateParam('M', 'Parse mode', '<mode>',
     'Parser type (F[ull], U[ses])', pmFull, TD2X.CnvEnum<TD2XParseMode>,
-    TD2X.ToLabel<TD2XParseMode>, nil);
+    TD2X.ToLabel<TD2XParseMode>, nil, nil);
   try
     lPM.Convert('Uses');
     Check(pmUses = lPM.Value, 'Parse mode convert');
@@ -1432,7 +1433,7 @@ begin
 
   lRP := TD2XSingleParam<TD2XResultPer>.CreateParam('P', 'Results per', '<per>',
     'Result per (F[ile], S[ubdir], D[ir], W[ildcard], P[aram], R[un])', rpFile,
-    TD2X.CnvEnum<TD2XResultPer>, TD2X.ToLabel<TD2XResultPer>, nil);
+    TD2X.CnvEnum<TD2XResultPer>, TD2X.ToLabel<TD2XResultPer>, nil, nil);
   try
     lRP.Convert('Dir');
     Check(rpDir = lRP.Value, 'Results per convert');
@@ -1441,7 +1442,7 @@ begin
   end;
   lEM := TD2XSingleParam<TD2XElapsedMode>.CreateParam('E', 'Show elapsed', '<mode>',
     'Elapsed time display (N[one], T[otal], D[ir], F[ile], P[rocessing], [Q]uiet)', emQuiet,
-    TD2X.CnvEnum<TD2XElapsedMode>, TD2X.ToLabel<TD2XElapsedMode>, nil);
+    TD2X.CnvEnum<TD2XElapsedMode>, TD2X.ToLabel<TD2XElapsedMode>, nil, nil);
   try
     lEM.Convert('Dir');
     Check(emDir = lEM.Value, 'Elapsed mode convert');

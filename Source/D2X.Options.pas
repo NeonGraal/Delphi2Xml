@@ -631,13 +631,13 @@ begin
   fHeldDefines := TD2XDefinesParam.CreateDefines('H', 'Held Defines', ConfigFileOrExtn);
 
   lCountDefinesUsed := TD2XFlaggedStringParam.CreateFlagStr('CU', 'Count Defines Used', '<f/e>',
-    'Count Defines Used into <f/e>', '.used', True, ConvertExtn, nil, nil);
+    'Count Defines Used into <f/e>', '.used', True, ConvertExtn, nil, nil, nil);
   lSkipMethods := TD2XFlaggedStringParam.CreateFlagStr('S', 'Skipped Methods', '<f/e>',
-    'Load Skipped Methods from <f/e>', '.skip', False, ConvertFile, nil, nil);
+    'Load Skipped Methods from <f/e>', '.skip', False, ConvertFile, nil, nil, nil);
   lCountChildren := TD2XFlaggedStringParam.CreateFlagStr('CC', 'Count Children', '<f/e>',
-    'Report Min/Max Children into <f/e>', '.chld', True, ConvertExtn, nil, nil);
+    'Report Min/Max Children into <f/e>', '.chld', True, ConvertExtn, nil, nil, nil);
   lCountFinalDefines := TD2XFlaggedStringParam.CreateFlagStr('CF', 'Count Final Defines', '<f/e>',
-    'Count Final Defines into <f/e>', '.final', True, ConvertExtn, nil, nil);
+    'Count Final Defines into <f/e>', '.final', True, ConvertExtn, nil, nil, nil);
 
   lParserDefinesHandler := TD2XParserDefinesHandler.CreateDefines(fParserDefines.Defines);
   lHeldDefinesHandler := TD2XHeldDefinesHandler.CreateDefines(fHeldDefines.Defines);
@@ -736,19 +736,18 @@ begin
 
   fParseMode := TD2XSingleParam<TD2XParseMode>.CreateParam('M', 'Parse mode', '<mode>',
     'Parser type (F[ull], U[ses])', pmFull, TD2X.CnvEnum<TD2XParseMode>,
-    TD2X.ToLabel<TD2XParseMode>,
-    function(pVal: TD2XParseMode): Boolean
+    TD2X.ToLabel<TD2XParseMode>, nil,
+    procedure(pOld, pNew, pDflt: TD2XParseMode)
     begin
-      Result := True;
-      if pVal = pmUses then
+      if pNew = pmUses then
         fIOFact.SetGlobalName('Uses');
     end);
   fResultPer := TD2XSingleParam<TD2XResultPer>.CreateParam('P', 'Results per', '<per>',
     'Result per (F[ile], S[ubdir], D[ir], W[ildcard], P[aram], R[un])', rpFile,
-    TD2X.CnvEnum<TD2XResultPer>, TD2X.ToLabel<TD2XResultPer>, nil);
+    TD2X.CnvEnum<TD2XResultPer>, TD2X.ToLabel<TD2XResultPer>, nil, nil);
   fElapsedMode := TD2XSingleParam<TD2XElapsedMode>.CreateParam('E', 'Show elapsed', '<mode>',
     'Elapsed time display (N[one], T[otal], D[ir], F[ile], P[rocessing], [Q]uiet)', emQuiet,
-    TD2X.CnvEnum<TD2XElapsedMode>, TD2X.ToLabel<TD2XElapsedMode>, nil);
+    TD2X.CnvEnum<TD2XElapsedMode>, TD2X.ToLabel<TD2XElapsedMode>, nil, nil);
 
   fXmlHandler := TD2XXmlHandler.CreateXml(fFlags.ByLabel['FinalToken'],
     function: string
@@ -759,10 +758,10 @@ begin
 
   lWriteXml := TD2XFlaggedStringParam.CreateFlagStr('WX', 'Write XML', '<d/e>',
     'Write XML files into current or given <d/e>', 'Xml,xml', True, ConvertDirExtn,
-    nil, nil);
+    nil, nil, nil);
   lWriteDefines := TD2XFlaggedStringParam.CreateFlagStr('WD', 'Write Defines', '<d/e>',
     'Write Final Defines files into current or given <d/e>', 'Defines,def', False,
-    ConvertDirExtn, nil, nil);
+    ConvertDirExtn, nil, nil, nil);
 
   fProcs.Add(TD2XHandlerProcessor.CreateHandler(lWriteXml, fXmlHandler, True)
     .SetResultsOutput(MakeNamedRef(lWriteXml)));

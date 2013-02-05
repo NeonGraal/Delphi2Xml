@@ -64,12 +64,14 @@ type
     TspConverter = reference to function(pStr: string; pDflt: T; out pVal: T): Boolean;
     TspFormatter = reference to function(pVal: T): string;
     TspValidator = reference to function(pVal: T): Boolean;
+    TspOnSet = reference to procedure(pOld, pNew, pDflt: T);
 
   public
     constructor Create(pCode, pLabel, pSample, pDescr: string;
       pParser: TD2XStringCheckRef); override;
     constructor CreateParam(pCode, pLabel, pSample, pDescr: string; pDefault: T;
-      pConverter: TspConverter; pFormatter: TspFormatter; pValidator: TspValidator); virtual;
+      pConverter: TspConverter; pFormatter: TspFormatter; pValidator: TspValidator;
+      pOnSet: TspOnSet); virtual;
 
     procedure Convert(pStr: string); override;
     procedure Output(pSL: TStringList); override;
@@ -88,6 +90,7 @@ type
     fConverter: TspConverter;
     fValidator: TspValidator;
     fValue: T;
+    fOnSet: TspOnSet;
 
     function CheckValue(pVal: T): Boolean;
     function ConvertAndSet(pStr: string): Boolean;
@@ -320,7 +323,11 @@ var
 begin
   Result := fConverter(pStr, fDefault, lVal) and CheckValue(lVal);
   if Result then
+  begin
+    if Assigned(fOnSet) then
+      fOnSet(fValue, lVal, fDefault);
     fValue := lVal;
+  end;
 end;
 
 constructor TD2XSingleParam<T>.Create(pCode, pLabel, pSample, pDescr: string;
@@ -331,7 +338,7 @@ end;
 
 constructor TD2XSingleParam<T>.CreateParam(pCode, pLabel, pSample, pDescr: string; pDefault: T;
   pConverter: TspConverter; pFormatter: TspFormatter;
-  pValidator: TspValidator);
+  pValidator: TspValidator; pOnSet: TspOnSet);
 begin
   inherited Create(pCode, pLabel, pSample, pDescr, ConvertAndSet);
 
@@ -344,6 +351,7 @@ begin
   fConverter := pConverter;
   fFormatter := pFormatter;
   fValidator := pValidator;
+  fOnSet := pOnSet;
 
   Reset;
 end;
@@ -379,7 +387,11 @@ end;
 procedure TD2XSingleParam<T>.Reset;
 begin
   if CheckValue(fDefault) then
-    fValue := fDefault
+  begin
+    if Assigned(fOnSet) then
+      fOnSet(fValue, fDefault, fDefault);
+    fValue := fDefault;
+  end
   else
     raise EInvalidParam.Create('Invalid default value');
 end;
@@ -387,14 +399,23 @@ end;
 procedure TD2XSingleParam<T>.SetValue(const pVal: T);
 begin
   if CheckValue(pVal) then
-    fValue := pVal
+  begin
+    if Assigned(fOnSet) then
+      fOnSet(fValue, pVal, fDefault);
+    fValue := pVal;
+  end
   else
     raise EInvalidParam.Create('Invalid value');
 end;
 
 procedure TD2XSingleParam<T>.Zero;
+var
+  lVal: T;
 begin
-  fValue := TD2X.Zero<T>;
+  lVal := TD2X.Zero<T>;
+  if Assigned(fOnSet) then
+    fOnSet(fValue, lVal, fDefault);
+  fValue := lVal;
 end;
 
 end.

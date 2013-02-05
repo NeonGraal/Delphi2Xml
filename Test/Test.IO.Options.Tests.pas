@@ -531,6 +531,10 @@ var
 begin
   lBase := ForCode('B');
   CheckTrue(lBase.Parse('B'), 'Parse just Base code');
+  CheckTrue(lBase.Parse('B-'), 'Parse Base Off');
+  CheckTrue(lBase.Parse('B+'), 'Parse Base On');
+  CheckTrue(lBase.Parse('B!'), 'Parse Base Reset');
+  CheckTrue(lBase.Parse('B:Base'), 'Parse Base Value');
 end;
 
 procedure TestTD2XFileOptions.TestParseG;
