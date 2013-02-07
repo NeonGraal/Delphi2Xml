@@ -157,7 +157,7 @@ end;
 
 function TD2XHandlerTester.UseProxy: Boolean;
 begin
-  CalledUseProxy := True;
+  CalledUseProxy := true;
   Result := inherited UseProxy;
 end;
 
@@ -165,7 +165,7 @@ end;
 
 procedure TD2XParserHandlerTester.InitParser(pParser: TD2XDefinesParser);
 begin
-  CalledInitParser := True;
+  CalledInitParser := true;
   inherited;
 end;
 

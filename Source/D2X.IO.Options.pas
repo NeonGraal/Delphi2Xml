@@ -232,13 +232,13 @@ end;
 procedure TD2XFileOptions.SetGlobalValidator(pValidator: TD2XSingleParam<string>.TspValidator);
 begin
   fConfigBase := TD2XFlaggedStringParam.CreateFlagStr('I', 'Config dir', '<dir>',
-    'Use <dir> as a base for all Config files', 'Config\', True, ConvertDir, nil, nil, nil);
+    'Use <dir> as a base for all Config files', 'Config\', True, ConvertDir);
   fLogBase := TD2XFlaggedStringParam.CreateFlagStr('O', 'Log dir', '<dir>',
-    'Use <dir> as a base for all Log files', 'Log\', True, ConvertDir, nil, nil, nil);
+    'Use <dir> as a base for all Log files', 'Log\', True, ConvertDir);
   fInputBase := TD2XFlaggedStringParam.CreateFlagStr('B', 'Base dir', '<dir>',
-    'Use <dir> as a base for all Input files', '.\', False, ConvertDir, nil, nil, nil);
-  fGlobalName := TD2XStringParam.CreateStr('G', 'Global name', '<str>', 'Sets global name',
-    ChangeFileExt(ExtractFileName(ParamStr(0)), ''),
+    'Use <dir> as a base for all Input files', '.\', False, ConvertDir);
+  fGlobalName := TD2XStringParam.CreateStrValid('G', 'Global name', '<str>',
+    'Sets global name', ChangeFileExt(ExtractFileName(ParamStr(0)), ''),
       function(pStr: string; pDflt: string; out pVal: string): Boolean
     begin
       Result := True;
@@ -246,7 +246,7 @@ begin
         pVal := ChangeFileExt(ExtractFileName(ParamStr(0)), '')
       else
         pVal := pStr;
-    end, pValidator, nil);
+    end, pValidator);
   fExcludeDirs := TD2XListParam.CreateList('X', 'Exclude Dirs',
     'Exclude dirs matching these strings', '.xdre', ConfigFileOrExtn);
 
@@ -264,4 +264,3 @@ begin
 end;
 
 end.
-

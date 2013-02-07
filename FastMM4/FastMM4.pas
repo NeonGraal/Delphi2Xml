@@ -1242,14 +1242,14 @@ var
 function FastGetMem(ASize: {$IFDEF XE2AndUp}NativeInt{$ELSE}Integer{$ENDIF}): Pointer;
 function FastFreeMem(APointer: Pointer): Integer;
 function FastReallocMem(APointer: Pointer; ANewSize:
-  {$IFDEF XE2AndUp}NativeInt{$ELSE}Integer{$ENDIF}): Pointer;
+{$IFDEF XE2AndUp}NativeInt{$ELSE}Integer{$ENDIF}): Pointer;
 function FastAllocMem(ASize: {$IFDEF XE2AndUp}NativeInt{$ELSE}Cardinal{$ENDIF}): Pointer;
 {$ELSE}
   {The FullDebugMode memory manager functions}
 function DebugGetMem(ASize: {$IFDEF XE2AndUp}NativeInt{$ELSE}Integer{$ENDIF}): Pointer;
 function DebugFreeMem(APointer: Pointer): Integer;
 function DebugReallocMem(APointer: Pointer; ANewSize:
-  {$IFDEF XE2AndUp}NativeInt{$ELSE}Integer{$ENDIF}): Pointer;
+{$IFDEF XE2AndUp}NativeInt{$ELSE}Integer{$ENDIF}): Pointer;
 function DebugAllocMem(ASize: {$IFDEF XE2AndUp}NativeInt{$ELSE}Cardinal{$ENDIF}): Pointer;
 {Scans the memory pool for any corruptions. If a corruption is encountered an "Out of Memory" exception is
  raised.}
@@ -1491,11 +1491,11 @@ procedure Move56(const ASource; var ADest; ACount: NativeInt); forward;
 {Invalid handlers to catch MM operations after uninstall}
 function InvalidFreeMem(APointer: Pointer): Integer; forward;
 function InvalidGetMem(ASize:
-  {$IFDEF XE2AndUp}NativeInt{$ELSE}Integer{$ENDIF}): Pointer; forward;
+{$IFDEF XE2AndUp}NativeInt{$ELSE}Integer{$ENDIF}): Pointer; forward;
 function InvalidReallocMem(APointer: Pointer; ANewSize:
-  {$IFDEF XE2AndUp}NativeInt{$ELSE}Integer{$ENDIF}): Pointer; forward;
+{$IFDEF XE2AndUp}NativeInt{$ELSE}Integer{$ENDIF}): Pointer; forward;
 function InvalidAllocMem(ASize:
-  {$IFDEF XE2AndUp}NativeInt{$ELSE}Cardinal{$ENDIF}): Pointer; forward;
+{$IFDEF XE2AndUp}NativeInt{$ELSE}Cardinal{$ENDIF}): Pointer; forward;
 function InvalidRegisterAndUnRegisterMemoryLeak(APointer: Pointer): Boolean; forward;
 {$ENDIF}
 
@@ -1863,31 +1863,31 @@ var
 {$IFNDEF Align16Bytes}
     (
       BlockSize: 8
-      {$IFDEF UseCustomFixedSizeMoveRoutines}; UpsizeMoveProcedure: Move4{$ENDIF}),
+{$IFDEF UseCustomFixedSizeMoveRoutines}; UpsizeMoveProcedure: Move4{$ENDIF}),
 {$ENDIF}
     (BlockSize: 16 {$IFDEF UseCustomFixedSizeMoveRoutines}; UpsizeMoveProcedure:
-      {$IFDEF 32Bit}Move12{$ELSE}Move8{$ENDIF}{$ENDIF}),
+{$IFDEF 32Bit}Move12{$ELSE}Move8{$ENDIF}{$ENDIF}),
 {$IFNDEF Align16Bytes}
     (BlockSize: 24
-      {$IFDEF UseCustomFixedSizeMoveRoutines}; UpsizeMoveProcedure: Move20{$ENDIF}),
+{$IFDEF UseCustomFixedSizeMoveRoutines}; UpsizeMoveProcedure: Move20{$ENDIF}),
 {$ENDIF}
     (BlockSize: 32 {$IFDEF UseCustomFixedSizeMoveRoutines}; UpsizeMoveProcedure:
-      {$IFDEF 32Bit}Move28{$ELSE}Move24{$ENDIF}{$ENDIF}),
+{$IFDEF 32Bit}Move28{$ELSE}Move24{$ENDIF}{$ENDIF}),
 {$IFNDEF Align16Bytes}
     (BlockSize: 40
-      {$IFDEF UseCustomFixedSizeMoveRoutines}; UpsizeMoveProcedure: Move36{$ENDIF}),
+{$IFDEF UseCustomFixedSizeMoveRoutines}; UpsizeMoveProcedure: Move36{$ENDIF}),
 {$ENDIF}
     (BlockSize: 48 {$IFDEF UseCustomFixedSizeMoveRoutines}; UpsizeMoveProcedure:
-      {$IFDEF 32Bit}Move44{$ELSE}Move40{$ENDIF}{$ENDIF}),
+{$IFDEF 32Bit}Move44{$ELSE}Move40{$ENDIF}{$ENDIF}),
 {$IFNDEF Align16Bytes}
     (BlockSize: 56
-      {$IFDEF UseCustomFixedSizeMoveRoutines}; UpsizeMoveProcedure: Move52{$ENDIF}),
+{$IFDEF UseCustomFixedSizeMoveRoutines}; UpsizeMoveProcedure: Move52{$ENDIF}),
 {$ENDIF}
     (BlockSize: 64 {$IFDEF UseCustomFixedSizeMoveRoutines}; UpsizeMoveProcedure:
-      {$IFDEF 32Bit}Move60{$ELSE}Move56{$ENDIF}{$ENDIF}),
+{$IFDEF 32Bit}Move60{$ELSE}Move56{$ENDIF}{$ENDIF}),
 {$IFNDEF Align16Bytes}
     (BlockSize: 72
-      {$IFDEF UseCustomFixedSizeMoveRoutines}; UpsizeMoveProcedure: Move68{$ENDIF}),
+{$IFDEF UseCustomFixedSizeMoveRoutines}; UpsizeMoveProcedure: Move68{$ENDIF}),
 {$ENDIF}
     (BlockSize: 80),
 {$IFNDEF Align16Bytes}
@@ -4224,7 +4224,7 @@ var
   LNewFirstFreeBlock: Pointer;
   LPMediumBin: PMediumFreeBlock;
   LBinNumber, {$IFNDEF FullDebugMode}LBinGroupsMasked,
-  {$ENDIF}LBinGroupMasked, LBinGroupNumber: Cardinal;
+{$ENDIF}LBinGroupMasked, LBinGroupNumber: Cardinal;
 begin
   {Is it a small block? -> Take the header size into account when
    determining the required block size}
@@ -4576,7 +4576,7 @@ begin
       {Check that this block is actually free and the next and previous blocks
        are both in use (except in full debug mode).}
       if ((PNativeUInt(PByte(Result) - BlockHeaderSize)^ and
-          {$IFNDEF FullDebugMode}ExtractMediumAndLargeFlagsMask{$ELSE}(IsMediumBlockFlag or
+{$IFNDEF FullDebugMode}ExtractMediumAndLargeFlagsMask{$ELSE}(IsMediumBlockFlag or
               IsFreeBlockFlag){$ENDIF}) <> (IsFreeBlockFlag or IsMediumBlockFlag))
 {$IFNDEF FullDebugMode}
         or ((PNativeUInt(PByte(Result) + (PNativeUInt(PByte(Result) - BlockHeaderSize)^ and
@@ -6430,7 +6430,7 @@ end;
 
 {Replacement for SysReallocMem}
 function FastReallocMem(APointer: Pointer; ANewSize:
-  {$IFDEF XE2AndUp}NativeInt{$ELSE}Integer{$ENDIF}): Pointer;
+{$IFDEF XE2AndUp}NativeInt{$ELSE}Integer{$ENDIF}): Pointer;
 {$IFNDEF ASMVersion}
 var
   LBlockHeader, LNextBlockSizeAndFlags, LNewAllocSize, LBlockFlags, LOldAvailableSize,
@@ -7834,7 +7834,7 @@ begin
 end;
 
 function InvalidReallocMem(APointer: Pointer; ANewSize:
-  {$IFDEF XE2AndUp}NativeInt{$ELSE}Integer{$ENDIF}): Pointer;
+{$IFDEF XE2AndUp}NativeInt{$ELSE}Integer{$ENDIF}): Pointer;
 {$IFNDEF NoMessageBoxes}
 var
   LErrorMessageTitle: array [0 .. 1023] of AnsiChar;
@@ -9036,7 +9036,7 @@ begin
 end;
 
 function DebugReallocMem(APointer: Pointer; ANewSize:
-  {$IFDEF XE2AndUp}NativeInt{$ELSE}Integer{$ENDIF}): Pointer;
+{$IFDEF XE2AndUp}NativeInt{$ELSE}Integer{$ENDIF}): Pointer;
 var
   LMoveSize, LBlockSpace: NativeUInt;
   LActualBlock, LNewActualBlock: PFullDebugBlockHeader;
@@ -10611,7 +10611,7 @@ var
                 {Not a known class: Is it perhaps string data?}
                 case DetectStringData(LDataPtr, APSmallBlockPool.BlockType.BlockSize -
                     (BlockHeaderSize
-                    {$IFDEF FullDebugMode} + FullDebugBlockOverhead{$ENDIF})) of
+{$IFDEF FullDebugMode} + FullDebugBlockOverhead{$ENDIF})) of
                   stAnsiString:
                     LClassIndex := 1;
                   stUnicodeString:

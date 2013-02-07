@@ -235,30 +235,20 @@ end;
 
 procedure TestTD2XHandlerProcessor.TestInvalidCreate;
 begin
-  StartExpectingException(EInvalidParam);
-  try
-    TD2XHandlerProcessor.Create;
-  except
-    on E: EInvalidParam do
+  CheckInvalidParam('Need to use correct constructor', 'TD2XHandlerProcessor.Create',
+      procedure
     begin
-      CheckEqualsString('Need to use correct constructor', E.Message, 'Exception message');
-      raise;
-    end;
-  end;
+      TD2XHandlerProcessor.Create;
+    end);
 end;
 
 procedure TestTD2XHandlerProcessor.TestInvalidCreateActive;
 begin
-  StartExpectingException(EInvalidParam);
-  try
-    TD2XHandlerProcessor.CreateActive(fActive);
-  except
-    on E: EInvalidParam do
+  CheckInvalidParam('Need to use correct constructor', 'TD2XHandlerProcessor.CreateActive',
+    procedure
     begin
-      CheckEqualsString('Need to use correct constructor', E.Message, 'Exception message');
-      raise;
-    end;
-  end;
+      TD2XHandlerProcessor.CreateActive(fActive);
+    end);
 end;
 
 procedure TestTD2XHandlerProcessor.TestLexerInclude;
@@ -289,7 +279,7 @@ begin
   lCalled := False;
 
   FD2XProcessor.SetFileInput(
-      function: ID2XFile
+    function: ID2XFile
     begin
       lCalled := True;
       Result := nil;

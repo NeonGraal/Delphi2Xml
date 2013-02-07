@@ -70,8 +70,11 @@ type
     constructor Create(pCode, pLabel, pSample, pDescr: string;
       pParser: TD2XStringCheckRef); override;
     constructor CreateParam(pCode, pLabel, pSample, pDescr: string; pDefault: T;
-      pConverter: TspConverter; pFormatter: TspFormatter; pValidator: TspValidator;
-      pOnSet: TspOnSet); virtual;
+      pConverter: TspConverter; pFormatter: TspFormatter); virtual;
+    constructor CreateParamValid(pCode, pLabel, pSample, pDescr: string; pDefault: T;
+      pConverter: TspConverter; pFormatter: TspFormatter; pValidator: TspValidator); virtual;
+    constructor CreateParamOnSet(pCode, pLabel, pSample, pDescr: string; pDefault: T;
+      pConverter: TspConverter; pFormatter: TspFormatter; pOnSet: TspOnSet); virtual;
 
     procedure Convert(pStr: string); override;
     procedure Output(pSL: TStringList); override;
@@ -118,6 +121,11 @@ type
 function FlagDef(pCode: Char; pLabel, pDescr: string; pDefault: Boolean = False)
   : TD2XFlagDefine;
 
+procedure InvalidConstructor;
+procedure CheckParam(pCheck: Boolean; pLabel: string); overload;
+procedure CheckParam(pStr: string; pLabel: string); overload;
+procedure CheckParam(pObj: TObject; pLabel: string); overload;
+
 implementation
 
 uses
@@ -133,6 +141,29 @@ begin
   Result.FlagDefault := pDefault;
 end;
 
+procedure InvalidConstructor;
+begin
+  raise EInvalidParam.Create('Need to use correct constructor');
+end;
+
+procedure CheckParam(pCheck: Boolean; pLabel: string); overload;
+begin
+  if not pCheck then
+    raise EInvalidParam.Create(pLabel + ' invalid');
+end;
+
+procedure CheckParam(pStr: string; pLabel: string); overload;
+begin
+  if pStr = '' then
+    raise EInvalidParam.Create(pLabel + ' cannot be blank');
+end;
+
+procedure CheckParam(pObj: TObject; pLabel: string); overload;
+begin
+  if not Assigned(pObj) then
+    raise EInvalidParam.Create(pLabel + ' must be assigned to');
+end;
+
 { TD2XParam }
 
 procedure TD2XParam.Convert(pStr: string);
@@ -143,12 +174,9 @@ end;
 constructor TD2XParam.Create(pCode, pLabel, pSample, pDescr: string;
   pParser: TD2XStringCheckRef);
 begin
-  if pCode = '' then
-    raise EInvalidParam.Create('Need a Code');
-  if pLabel = '' then
-    raise EInvalidParam.Create('Need a Label');
-  if not Assigned(pParser) then
-    raise EInvalidParam.Create('Need a Parser');
+  CheckParam(pCode, 'Code');
+  CheckParam(pLabel, 'Label');
+  CheckParam(Assigned(pParser), 'Parser');
 
   fCode := pCode;
   fLabel := pLabel;
@@ -333,25 +361,56 @@ end;
 constructor TD2XSingleParam<T>.Create(pCode, pLabel, pSample, pDescr: string;
   pParser: TD2XStringCheckRef);
 begin
-  raise EInvalidParam.Create('Need to use correct constructor');
+  InvalidConstructor;
 end;
 
 constructor TD2XSingleParam<T>.CreateParam(pCode, pLabel, pSample, pDescr: string; pDefault: T;
-  pConverter: TspConverter; pFormatter: TspFormatter;
-  pValidator: TspValidator; pOnSet: TspOnSet);
+  pConverter: TspConverter; pFormatter: TspFormatter);
 begin
   inherited Create(pCode, pLabel, pSample, pDescr, ConvertAndSet);
 
-  if not Assigned(pConverter) then
-    raise EInvalidParam.Create('Need a Converter');
-  if not Assigned(pFormatter) then
-    raise EInvalidParam.Create('Need a Formatter');
+  CheckParam(Assigned(pConverter), 'Converter');
+  CheckParam(Assigned(pFormatter), 'Formatter');
+
+  fDefault := pDefault;
+  fConverter := pConverter;
+  fFormatter := pFormatter;
+  fValidator := nil;
+  fOnSet := nil;
+
+  Reset;
+end;
+
+constructor TD2XSingleParam<T>.CreateParamOnSet(pCode, pLabel, pSample, pDescr: string;
+  pDefault: T; pConverter: TspConverter; pFormatter: TspFormatter; pOnSet: TspOnSet);
+begin
+  inherited Create(pCode, pLabel, pSample, pDescr, ConvertAndSet);
+
+  CheckParam(Assigned(pConverter), 'Converter');
+  CheckParam(Assigned(pFormatter), 'Formatter');
+
+  fDefault := pDefault;
+  fConverter := pConverter;
+  fFormatter := pFormatter;
+  fValidator := nil;
+  fOnSet := pOnSet;
+
+  Reset;
+end;
+
+constructor TD2XSingleParam<T>.CreateParamValid(pCode, pLabel, pSample, pDescr: string;
+  pDefault: T; pConverter: TspConverter; pFormatter: TspFormatter; pValidator: TspValidator);
+begin
+  inherited Create(pCode, pLabel, pSample, pDescr, ConvertAndSet);
+
+  CheckParam(Assigned(pConverter), 'Converter');
+  CheckParam(Assigned(pFormatter), 'Formatter');
 
   fDefault := pDefault;
   fConverter := pConverter;
   fFormatter := pFormatter;
   fValidator := pValidator;
-  fOnSet := pOnSet;
+  fOnSet := nil;
 
   Reset;
 end;

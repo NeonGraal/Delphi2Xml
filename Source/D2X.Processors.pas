@@ -169,12 +169,12 @@ end;
 
 constructor TD2XHandlerProcessor.Create;
 begin
-  raise EInvalidParam.Create('Need to use correct constructor');
+  InvalidConstructor;
 end;
 
 constructor TD2XHandlerProcessor.CreateActive(pActive: ID2XFlag);
 begin
-  raise EInvalidParam.Create('Need to use correct constructor');
+  InvalidConstructor;
 end;
 
 constructor TD2XHandlerProcessor.CreateClass(pActive: ID2XFlag;

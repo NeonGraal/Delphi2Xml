@@ -321,16 +321,12 @@ const
 
 procedure TestTD2XOptionEnums.TestElapsedModeInvalidCreate;
 begin
-  StartExpectingException(EInvalidParam);
-  try
-    TD2XSingleParam<TD2XElapsedMode>.Create('', '', '', '', nil);
-  except
-    on E: EInvalidParam do
+  CheckInvalidParam('Need to use correct constructor',
+    'TD2XSingleParam<TD2XElapsedMode>.Create',
+      procedure
     begin
-      CheckEqualsString('Need to use correct constructor', E.Message, 'Exception message');
-      raise;
-    end;
-  end;
+      TD2XSingleParam<TD2XElapsedMode>.Create('', '', '', '', nil);
+    end);
 end;
 
 procedure TestTD2XOptionEnums.TestElapsedModeParam;
@@ -339,7 +335,7 @@ var
 begin
   lPrm := TD2XSingleParam<TD2XElapsedMode>.CreateParam('T', 'Test', '<tst>',
     'Test Elapsed mode', emQuiet, TD2X.CnvDflt<TD2XElapsedMode>,
-    TD2X.ToLabel<TD2XElapsedMode>, nil, nil);
+    TD2X.ToLabel<TD2XElapsedMode>);
   try
     lPrm.Describe(fLog);
     CheckLog('T<tst> Quiet Test Elapsed mode', 'Describe Param');
@@ -362,16 +358,11 @@ end;
 
 procedure TestTD2XOptionEnums.TestParseModeInvalidCreate;
 begin
-  StartExpectingException(EInvalidParam);
-  try
-    TD2XSingleParam<TD2XParseMode>.Create('', '', '', '', nil);
-  except
-    on E: EInvalidParam do
+  CheckInvalidParam('Need to use correct constructor', 'TD2XSingleParam<TD2XParseMode>.Create',
+    procedure
     begin
-      CheckEqualsString('Need to use correct constructor', E.Message, 'Exception message');
-      raise;
-    end;
-  end;
+      TD2XSingleParam<TD2XParseMode>.Create('', '', '', '', nil);
+    end);
 end;
 
 procedure TestTD2XOptionEnums.TestParseModeParam;
@@ -379,7 +370,7 @@ var
   lPrm: TD2XSingleParam<TD2XParseMode>;
 begin
   lPrm := TD2XSingleParam<TD2XParseMode>.CreateParam('T', 'Test', '<tst>', 'Test Parse mode',
-    pmFull, TD2X.CnvDflt<TD2XParseMode>, TD2X.ToLabel<TD2XParseMode>, nil, nil);
+    pmFull, TD2X.CnvDflt<TD2XParseMode>, TD2X.ToLabel<TD2XParseMode>);
   try
     lPrm.Describe(fLog);
     CheckLog('T<tst> Full Test Parse mode', 'Describe Param');
@@ -402,16 +393,11 @@ end;
 
 procedure TestTD2XOptionEnums.TestResultPerInvalidCreate;
 begin
-  StartExpectingException(EInvalidParam);
-  try
-    TD2XSingleParam<TD2XResultPer>.Create('', '', '', '', nil);
-  except
-    on E: EInvalidParam do
+  CheckInvalidParam('Need to use correct constructor', 'TD2XSingleParam<TD2XResultPer>.Create',
+    procedure
     begin
-      CheckEqualsString('Need to use correct constructor', E.Message, 'Exception message');
-      raise;
-    end;
-  end;
+      TD2XSingleParam<TD2XResultPer>.Create('', '', '', '', nil);
+    end);
 end;
 
 procedure TestTD2XOptionEnums.TestResultPerParam;
@@ -419,7 +405,7 @@ var
   lPrm: TD2XSingleParam<TD2XResultPer>;
 begin
   lPrm := TD2XSingleParam<TD2XResultPer>.CreateParam('T', 'Test', '<tst>', 'Test Parse mode',
-    rpFile, TD2X.CnvDflt<TD2XResultPer>, TD2X.ToLabel<TD2XResultPer>, nil, nil);
+    rpFile, TD2X.CnvDflt<TD2XResultPer>, TD2X.ToLabel<TD2XResultPer>);
   try
     lPrm.Describe(fLog);
     CheckLog('T<tst> File Test Parse mode', 'Describe Param');
@@ -1004,8 +990,8 @@ begin
   Check(fOpts.ProcessParam('Testing.Test*', 'Count Children'), 'Process Units');
   fOpts.EndProcessing;
   CheckLog(PT([PD('', ['Testing.Test.AUnit.pas', 'Testing.Test.AProgram.dpr',
-            'Testing.Test.APackage.dpk']), PD('Config', ['Testing.Test.Dir.pas']),
-        PD('Config\Test', ['Testing.Test.SubDir.pas'])]), 'Elapsed File');
+          'Testing.Test.APackage.dpk']), PD('Config', ['Testing.Test.Dir.pas']),
+      PD('Config\Test', ['Testing.Test.SubDir.pas'])]), 'Elapsed File');
 
   Check(fOpts.ProcessOption('EP'), 'Return Value 1');
   fB.Clear;
@@ -1020,8 +1006,8 @@ begin
   SetLength(lT, 1);
   SA(lT[0], [7, 21, 23, 30, 32, 43, 45, 63, 90, 98, 100]);
   CheckLog(PT([PDP('', ['Testing.Test.AUnit.pas', 'Testing.Test.AProgram.dpr',
-            'Testing.Test.APackage.dpk'], lP), PDP('Config', ['Testing.Test.Dir.pas'], lC),
-        PDP('Config\Test', ['Testing.Test.SubDir.pas'], lT)]), 'Elapsed Processing');
+          'Testing.Test.APackage.dpk'], lP), PDP('Config', ['Testing.Test.Dir.pas'], lC),
+      PDP('Config\Test', ['Testing.Test.SubDir.pas'], lT)]), 'Elapsed Processing');
 end;
 
 procedure TestTD2XOptionsSpecific.TestLoadSkipped;
@@ -1423,7 +1409,7 @@ var
 begin
   lPM := TD2XSingleParam<TD2XParseMode>.CreateParam('M', 'Parse mode', '<mode>',
     'Parser type (F[ull], U[ses])', pmFull, TD2X.CnvEnum<TD2XParseMode>,
-    TD2X.ToLabel<TD2XParseMode>, nil, nil);
+    TD2X.ToLabel<TD2XParseMode>);
   try
     lPM.Convert('Uses');
     Check(pmUses = lPM.Value, 'Parse mode convert');
@@ -1433,7 +1419,7 @@ begin
 
   lRP := TD2XSingleParam<TD2XResultPer>.CreateParam('P', 'Results per', '<per>',
     'Result per (F[ile], S[ubdir], D[ir], W[ildcard], P[aram], R[un])', rpFile,
-    TD2X.CnvEnum<TD2XResultPer>, TD2X.ToLabel<TD2XResultPer>, nil, nil);
+    TD2X.CnvEnum<TD2XResultPer>, TD2X.ToLabel<TD2XResultPer>);
   try
     lRP.Convert('Dir');
     Check(rpDir = lRP.Value, 'Results per convert');
@@ -1442,7 +1428,7 @@ begin
   end;
   lEM := TD2XSingleParam<TD2XElapsedMode>.CreateParam('E', 'Show elapsed', '<mode>',
     'Elapsed time display (N[one], T[otal], D[ir], F[ile], P[rocessing], [Q]uiet)', emQuiet,
-    TD2X.CnvEnum<TD2XElapsedMode>, TD2X.ToLabel<TD2XElapsedMode>, nil, nil);
+    TD2X.CnvEnum<TD2XElapsedMode>, TD2X.ToLabel<TD2XElapsedMode>);
   try
     lEM.Convert('Dir');
     Check(emDir = lEM.Value, 'Elapsed mode convert');
@@ -1730,12 +1716,12 @@ end;
 initialization
 
 RegisterTests('Options', [TestTD2XOptionEnums.Suite, TestTD2XOptions.Suite,
-    TestTD2XOptionsParseAll.Suite, TestTD2XOptionsParseUnused.Suite,
-    TestTD2XOptionsParseEnumerated.Suite, TestTD2XOptionsParseFlags.Suite,
-    TestTD2XOptionsParseCountChildren.Suite, TestTD2XOptionsParseCountFinalDefines.Suite,
-    TestTD2XOptionsParseDefines.Suite, TestTD2XOptionsParseHeldDefines.Suite,
-    TestTD2XOptionsParseSkippedMethods.Suite, TestTD2XOptionsParseCountDefinesUsed.Suite,
-    TestTD2XOptionsParseWriteDefines.Suite, TestTD2XOptionsParseWriteXml.Suite,
-    TestTD2XOptionsGeneral.Suite, TestTD2XOptionsSpecific.Suite, TestTD2XOptionsXmlPer.Suite]);
+  TestTD2XOptionsParseAll.Suite, TestTD2XOptionsParseUnused.Suite,
+  TestTD2XOptionsParseEnumerated.Suite, TestTD2XOptionsParseFlags.Suite,
+  TestTD2XOptionsParseCountChildren.Suite, TestTD2XOptionsParseCountFinalDefines.Suite,
+  TestTD2XOptionsParseDefines.Suite, TestTD2XOptionsParseHeldDefines.Suite,
+  TestTD2XOptionsParseSkippedMethods.Suite, TestTD2XOptionsParseCountDefinesUsed.Suite,
+  TestTD2XOptionsParseWriteDefines.Suite, TestTD2XOptionsParseWriteXml.Suite,
+  TestTD2XOptionsGeneral.Suite, TestTD2XOptionsSpecific.Suite, TestTD2XOptionsXmlPer.Suite]);
 
 end.

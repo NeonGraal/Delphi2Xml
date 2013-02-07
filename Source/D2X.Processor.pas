@@ -84,7 +84,7 @@ end;
 
 constructor TD2XProcessor.Create;
 begin
-  raise EInvalidParam.Create('Need to use correct constructor');
+  InvalidConstructor;
 end;
 
 constructor TD2XProcessor.CreateActive(pActive: ID2XFlag);

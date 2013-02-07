@@ -10,7 +10,14 @@ uses
   TestFramework;
 
 type
-  TStringTestCase = class(TTestCase)
+  TTestProc = reference to procedure;
+
+  TBaseTestCase = class(TTestCase)
+  protected
+    procedure CheckInvalidParam(pExp, pLabel: string; pProc: TTestProc);
+  end;
+
+  TStringTestCase = class(TBaseTestCase)
   protected
     fB: TStringBuilder;
     fS: TStringStream;
@@ -24,6 +31,7 @@ type
     procedure CheckReader(pExp, pLabel: string; pR: TStreamReader);
     procedure CheckStream(pExp, pLabel: string; pS: TStringStream = nil);
     procedure CheckWriter(pExp, pLabel: string; pW: TStringWriter = nil);
+
   public
     procedure SetUp; override;
     procedure TearDown; override;
@@ -44,6 +52,7 @@ type
 implementation
 
 uses
+  D2X.Param,
   Test.Utils,
   System.StrUtils;
 
@@ -64,7 +73,7 @@ type
     function WriteTo(pAppend: Boolean = False): TStreamWriter;
   end;
 
-{ TStringBuilderTestCase }
+  { TStringBuilderTestCase }
 
 procedure TStringTestCase.CheckBuilder(pExp, pLabel: string; pB: TStringBuilder);
 begin
@@ -190,6 +199,22 @@ begin
   if not Assigned(fSW) then
     fSW := TStreamWriter.Create(fS);
   Result := fSW;
+end;
+
+{ TBaseTestCase }
+
+procedure TBaseTestCase.CheckInvalidParam(pExp, pLabel: string; pProc: TTestProc);
+begin
+  StartExpectingException(EInvalidParam);
+  try
+    pProc;
+  except
+    on E: EInvalidParam do
+    begin
+      CheckEqualsString(pExp, E.Message, pLabel + ' Exception message');
+      raise;
+    end;
+  end;
 end;
 
 end.

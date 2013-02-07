@@ -41,7 +41,8 @@ const
 
   REPORT_HEADING = 'Current option settings: ';
 
-  FILE_REPORT_OPTIONS = 'Global name %s Config dir :Config\ Log dir :Log\ Base dir -(.\) Exclude Dirs';
+  FILE_REPORT_OPTIONS =
+    'Global name %s Config dir :Config\ Log dir :Log\ Base dir -(.\) Exclude Dirs';
 
   BASE_REPORT_OPTIONS = REPORT_HEADING +
     'Flags FinalToken+,LogErrors+,LogNotSupp-,Recurse-,Timestamp-,Verbose- ' +
@@ -87,6 +88,5 @@ function GlobalDescription: string;
 begin
   Result := Format(GLOBAL_DESCRIPTION, [ChangeFileExt(ExtractFilename(ParamStr(0)), '')]);
 end;
-
 
 end.

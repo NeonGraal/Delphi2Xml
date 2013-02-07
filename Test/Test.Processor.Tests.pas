@@ -135,16 +135,11 @@ end;
 
 procedure TestTD2XProcessor.TestInvalidCreate;
 begin
-  StartExpectingException(EInvalidParam);
-  try
-    TTestProcessor.Create;
-  except
-    on E: EInvalidParam do
+  CheckInvalidParam('Need to use correct constructor', 'TTestProcessor.Create',
+      procedure
     begin
-      CheckEqualsString('Need to use correct constructor', E.Message, 'Exception message');
-      raise;
-    end;
-  end;
+      TTestProcessor.Create;
+    end);
 end;
 
 procedure TestTD2XProcessor.TestLexerInclude;

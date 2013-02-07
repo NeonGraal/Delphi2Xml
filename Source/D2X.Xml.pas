@@ -53,7 +53,7 @@ type
     fAtttributes: TObjectList<TD2XmlNode>;
 
   strict protected
-    constructor CreateTag(pTag: string; pParent: TD2XmlNode); override;
+    constructor CreateTag(pTag: string; pParent: TD2XmlNode = nil); override;
 
   protected
     procedure MakeXml(pW: TTextWriter); override;
@@ -111,7 +111,7 @@ end;
 
 constructor TD2XmlDoc.CreateDoc;
 begin
-  CreateTag('', nil);
+  CreateTag('');
   fDoc := Self;
 end;
 
