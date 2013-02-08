@@ -53,9 +53,6 @@ type
 
     function TstParser(pStr: string): Boolean;
     function TstFormatter(pVal: Boolean): string;
-    //    TspConverter = reference to function(pStr: string; pDflt: T; out pVal: T): Boolean;
-    //    TspFormatter = reference to function(pVal: T): string;
-    //    TspValidator = reference to function(pVal: T): Boolean;
 
   public
     procedure SetUp; override;
@@ -84,6 +81,8 @@ type
     procedure TestInvalidAllNil;
     procedure TestInvalidNilConverter;
     procedure TestInvalidNilFormatter;
+    procedure TestInvalidNilValidator;
+    procedure TestInvalidNilOnSet;
 
     procedure TestInvalidAllBlank;
     procedure TestInvalidDefaultValue;
@@ -91,13 +90,17 @@ type
     procedure TestObjectParam;
     procedure TestStringParam;
     procedure TestBooleanParam;
-
-    procedure TestParseModeParam;
-    procedure TestElapsedModeParam;
-    procedure TestResultPerParam;
+    procedure TestBooleanCreates;
 
     procedure TestStringDfltParam;
     procedure TestBooleanDfltParam;
+  end;
+
+  TestTD2XSingleParamEnum = class(TLoggerTestCase)
+  published
+    procedure TestParseModeParam;
+    procedure TestElapsedModeParam;
+    procedure TestResultPerParam;
   end;
 
   TestTD2XFlagsParam = class(TLoggerTestCase)
@@ -158,6 +161,8 @@ type
   published
     procedure TestInvalidCreateReset;
     procedure TestInvalidCreateParam;
+    procedure TestInvalidCreateParamValid;
+    procedure TestInvalidCreateParamOnSet;
     procedure TestCreateStr;
     procedure TestParse;
     procedure TestReset;
@@ -223,6 +228,8 @@ type
 
   published
     procedure TestInvalidCreateParam;
+    procedure TestInvalidCreateParamValid;
+    procedure TestInvalidCreateParamOnSet;
     procedure TestOldFormatted;
 
     procedure TestParse;
@@ -258,6 +265,24 @@ type
     procedure TestZero;
     procedure TestConvert;
     procedure TestIsDefault;
+    procedure TestGetFlag; override;
+    procedure TestSetFlag; override;
+  end;
+
+  TestTD2XFlaggedStringFormatParam = class(TFlagParamTestCase)
+  strict private
+    fFlagP: TTestFlaggedStringParam;
+
+    function FormatFlagString(pFlag: Boolean; pVal: string): string;
+  public
+    procedure SetUp; override;
+    procedure TearDown; override;
+
+  published
+    procedure TestDescribe;
+    procedure TestReport;
+    procedure TestOutput;
+    procedure TestToString;
     procedure TestGetFlag; override;
     procedure TestSetFlag; override;
   end;
@@ -306,6 +331,47 @@ begin
   Result := False;
 end;
 
+procedure TestTD2XSingleParam.TestBooleanCreates;
+var
+  lBoolP: TD2XSingleParam<Boolean>;
+  lCalled: Boolean;
+begin
+  lCalled := False;
+  lBoolP := TD2XSingleParam<Boolean>.CreateParamValid('T', 'Test', '', '', False,
+      function(pStr: string; pDflt: Boolean; out pVal: Boolean): Boolean
+    begin
+      pVal := False;
+      Result := True;
+    end, FmtBoolProp,
+    function(pVal: Boolean): Boolean
+    begin
+      Result := True;
+      lCalled := True;
+    end);
+  try
+    Check(lCalled, 'Validity Called');
+  finally
+    FreeAndNil(lBoolP);
+  end;
+
+  lCalled := False;
+  lBoolP := TD2XSingleParam<Boolean>.CreateParamOnSet('T', 'Test', '', '', False,
+    function(pStr: string; pDflt: Boolean; out pVal: Boolean): Boolean
+    begin
+      pVal := False;
+      Result := True;
+    end, FmtBoolProp,
+    procedure(pOld, pVal, pDflt: Boolean)
+    begin
+      lCalled := True;
+    end);
+  try
+    Check(lCalled, 'On Set Called');
+  finally
+    FreeAndNil(lBoolP);
+  end;
+end;
+
 procedure TestTD2XSingleParam.TestBooleanDfltParam;
 var
   lBoolP: TD2XSingleParam<Boolean>;
@@ -340,7 +406,7 @@ var
   lBoolP: TD2XSingleParam<Boolean>;
 begin
   lBoolP := TD2XSingleParam<Boolean>.CreateParam('T', 'Test', '', '', False,
-      function(pStr: string; pDflt: Boolean; out pVal: Boolean): Boolean
+    function(pStr: string; pDflt: Boolean; out pVal: Boolean): Boolean
     begin
       pVal := False;
       Result := True;
@@ -372,43 +438,6 @@ begin
   end;
 end;
 
-procedure TestTD2XSingleParam.TestElapsedModeParam;
-var
-  lEnumP: TD2XSingleParam<TD2XElapsedMode>;
-begin
-  lEnumP := TD2XSingleParam<TD2XElapsedMode>.CreateParam('T', 'Test', '', '', emNone,
-    function(pStr: string; pDflt: TD2XElapsedMode; out pVal: TD2XElapsedMode): Boolean
-    begin
-      pVal := emNone;
-      Result := True;
-    end, TD2X.ToLabel<TD2XElapsedMode>);
-
-  try
-    lEnumP.Describe(fLog);
-    CheckLog('T None', 'Describe Param');
-    lEnumP.Report(fLog);
-    CheckLog('Test None', 'Report Default Value');
-    Check(lEnumP.IsDefault, 'Check is Default');
-
-    CheckFalse(lEnumP.IsCode('A'), 'Check wrong code');
-    Check(lEnumP.IsCode('T'), 'Check correct code');
-
-    CheckFalse(lEnumP.Parse('A'), 'Parse wrong code');
-    Check(lEnumP.Parse('T'), 'Parse right code with No value');
-    Check(lEnumP.Parse('T0'), 'Parse right code with False value');
-    Check(lEnumP.Parse('T+'), 'Parse right code with True value');
-
-    Check(emNone = lEnumP.Value, 'Returned value');
-    CheckEqualsString('TNone', lEnumP.ToString, 'String representation');
-
-    lEnumP.Convert('+');
-    Check(emNone = lEnumP.Value, 'Returned value');
-    CheckEqualsString('TNone', lEnumP.ToString, 'String representation');
-  finally
-    FreeAndNil(lEnumP);
-  end;
-end;
-
 procedure TestTD2XSingleParam.TestInvalidAllBlank;
 begin
   CheckInvalidParam('Code cannot be blank', 'TD2XSingleParam<string>.CreateParam',
@@ -431,7 +460,7 @@ end;
 
 procedure TestTD2XSingleParam.TestInvalidAllNil;
 begin
-  CheckInvalidParam('Code cannot be blank', 'TD2XSingleParam<string>.CreateParam',
+  CheckInvalidParam('Converter invalid', 'TD2XSingleParam<string>.CreateParam',
     procedure
     begin
       TD2XSingleParam<string>.CreateParam('', '', '', '', '', nil, nil);
@@ -463,6 +492,26 @@ begin
     begin
       TD2XSingleParam<string>.CreateParam('Code', 'Label', '', '', '',
         TD2X.CnvDflt<string>, nil);
+    end);
+end;
+
+procedure TestTD2XSingleParam.TestInvalidNilOnSet;
+begin
+  CheckInvalidParam('OnSet invalid', 'TD2XSingleParam<string>.CreateParam',
+    procedure
+    begin
+      TD2XSingleParam<string>.CreateParamOnSet('Code', 'Label', '', '', '',
+        TD2X.CnvDflt<string>, FmtStrProp, nil);
+    end);
+end;
+
+procedure TestTD2XSingleParam.TestInvalidNilValidator;
+begin
+  CheckInvalidParam('Validator invalid', 'TD2XSingleParam<string>.CreateParam',
+    procedure
+    begin
+      TD2XSingleParam<string>.CreateParamValid('Code', 'Label', '', '', '',
+        TD2X.CnvDflt<string>, FmtStrProp, nil);
     end);
 end;
 
@@ -507,80 +556,6 @@ begin
     CheckEqualsString('Tnil', lObjP.ToString, 'String representation');
   finally
     FreeAndNil(lObjP);
-  end;
-end;
-
-procedure TestTD2XSingleParam.TestParseModeParam;
-var
-  lEnumP: TD2XSingleParam<TD2XParseMode>;
-begin
-  lEnumP := TD2XSingleParam<TD2XParseMode>.CreateParam('T', 'Test', '', '', pmFull,
-    function(pStr: string; pDflt: TD2XParseMode; out pVal: TD2XParseMode): Boolean
-    begin
-      pVal := pmFull;
-      Result := True;
-    end, TD2X.ToLabel<TD2XParseMode>);
-
-  try
-    lEnumP.Describe(fLog);
-    CheckLog('T Full', 'Describe Param');
-    lEnumP.Report(fLog);
-    CheckLog('Test Full', 'Report Default Value');
-    Check(lEnumP.IsDefault, 'Check is Default');
-
-    CheckFalse(lEnumP.IsCode('A'), 'Check wrong code');
-    Check(lEnumP.IsCode('T'), 'Check correct code');
-
-    CheckFalse(lEnumP.Parse('A'), 'Parse wrong code');
-    Check(lEnumP.Parse('T'), 'Parse right code with No value');
-    Check(lEnumP.Parse('T0'), 'Parse right code with False value');
-    Check(lEnumP.Parse('T+'), 'Parse right code with True value');
-
-    Check(pmFull = lEnumP.Value, 'Returned value');
-    CheckEqualsString('TFull', lEnumP.ToString, 'String representation');
-
-    lEnumP.Convert('+');
-    Check(pmFull = lEnumP.Value, 'Returned value');
-    CheckEqualsString('TFull', lEnumP.ToString, 'String representation');
-  finally
-    FreeAndNil(lEnumP);
-  end;
-end;
-
-procedure TestTD2XSingleParam.TestResultPerParam;
-var
-  lEnumP: TD2XSingleParam<TD2XResultPer>;
-begin
-  lEnumP := TD2XSingleParam<TD2XResultPer>.CreateParam('T', 'Test', '', '', rpFile,
-    function(pStr: string; pDflt: TD2XResultPer; out pVal: TD2XResultPer): Boolean
-    begin
-      pVal := rpFile;
-      Result := True;
-    end, TD2X.ToLabel<TD2XResultPer>);
-
-  try
-    lEnumP.Describe(fLog);
-    CheckLog('T File', 'Describe Param');
-    lEnumP.Report(fLog);
-    CheckLog('Test File', 'Report Default Value');
-    Check(lEnumP.IsDefault, 'Check is Default');
-
-    CheckFalse(lEnumP.IsCode('A'), 'Check wrong code');
-    Check(lEnumP.IsCode('T'), 'Check correct code');
-
-    CheckFalse(lEnumP.Parse('A'), 'Parse wrong code');
-    Check(lEnumP.Parse('T'), 'Parse right code with No value');
-    Check(lEnumP.Parse('T0'), 'Parse right code with False value');
-    Check(lEnumP.Parse('T+'), 'Parse right code with True value');
-
-    Check(rpFile = lEnumP.Value, 'Returned value');
-    CheckEqualsString('TFile', lEnumP.ToString, 'String representation');
-
-    lEnumP.Convert('+');
-    Check(rpFile = lEnumP.Value, 'Returned value');
-    CheckEqualsString('TFile', lEnumP.ToString, 'String representation');
-  finally
-    FreeAndNil(lEnumP);
   end;
 end;
 
@@ -697,6 +672,24 @@ begin
     procedure
     begin
       TD2XStringParam.CreateParam('', '', '', '', '', nil, nil);
+    end);
+end;
+
+procedure TestTD2XStringParam.TestInvalidCreateParamOnSet;
+begin
+  CheckInvalidParam('Need to use correct constructor', 'TD2XStringParam.CreateParam',
+    procedure
+    begin
+      TD2XStringParam.CreateParamOnSet('', '', '', '', '', nil, nil, nil);
+    end);
+end;
+
+procedure TestTD2XStringParam.TestInvalidCreateParamValid;
+begin
+  CheckInvalidParam('Need to use correct constructor', 'TD2XStringParam.CreateParam',
+    procedure
+    begin
+      TD2XStringParam.CreateParamValid('', '', '', '', '', nil, nil, nil);
     end);
 end;
 
@@ -826,7 +819,7 @@ begin
   CheckInvalidParam('Code cannot be blank', 'TD2XSingleParam<string>.CreateParam',
     procedure
     begin
-      fPrm := TD2XParam.Create('', '', '', '', TstParser);
+      TD2XParam.Create('', '', '', '', TstParser);
     end);
 end;
 
@@ -835,7 +828,7 @@ begin
   CheckInvalidParam('Code cannot be blank', 'TD2XSingleParam<string>.CreateParam',
     procedure
     begin
-      fPrm := TD2XParam.Create('', 'Label', '', '', TstParser);
+      TD2XParam.Create('', 'Label', '', '', TstParser);
     end);
 end;
 
@@ -844,7 +837,7 @@ begin
   CheckInvalidParam('Label cannot be blank', 'TD2XSingleParam<string>.CreateParam',
     procedure
     begin
-      fPrm := TD2XParam.Create('Code', '', '', '', TstParser);
+      TD2XParam.Create('Code', '', '', '', TstParser);
     end);
 end;
 
@@ -1269,6 +1262,24 @@ begin
     procedure
     begin
       TD2XFlaggedStringParam.CreateParam('', '', '', '', '', nil, nil);
+    end);
+end;
+
+procedure TestTD2XFlaggedStringParam.TestInvalidCreateParamOnSet;
+begin
+  CheckInvalidParam('Need to use correct constructor', 'TD2XFlaggedStringParam.CreateParam',
+    procedure
+    begin
+      TD2XFlaggedStringParam.CreateParamOnSet('', '', '', '', '', nil, nil, nil);
+    end);
+end;
+
+procedure TestTD2XFlaggedStringParam.TestInvalidCreateParamValid;
+begin
+  CheckInvalidParam('Need to use correct constructor', 'TD2XFlaggedStringParam.CreateParam',
+    procedure
+    begin
+      TD2XFlaggedStringParam.CreateParamValid('', '', '', '', '', nil, nil, nil);
     end);
 end;
 
@@ -2158,12 +2169,228 @@ begin
   CheckFlag(False, 'Flag Zeroed');
 end;
 
+{ TestTD2XSingleParamEnum }
+
+procedure TestTD2XSingleParamEnum.TestElapsedModeParam;
+var
+  lEnumP: TD2XSingleParam<TD2XElapsedMode>;
+begin
+  lEnumP := TD2XSingleParam<TD2XElapsedMode>.CreateParam('T', 'Test', '', '', emNone,
+    function(pStr: string; pDflt: TD2XElapsedMode; out pVal: TD2XElapsedMode): Boolean
+    begin
+      pVal := emNone;
+      Result := True;
+    end, TD2X.ToLabel<TD2XElapsedMode>);
+
+  try
+    lEnumP.Describe(fLog);
+    CheckLog('T None', 'Describe Param');
+    lEnumP.Report(fLog);
+    CheckLog('Test None', 'Report Default Value');
+    Check(lEnumP.IsDefault, 'Check is Default');
+
+    CheckFalse(lEnumP.IsCode('A'), 'Check wrong code');
+    Check(lEnumP.IsCode('T'), 'Check correct code');
+
+    CheckFalse(lEnumP.Parse('A'), 'Parse wrong code');
+    Check(lEnumP.Parse('T'), 'Parse right code with No value');
+    Check(lEnumP.Parse('T0'), 'Parse right code with False value');
+    Check(lEnumP.Parse('T+'), 'Parse right code with True value');
+
+    Check(emNone = lEnumP.Value, 'Returned value');
+    CheckEqualsString('TNone', lEnumP.ToString, 'String representation');
+
+    lEnumP.Convert('+');
+    Check(emNone = lEnumP.Value, 'Returned value');
+    CheckEqualsString('TNone', lEnumP.ToString, 'String representation');
+  finally
+    FreeAndNil(lEnumP);
+  end;
+end;
+
+procedure TestTD2XSingleParamEnum.TestParseModeParam;
+var
+  lEnumP: TD2XSingleParam<TD2XParseMode>;
+begin
+  lEnumP := TD2XSingleParam<TD2XParseMode>.CreateParam('T', 'Test', '', '', pmFull,
+    function(pStr: string; pDflt: TD2XParseMode; out pVal: TD2XParseMode): Boolean
+    begin
+      pVal := pmFull;
+      Result := True;
+    end, TD2X.ToLabel<TD2XParseMode>);
+
+  try
+    lEnumP.Describe(fLog);
+    CheckLog('T Full', 'Describe Param');
+    lEnumP.Report(fLog);
+    CheckLog('Test Full', 'Report Default Value');
+    Check(lEnumP.IsDefault, 'Check is Default');
+
+    CheckFalse(lEnumP.IsCode('A'), 'Check wrong code');
+    Check(lEnumP.IsCode('T'), 'Check correct code');
+
+    CheckFalse(lEnumP.Parse('A'), 'Parse wrong code');
+    Check(lEnumP.Parse('T'), 'Parse right code with No value');
+    Check(lEnumP.Parse('T0'), 'Parse right code with False value');
+    Check(lEnumP.Parse('T+'), 'Parse right code with True value');
+
+    Check(pmFull = lEnumP.Value, 'Returned value');
+    CheckEqualsString('TFull', lEnumP.ToString, 'String representation');
+
+    lEnumP.Convert('+');
+    Check(pmFull = lEnumP.Value, 'Returned value');
+    CheckEqualsString('TFull', lEnumP.ToString, 'String representation');
+  finally
+    FreeAndNil(lEnumP);
+  end;
+end;
+
+procedure TestTD2XSingleParamEnum.TestResultPerParam;
+var
+  lEnumP: TD2XSingleParam<TD2XResultPer>;
+begin
+  lEnumP := TD2XSingleParam<TD2XResultPer>.CreateParam('T', 'Test', '', '', rpFile,
+    function(pStr: string; pDflt: TD2XResultPer; out pVal: TD2XResultPer): Boolean
+    begin
+      pVal := rpFile;
+      Result := True;
+    end, TD2X.ToLabel<TD2XResultPer>);
+
+  try
+    lEnumP.Describe(fLog);
+    CheckLog('T File', 'Describe Param');
+    lEnumP.Report(fLog);
+    CheckLog('Test File', 'Report Default Value');
+    Check(lEnumP.IsDefault, 'Check is Default');
+
+    CheckFalse(lEnumP.IsCode('A'), 'Check wrong code');
+    Check(lEnumP.IsCode('T'), 'Check correct code');
+
+    CheckFalse(lEnumP.Parse('A'), 'Parse wrong code');
+    Check(lEnumP.Parse('T'), 'Parse right code with No value');
+    Check(lEnumP.Parse('T0'), 'Parse right code with False value');
+    Check(lEnumP.Parse('T+'), 'Parse right code with True value');
+
+    Check(rpFile = lEnumP.Value, 'Returned value');
+    CheckEqualsString('TFile', lEnumP.ToString, 'String representation');
+
+    lEnumP.Convert('+');
+    Check(rpFile = lEnumP.Value, 'Returned value');
+    CheckEqualsString('TFile', lEnumP.ToString, 'String representation');
+  finally
+    FreeAndNil(lEnumP);
+  end;
+end;
+
+{ TestTD2XFlaggedStringFormatParam }
+
+function TestTD2XFlaggedStringFormatParam.FormatFlagString(pFlag: Boolean;
+  pVal: string): string;
+begin
+  Result := pVal + IfThen(pFlag, ' +', ' -');
+end;
+
+procedure TestTD2XFlaggedStringFormatParam.SetUp;
+begin
+  inherited;
+
+  fFlagP := TTestFlaggedStringParam.CreateFlagStrFmt('T', 'Test', '<Example>',
+    'Test String Param', 'Tst', False, nil, FormatFlagString);
+  AssignFlag(fFlagP);
+end;
+
+procedure TestTD2XFlaggedStringFormatParam.TearDown;
+begin
+  ClearFlag(fFlagP);
+
+  inherited;
+end;
+
+procedure TestTD2XFlaggedStringFormatParam.TestDescribe;
+begin
+  fFlagP.Describe(fLog);
+  CheckLog('T[+-]:<Example> Tst - Test String Param', 'Describe Param');
+end;
+
+procedure TestTD2XFlaggedStringFormatParam.TestGetFlag;
+begin
+  CheckFlag(False, 'Check is Default');
+
+  fFlagP.FlagValue := True;
+  CheckFlag(True, 'Check is not Default');
+
+  fFlagP.Reset;
+  CheckFlag(False, 'Check is Default');
+end;
+
+procedure TestTD2XFlaggedStringFormatParam.TestOutput;
+begin
+  fFlagP.Output(fL);
+  CheckList('', 'Output Default Value');
+
+  fFlagP.Value := '';
+  fFlagP.Output(fL);
+  CheckList('-T -', 'Output Blank value off');
+
+  SetFlag(True);
+  fFlagP.Output(fL);
+  CheckList('-T +', 'Output Blank value on');
+
+  fFlagP.Value := 'Simple';
+  fFlagP.Output(fL);
+  CheckList('-TSimple +', 'Output Simple Value on');
+end;
+
+procedure TestTD2XFlaggedStringFormatParam.TestReport;
+begin
+  fFlagP.Report(fLog);
+  CheckLog('Test Tst -', 'Report Default Value');
+
+  fFlagP.Value := '';
+  fFlagP.Report(fLog);
+  CheckLog('Test -', 'Report Blank value off');
+
+  SetFlag(True);
+  fFlagP.Report(fLog);
+  CheckLog('Test +', 'Report Blank value on');
+
+  fFlagP.Value := 'Simple';
+  fFlagP.Report(fLog);
+  CheckLog('Test Simple +', 'Report Simple Value on');
+end;
+
+procedure TestTD2XFlaggedStringFormatParam.TestSetFlag;
+begin
+  CheckFalse(fFlagP.FlagValue, 'Check is Default');
+
+  SetFlag(True);
+  CheckTrue(fFlagP.FlagValue, 'Check is not Default');
+
+  SetFlag(False);
+  CheckFalse(fFlagP.FlagValue, 'Check is Default');
+end;
+
+procedure TestTD2XFlaggedStringFormatParam.TestToString;
+begin
+  CheckEqualsString('TTst -', fFlagP.ToString, 'Check Default Value');
+
+  fFlagP.Value := '';
+  CheckEqualsString('T -', fFlagP.ToString, 'Blank value off');
+
+  SetFlag(True);
+  CheckEqualsString('T +', fFlagP.ToString, 'Blank value on');
+
+  fFlagP.Value := 'Simple';
+  CheckEqualsString('TSimple +', fFlagP.ToString, 'Check Simple Value');
+end;
+
 initialization
 
 RegisterTests('Params', [TestTD2XParam.Suite, TestTD2XParams.Suite, TestTD2XSingleParam.Suite,
-  TestTD2XFlagsParam.Suite, TestTD2XListParam.Suite, TestTD2XStringParam.Suite,
-  TestTD2XValidStringParam.Suite, TestTD2XFormatStringParam.Suite,
+  TestTD2XSingleParamEnum.Suite, TestTD2XFlagsParam.Suite, TestTD2XListParam.Suite,
+  TestTD2XStringParam.Suite, TestTD2XValidStringParam.Suite, TestTD2XFormatStringParam.Suite,
   TestTD2XFormatValidStringParam.Suite, TestTD2XFlaggedStringParam.Suite,
-  TestTD2XFlaggedStringConvertParam.Suite, TestTD2XDefinesParam.Suite]);
+  TestTD2XFlaggedStringConvertParam.Suite, TestTD2XFlaggedStringFormatParam.Suite,
+  TestTD2XDefinesParam.Suite]);
 
 end.

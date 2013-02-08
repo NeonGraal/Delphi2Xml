@@ -534,7 +534,7 @@ begin
   CheckTrue(lBase.Parse('B-'), 'Parse Base Off');
   CheckTrue(lBase.Parse('B+'), 'Parse Base On');
   CheckTrue(lBase.Parse('B!'), 'Parse Base Reset');
-  CheckTrue(lBase.Parse('B:Base'), 'Parse Base Value');
+  CheckTrue(lBase.Parse('B:Test'), 'Parse Base Value');
 end;
 
 procedure TestTD2XFileOptions.TestParseG;
@@ -543,6 +543,10 @@ var
 begin
   lGlobal := ForCode('G');
   CheckTrue(lGlobal.Parse('G'), 'Parse just Global code');
+  CheckTrue(lGlobal.Parse('G-'), 'Parse Global Off');
+  CheckTrue(lGlobal.Parse('G+'), 'Parse Global On');
+  CheckTrue(lGlobal.Parse('G!'), 'Parse Global Reset');
+  CheckTrue(lGlobal.Parse('G:Test'), 'Parse Global Value');
 end;
 
 procedure TestTD2XFileOptions.TestParseI;
@@ -551,6 +555,10 @@ var
 begin
   lInput := ForCode('I');
   CheckTrue(lInput.Parse('I'), 'Parse just Input code');
+  CheckTrue(lInput.Parse('I-'), 'Parse Input Off');
+  CheckTrue(lInput.Parse('I+'), 'Parse Input On');
+  CheckTrue(lInput.Parse('I!'), 'Parse Input Reset');
+  CheckTrue(lInput.Parse('I:Test'), 'Parse Input Value');
 end;
 
 procedure TestTD2XFileOptions.TestParseO;
@@ -559,14 +567,22 @@ var
 begin
   lOutput := ForCode('O');
   CheckTrue(lOutput.Parse('O'), 'Parse just Output code');
+  CheckTrue(lOutput.Parse('O-'), 'Parse Output Off');
+  CheckTrue(lOutput.Parse('O+'), 'Parse Output On');
+  CheckTrue(lOutput.Parse('O!'), 'Parse Output Reset');
+  CheckTrue(lOutput.Parse('O:Test'), 'Parse Output Value');
 end;
 
 procedure TestTD2XFileOptions.TestParseX;
 var
   lExclude: TD2XParam;
 begin
+  ForCode('I').Parse('I:Test');
+
   lExclude := ForCode('X');
   CheckFalse(lExclude.Parse('X'), 'Parse just Exclude code');
+  CheckTrue(lExclude.Parse('X!'), 'Parse Exclude Reset');
+  CheckTrue(lExclude.Parse('X:Test'), 'Parse Exclude Value');
 end;
 
 procedure TestTD2XFileOptions.TestReportAll;

@@ -31,13 +31,13 @@ type
     fFlags: TD2XFlagDefines;
     fValues: array of TD2XBoolFlag;
 
+    function UseParser: TD2XStringCheckRef;
+
     function IndexCode(pCode: Char): Integer;
     function IndexLabel(pLabel: String): Integer;
 
     function GetByCode(pCode: Char): ID2XFlag;
     function GetByLabel(pLabel: String): ID2XFlag;
-
-    function ParseFlags(pStr: String): Boolean;
 
     function ProcessLabels(pStr: String): Boolean;
     function ProcessCodes(pStr: String): Boolean;
@@ -71,7 +71,7 @@ type
     fExtn: String;
     fListFileName: TD2XNamedStreamRef;
 
-    function ParseList(pStr: String): Boolean;
+    function UseParser: TD2XStringCheckRef;
 
     procedure LoadItems(pFilename: String; pFunc: TItemProc);
     procedure ProcessItems(pItems: String; pFunc: TItemProc);
@@ -102,8 +102,9 @@ type
       pValidator: TD2XSingleParam<String>.TspValidator);
 
   private
-    function ConvertString(pStr: String; pDflt: String; out pVal: String): Boolean;
-    function FormatString(pVal: String): String;
+    function UseConverter(pConverter: TD2XSingleParam<String>.TspConverter)
+      : TD2XSingleParam<String>.TspConverter;
+    function UseFormatter: TD2XSingleParam<String>.TspFormatter;
   end;
 
   TD2XFlaggedStringParam = class(TD2XSingleParam<String>, ID2XFlag)
@@ -143,9 +144,10 @@ type
     fStrConverter: TD2XSingleParam<String>.TspConverter;
     fFlagFormatter: TfspFormatter;
 
-    function ConvertString(pStr: String; pDflt: String; out pVal: String): Boolean;
+    function UseConverter: TD2XSingleParam<String>.TspConverter;
+    function UseFormatter: TD2XSingleParam<String>.TspFormatter;
+
     function FormatFlagString(pFlag: Boolean; pVal: String): String;
-    function FormatString(pVal: String): String;
 
     function GetFlag: Boolean;
     procedure SetFlag(pVal: Boolean);
@@ -176,8 +178,8 @@ type
     fDefines: TStringList;
     fDefinesFileName: TD2XNamedStreamRef;
 
-    function ConvertDefines(pStr: String; pDflt: Boolean; out pVal: Boolean): Boolean;
-    function FormatDefines(pVal: Boolean): String;
+    function UseConverter: TD2XSingleParam<Boolean>.TspConverter;
+    function UseFormatter: TD2XSingleParam<Boolean>.TspFormatter;
 
     procedure IncludeDefine(pDef: String);
     procedure RemoveDefine(pDef: String);
@@ -227,12 +229,6 @@ end;
 
 { TD2XStringParam }
 
-function TD2XStringParam.ConvertString(pStr: String; pDflt: String; out pVal: String): Boolean;
-begin
-  Result := True;
-  pVal := pStr;
-end;
-
 constructor TD2XStringParam.CreateParam(pCode, pLabel, pSample, pDescr, pDefault: String;
   pConverter: TD2XSingleParam<String>.TspConverter;
   pFormatter: TD2XSingleParam<String>.TspFormatter);
@@ -258,28 +254,36 @@ end;
 constructor TD2XStringParam.CreateStr(pCode, pLabel, pSample, pDescr, pDefault: String;
   pConverter: TD2XSingleParam<String>.TspConverter);
 begin
-  if Assigned(pConverter) then
-    inherited CreateParam(pCode, pLabel, pSample, pDescr, pDefault, pConverter, FormatString)
-  else
-    inherited CreateParam(pCode, pLabel, pSample, pDescr, pDefault, ConvertString,
-      FormatString);
+  inherited CreateParam(pCode, pLabel, pSample, pDescr, pDefault, UseConverter(pConverter),
+    UseFormatter());
 end;
 
 constructor TD2XStringParam.CreateStrValid(pCode, pLabel, pSample, pDescr, pDefault: String;
   pConverter: TD2XSingleParam<String>.TspConverter;
   pValidator: TD2XSingleParam<String>.TspValidator);
 begin
-  if Assigned(pConverter) then
-    inherited CreateParamValid(pCode, pLabel, pSample, pDescr, pDefault, pConverter,
-      FormatString, pValidator)
-  else
-    inherited CreateParamValid(pCode, pLabel, pSample, pDescr, pDefault, ConvertString,
-      FormatString, pValidator);
+  inherited CreateParamValid(pCode, pLabel, pSample, pDescr, pDefault,
+    UseConverter(pConverter), UseFormatter(), pValidator);
 end;
 
-function TD2XStringParam.FormatString(pVal: String): String;
+function TD2XStringParam.UseConverter(pConverter: TD2XSingleParam<String>.TspConverter)
+  : TD2XSingleParam<String>.TspConverter;
 begin
-  Result := pVal;
+  if Assigned(pConverter) then
+    Result := pConverter
+  else
+    Result :=
+    function(pStr, pDflt: String; out pVal: String): Boolean begin Result := True;
+  pVal := pStr;
+end;
+end;
+
+function TD2XStringParam.UseFormatter: TD2XSingleParam<String>.TspFormatter;
+begin
+  Result := function(pVal: String): String
+    begin
+      Result := pVal;
+    end;
 end;
 
 { TD2XFlaggedStringParam }
@@ -297,34 +301,6 @@ begin
     Value := pStr;
 end;
 
-function TD2XFlaggedStringParam.ConvertString(pStr: String; pDflt: String;
-  out pVal: String): Boolean;
-begin
-  Result := False;
-  if (pStr = '') or (pStr = '+') or (pStr = '-') or (pStr = '!') then
-  begin
-    Result := True;
-    if pStr = '!' then
-      Reset
-    else
-      fFlag := pStr <> '-';
-    pVal := fValue;
-  end
-  else
-    if pStr[1] = ':' then
-    begin
-      if Assigned(fStrConverter) then
-        Result := fStrConverter(Copy(pStr, 2, Length(pStr)), pDflt, pVal)
-      else
-      begin
-        pVal := Copy(pStr, 2, Length(pStr));
-        Result := True;
-      end;
-      if Result then
-        fFlag := True;
-    end;
-end;
-
 constructor TD2XFlaggedStringParam.CreateFlagStr(pCode, pLabel, pSample, pDescr,
   pStrDefault: String; pFlagDefault: Boolean;
   pStrConverter: TD2XSingleParam<String>.TspConverter);
@@ -333,18 +309,18 @@ begin
   fFlagDefault := pFlagDefault;
   fFlagFormatter := FormatFlagString;
 
-  inherited CreateParam(pCode, pLabel, pSample, pDescr, pStrDefault, ConvertString,
-    FormatString);
+  inherited CreateParam(pCode, pLabel, pSample, pDescr, pStrDefault, UseConverter(),
+    UseFormatter());
 end;
 
 constructor TD2XFlaggedStringParam.CreateFlagStrFmt(pCode, pLabel, pSample, pDescr,
   pStrDefault: String; pFlagDefault: Boolean;
   pStrConverter: TD2XSingleParam<String>.TspConverter; pFormatter: TfspFormatter);
 begin
-  inherited CreateParam(pCode, pLabel, pSample, pDescr, pStrDefault, ConvertString,
-    FormatString);
-
   CheckParam(Assigned(pFormatter), 'Formatter');
+
+  inherited CreateParam(pCode, pLabel, pSample, pDescr, pStrDefault, UseConverter(),
+    UseFormatter());
 
   fStrConverter := pStrConverter;
   fFlagDefault := pFlagDefault;
@@ -388,11 +364,6 @@ begin
       Result := '-';
 end;
 
-function TD2XFlaggedStringParam.FormatString(pVal: String): String;
-begin
-  raise EInvalidParam.Create('Incorrect call to TD2XFlaggedStringParam.FormatString');
-end;
-
 function TD2XFlaggedStringParam.GetFlag: Boolean;
 begin
   Result := fFlag;
@@ -428,6 +399,45 @@ begin
   fFlag := pVal;
 end;
 
+function TD2XFlaggedStringParam.UseConverter: TD2XSingleParam<String>.TspConverter;
+begin
+  Result := function(pStr, pDflt: String; out pVal: String): Boolean
+    begin
+      Result := False;
+      if (pStr = '') or (pStr = '+') or (pStr = '-') or (pStr = '!') then
+      begin
+        Result := True;
+        if pStr = '!' then
+          Reset
+        else
+          fFlag := pStr <> '-';
+        pVal := fValue;
+      end
+      else
+        if pStr[1] = ':' then
+        begin
+          if Assigned(fStrConverter) then
+            Result := fStrConverter(Copy(pStr, 2, Length(pStr)), pDflt, pVal)
+          else
+          begin
+            pVal := Copy(pStr, 2, Length(pStr));
+            Result := True;
+          end;
+          if Result then
+            fFlag := True;
+        end;
+    end;
+
+end;
+
+function TD2XFlaggedStringParam.UseFormatter: TD2XSingleParam<String>.TspFormatter;
+begin
+  Result := function(pVal: String): String
+    begin
+      raise EInvalidParam.Create('Incorrect call to TD2XFlaggedStringParam.FormatString');
+    end;
+end;
+
 procedure TD2XFlaggedStringParam.Zero;
 begin
   Convert('');
@@ -436,43 +446,6 @@ end;
 
 { TD2XDefinesParam }
 
-function TD2XDefinesParam.ConvertDefines(pStr: String; pDflt: Boolean;
-  out pVal: Boolean): Boolean;
-var
-  lStr: String;
-begin
-  Result := False;
-  if (pStr = '!') or (pStr = ':') then
-  begin
-    Result := True;
-    fDefines.Clear;
-    pVal := pStr = ':';
-  end
-  else
-    if Length(pStr) > 1 then
-    begin
-      lStr := System.Copy(pStr, 2, Length(pStr));
-      Result := True;
-      pVal := True;
-      case pStr[1] of
-        '+':
-          IncludeDefines(lStr);
-        '-':
-          RemoveDefines(lStr);
-        ':':
-          begin
-            fDefines.Clear;
-            LoadDefines(MakeFileName(lStr, '.def'), IncludeDefine);
-          end;
-      else
-        begin
-          Result := False;
-          pVal := False;
-        end;
-      end;
-    end;
-end;
-
 constructor TD2XDefinesParam.CreateDefines(pCode, pLabel: String;
   pDefinesFileName: TD2XNamedStreamRef);
 begin
@@ -480,7 +453,7 @@ begin
   fDefines.Sorted := True;
 
   inherited CreateParam(pCode, pLabel, '[+-!:]<def>', 'Add(+), Remove(-), Clear(!) or Load(:) '
-      + pLabel, False, ConvertDefines, FormatDefines);
+      + pLabel, False, UseConverter(), UseFormatter());
 
   fDefinesFileName := pDefinesFileName;
 end;
@@ -497,11 +470,6 @@ begin
   FreeAndNil(fDefines);
 
   inherited;
-end;
-
-function TD2XDefinesParam.FormatDefines(pVal: Boolean): String;
-begin
-  Result := '';
 end;
 
 function TD2XDefinesParam.GetFlag: Boolean;
@@ -638,6 +606,53 @@ begin
   SetValue(pVal);
 end;
 
+function TD2XDefinesParam.UseConverter: TD2XSingleParam<Boolean>.TspConverter;
+begin
+  Result := function(pStr: string; pDflt: Boolean; out pVal: Boolean): Boolean
+    var
+      lStr: String;
+    begin
+      Result := False;
+      if (pStr = '!') or (pStr = ':') then
+      begin
+        Result := True;
+        fDefines.Clear;
+        pVal := pStr = ':';
+      end
+      else
+        if Length(pStr) > 1 then
+        begin
+          lStr := System.Copy(pStr, 2, Length(pStr));
+          Result := True;
+          pVal := True;
+          case pStr[1] of
+            '+':
+              IncludeDefines(lStr);
+            '-':
+              RemoveDefines(lStr);
+            ':':
+              begin
+                fDefines.Clear;
+                LoadDefines(MakeFileName(lStr, '.def'), IncludeDefine);
+              end;
+          else
+            begin
+              Result := False;
+              pVal := False;
+            end;
+          end;
+        end;
+    end;
+end;
+
+function TD2XDefinesParam.UseFormatter: TD2XSingleParam<Boolean>.TspFormatter;
+begin
+  Result := function(pVal: Boolean): String
+    begin
+      Result := '';
+    end;
+end;
+
 procedure TD2XDefinesParam.Zero;
 begin
   inherited;
@@ -660,7 +675,7 @@ begin
   if Length(pFlags) < 1 then
     raise EInvalidParam.Create('Need to initialize some Flags');
 
-  inherited Create('F', 'Flags', '<codes> | :<labels>', 'Flags', ParseFlags);
+  inherited Create('F', 'Flags', '<codes> | :<labels>', 'Flags', UseParser());
 
   SetLength(fFlags, Length(pFlags));
   SetLength(fValues, Length(pFlags));
@@ -832,28 +847,6 @@ begin
   end;
 end;
 
-function TD2XFlagsParam.ParseFlags(pStr: String): Boolean;
-var
-  lStr: String;
-begin
-  Result := False;
-  if (Length(pStr) > 0) and (pStr[1] = '!') then
-  begin
-    Result := True;
-    Reset;
-    lStr := System.Copy(pStr, 2, Length(pStr));
-  end
-  else
-    lStr := pStr;
-  if Length(lStr) > 0 then
-  begin
-    if lStr[1] = ':' then
-      Result := ProcessLabels(System.Copy(lStr, 2, Length(lStr)))
-    else
-      Result := ProcessCodes(lStr);
-  end;
-end;
-
 function TD2XFlagsParam.ProcessCodes(pStr: String): Boolean;
 var
   lVal: Boolean;
@@ -921,6 +914,31 @@ begin
     ID2XFlag(fValues[i]).Flag := fFlags[i].FlagDefault;
 end;
 
+function TD2XFlagsParam.UseParser: TD2XStringCheckRef;
+begin
+  Result := function(pStr: String): Boolean
+    var
+      lStr: String;
+    begin
+      Result := False;
+      if (Length(pStr) > 0) and (pStr[1] = '!') then
+      begin
+        Result := True;
+        Reset;
+        lStr := System.Copy(pStr, 2, Length(pStr));
+      end
+      else
+        lStr := pStr;
+      if Length(lStr) > 0 then
+      begin
+        if lStr[1] = ':' then
+          Result := ProcessLabels(System.Copy(lStr, 2, Length(lStr)))
+        else
+          Result := ProcessCodes(lStr);
+      end;
+    end;
+end;
+
 procedure TD2XFlagsParam.Zero;
 var
   i: Integer;
@@ -962,7 +980,7 @@ constructor TD2XListParam.CreateList(pCode, pLabel, pDescr, pExtn: String;
   pListFileName: TD2XNamedStreamRef);
 begin
   inherited Create(pCode, pLabel, '[!:]<list>', 'Clear(!), Load(:,' + pExtn +
-      ') or Add items to ' + pDescr, ParseList);
+      ') or Add items to ' + pDescr, UseParser());
 
   fList := TStringList.Create;
   fExtn := pExtn;
@@ -1049,31 +1067,34 @@ begin
   end;
 end;
 
-function TD2XListParam.ParseList(pStr: String): Boolean;
-begin
-  Result := False;
-  if (pStr = '!') or (pStr = ':') then
-  begin
-    Result := True;
-    fList.Clear;
-  end
-  else
-    if Length(pStr) > 1 then
-    begin
-      Result := True;
-      if pStr[1] = ':' then
-      begin
-        fList.Clear;
-        LoadItems(MakeFileName(System.Copy(pStr, 2, Length(pStr)), fExtn), AddItem);
-      end
-      else
-        ProcessItems(pStr, AddItem);
-    end;
-end;
-
 procedure TD2XListParam.Reset;
 begin
   fList.Clear;
+end;
+
+function TD2XListParam.UseParser: TD2XStringCheckRef;
+begin
+  Result := function(pStr: String): Boolean
+    begin
+      Result := False;
+      if (pStr = '!') or (pStr = ':') then
+      begin
+        Result := True;
+        fList.Clear;
+      end
+      else
+        if Length(pStr) > 1 then
+        begin
+          Result := True;
+          if pStr[1] = ':' then
+          begin
+            fList.Clear;
+            LoadItems(MakeFileName(System.Copy(pStr, 2, Length(pStr)), fExtn), AddItem);
+          end
+          else
+            ProcessItems(pStr, AddItem);
+        end;
+    end;
 end;
 
 procedure TD2XListParam.Zero;

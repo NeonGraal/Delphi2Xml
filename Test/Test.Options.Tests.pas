@@ -30,6 +30,10 @@ type
     procedure TestElapsedModeParam;
     procedure TestParseModeParam;
     procedure TestResultPerParam;
+
+    procedure TestElapsedModeParamCreates;
+    procedure TestParseModeParamCreates;
+    procedure TestResultPerParamCreates;
   end;
 
   TOptionsTestCase = class(TLoggerTestCase)
@@ -356,6 +360,39 @@ begin
   end;
 end;
 
+procedure TestTD2XOptionEnums.TestElapsedModeParamCreates;
+var
+  lCalled: Boolean;
+  lPrm: TD2XSingleParam<TD2XElapsedMode>;
+begin
+  lCalled := False;
+  lPrm := TD2XSingleParam<TD2XElapsedMode>.CreateParamValid('T', 'Test', '<tst>', 'Test Elapsed mode',
+    emQuiet, TD2X.CnvDflt<TD2XElapsedMode>, TD2X.ToLabel<TD2XElapsedMode>,
+    function(pVal: TD2XElapsedMode): Boolean
+    begin
+      lCalled := True;
+      Result := True;
+    end);
+  try
+    CheckTrue(lCalled, 'Validator called');
+  finally
+    lPrm.Free;
+  end;
+
+  lCalled := False;
+  lPrm := TD2XSingleParam<TD2XElapsedMode>.CreateParamOnSet('T', 'Test', '<tst>', 'Test Elapsed mode',
+    emQuiet, TD2X.CnvDflt<TD2XElapsedMode>, TD2X.ToLabel<TD2XElapsedMode>,
+    procedure(pOld, pNew, pDflt: TD2XElapsedMode)
+    begin
+      lCalled := True;
+    end);
+  try
+    CheckTrue(lCalled, 'OnSet called');
+  finally
+    lPrm.Free;
+  end;
+end;
+
 procedure TestTD2XOptionEnums.TestParseModeInvalidCreate;
 begin
   CheckInvalidParam('Need to use correct constructor', 'TD2XSingleParam<TD2XParseMode>.Create',
@@ -391,6 +428,39 @@ begin
   end;
 end;
 
+procedure TestTD2XOptionEnums.TestParseModeParamCreates;
+var
+  lCalled: Boolean;
+  lPrm: TD2XSingleParam<TD2XParseMode>;
+begin
+  lCalled := False;
+  lPrm := TD2XSingleParam<TD2XParseMode>.CreateParamValid('T', 'Test', '<tst>', 'Test Elapsed mode',
+    pmFull, TD2X.CnvDflt<TD2XParseMode>, TD2X.ToLabel<TD2XParseMode>,
+    function(pVal: TD2XParseMode): Boolean
+    begin
+      lCalled := True;
+      Result := True;
+    end);
+  try
+    CheckTrue(lCalled, 'Validator called');
+  finally
+    lPrm.Free;
+  end;
+
+  lCalled := False;
+  lPrm := TD2XSingleParam<TD2XParseMode>.CreateParamOnSet('T', 'Test', '<tst>', 'Test Elapsed mode',
+    pmFull, TD2X.CnvDflt<TD2XParseMode>, TD2X.ToLabel<TD2XParseMode>,
+    procedure(pOld, pNew, pDflt: TD2XParseMode)
+    begin
+      lCalled := True;
+    end);
+  try
+    CheckTrue(lCalled, 'OnSet called');
+  finally
+    lPrm.Free;
+  end;
+end;
+
 procedure TestTD2XOptionEnums.TestResultPerInvalidCreate;
 begin
   CheckInvalidParam('Need to use correct constructor', 'TD2XSingleParam<TD2XResultPer>.Create',
@@ -423,6 +493,39 @@ begin
     CheckEqualsString('TDir', lPrm.ToString, 'String representation');
   finally
     FreeAndNil(lPrm);
+  end;
+end;
+
+procedure TestTD2XOptionEnums.TestResultPerParamCreates;
+var
+  lCalled: Boolean;
+  lPrm: TD2XSingleParam<TD2XResultPer>;
+begin
+  lCalled := False;
+  lPrm := TD2XSingleParam<TD2XResultPer>.CreateParamValid('T', 'Test', '<tst>', 'Test Elapsed mode',
+    rpDir, TD2X.CnvDflt<TD2XResultPer>, TD2X.ToLabel<TD2XResultPer>,
+    function(pVal: TD2XResultPer): Boolean
+    begin
+      lCalled := True;
+      Result := True;
+    end);
+  try
+    CheckTrue(lCalled, 'Validator called');
+  finally
+    lPrm.Free;
+  end;
+
+  lCalled := False;
+  lPrm := TD2XSingleParam<TD2XResultPer>.CreateParamOnSet('T', 'Test', '<tst>', 'Test Elapsed mode',
+    rpDir, TD2X.CnvDflt<TD2XResultPer>, TD2X.ToLabel<TD2XResultPer>,
+    procedure(pOld, pNew, pDflt: TD2XResultPer)
+    begin
+      lCalled := True;
+    end);
+  try
+    CheckTrue(lCalled, 'OnSet called');
+  finally
+    lPrm.Free;
   end;
 end;
 

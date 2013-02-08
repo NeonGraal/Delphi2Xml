@@ -86,6 +86,10 @@ type
     fDefault: T;
     fFormatter: TspFormatter;
 
+    constructor CreateSingleParam(pCode, pLabel, pSample, pDescr: string; pDefault: T;
+      pConverter: TspConverter; pFormatter: TspFormatter; pValidator: TspValidator;
+      pOnSet: TspOnSet);
+
     function GetFormatted(pDefault: Boolean): string; override;
     function GetReportDetails(pStr: string = ''): string; override;
 
@@ -95,8 +99,9 @@ type
     fValue: T;
     fOnSet: TspOnSet;
 
+    function UseParser: TD2XStringCheckRef;
+
     function CheckValue(pVal: T): Boolean;
-    function ConvertAndSet(pStr: string): Boolean;
     procedure SetValue(const pVal: T);
 
   public
@@ -342,20 +347,7 @@ end;
 
 procedure TD2XSingleParam<T>.Convert(pStr: string);
 begin
-  ConvertAndSet(pStr);
-end;
-
-function TD2XSingleParam<T>.ConvertAndSet(pStr: string): Boolean;
-var
-  lVal: T;
-begin
-  Result := fConverter(pStr, fDefault, lVal) and CheckValue(lVal);
-  if Result then
-  begin
-    if Assigned(fOnSet) then
-      fOnSet(fValue, lVal, fDefault);
-    fValue := lVal;
-  end;
+  UseParser()(pStr);
 end;
 
 constructor TD2XSingleParam<T>.Create(pCode, pLabel, pSample, pDescr: string;
@@ -367,60 +359,55 @@ end;
 constructor TD2XSingleParam<T>.CreateParam(pCode, pLabel, pSample, pDescr: string; pDefault: T;
   pConverter: TspConverter; pFormatter: TspFormatter);
 begin
-  inherited Create(pCode, pLabel, pSample, pDescr, ConvertAndSet);
-
-  CheckParam(Assigned(pConverter), 'Converter');
-  CheckParam(Assigned(pFormatter), 'Formatter');
-
-  fDefault := pDefault;
-  fConverter := pConverter;
-  fFormatter := pFormatter;
-  fValidator := nil;
-  fOnSet := nil;
-
-  Reset;
+  CreateSingleParam(pCode, pLabel, pSample, pDescr, pDefault, pConverter, pFormatter,
+    nil, nil);
 end;
 
 constructor TD2XSingleParam<T>.CreateParamOnSet(pCode, pLabel, pSample, pDescr: string;
   pDefault: T; pConverter: TspConverter; pFormatter: TspFormatter; pOnSet: TspOnSet);
 begin
-  inherited Create(pCode, pLabel, pSample, pDescr, ConvertAndSet);
+  CheckParam(Assigned(pOnSet), 'OnSet');
 
-  CheckParam(Assigned(pConverter), 'Converter');
-  CheckParam(Assigned(pFormatter), 'Formatter');
-
-  fDefault := pDefault;
-  fConverter := pConverter;
-  fFormatter := pFormatter;
-  fValidator := nil;
-  fOnSet := pOnSet;
-
-  Reset;
+  CreateSingleParam(pCode, pLabel, pSample, pDescr, pDefault, pConverter, pFormatter,
+    nil, pOnSet);
 end;
 
 constructor TD2XSingleParam<T>.CreateParamValid(pCode, pLabel, pSample, pDescr: string;
   pDefault: T; pConverter: TspConverter; pFormatter: TspFormatter; pValidator: TspValidator);
 begin
-  inherited Create(pCode, pLabel, pSample, pDescr, ConvertAndSet);
+  CheckParam(Assigned(pValidator), 'Validator');
 
+  CreateSingleParam(pCode, pLabel, pSample, pDescr, pDefault, pConverter, pFormatter,
+    pValidator, nil);
+end;
+
+constructor TD2XSingleParam<T>.CreateSingleParam(pCode, pLabel, pSample, pDescr: string;
+  pDefault: T; pConverter: TspConverter; pFormatter: TspFormatter; pValidator: TspValidator;
+  pOnSet: TspOnSet);
+begin
   CheckParam(Assigned(pConverter), 'Converter');
   CheckParam(Assigned(pFormatter), 'Formatter');
+
+  inherited Create(pCode, pLabel, pSample, pDescr, UseParser());
 
   fDefault := pDefault;
   fConverter := pConverter;
   fFormatter := pFormatter;
   fValidator := pValidator;
-  fOnSet := nil;
+  fOnSet := pOnSet;
 
   Reset;
 end;
 
 function TD2XSingleParam<T>.GetFormatted(pDefault: Boolean): string;
 begin
-  if pDefault then
-    Result := fFormatter(fDefault)
+  if Assigned(fFormatter) then
+    if pDefault then
+      Result := fFormatter(fDefault)
+    else
+      Result := fFormatter(fValue)
   else
-    Result := fFormatter(fValue);
+    Result := '';
 end;
 
 function TD2XSingleParam<T>.GetReportDetails(pStr: string): string;
@@ -465,6 +452,22 @@ begin
   end
   else
     raise EInvalidParam.Create('Invalid value');
+end;
+
+function TD2XSingleParam<T>.UseParser: TD2XStringCheckRef;
+begin
+  Result := function(pStr: string): Boolean
+    var
+      lVal: T;
+    begin
+      Result := fConverter(pStr, fDefault, lVal) and CheckValue(lVal);
+      if Result then
+      begin
+        if Assigned(fOnSet) then
+          fOnSet(fValue, lVal, fDefault);
+        fValue := lVal;
+      end;
+    end;
 end;
 
 procedure TD2XSingleParam<T>.Zero;
