@@ -3,4 +3,5 @@
 -f+tr-f
 *.dp?,*.inc,*.pas
 -b:..\V6\3.6\Main
+-xCode Templates
 *.dp?,*.inc,*.pas

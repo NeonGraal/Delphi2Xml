@@ -2,4 +2,5 @@
 -h+Standalone_PropertyUnits
 -f+tr-f
 -b:..\V6\3.6\Main\V6
+-xCode Templates
 *.dp?,*.inc,*.pas
