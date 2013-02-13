@@ -38,6 +38,7 @@ type
     procedure TestFull;
     procedure TestFullBase;
     procedure TestFullExcluding;
+    procedure TestFullBaseExcluding;
   end;
 
   TestTD2XFileOptions = class(TFileFactoryTestCase)
@@ -69,7 +70,7 @@ type
 
 const
   FILE_CHANGED_OPTIONS = 'Global name :Test Config dir ::Test Log dir ::Test ' +
-    'Base dir -(:Test) Exclude Dirs';
+    'Base dir -(:Test) Exclude Files/Dirs';
   { TestTD2XFileOptions }
 
 procedure TestTD2XFileFactory.CheckIO(var pDS: ID2XIO; pExp, pLabel: string);
@@ -211,9 +212,11 @@ begin
 
     CheckTrue(lD.FirstFile('File*.txt'), 'First File');
     try
-      CheckEqualsString('Test\FileTest.txt', lD.Current, 'First File Name');
+      CheckEqualsString('Test\FileExclude.txt', lD.Current, 'First File Name');
+      CheckTrue(lD.Next, 'Next File');
 
-      CheckFalse(lD.Next, 'Next File');
+      CheckEqualsString('Test\FileTest.txt', lD.Current, 'Next File Name');
+      CheckFalse(lD.Next, 'Last File');
     finally
       lD.Close;
     end;
@@ -243,15 +246,18 @@ var
 begin
   ForCode('B').Parse('B:Test');
 
+  lSD := nil;
   lD := fFileOpts.BaseDir('DirTest');
   try
     CheckEqualsString('Test\DirTest\', lD.Description, 'Dir Description');
 
     CheckTrue(lD.FirstFile('*.txt'), 'First File');
     try
-      CheckEqualsString('DirTest\DirFileTest.txt', lD.Current, 'First File Name');
+      CheckEqualsString('DirTest\DirFileExclude.txt', lD.Current, 'First File Name');
+      CheckTrue(lD.Next, 'Next File');
 
-      CheckFalse(lD.Next, 'Next File');
+      CheckEqualsString('DirTest\DirFileTest.txt', lD.Current, 'Next File Name');
+      CheckFalse(lD.Next, 'Last File');
     finally
       lD.Close;
     end;
@@ -275,16 +281,60 @@ begin
   end;
 end;
 
+procedure TestTD2XFileFactory.TestFullBaseExcluding;
+var
+  lD, lSD: ID2XDir;
+begin
+  ForCode('X').Parse('XEx\w+de');
+  ForCode('B').Parse('B:Test');
+
+  lSD := nil;
+  lD := fFileOpts.BaseDir('DirTest');
+  try
+    CheckEqualsString('Test\DirTest\', lD.Description, 'Dir Description');
+
+    CheckTrue(lD.FirstFile('DirFile*.txt'), 'First File');
+    try
+      CheckEqualsString('DirTest\DirFileTest.txt', lD.Current, 'First File Name');
+      CheckFalse(lD.Next, 'Last File');
+    finally
+      lD.Close;
+    end;
+
+    CheckTrue(lD.FirstDir, 'First Dir');
+    try
+      CheckEqualsString('DirTest\SubDirTest', lD.Current, 'First Dir Name');
+      lSD := fFileOpts.BaseDir(lD.Current);
+      CheckEqualsString('Test\DirTest\SubDirTest\', lSD.Description);
+
+      CheckFalse(lD.Next, 'Next Dir');
+    finally
+      lD.Close;
+    end;
+  finally
+    DisposeOf(lSD);
+    DisposeOf(lD);
+  end;
+end;
+
 procedure TestTD2XFileFactory.TestFullExcluding;
 var
   lD, lSD: ID2XDir;
 begin
-  ForCode('X').Parse('XExclude');
+  ForCode('X').Parse('XEx\w+de');
 
   lSD := nil;
   lD := fFileOpts.BaseDir('Test');
   try
     CheckEqualsString('Test\', lD.Description, 'Dir Description');
+
+    CheckTrue(lD.FirstFile('File*.txt'), 'First File');
+    try
+      CheckEqualsString('Test\FileTest.txt', lD.Current, 'First File Name');
+      CheckFalse(lD.Next, 'Last File');
+    finally
+      lD.Close;
+    end;
 
     CheckTrue(lD.FirstDir, 'First Dir');
     try
@@ -292,7 +342,7 @@ begin
       lSD := fFileOpts.BaseDir(lD.Current);
       CheckEqualsString('Test\DirTest\', lSD.Description);
 
-      CheckFalse(lD.Next, 'Next Dir');
+      CheckFalse(lD.Next, 'Last Dir');
     finally
       lD.Close;
     end;
@@ -626,7 +676,7 @@ begin
   fParams.ZeroAll;
 
   fParams.ReportAll(fLog);
-  CheckLog(REPORT_HEADING + 'Global name Config dir - Log dir - Base dir - Exclude Dirs',
+  CheckLog(REPORT_HEADING + 'Global name Config dir - Log dir - Base dir - Exclude Files/Dirs',
     'All Params Zeroed');
 end;
 

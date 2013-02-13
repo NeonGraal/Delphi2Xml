@@ -20,7 +20,7 @@ const
   FILE_SHOW_OPTIONS = 'I[+-]:<dir> :Config\ Use <dir> as a base for all Config files ' +
     'O[+-]:<dir> :Log\ Use <dir> as a base for all Log files ' +
     'B[+-]:<dir> -(.\) Use <dir> as a base for all Input files ' +
-    'X[!:]<list> Clear(!), Load(:,.xdre) or Add items to Exclude dirs matching these strings';
+    'X[!:]<list> Clear(!), Load(:,.xre) or Add items to Exclude files/dirs matching these regular expressions';
 
   EXPECTED_SHOW_OPTIONS = ' ? Show valid options ! Reset all options to defaults ' +
     '@<file> Report/Output Current options F<codes> | :<labels> Flags ' +
@@ -42,7 +42,7 @@ const
   REPORT_HEADING = 'Current option settings: ';
 
   FILE_REPORT_OPTIONS =
-    'Global name %s Config dir :Config\ Log dir :Log\ Base dir -(.\) Exclude Dirs';
+    'Global name %s Config dir :Config\ Log dir :Log\ Base dir -(.\) Exclude Files/Dirs';
 
   BASE_REPORT_OPTIONS = REPORT_HEADING +
     'Flags FinalToken+,LogErrors+,LogNotSupp-,Recurse-,Timestamp-,Verbose- ' +

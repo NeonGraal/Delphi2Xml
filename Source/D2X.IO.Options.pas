@@ -247,8 +247,8 @@ begin
       else
         pVal := pStr;
     end, pValidator);
-  fExcludeDirs := TD2XListParam.CreateList('X', 'Exclude Dirs',
-    'Exclude dirs matching these strings', '.xdre', ConfigFileOrExtn);
+  fExcludeDirs := TD2XListParam.CreateList('X', 'Exclude Files/Dirs',
+    'Exclude files/dirs matching these regular expressions', '.xre', ConfigFileOrExtn);
 
   fOutputTimestamp := FormatDateTime('-HH-mm', Now);
 end;

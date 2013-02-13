@@ -138,6 +138,7 @@ type
     //    procedure TestParseOptionT; // Tested in Test.IO.Options
     procedure TestParseOptionWD;
     procedure TestParseOptionWX;
+    //    procedure TestParseOptionX; // Tested in Test.IO.Options
   end;
 
   TestTD2XOptionsParseUnused = class(TOptionsParseTestCase)
@@ -155,7 +156,6 @@ type
     procedure TestParseOptionU;
     procedure TestParseOptionV;
     procedure TestParseOptionW;
-    procedure TestParseOptionX;
     procedure TestParseOptionY;
     procedure TestParseOptionZ;
   end;
@@ -1485,11 +1485,6 @@ end;
 procedure TestTD2XOptionsParseUnused.TestParseOptionW;
 begin
   CheckUnknown('W');
-end;
-
-procedure TestTD2XOptionsParseUnused.TestParseOptionX;
-begin
-  CheckUnknown('X');
 end;
 
 procedure TestTD2XOptionsParseUnused.TestParseOptionY;

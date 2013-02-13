@@ -120,6 +120,11 @@ end;
 procedure TestTD2XDirPath.TestExcludes;
 begin
   fExcludes.CommaText := 'Exclude';
+  CheckTrue(fDir.FirstFile('File*.txt'), 'First File');
+  CheckEqualsString('Test\FileTest.txt', fDir.Current, 'First File Current');
+  CheckFalse(fDir.Next, 'First File Last');
+  fDir.Close;
+
   CheckTrue(fDir.FirstDir, 'First Dir');
   CheckEqualsString('Test\DirTest', fDir.Current, 'First Dir Current');
   CheckFalse(fDir.Next, 'First Dir Next');
@@ -144,8 +149,10 @@ end;
 procedure TestTD2XDirPath.TestFiles;
 begin
   CheckTrue(fDir.FirstFile('File*.txt'), 'First File');
+  CheckEqualsString('Test\FileExclude.txt', fDir.Current, 'Exclude File Current');
+  CheckTrue(fDir.Next, 'First File Next');
   CheckEqualsString('Test\FileTest.txt', fDir.Current, 'First File Current');
-  CheckFalse(fDir.Next, 'First File Next');
+  CheckFalse(fDir.Next, 'First File Last');
   fDir.Close;
 end;
 
