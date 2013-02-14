@@ -1,34 +1,36 @@
 <?xml version="1.0"?>
 <D2X_Pattern parseMode="Uses" fileName="Pattern-TestingTest">
-  <D2X_File fileName="Testing.Test.AUnit.pas">
-    <UnitFile lastToken="end.">
-      <MainUnitName group="Testing.Test">Testing.Test.AUnit</MainUnitName>
-      <InterfaceSection>
-        <UsedUnitName>System.Classes</UsedUnitName>
-        <IncludeFile filename="TEST.INC" msgAt="71,0" />
-        <D2X_notSuppMsg msgAt="91,0">Currently not supported {$D+}</D2X_notSuppMsg>
-      </InterfaceSection>
-      <ImplementationSection lastToken=";{$ELSE}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}">
-        <UsedUnitName>System.SysUtils</UsedUnitName>
-      </ImplementationSection>
-    </UnitFile>
-  </D2X_File>
-  <D2X_File fileName="Testing.Test.AProgram.dpr">
-    <ProgramFile lastToken="beginend.">
-      <MainUnitName group="Testing.Test">Testing.Test.AProgram</MainUnitName>
-      <MainUsedUnitStatement file="'Testing.Test.AUnit.pas'">
-        <UsedUnitName group="Testing.Test">Testing.Test.AUnit</UsedUnitName>
-      </MainUsedUnitStatement>
-    </ProgramFile>
-  </D2X_File>
-  <D2X_File fileName="Testing.Test.APackage.dpk">
-    <PackageFile lastToken=";end.">
-      <MainUnitName group="Testing.Test">Testing.Test.APackage</MainUnitName>
-      <ContainsStatement>
-        <ContainsIdentifier group="Testing.Test">Testing.Test.AUnit</ContainsIdentifier>
-        <ContainsExpression file="'Testing.Test.AUnit.pas'" />
-      </ContainsStatement>
-    </PackageFile>
-  </D2X_File>
+  <D2X_Group name="Testing.Test" fileName="Group-TestingTest">
+    <D2X_File fileName="Testing.Test.AUnit.pas">
+      <UnitFile lastToken="end.">
+        <MainUnitName group="Testing.Test">Testing.Test.AUnit</MainUnitName>
+        <InterfaceSection>
+          <UsedUnitName>System.Classes</UsedUnitName>
+          <IncludeFile filename="TEST.INC" msgAt="71,0" />
+          <D2X_notSuppMsg msgAt="91,0">Currently not supported {$D+}</D2X_notSuppMsg>
+        </InterfaceSection>
+        <ImplementationSection lastToken=";{$ELSE}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}">
+          <UsedUnitName>System.SysUtils</UsedUnitName>
+        </ImplementationSection>
+      </UnitFile>
+    </D2X_File>
+    <D2X_File fileName="Testing.Test.AProgram.dpr">
+      <ProgramFile lastToken="beginend.">
+        <MainUnitName group="Testing.Test">Testing.Test.AProgram</MainUnitName>
+        <MainUsedUnitStatement file="'Testing.Test.AUnit.pas'">
+          <UsedUnitName group="Testing.Test">Testing.Test.AUnit</UsedUnitName>
+        </MainUsedUnitStatement>
+      </ProgramFile>
+    </D2X_File>
+    <D2X_File fileName="Testing.Test.APackage.dpk">
+      <PackageFile lastToken=";end.">
+        <MainUnitName group="Testing.Test">Testing.Test.APackage</MainUnitName>
+        <ContainsStatement>
+          <ContainsIdentifier group="Testing.Test">Testing.Test.AUnit</ContainsIdentifier>
+          <ContainsExpression file="'Testing.Test.AUnit.pas'" />
+        </ContainsStatement>
+      </PackageFile>
+    </D2X_File>
+  </D2X_Group>
 </D2X_Pattern>
 

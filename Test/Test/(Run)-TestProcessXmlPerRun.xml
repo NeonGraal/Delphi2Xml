@@ -4,74 +4,80 @@
     <D2X_Dir fileName="(Base)">
       <D2X_SubDir fileName="(Dir)">
         <D2X_Pattern fileName="Pattern-TestingTest">
-          <D2X_File fileName="Testing.Test.AUnit.pas">
-            <UnitFile>
-              <MainUnitName group="Testing.Test">Testing.Test.AUnit</MainUnitName>
-              <InterfaceSection>
-                <UsedUnitsList>
-                  <UsedUnitName>System.Classes</UsedUnitName>
-                </UsedUnitsList>
-                <IncludeFile filename="TEST.INC" msgAt="71,0" />
-                <D2X_notSuppMsg msgAt="91,0">Currently not supported {$D+}</D2X_notSuppMsg>
-              </InterfaceSection>
-              <ImplementationSection lastToken=";{$ELSE}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}">
-                <UsedUnitsList>
-                  <UsedUnitName>System.SysUtils</UsedUnitName>
-                </UsedUnitsList>
-              </ImplementationSection>
-              <InitializationSection lastToken="end" />
-            </UnitFile>
-          </D2X_File>
-          <D2X_File fileName="Testing.Test.AProgram.dpr">
-            <ProgramFile>
-              <MainUnitName group="Testing.Test">Testing.Test.AProgram</MainUnitName>
-              <ProgramBlock>
-                <MainUsedUnitStatement file="'Testing.Test.AUnit.pas'">
-                  <UsedUnitName group="Testing.Test">Testing.Test.AUnit</UsedUnitName>
-                </MainUsedUnitStatement>
-                <Block>
-                  <CompoundStatement lastToken="end">
-                    <StatementList />
-                  </CompoundStatement>
-                </Block>
-              </ProgramBlock>
-            </ProgramFile>
-          </D2X_File>
-          <D2X_File fileName="Testing.Test.APackage.dpk">
-            <PackageFile lastToken=";end.">
-              <MainUnitName group="Testing.Test">Testing.Test.APackage</MainUnitName>
-              <ContainsStatement>
-                <ContainsIdentifier group="Testing.Test">Testing.Test.AUnit</ContainsIdentifier>
-                <ContainsExpression file="'Testing.Test.AUnit.pas'" />
-              </ContainsStatement>
-            </PackageFile>
-          </D2X_File>
+          <D2X_Group name="Testing.Test" fileName="Group-TestingTest">
+            <D2X_File fileName="Testing.Test.AUnit.pas">
+              <UnitFile>
+                <MainUnitName group="Testing.Test">Testing.Test.AUnit</MainUnitName>
+                <InterfaceSection>
+                  <UsedUnitsList>
+                    <UsedUnitName>System.Classes</UsedUnitName>
+                  </UsedUnitsList>
+                  <IncludeFile filename="TEST.INC" msgAt="71,0" />
+                  <D2X_notSuppMsg msgAt="91,0">Currently not supported {$D+}</D2X_notSuppMsg>
+                </InterfaceSection>
+                <ImplementationSection lastToken=";{$ELSE}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}">
+                  <UsedUnitsList>
+                    <UsedUnitName>System.SysUtils</UsedUnitName>
+                  </UsedUnitsList>
+                </ImplementationSection>
+                <InitializationSection lastToken="end" />
+              </UnitFile>
+            </D2X_File>
+            <D2X_File fileName="Testing.Test.AProgram.dpr">
+              <ProgramFile>
+                <MainUnitName group="Testing.Test">Testing.Test.AProgram</MainUnitName>
+                <ProgramBlock>
+                  <MainUsedUnitStatement file="'Testing.Test.AUnit.pas'">
+                    <UsedUnitName group="Testing.Test">Testing.Test.AUnit</UsedUnitName>
+                  </MainUsedUnitStatement>
+                  <Block>
+                    <CompoundStatement lastToken="end">
+                      <StatementList />
+                    </CompoundStatement>
+                  </Block>
+                </ProgramBlock>
+              </ProgramFile>
+            </D2X_File>
+            <D2X_File fileName="Testing.Test.APackage.dpk">
+              <PackageFile lastToken=";end.">
+                <MainUnitName group="Testing.Test">Testing.Test.APackage</MainUnitName>
+                <ContainsStatement>
+                  <ContainsIdentifier group="Testing.Test">Testing.Test.AUnit</ContainsIdentifier>
+                  <ContainsExpression file="'Testing.Test.AUnit.pas'" />
+                </ContainsStatement>
+              </PackageFile>
+            </D2X_File>
+          </D2X_Group>
         </D2X_Pattern>
       </D2X_SubDir>
     </D2X_Dir>
     <D2X_Dir fileName="Config">
       <D2X_SubDir fileName="Config">
         <D2X_Pattern fileName="ConfigPattern-TestingTest">
-          <D2X_File fileName="Config\Testing.Test.Dir.pas">
-            <UnitFile>
-              <MainUnitName group="Testing.Test">Testing.Test.Dir</MainUnitName>
-              <InterfaceSection lastToken="interface" />
-              <ImplementationSection lastToken="implementation" />
-              <InitializationSection lastToken="end" />
-            </UnitFile>
-          </D2X_File>
+          <D2X_Group name="" fileName="ConfigGroup-">
+            <D2X_File fileName="Config\Testing.Test.Dir.pas">
+              <UnitFile>
+                <MainUnitName group="Testing.Test">Testing.Test.Dir</MainUnitName>
+                <InterfaceSection lastToken="interface" />
+                <ImplementationSection lastToken="implementation" />
+                <InitializationSection lastToken="end" />
+              </UnitFile>
+            </D2X_File>
+          </D2X_Group>
         </D2X_Pattern>
       </D2X_SubDir>
       <D2X_SubDir fileName="Config\Test">
         <D2X_Pattern fileName="Config\TestPattern-TestingTest">
-          <D2X_File fileName="Config\Test\Testing.Test.SubDir.pas">
-            <UnitFile>
-              <MainUnitName group="Testing.Test">Testing.Test.SubDir</MainUnitName>
-              <InterfaceSection lastToken="interface" />
-              <ImplementationSection lastToken="implementation" />
-              <InitializationSection lastToken="end" />
-            </UnitFile>
-          </D2X_File>
+          <D2X_Group name="" fileName="Config\TestGroup-">
+            <D2X_File fileName="Config\Test\Testing.Test.SubDir.pas">
+              <UnitFile>
+                <MainUnitName group="Testing.Test">Testing.Test.SubDir</MainUnitName>
+                <InterfaceSection lastToken="interface" />
+                <ImplementationSection lastToken="implementation" />
+                <InitializationSection lastToken="end" />
+              </UnitFile>
+            </D2X_File>
+          </D2X_Group>
         </D2X_Pattern>
       </D2X_SubDir>
     </D2X_Dir>

@@ -13,7 +13,7 @@ type
 
   TD2XElapsedMode = (emNone, emTotal, emDir, emFile, emProcessing, emQuiet);
 
-  TD2XResultPer = (rpFile, rpWildcard, rpSubDir, rpDir, rpParam, rpRun);
+  TD2XResultPer = (rpFile, rpGroup, rpWildcard, rpSubDir, rpDir, rpParam, rpRun);
 
   TD2X = class
     class function Zero<T>: T;
@@ -70,9 +70,12 @@ procedure OutputStrIntDict(pDict: TStrIntDict; pStream: TStreamWriter; pFunc: TP
 function MakeFileName(pStr, pDflt: string): string;
 function TidyFilename(pFilename: string): string;
 
+function ExtractGroup(pName: string): string;
+
 implementation
 
 uses
+  System.RegularExpressions,
   System.StrUtils,
   System.TypInfo;
 
@@ -111,6 +114,19 @@ function TidyFilename(pFilename: string): string;
 begin
   Result := ReplaceStr(ReplaceStr(ReplaceStr(ReplaceStr(pFilename, '*', ''), '.', ''), '?',
       ''), '\', '-');
+end;
+
+var
+  gGroupRE: TRegEx;
+
+function ExtractGroup(pName: string): string;
+var
+  lM: TMatch;
+begin
+  Result := '';
+  lM := gGroupRE.Match(ExtractFileName(pName));
+  if lM.Success then
+    Result := lM.Groups[1].Value;
 end;
 
 { TD2X }
@@ -260,4 +276,6 @@ begin
   Result := -1;
 end;
 
+initialization
+  gGroupRE := TRegEx.Create('^(\w+\.\w+)\.');
 end.

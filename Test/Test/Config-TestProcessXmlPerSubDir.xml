@@ -1,14 +1,16 @@
 <?xml version="1.0"?>
 <D2X_SubDir parseMode="Full" fileName="Config">
   <D2X_Pattern fileName="ConfigPattern-TestingTest">
-    <D2X_File fileName="Config\Testing.Test.Dir.pas">
-      <UnitFile>
-        <MainUnitName group="Testing.Test">Testing.Test.Dir</MainUnitName>
-        <InterfaceSection lastToken="interface" />
-        <ImplementationSection lastToken="implementation" />
-        <InitializationSection lastToken="end" />
-      </UnitFile>
-    </D2X_File>
+    <D2X_Group name="" fileName="ConfigGroup-">
+      <D2X_File fileName="Config\Testing.Test.Dir.pas">
+        <UnitFile>
+          <MainUnitName group="Testing.Test">Testing.Test.Dir</MainUnitName>
+          <InterfaceSection lastToken="interface" />
+          <ImplementationSection lastToken="implementation" />
+          <InitializationSection lastToken="end" />
+        </UnitFile>
+      </D2X_File>
+    </D2X_Group>
   </D2X_Pattern>
 </D2X_SubDir>
 

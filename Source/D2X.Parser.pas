@@ -361,6 +361,7 @@ type
 implementation
 
 uses
+  D2X,
   System.Math,
   System.RegularExpressions,
   System.SysUtils;
@@ -1779,7 +1780,7 @@ procedure TD2XDefinesParser.UnitName;
 begin
   inherited;
   if TRegEx.Matches(fLastTokens, '\.').Count > 1 then
-    DoAddAttribute('group', TRegEx.Match(fLastTokens, '^(\w+\.\w+)\.').Groups[1].Value);
+    DoAddAttribute('group', ExtractGroup(fLastTokens));
 
   DoAddText;
 end;

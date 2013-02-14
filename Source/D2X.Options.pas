@@ -312,8 +312,10 @@ end;
 function TD2XOptions.ProcessDirectory(pDir, pWildCards: string): Boolean;
 var
   lPath: ID2XDir;
-  lFile: string;
+  lFile, lGroup, lS: string;
   lTimer: TStopwatch;
+const
+  INIT_GROUP = '~~~~';
 begin
   Result := False;
   lTimer := TStopwatch.Create;
@@ -331,10 +333,22 @@ begin
             lTimer.Start;
           end;
           BeginResults('D2X_Pattern', rpWildcard);
+          lGroup := INIT_GROUP;
           repeat
+            lS := ExtractGroup(lPath.Current);
+            if lGroup <> lS then
+            begin
+              if lGroup <> INIT_GROUP then
+                EndResults(IncludeTrailingPathDelimiter(pDir) + 'Group-' + lGroup, rpGroup);
+              lGroup := lS;
+              BeginResults('D2X_Group', rpGroup);
+              fXmlHandler.AddAttr('name', lGroup);
+            end;
             Result := ProcessFile(lPath.Current, True) or Result;
           until not lPath.Next;
-          EndResults(pDir + 'Pattern-' + TidyFilename(lFile), rpWildcard);
+          if lGroup <> INIT_GROUP then
+            EndResults(IncludeTrailingPathDelimiter(pDir) + 'Group-' + lGroup, rpGroup);
+          EndResults(IncludeTrailingPathDelimiter(pDir) + 'Pattern-' + TidyFilename(lFile), rpWildcard);
         finally
           lPath.Close;
         end;

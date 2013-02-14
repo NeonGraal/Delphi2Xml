@@ -81,19 +81,21 @@ type
   public
     procedure SetUp; override;
   published
-    procedure TestProcessXmlPerDir;
-    procedure TestProcessXmlPerFile;
-    procedure TestProcessXmlPerParam;
     procedure TestProcessXmlPerRun;
+    procedure TestProcessXmlPerParam;
+    procedure TestProcessXmlPerDir;
     procedure TestProcessXmlPerSubDir;
     procedure TestProcessXmlPerWildcard;
+    procedure TestProcessXmlPerGroup;
+    procedure TestProcessXmlPerFile;
 
-    procedure TestProcessXmlUsesPerDir;
-    procedure TestProcessXmlUsesPerFile;
-    procedure TestProcessXmlUsesPerParam;
     procedure TestProcessXmlUsesPerRun;
+    procedure TestProcessXmlUsesPerParam;
+    procedure TestProcessXmlUsesPerDir;
     procedure TestProcessXmlUsesPerSubDir;
     procedure TestProcessXmlUsesPerWildcard;
+    procedure TestProcessXmlUsesPerGroup;
+    procedure TestProcessXmlUsesPerFile;
   end;
 
   TestTD2XOptions = class(TOptionsTestCase)
@@ -809,6 +811,7 @@ end;
 procedure TestTD2XOptions.TestBeginResults;
 begin
   fOpts.BeginResults('File', rpFile);
+  fOpts.BeginResults('Group', rpGroup);
   fOpts.BeginResults('Wildcard', rpWildcard);
   fOpts.BeginResults('SubDir', rpSubDir);
   fOpts.BeginResults('Dir', rpDir);
@@ -852,6 +855,7 @@ end;
 procedure TestTD2XOptions.TestEndResults;
 begin
   fOpts.EndResults('File', rpFile);
+  fOpts.EndResults('Group', rpGroup);
   fOpts.EndResults('Wildcard', rpWildcard);
   fOpts.EndResults('SubDir', rpSubDir);
   fOpts.EndResults('Dir', rpDir);
@@ -1698,11 +1702,21 @@ begin
   CheckFiles('TestProcessXmlPerFile');
 end;
 
+procedure TestTD2XOptionsXmlPer.TestProcessXmlPerGroup;
+begin
+  fOpts.ProcessOption('WX:');
+  fOpts.ProcessOption('PG');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Group');
+  CheckLog(ALL_PROCESSING, 'Processing Xml per Group');
+  fOpts.EndProcessing;
+  CheckFiles('TestProcessXmlPerGroup');
+end;
+
 procedure TestTD2XOptionsXmlPer.TestProcessXmlPerParam;
 begin
   fOpts.ProcessOption('WX:');
   fOpts.ProcessOption('PP');
-  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per FilParam');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Param');
   CheckLog(ALL_PROCESSING, 'Processing Xml per Param');
   fOpts.EndProcessing;
   CheckFiles('TestProcessXmlPerParam');
@@ -1760,12 +1774,23 @@ begin
   CheckFiles('TestProcessXmlUsesPerFile');
 end;
 
+procedure TestTD2XOptionsXmlPer.TestProcessXmlUsesPerGroup;
+begin
+  fOpts.ProcessOption('MU');
+  fOpts.ProcessOption('WX:');
+  fOpts.ProcessOption('PG');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Group');
+  CheckLog(ALL_PROCESSING, 'Processing Xml per Group');
+  fOpts.EndProcessing;
+  CheckFiles('TestProcessXmlUsesPerGroup');
+end;
+
 procedure TestTD2XOptionsXmlPer.TestProcessXmlUsesPerParam;
 begin
   fOpts.ProcessOption('MU');
   fOpts.ProcessOption('WX:');
   fOpts.ProcessOption('PP');
-  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per FilParam');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Param');
   CheckLog(ALL_PROCESSING, 'Processing Xml per Param');
   fOpts.EndProcessing;
   CheckFiles('TestProcessXmlUsesPerParam');
