@@ -107,12 +107,14 @@
 			<DCCReference Include="Source\D2X.Parser.pas"/>
 			<DCCReference Include="Source\D2X.Processor.pas"/>
 			<DCCReference Include="Source\D2X.Processors.pas"/>
-			<DCCReference Include="Source\D2X.Xml.pas"/>
 			<DCCReference Include="Source\D2X.IO.pas"/>
 			<DCCReference Include="Source\D2X.IO.Actual.pas"/>
 			<DCCReference Include="Source\D2X.Param.pas"/>
 			<DCCReference Include="Source\D2X.IO.Options.pas"/>
 			<DCCReference Include="Source\D2X.RunParam.pas"/>
+			<DCCReference Include="Source\D2X.Tree.Json.pas"/>
+			<DCCReference Include="Source\D2X.Tree.pas"/>
+			<DCCReference Include="Source\D2X.Tree.Xml.pas"/>
 			<None Include="TODO.txt"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>

@@ -1,4 +1,4 @@
-program Delphi2Xml.Xml.Tests;
+program Delphi2Xml.Tree.Xml.Tests;
 
 {$APPTYPE CONSOLE}
 
@@ -9,8 +9,8 @@ uses
   System.StrUtils,
   Winapi.Windows,
   FastMM4Messages in '..\..\FastMM4\FastMM4Messages.pas',
-  Test.Xml.Tests in '..\Test.Xml.Tests.pas',
-  D2X.Xml in '..\..\Source\D2X.Xml.pas';
+  Test.Tree.Xml.Tests in '..\Test.Tree.Xml.Tests.pas',
+  D2X.Tree.Xml in '..\..\Source\D2X.Tree.Xml.pas';
 
 {$R *.RES}
 

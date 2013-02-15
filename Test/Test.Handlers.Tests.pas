@@ -12,7 +12,7 @@ uses
   D2X.IO,
   D2X.Param,
   D2X.Parser,
-  D2X.Xml,
+  D2X.Tree.Xml,
   System.Classes,
   System.StrUtils,
   System.SysUtils,

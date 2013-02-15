@@ -12,7 +12,13 @@
 			<Projects Include="Test\Single\Delphi2Xml.Global.Tests.dproj">
 				<Dependencies/>
 			</Projects>
-			<Projects Include="Test\Single\Delphi2Xml.Xml.Tests.dproj">
+			<Projects Include="Test\Single\Delphi2Xml.Tree.Tests.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="Test\Single\Delphi2Xml.Tree.Json.Tests.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="Test\Single\Delphi2Xml.Tree.Xml.Tests.dproj">
 				<Dependencies/>
 			</Projects>
 			<Projects Include="Test\Single\Delphi2Xml.Handler.Tests.dproj">
@@ -83,14 +89,32 @@
 		<Target Name="Delphi2Xml_Global_Tests:Make">
 			<MSBuild Targets="Make" Projects="Test\Single\Delphi2Xml.Global.Tests.dproj"/>
 		</Target>
-		<Target Name="Delphi2Xml_Xml_Tests">
-			<MSBuild Projects="Test\Single\Delphi2Xml.Xml.Tests.dproj"/>
+		<Target Name="Delphi2Xml_Tree_Tests">
+			<MSBuild Projects="Test\Single\Delphi2Xml.Tree.Tests.dproj"/>
 		</Target>
-		<Target Name="Delphi2Xml_Xml_Tests:Clean">
-			<MSBuild Targets="Clean" Projects="Test\Single\Delphi2Xml.Xml.Tests.dproj"/>
+		<Target Name="Delphi2Xml_Tree_Tests:Clean">
+			<MSBuild Targets="Clean" Projects="Test\Single\Delphi2Xml.Tree.Tests.dproj"/>
 		</Target>
-		<Target Name="Delphi2Xml_Xml_Tests:Make">
-			<MSBuild Targets="Make" Projects="Test\Single\Delphi2Xml.Xml.Tests.dproj"/>
+		<Target Name="Delphi2Xml_Tree_Tests:Make">
+			<MSBuild Targets="Make" Projects="Test\Single\Delphi2Xml.Tree.Tests.dproj"/>
+		</Target>
+		<Target Name="Delphi2Xml_Tree_Json_Tests">
+			<MSBuild Projects="Test\Single\Delphi2Xml.Tree.Json.Tests.dproj"/>
+		</Target>
+		<Target Name="Delphi2Xml_Tree_Json_Tests:Clean">
+			<MSBuild Targets="Clean" Projects="Test\Single\Delphi2Xml.Tree.Json.Tests.dproj"/>
+		</Target>
+		<Target Name="Delphi2Xml_Tree_Json_Tests:Make">
+			<MSBuild Targets="Make" Projects="Test\Single\Delphi2Xml.Tree.Json.Tests.dproj"/>
+		</Target>
+		<Target Name="Delphi2Xml_Tree_Xml_Tests">
+			<MSBuild Projects="Test\Single\Delphi2Xml.Tree.Xml.Tests.dproj"/>
+		</Target>
+		<Target Name="Delphi2Xml_Tree_Xml_Tests:Clean">
+			<MSBuild Targets="Clean" Projects="Test\Single\Delphi2Xml.Tree.Xml.Tests.dproj"/>
+		</Target>
+		<Target Name="Delphi2Xml_Tree_Xml_Tests:Make">
+			<MSBuild Targets="Make" Projects="Test\Single\Delphi2Xml.Tree.Xml.Tests.dproj"/>
 		</Target>
 		<Target Name="Delphi2Xml_Handler_Tests">
 			<MSBuild Projects="Test\Single\Delphi2Xml.Handler.Tests.dproj"/>
@@ -192,13 +216,13 @@
 			<MSBuild Targets="Make" Projects="Test\Single\Delphi2Xml.RunParam.Tests.dproj"/>
 		</Target>
 		<Target Name="Build">
-			<CallTarget Targets="Delphi2Xml;Delphi2Xml_Tests;Delphi2Xml_Global_Tests;Delphi2Xml_Xml_Tests;Delphi2Xml_Handler_Tests;Delphi2Xml_Handlers_Tests;Delphi2Xml_IO_Tests;Delphi2Xml_IO_Actual_Tests;Delphi2Xml_Params_Tests;Delphi2Xml_Parser_Tests;Delphi2Xml_Processor_Tests;Delphi2Xml_Processors_Tests;Delphi2Xml_IO_Options_Tests;Delphi2Xml_Options_Tests;Delphi2Xml_RunParam_Tests"/>
+			<CallTarget Targets="Delphi2Xml;Delphi2Xml_Tests;Delphi2Xml_Global_Tests;Delphi2Xml_Tree_Tests;Delphi2Xml_Tree_Json_Tests;Delphi2Xml_Tree_Xml_Tests;Delphi2Xml_Handler_Tests;Delphi2Xml_Handlers_Tests;Delphi2Xml_IO_Tests;Delphi2Xml_IO_Actual_Tests;Delphi2Xml_Params_Tests;Delphi2Xml_Parser_Tests;Delphi2Xml_Processor_Tests;Delphi2Xml_Processors_Tests;Delphi2Xml_IO_Options_Tests;Delphi2Xml_Options_Tests;Delphi2Xml_RunParam_Tests"/>
 		</Target>
 		<Target Name="Clean">
-			<CallTarget Targets="Delphi2Xml:Clean;Delphi2Xml_Tests:Clean;Delphi2Xml_Global_Tests:Clean;Delphi2Xml_Xml_Tests:Clean;Delphi2Xml_Handler_Tests:Clean;Delphi2Xml_Handlers_Tests:Clean;Delphi2Xml_IO_Tests:Clean;Delphi2Xml_IO_Actual_Tests:Clean;Delphi2Xml_Params_Tests:Clean;Delphi2Xml_Parser_Tests:Clean;Delphi2Xml_Processor_Tests:Clean;Delphi2Xml_Processors_Tests:Clean;Delphi2Xml_IO_Options_Tests:Clean;Delphi2Xml_Options_Tests:Clean;Delphi2Xml_RunParam_Tests:Clean"/>
+			<CallTarget Targets="Delphi2Xml:Clean;Delphi2Xml_Tests:Clean;Delphi2Xml_Global_Tests:Clean;Delphi2Xml_Tree_Tests:Clean;Delphi2Xml_Tree_Json_Tests:Clean;Delphi2Xml_Tree_Xml_Tests:Clean;Delphi2Xml_Handler_Tests:Clean;Delphi2Xml_Handlers_Tests:Clean;Delphi2Xml_IO_Tests:Clean;Delphi2Xml_IO_Actual_Tests:Clean;Delphi2Xml_Params_Tests:Clean;Delphi2Xml_Parser_Tests:Clean;Delphi2Xml_Processor_Tests:Clean;Delphi2Xml_Processors_Tests:Clean;Delphi2Xml_IO_Options_Tests:Clean;Delphi2Xml_Options_Tests:Clean;Delphi2Xml_RunParam_Tests:Clean"/>
 		</Target>
 		<Target Name="Make">
-			<CallTarget Targets="Delphi2Xml:Make;Delphi2Xml_Tests:Make;Delphi2Xml_Global_Tests:Make;Delphi2Xml_Xml_Tests:Make;Delphi2Xml_Handler_Tests:Make;Delphi2Xml_Handlers_Tests:Make;Delphi2Xml_IO_Tests:Make;Delphi2Xml_IO_Actual_Tests:Make;Delphi2Xml_Params_Tests:Make;Delphi2Xml_Parser_Tests:Make;Delphi2Xml_Processor_Tests:Make;Delphi2Xml_Processors_Tests:Make;Delphi2Xml_IO_Options_Tests:Make;Delphi2Xml_Options_Tests:Make;Delphi2Xml_RunParam_Tests:Make"/>
+			<CallTarget Targets="Delphi2Xml:Make;Delphi2Xml_Tests:Make;Delphi2Xml_Global_Tests:Make;Delphi2Xml_Tree_Tests:Make;Delphi2Xml_Tree_Json_Tests:Make;Delphi2Xml_Tree_Xml_Tests:Make;Delphi2Xml_Handler_Tests:Make;Delphi2Xml_Handlers_Tests:Make;Delphi2Xml_IO_Tests:Make;Delphi2Xml_IO_Actual_Tests:Make;Delphi2Xml_Params_Tests:Make;Delphi2Xml_Parser_Tests:Make;Delphi2Xml_Processor_Tests:Make;Delphi2Xml_Processors_Tests:Make;Delphi2Xml_IO_Options_Tests:Make;Delphi2Xml_Options_Tests:Make;Delphi2Xml_RunParam_Tests:Make"/>
 		</Target>
 		<Import Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')" Project="$(BDS)\Bin\CodeGear.Group.Targets"/>
 		<ItemGroup Condition="'$(BuildGroup)'=='Main'">
@@ -214,7 +238,7 @@
 				<Platforms>Win32</Platforms>
 				<Enabled>True</Enabled>
 			</BuildGroupProject>
-			<BuildGroupProject Include="Test\Single\Delphi2Xml.Handlers.Tests.dproj">
+			<BuildGroupProject Include="Test\Single\Delphi2Xml.Global.Tests.dproj">
 				<ProjectGuid>{B5E5229D-7BAD-403C-B9C4-8F9C1BF775AE}</ProjectGuid>
 				<Configurations>Debug</Configurations>
 				<Platforms>Win32</Platforms>
@@ -234,7 +258,7 @@
 				<Platforms>Win32</Platforms>
 				<Enabled>True</Enabled>
 			</BuildGroupProject>
-			<BuildGroupProject Include="Test\Single\Delphi2Xml.Handlers.Tests.dproj">
+			<BuildGroupProject Include="Test\Single\Delphi2Xml.Global.Tests.dproj">
 				<ProjectGuid>{B5E5229D-7BAD-403C-B9C4-8F9C1BF775AE}</ProjectGuid>
 				<Configurations>Debug</Configurations>
 				<Platforms>Win32</Platforms>

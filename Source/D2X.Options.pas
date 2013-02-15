@@ -316,6 +316,14 @@ var
   lTimer: TStopwatch;
 const
   INIT_GROUP = '~~~~';
+  procedure DirEndResults(pName: string; pPer: TD2XResultPer);
+  begin
+    if pDir > '' then
+      EndResults(IncludeTrailingPathDelimiter(pDir) + pName, pPer)
+    else
+      EndResults(pName, pPer);
+  end;
+
 begin
   Result := False;
   lTimer := TStopwatch.Create;
@@ -339,7 +347,7 @@ begin
             if lGroup <> lS then
             begin
               if lGroup <> INIT_GROUP then
-                EndResults(IncludeTrailingPathDelimiter(pDir) + 'Group-' + lGroup, rpGroup);
+                DirEndResults('Group-' + lGroup, rpGroup);
               lGroup := lS;
               BeginResults('D2X_Group', rpGroup);
               fXmlHandler.AddAttr('name', lGroup);
@@ -347,8 +355,8 @@ begin
             Result := ProcessFile(lPath.Current, True) or Result;
           until not lPath.Next;
           if lGroup <> INIT_GROUP then
-            EndResults(IncludeTrailingPathDelimiter(pDir) + 'Group-' + lGroup, rpGroup);
-          EndResults(IncludeTrailingPathDelimiter(pDir) + 'Pattern-' + TidyFilename(lFile), rpWildcard);
+            DirEndResults('Group-' + lGroup, rpGroup);
+          DirEndResults('Pattern-' + TidyFilename(lFile), rpWildcard);
         finally
           lPath.Close;
         end;

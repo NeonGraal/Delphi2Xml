@@ -18,12 +18,14 @@ uses
   D2X.Parser in 'Source\D2X.Parser.pas',
   D2X.Processor in 'Source\D2X.Processor.pas',
   D2X.Processors in 'Source\D2X.Processors.pas',
-  D2X.Xml in 'Source\D2X.Xml.pas',
   D2X.IO in 'Source\D2X.IO.pas',
   D2X.IO.Actual in 'Source\D2X.IO.Actual.pas',
   D2X.Param in 'Source\D2X.Param.pas',
   D2X.IO.Options in 'Source\D2X.IO.Options.pas',
-  D2X.RunParam in 'Source\D2X.RunParam.pas';
+  D2X.RunParam in 'Source\D2X.RunParam.pas',
+  D2X.Tree.Json in 'Source\D2X.Tree.Json.pas',
+  D2X.Tree in 'Source\D2X.Tree.pas',
+  D2X.Tree.Xml in 'Source\D2X.Tree.Xml.pas';
 
 var
   opts: TD2XRunParam;

@@ -1,14 +1,14 @@
-unit Test.Xml.Tests;
+unit Test.Tree.Tests;
 
 interface
 
 implementation
 
 uses
-  D2X.Xml,
+  D2X.Tree.Xml,
   System.Classes,
   System.SysUtils,
-  Test.Xml,
+  Test.Tree.Xml,
   TestFramework,
   Xml.XMLIntf;
 
@@ -355,7 +355,7 @@ end;
 initialization
 
 // Register any test cases with the test runner
-RegisterTests('Xml', [TestTD2XmlNode.Suite, TestTD2XmlAttribute.Suite, TestTD2XmlElement.Suite,
+RegisterTests('Tree', [TestTD2XmlNode.Suite, TestTD2XmlAttribute.Suite, TestTD2XmlElement.Suite,
     TestTD2XmlDoc.Suite]);
 
 end.

@@ -2,7 +2,7 @@
 <D2X_Dir parseMode="Uses" fileName="(Base)">
   <D2X_SubDir fileName="(Dir)">
     <D2X_Pattern fileName="Pattern-TestingTest">
-      <D2X_Group name="Testing.Test" fileName="Group-TestingTest">
+      <D2X_Group name="Testing.Test" fileName="Group-Testing.Test">
         <D2X_File fileName="Testing.Test.AUnit.pas">
           <UnitFile lastToken="end.">
             <MainUnitName group="Testing.Test">Testing.Test.AUnit</MainUnitName>

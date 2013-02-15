@@ -1,9 +1,9 @@
-unit Test.Xml;
+unit Test.Tree.Xml;
 
 interface
 
 uses
-  D2X.Xml,
+  D2X.Tree.Xml,
   System.Classes,
   TestFramework;
 

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <D2X_SubDir parseMode="Full" fileName="Config\Test">
-  <D2X_Pattern fileName="Config\TestPattern-TestingTest">
-    <D2X_Group name="" fileName="Config\TestGroup-">
+  <D2X_Pattern fileName="Config\Test\Pattern-TestingTest">
+    <D2X_Group name="Testing.Test" fileName="Config\Test\Group-Testing.Test">
       <D2X_File fileName="Config\Test\Testing.Test.SubDir.pas">
         <UnitFile>
           <MainUnitName group="Testing.Test">Testing.Test.SubDir</MainUnitName>

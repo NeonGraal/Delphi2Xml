@@ -160,7 +160,6 @@
 			<DCCReference Include="..\Source\D2X.Processor.pas"/>
 			<DCCReference Include="..\Source\D2X.Processors.pas"/>
 			<DCCReference Include="..\Source\D2X.RunParam.pas"/>
-			<DCCReference Include="..\Source\D2X.Xml.pas"/>
 			<DCCReference Include="Source\Test.Constants.pas"/>
 			<DCCReference Include="Test.Global.Tests.pas"/>
 			<DCCReference Include="Source\Test.Handler.pas"/>
@@ -182,10 +181,16 @@
 			<DCCReference Include="Test.Processors.Tests.pas"/>
 			<DCCReference Include="Test.RunParam.Tests.pas"/>
 			<DCCReference Include="Source\Test.Utils.pas"/>
-			<DCCReference Include="Source\Test.Xml.pas"/>
-			<DCCReference Include="Test.Xml.Tests.pas"/>
+			<DCCReference Include="Test.Tree.Tests.pas"/>
+			<DCCReference Include="Test.Tree.Json.Tests.pas"/>
+			<DCCReference Include="Source\Test.Tree.Json.pas"/>
+			<DCCReference Include="Test.Tree.Xml.Tests.pas"/>
 			<DCCReference Include="Source\Test.Global.pas"/>
 			<DCCReference Include="Source\Test.IO.Options.pas"/>
+			<DCCReference Include="..\Source\D2X.Tree.Json.pas"/>
+			<DCCReference Include="..\Source\D2X.Tree.pas"/>
+			<DCCReference Include="..\Source\D2X.Tree.Xml.pas"/>
+			<DCCReference Include="Source\Test.Tree.Xml.pas"/>
 			<None Include="Profiling\Delphi2Xml.Test.aqt"/>
 			<None Include="Config\Test.def"/>
 			<None Include="Config\Test.prm"/>
@@ -247,16 +252,16 @@
 					</Source>
 				</Delphi.Personality>
 				<Deployment>
-					<DeployFile LocalName="Delphi2XmlTests.rsm" Configuration="Debug" Class="DebugSymbols">
-						<Platform Name="Win64">
-							<RemoteName>Delphi2XmlTests.rsm</RemoteName>
-						</Platform>
-					</DeployFile>
 					<DeployFile LocalName="Delphi2XmlTests" Configuration="Debug" Class="ProjectOutput">
 						<Platform Name="All Platforms"/>
 					</DeployFile>
 					<DeployFile LocalName="$(BDS)\Redist\osx32\libcgunwind.1.0.dylib" Class="DependencyModule">
 						<Platform Name="OSX32"/>
+					</DeployFile>
+					<DeployFile LocalName="Delphi2XmlTests.rsm" Configuration="Debug" Class="DebugSymbols">
+						<Platform Name="Win64">
+							<RemoteName>Delphi2XmlTests.rsm</RemoteName>
+						</Platform>
 					</DeployFile>
 					<DeployFile LocalName="Delphi2XmlTests.exe" Configuration="Debug" Class="ProjectOutput">
 						<Platform Name="Win64"/>

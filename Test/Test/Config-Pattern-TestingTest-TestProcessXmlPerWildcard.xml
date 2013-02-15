@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<D2X_Pattern parseMode="Full" fileName="ConfigPattern-TestingTest">
-  <D2X_Group name="" fileName="ConfigGroup-">
+<D2X_Pattern parseMode="Full" fileName="Config\Pattern-TestingTest">
+  <D2X_Group name="Testing.Test" fileName="Config\Group-Testing.Test">
     <D2X_File fileName="Config\Testing.Test.Dir.pas">
       <UnitFile>
         <MainUnitName group="Testing.Test">Testing.Test.Dir</MainUnitName>

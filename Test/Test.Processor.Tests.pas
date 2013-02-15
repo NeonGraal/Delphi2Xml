@@ -6,7 +6,7 @@ implementation
 
 uses
   CastaliaPasLexTypes,
-  D2X.Xml,
+  D2X.Tree.Xml,
   D2X.Handler,
   D2X.Options,
   D2X.Param,

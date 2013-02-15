@@ -4,7 +4,7 @@
     <D2X_Dir fileName="(Base)">
       <D2X_SubDir fileName="(Dir)">
         <D2X_Pattern fileName="Pattern-TestingTest">
-          <D2X_Group name="Testing.Test" fileName="Group-TestingTest">
+          <D2X_Group name="Testing.Test" fileName="Group-Testing.Test">
             <D2X_File fileName="Testing.Test.AUnit.pas">
               <UnitFile>
                 <MainUnitName group="Testing.Test">Testing.Test.AUnit</MainUnitName>
@@ -53,8 +53,8 @@
     </D2X_Dir>
     <D2X_Dir fileName="Config">
       <D2X_SubDir fileName="Config">
-        <D2X_Pattern fileName="ConfigPattern-TestingTest">
-          <D2X_Group name="" fileName="ConfigGroup-">
+        <D2X_Pattern fileName="Config\Pattern-TestingTest">
+          <D2X_Group name="Testing.Test" fileName="Config\Group-Testing.Test">
             <D2X_File fileName="Config\Testing.Test.Dir.pas">
               <UnitFile>
                 <MainUnitName group="Testing.Test">Testing.Test.Dir</MainUnitName>
@@ -67,8 +67,8 @@
         </D2X_Pattern>
       </D2X_SubDir>
       <D2X_SubDir fileName="Config\Test">
-        <D2X_Pattern fileName="Config\TestPattern-TestingTest">
-          <D2X_Group name="" fileName="Config\TestGroup-">
+        <D2X_Pattern fileName="Config\Test\Pattern-TestingTest">
+          <D2X_Group name="Testing.Test" fileName="Config\Test\Group-Testing.Test">
             <D2X_File fileName="Config\Test\Testing.Test.SubDir.pas">
               <UnitFile>
                 <MainUnitName group="Testing.Test">Testing.Test.SubDir</MainUnitName>

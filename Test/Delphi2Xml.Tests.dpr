@@ -22,7 +22,6 @@ uses
   D2X.Processor in '..\Source\D2X.Processor.pas',
   D2X.Processors in '..\Source\D2X.Processors.pas',
   D2X.RunParam in '..\Source\D2X.RunParam.pas',
-  D2X.Xml in '..\Source\D2X.Xml.pas',
   Test.Constants in 'Source\Test.Constants.pas',
   Test.Global.Tests in 'Test.Global.Tests.pas',
   Test.Handler in 'Source\Test.Handler.pas',
@@ -44,10 +43,16 @@ uses
   Test.Processors.Tests in 'Test.Processors.Tests.pas',
   Test.RunParam.Tests in 'Test.RunParam.Tests.pas',
   Test.Utils in 'Source\Test.Utils.pas',
-  Test.Xml in 'Source\Test.Xml.pas',
-  Test.Xml.Tests in 'Test.Xml.Tests.pas',
+  Test.Tree.Tests in 'Test.Tree.Tests.pas',
+  Test.Tree.Json.Tests in 'Test.Tree.Json.Tests.pas',
+  Test.Tree.Json in 'Source\Test.Tree.Json.pas',
+  Test.Tree.Xml.Tests in 'Test.Tree.Xml.Tests.pas',
   Test.Global in 'Source\Test.Global.pas',
-  Test.IO.Options in 'Source\Test.IO.Options.pas';
+  Test.IO.Options in 'Source\Test.IO.Options.pas',
+  D2X.Tree.Json in '..\Source\D2X.Tree.Json.pas',
+  D2X.Tree in '..\Source\D2X.Tree.pas',
+  D2X.Tree.Xml in '..\Source\D2X.Tree.Xml.pas',
+  Test.Tree.Xml in 'Source\Test.Tree.Xml.pas';
 
 {$R *.RES}
 
