@@ -10,7 +10,7 @@ uses
   Winapi.Windows,
   FastMM4Messages in '..\..\FastMM4\FastMM4Messages.pas',
   Test.Global.Tests in '..\Test.Global.Tests.pas',
-  D2X in '..\..\Source\D2X.pas',
+  D2X.Global in '..\..\Source\D2X.Global.pas',
   Test.Global in '..\Source\Test.Global.pas';
 
 {$R *.RES}

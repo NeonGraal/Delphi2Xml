@@ -6,7 +6,7 @@ uses
   System.Classes,
   System.Generics.Collections,
   System.SysUtils,
-  D2X;
+  D2X.Global;
 
 type
   EInvalidParam = class(Exception);

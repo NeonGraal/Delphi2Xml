@@ -3,7 +3,7 @@ unit D2X.RunParam;
 interface
 
 uses
-  D2X,
+  D2X.Global,
   D2X.IO,
   D2X.Options;
 

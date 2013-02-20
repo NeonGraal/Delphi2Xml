@@ -11,7 +11,7 @@ uses
   D2X.Param,
   D2X.Handlers,
   D2X.Parser,
-  D2X;
+  D2X.Global;
 
 type
   TD2XProcessor = class abstract(TD2XLogger)

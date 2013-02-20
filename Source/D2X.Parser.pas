@@ -362,7 +362,7 @@ type
 implementation
 
 uses
-  D2X,
+  D2X.Global,
   System.Math,
   System.RegularExpressions,
   System.SysUtils;

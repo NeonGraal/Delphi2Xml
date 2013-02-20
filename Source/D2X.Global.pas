@@ -1,4 +1,4 @@
-unit D2X;
+unit D2X.Global;
 
 interface
 

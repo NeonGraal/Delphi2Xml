@@ -5,7 +5,7 @@ interface
 implementation
 
 uses
-  D2X,
+  D2X.Global,
   System.Classes,
   System.StrUtils,
   System.SysUtils,

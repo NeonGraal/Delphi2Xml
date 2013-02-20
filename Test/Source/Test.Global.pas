@@ -3,7 +3,7 @@ unit Test.Global;
 interface
 
 uses
-  D2X,
+  D2X.Global,
   D2X.IO,
   System.Classes,
   System.SysUtils,

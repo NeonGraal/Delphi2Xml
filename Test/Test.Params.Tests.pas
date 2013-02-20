@@ -5,7 +5,7 @@ interface
 implementation
 
 uses
-  D2X,
+  D2X.Global,
   D2X.IO,
   D2X.IO.Actual,
   D2X.Param,

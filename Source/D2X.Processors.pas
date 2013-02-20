@@ -4,7 +4,7 @@ interface
 
 uses
   CastaliaPasLexTypes,
-  D2X,
+  D2X.Global,
   D2X.Param,
   D2X.Parser,
   D2X.Handler,

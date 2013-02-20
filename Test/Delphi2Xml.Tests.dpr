@@ -9,7 +9,7 @@ uses
   System.StrUtils,
   Winapi.Windows,
   FastMM4Messages in '..\FastMM4\FastMM4Messages.pas',
-  D2X in '..\Source\D2X.pas',
+  D2X.Global in '..\Source\D2X.Global.pas',
   D2X.Handler in '..\Source\D2X.Handler.pas',
   D2X.Handlers in '..\Source\D2X.Handlers.pas',
   D2X.IO in '..\Source\D2X.IO.pas',

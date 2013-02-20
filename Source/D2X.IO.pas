@@ -3,7 +3,7 @@ unit D2X.IO;
 interface
 
 uses
-  D2X,
+  D2X.Global,
   D2X.Param,
   System.Classes,
   System.Diagnostics,

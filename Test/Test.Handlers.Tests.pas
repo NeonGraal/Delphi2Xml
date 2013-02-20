@@ -6,7 +6,7 @@ implementation
 
 uses
   CastaliaPasLexTypes,
-  D2X,
+  D2X.Global,
   D2X.Handler,
   D2X.Handlers,
   D2X.IO,
