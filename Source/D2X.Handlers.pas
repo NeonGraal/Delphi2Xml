@@ -171,7 +171,8 @@ type
 
   public
     constructor Create; override;
-    constructor CreateTree(pWriter: TD2XTreeWriterClass; pFinalToken: ID2XFlag; pParseMode: TD2XStringRef);
+    constructor CreateTree(pWriter: TD2XTreeWriterClass; pFinalToken: ID2XFlag;
+      pParseMode: TD2XStringRef);
     destructor Destroy; override;
 
     function Description: string; override;
@@ -184,6 +185,7 @@ type
 
     procedure BeginMethod(pMethod: string); override;
     procedure EndMethod(pMethod: string); override;
+
 
     procedure ParserMessage(const pTyp: TMessageEventType; const pMsg: string;
       pX, pY: Integer); override;
@@ -246,45 +248,47 @@ end;
 
 procedure TD2XCountChildrenHandler.BeginMethod(pMethod: string);
 begin
-  Assert(Assigned(fStack), 'Begin Method called out of order');
-
-  Inc(fCurrent.Children);
-  fStack.Push(fCurrent);
-  fCurrent.Method := pMethod;
-  fCurrent.Children := 0;
+  if Assigned(fStack) then
+  begin
+    Inc(fCurrent.Children);
+    fStack.Push(fCurrent);
+    fCurrent.Method := pMethod;
+    fCurrent.Children := 0;
+  end;
 end;
 
 procedure TD2XCountChildrenHandler.EndMethod(pMethod: string);
 var
   lVal: Integer;
 begin
-  Assert(Assigned(fStack), 'End Method called out of order');
-
-  if fCurrent.Method = pMethod then
+  if Assigned(fStack) then
   begin
-    if fMaxChildren.TryGetValue(fCurrent.Method, lVal) then
+    if fCurrent.Method = pMethod then
     begin
-      if fCurrent.Children > lVal then
+      if fMaxChildren.TryGetValue(fCurrent.Method, lVal) then
+      begin
+        if fCurrent.Children > lVal then
+          fMaxChildren.AddOrSetValue(fCurrent.Method, fCurrent.Children);
+      end
+      else
         fMaxChildren.AddOrSetValue(fCurrent.Method, fCurrent.Children);
-    end
-    else
-      fMaxChildren.AddOrSetValue(fCurrent.Method, fCurrent.Children);
 
-    if fMinChildren.TryGetValue(fCurrent.Method, lVal) then
-    begin
-      if fCurrent.Children < lVal then
+      if fMinChildren.TryGetValue(fCurrent.Method, lVal) then
+      begin
+        if fCurrent.Children < lVal then
+          fMinChildren.AddOrSetValue(fCurrent.Method, fCurrent.Children);
+      end
+      else
         fMinChildren.AddOrSetValue(fCurrent.Method, fCurrent.Children);
-    end
-    else
-      fMinChildren.AddOrSetValue(fCurrent.Method, fCurrent.Children);
-  end;
+    end;
 
-  if fStack.Count > 0 then
-    fCurrent := fStack.Pop
-  else
-  begin
-    fCurrent.Method := '';
-    fCurrent.Children := 0;
+    if fStack.Count > 0 then
+      fCurrent := fStack.Pop
+    else
+    begin
+      fCurrent.Method := '';
+      fCurrent.Children := 0;
+    end;
   end;
 end;
 
@@ -463,7 +467,8 @@ begin
   raise EInvalidHandler.Create('Invalid constructor called');
 end;
 
-constructor TD2XTreeHandler.CreateTree(pWriter: TD2XTreeWriterClass; pFinalToken: ID2XFlag; pParseMode: TD2XStringRef);
+constructor TD2XTreeHandler.CreateTree(pWriter: TD2XTreeWriterClass; pFinalToken: ID2XFlag;
+  pParseMode: TD2XStringRef);
 begin
   Assert(Assigned(pFinalToken), 'Final Token Flag must be specified');
 

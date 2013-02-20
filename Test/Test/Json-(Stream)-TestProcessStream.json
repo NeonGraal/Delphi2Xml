@@ -1,0 +1,33 @@
+D2X_File:{
+  _parseMode:"Full"
+,_fileName:"(Stream)"
+
+,  ProgramFile:{
+  
+      MainUnitName:{
+      _group:"Testing.Test"
+    ,_:"Testing.Test.AProgram"
+    }
+  
+  ,  ProgramBlock:{
+    
+        MainUsedUnitStatement:{
+        _file:"'Testing.Test.AUnit.pas'"
+      
+      ,  UsedUnitName:{
+          _group:"Testing.Test"
+        ,_:"Testing.Test.AUnit"
+        }
+      }
+    
+    ,  Block:{
+      
+          CompoundStatement:{
+        
+            StatementList:""
+        }
+      }
+    }
+  }
+}
+

@@ -1,0 +1,35 @@
+D2X_File:{
+  _parseMode:"Uses"
+,_fileName:"Testing.Test.AUnit.pas"
+
+,  UnitFile:{
+    _lastToken:"end."
+  
+  ,  MainUnitName:{
+      _group:"Testing.Test"
+    ,_:"Testing.Test.AUnit"
+    }
+  
+  ,  InterfaceSection:{
+    
+        UsedUnitName:"System.Classes"
+    
+    ,  IncludeFile:{
+        _filename:"TEST.INC"
+      ,_msgAt:"71,0"
+      }
+    
+    ,  D2X_notSuppMsg:{
+        _msgAt:"91,0"
+      ,_:"Currently not supported {$D+}"
+      }
+    }
+  
+  ,  ImplementationSection:{
+      _lastToken:";{$ELSE}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}"
+    
+    ,  UsedUnitName:"System.SysUtils"
+    }
+  }
+}
+

@@ -77,6 +77,27 @@ type
     procedure TestWriteDefines;
   end;
 
+  TestTD2XOptionsJsonPer = class(TOptionsTestCase)
+  public
+    procedure SetUp; override;
+  published
+    procedure TestProcessJsonPerRun;
+    procedure TestProcessJsonPerParam;
+    procedure TestProcessJsonPerDir;
+    procedure TestProcessJsonPerSubDir;
+    procedure TestProcessJsonPerWildcard;
+    procedure TestProcessJsonPerGroup;
+    procedure TestProcessJsonPerFile;
+
+    procedure TestProcessJsonUsesPerRun;
+    procedure TestProcessJsonUsesPerParam;
+    procedure TestProcessJsonUsesPerDir;
+    procedure TestProcessJsonUsesPerSubDir;
+    procedure TestProcessJsonUsesPerWildcard;
+    procedure TestProcessJsonUsesPerGroup;
+    procedure TestProcessJsonUsesPerFile;
+  end;
+
   TestTD2XOptionsXmlPer = class(TOptionsTestCase)
   public
     procedure SetUp; override;
@@ -1878,6 +1899,164 @@ begin
   CheckSimple('WJ:Value,val', 'Write JSON :Value,val');
 end;
 
+{ TestTD2XOptionsJsonPer }
+
+procedure TestTD2XOptionsJsonPer.SetUp;
+begin
+  inherited;
+
+  fOpts.ProcessOption('!!');
+  fOpts.ProcessOption('FRF');
+  fOpts.ProcessOption('E!');
+end;
+
+procedure TestTD2XOptionsJsonPer.TestProcessJsonPerDir;
+begin
+  fOpts.ProcessOption('WJ:');
+  fOpts.ProcessOption('PD');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Json'), 'Param per Dir');
+  CheckLog(ALL_PROCESSING, 'Processing Json per Dir');
+  fOpts.EndProcessing;
+  CheckFiles('TestProcessJsonPerDir');
+end;
+
+procedure TestTD2XOptionsJsonPer.TestProcessJsonPerFile;
+begin
+  fOpts.ProcessOption('WJ:');
+  fOpts.ProcessOption('PF');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Json'), 'Param per File');
+  CheckLog(ALL_PROCESSING, 'Processing Json per File');
+  fOpts.EndProcessing;
+  CheckFiles('TestProcessJsonPerFile');
+end;
+
+procedure TestTD2XOptionsJsonPer.TestProcessJsonPerGroup;
+begin
+  fOpts.ProcessOption('WJ:');
+  fOpts.ProcessOption('PG');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Json'), 'Param per Group');
+  CheckLog(ALL_PROCESSING, 'Processing Json per Group');
+  fOpts.EndProcessing;
+  CheckFiles('TestProcessJsonPerGroup');
+end;
+
+procedure TestTD2XOptionsJsonPer.TestProcessJsonPerParam;
+begin
+  fOpts.ProcessOption('WJ:');
+  fOpts.ProcessOption('PP');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Json'), 'Param per Param');
+  CheckLog(ALL_PROCESSING, 'Processing Json per Param');
+  fOpts.EndProcessing;
+  CheckFiles('TestProcessJsonPerParam');
+end;
+
+procedure TestTD2XOptionsJsonPer.TestProcessJsonPerRun;
+begin
+  fOpts.ProcessOption('WJ:');
+  fOpts.ProcessOption('PR');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Json'), 'Param per Run');
+  CheckLog(ALL_PROCESSING, 'Processing Json per Run');
+  fOpts.EndProcessing;
+  CheckFiles('TestProcessJsonPerRun');
+end;
+
+procedure TestTD2XOptionsJsonPer.TestProcessJsonPerSubDir;
+begin
+  fOpts.ProcessOption('WJ:');
+  fOpts.ProcessOption('PS');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Json'), 'Param per SubDir');
+  CheckLog(ALL_PROCESSING, 'Processing Json per SubDir');
+  fOpts.EndProcessing;
+  CheckFiles('TestProcessJsonPerSubDir');
+end;
+
+procedure TestTD2XOptionsJsonPer.TestProcessJsonPerWildcard;
+begin
+  fOpts.ProcessOption('WJ:');
+  fOpts.ProcessOption('PW');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Json'), 'Param per Wildcard');
+  CheckLog(ALL_PROCESSING, 'Processing Json per Wildcard');
+  fOpts.EndProcessing;
+  CheckFiles('TestProcessJsonPerWildcard');
+end;
+
+procedure TestTD2XOptionsJsonPer.TestProcessJsonUsesPerDir;
+begin
+  fOpts.ProcessOption('MU');
+  fOpts.ProcessOption('WJ:');
+  fOpts.ProcessOption('PD');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Json'), 'Param per Dir');
+  CheckLog(ALL_PROCESSING, 'Processing Json per Dir');
+  fOpts.EndProcessing;
+  CheckFiles('TestProcessJsonUsesPerDir');
+end;
+
+procedure TestTD2XOptionsJsonPer.TestProcessJsonUsesPerFile;
+begin
+  fOpts.ProcessOption('MU');
+  fOpts.ProcessOption('WJ:');
+  fOpts.ProcessOption('PF');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Json'), 'Param per File');
+  CheckLog(ALL_PROCESSING, 'Processing Json per File');
+  fOpts.EndProcessing;
+  CheckFiles('TestProcessJsonUsesPerFile');
+end;
+
+procedure TestTD2XOptionsJsonPer.TestProcessJsonUsesPerGroup;
+begin
+  fOpts.ProcessOption('MU');
+  fOpts.ProcessOption('WJ:');
+  fOpts.ProcessOption('PG');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Json'), 'Param per Group');
+  CheckLog(ALL_PROCESSING, 'Processing Json per Group');
+  fOpts.EndProcessing;
+  CheckFiles('TestProcessJsonUsesPerGroup');
+end;
+
+procedure TestTD2XOptionsJsonPer.TestProcessJsonUsesPerParam;
+begin
+  fOpts.ProcessOption('MU');
+  fOpts.ProcessOption('WJ:');
+  fOpts.ProcessOption('PP');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Json'), 'Param per Param');
+  CheckLog(ALL_PROCESSING, 'Processing Json per Param');
+  fOpts.EndProcessing;
+  CheckFiles('TestProcessJsonUsesPerParam');
+end;
+
+procedure TestTD2XOptionsJsonPer.TestProcessJsonUsesPerRun;
+begin
+  fOpts.ProcessOption('MU');
+  fOpts.ProcessOption('WJ:');
+  fOpts.ProcessOption('PR');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Json'), 'Param per Run');
+  CheckLog(ALL_PROCESSING, 'Processing Json per Run');
+  fOpts.EndProcessing;
+  CheckFiles('TestProcessJsonUsesPerRun');
+end;
+
+procedure TestTD2XOptionsJsonPer.TestProcessJsonUsesPerSubDir;
+begin
+  fOpts.ProcessOption('MU');
+  fOpts.ProcessOption('WJ:');
+  fOpts.ProcessOption('PS');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Json'), 'Param per SubDir');
+  CheckLog(ALL_PROCESSING, 'Processing Json per SubDir');
+  fOpts.EndProcessing;
+  CheckFiles('TestProcessJsonUsesPerSubDir');
+end;
+
+procedure TestTD2XOptionsJsonPer.TestProcessJsonUsesPerWildcard;
+begin
+  fOpts.ProcessOption('MU');
+  fOpts.ProcessOption('WJ:');
+  fOpts.ProcessOption('PW');
+  Check(fOpts.ProcessParam('Testing.Test*', 'Process Json'), 'Param per Wildcard');
+  CheckLog(ALL_PROCESSING, 'Processing Json per Wildcard');
+  fOpts.EndProcessing;
+  CheckFiles('TestProcessJsonUsesPerWildcard');
+end;
+
 initialization
 
 RegisterTests('Options', [TestTD2XOptionEnums.Suite, TestTD2XOptions.Suite,
@@ -1888,6 +2067,6 @@ RegisterTests('Options', [TestTD2XOptionEnums.Suite, TestTD2XOptions.Suite,
   TestTD2XOptionsParseSkippedMethods.Suite, TestTD2XOptionsParseCountDefinesUsed.Suite,
   TestTD2XOptionsParseWriteDefines.Suite, TestTD2XOptionsParseWriteJson.Suite,
   TestTD2XOptionsParseWriteXml.Suite, TestTD2XOptionsGeneral.Suite,
-  TestTD2XOptionsSpecific.Suite, TestTD2XOptionsXmlPer.Suite]);
+  TestTD2XOptionsSpecific.Suite, TestTD2XOptionsJsonPer.Suite, TestTD2XOptionsXmlPer.Suite]);
 
 end.

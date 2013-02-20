@@ -1,0 +1,115 @@
+D2X_SubDir:{
+  _parseMode:"Full"
+,_fileName:"(Dir)"
+
+,  D2X_Pattern:{
+    _fileName:"Pattern-TestingTest"
+  
+  ,  D2X_Group:{
+      _name:"Testing.Test"
+    ,_fileName:"Group-Testing.Test"
+    
+    ,  D2X_File:{
+        _fileName:"Testing.Test.AUnit.pas"
+      
+      ,  UnitFile:{
+        
+            MainUnitName:{
+            _group:"Testing.Test"
+          ,_:"Testing.Test.AUnit"
+          }
+        
+        ,  InterfaceSection:{
+          
+              UsedUnitsList:{
+            
+                UsedUnitName:"System.Classes"
+            }
+          
+          ,  IncludeFile:{
+              _filename:"TEST.INC"
+            ,_msgAt:"71,0"
+            }
+          
+          ,  D2X_notSuppMsg:{
+              _msgAt:"91,0"
+            ,_:"Currently not supported {$D+}"
+            }
+          }
+        
+        ,  ImplementationSection:{
+            _lastToken:";{$ELSE}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}"
+          
+          ,  UsedUnitsList:{
+            
+                UsedUnitName:"System.SysUtils"
+            }
+          }
+        
+        ,  InitializationSection:{
+            _lastToken:"end"
+          }
+        }
+      }
+    
+    ,  D2X_File:{
+        _fileName:"Testing.Test.AProgram.dpr"
+      
+      ,  ProgramFile:{
+        
+            MainUnitName:{
+            _group:"Testing.Test"
+          ,_:"Testing.Test.AProgram"
+          }
+        
+        ,  ProgramBlock:{
+          
+              MainUsedUnitStatement:{
+              _file:"'Testing.Test.AUnit.pas'"
+            
+            ,  UsedUnitName:{
+                _group:"Testing.Test"
+              ,_:"Testing.Test.AUnit"
+              }
+            }
+          
+          ,  Block:{
+            
+                CompoundStatement:{
+                _lastToken:"end"
+              
+              ,  StatementList:""
+              }
+            }
+          }
+        }
+      }
+    
+    ,  D2X_File:{
+        _fileName:"Testing.Test.APackage.dpk"
+      
+      ,  PackageFile:{
+          _lastToken:";end."
+        
+        ,  MainUnitName:{
+            _group:"Testing.Test"
+          ,_:"Testing.Test.APackage"
+          }
+        
+        ,  ContainsStatement:{
+          
+              ContainsIdentifier:{
+              _group:"Testing.Test"
+            ,_:"Testing.Test.AUnit"
+            }
+          
+          ,  ContainsExpression:{
+              _file:"'Testing.Test.AUnit.pas'"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+

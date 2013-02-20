@@ -1,0 +1,38 @@
+D2X_SubDir:{
+  _parseMode:"Full"
+,_fileName:"Config"
+
+,  D2X_Pattern:{
+    _fileName:"Config\Pattern-TestingTest"
+  
+  ,  D2X_Group:{
+      _name:"Testing.Test"
+    ,_fileName:"Config\Group-Testing.Test"
+    
+    ,  D2X_File:{
+        _fileName:"Config\Testing.Test.Dir.pas"
+      
+      ,  UnitFile:{
+        
+            MainUnitName:{
+            _group:"Testing.Test"
+          ,_:"Testing.Test.Dir"
+          }
+        
+        ,  InterfaceSection:{
+            _lastToken:"interface"
+          }
+        
+        ,  ImplementationSection:{
+            _lastToken:"implementation"
+          }
+        
+        ,  InitializationSection:{
+            _lastToken:"end"
+          }
+        }
+      }
+    }
+  }
+}
+

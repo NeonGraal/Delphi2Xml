@@ -1,0 +1,25 @@
+D2X_File:{
+  _parseMode:"Full"
+,_fileName:"Config\Testing.Test.Dir.pas"
+
+,  UnitFile:{
+  
+      MainUnitName:{
+      _group:"Testing.Test"
+    ,_:"Testing.Test.Dir"
+    }
+  
+  ,  InterfaceSection:{
+      _lastToken:"interface"
+    }
+  
+  ,  ImplementationSection:{
+      _lastToken:"implementation"
+    }
+  
+  ,  InitializationSection:{
+      _lastToken:"end"
+    }
+  }
+}
+

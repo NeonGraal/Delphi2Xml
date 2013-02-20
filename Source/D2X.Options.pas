@@ -85,6 +85,10 @@ type
     function MakeNamedRef(pVal: TD2XSingleParam<string>): TD2XNamedStreamRef;
     function MakeFileRef(pVal: TD2XSingleParam<string>; pSuffix: string = ''): TD2XFileRef;
 
+    procedure AddAttr(pName: string; pValue: string = '');
+    procedure AddText(pText: string = '');
+    procedure TrimChildren(pElement: string);
+
   protected
     fParams: TD2XParams;
     function GetParserDefines: TStringList;
@@ -133,6 +137,18 @@ uses
 
 { TD2XOptions }
 
+procedure TD2XOptions.AddAttr(pName, pValue: string);
+begin
+  fXmlHandler.AddAttr(pName, pValue);
+  fJsonHandler.AddAttr(pName, pValue);
+end;
+
+procedure TD2XOptions.AddText(pText: string);
+begin
+  fXmlHandler.AddText(pText);
+  fJsonHandler.AddText(pText);
+end;
+
 procedure TD2XOptions.BeginResults(pNodename: string; pPer: TD2XResultPer);
 var
   lP: TD2XProcessor;
@@ -142,7 +158,8 @@ begin
       lP.BeginResults;
 
   if fResultPer.Value >= pPer then
-    fXmlHandler.BeginMethod(pNodename);
+    for lP in fProcs do
+      lP.BeginMethod(pNodename);
 end;
 
 constructor TD2XOptions.Create;
@@ -197,8 +214,9 @@ var
 begin
   if fResultPer.Value >= pPer then
   begin
-    fXmlHandler.AddAttr('fileName', pFilename);
-    fXmlHandler.EndMethod('');
+    AddAttr('fileName', pFilename);
+    for lP in fProcs do
+      lP.EndMethod('');
   end;
 
   if fResultPer.Value = pPer then
@@ -353,7 +371,7 @@ begin
                 DirEndResults('Group-' + lGroup, rpGroup);
               lGroup := lS;
               BeginResults('D2X_Group', rpGroup);
-              fXmlHandler.AddAttr('name', lGroup);
+              AddAttr('name', lGroup);
             end;
             Result := ProcessFile(lPath.Current, True) or Result;
           until not lPath.Next;
@@ -708,9 +726,9 @@ begin
     fParser := lC.Create;
 
     fParser.OnMessage := ParserMessage;
-    fParser.AddAttribute := fXmlHandler.AddAttr;
-    fParser.AddText := fXmlHandler.AddText;
-    fParser.TrimChildren := fXmlHandler.TrimChildren;
+    fParser.AddAttribute := AddAttr;
+    fParser.AddText := AddText;
+    fParser.TrimChildren := TrimChildren;
 
     fParser.Lexer.OnIncludeDirect := LexerOnInclude;
     // fParser.Lexer.OnDefineDirect := LexerOnDefine;
@@ -791,7 +809,7 @@ begin
   lWriteXml := TD2XFlaggedStringParam.CreateFlagStr('WX', 'Write XML', '<d/e>',
     'Write XML files into current or given <d/e>', 'Xml,xml', True, ConvertDirExtn);
   lWriteJson := TD2XFlaggedStringParam.CreateFlagStr('WJ', 'Write JSON', '<d/e>',
-    'Write JSON files into current or given <d/e>', 'Json,json', True, ConvertDirExtn);
+    'Write JSON files into current or given <d/e>', 'Json,json', False, ConvertDirExtn);
   lWriteDefines := TD2XFlaggedStringParam.CreateFlagStr('WD', 'Write Defines', '<d/e>',
     'Write Final Defines files into current or given <d/e>', 'Defines,def', False,
     ConvertDirExtn);
@@ -843,6 +861,7 @@ begin
 
     BeginResults('D2X_File', rpFile);
     fXmlHandler.HasFiles := True;
+    fJsonHandler.HasFiles := True;
 
     fFilename := pFilename;
     for lP in fProcs do
@@ -862,6 +881,7 @@ begin
         LogParser('EXCEPTION', '(' + e.ClassName + ')' + e.Message);
 
         fXmlHandler.RollbackTo('D2X_File');
+        fJsonHandler.RollbackTo('D2X_File');
       end;
     end;
 
@@ -964,6 +984,12 @@ begin
       pDoInvoke := True;
       fCurrentMethod := pMethod.Name;
     end;
+end;
+
+procedure TD2XOptions.TrimChildren(pElement: string);
+begin
+  fXmlHandler.TrimChildren(pElement);
+  fJsonHandler.TrimChildren(pElement);
 end;
 
 procedure TD2XOptions.SetBaseProxy;
