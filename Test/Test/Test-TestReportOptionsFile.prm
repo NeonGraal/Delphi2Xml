@@ -1,6 +1,7 @@
 -F!
 -F+VRN
 -WX:Test,xml
+-WJ:Test,json
 -WD:Test,def
 -CC:.Test
 -CF:.Test

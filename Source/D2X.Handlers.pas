@@ -9,6 +9,8 @@ uses
   D2X.Parser,
   D2X.Handler,
   D2X.IO,
+  D2X.Tree,
+  D2X.Tree.Json,
   D2X.Tree.Xml,
   System.Classes,
   System.Generics.Collections;
@@ -155,20 +157,21 @@ type
     procedure EndResults(pOutput: TStreamWriterRef); override;
   end;
 
-  TD2XXmlHandler = class(TD2XParserHandler)
+  TD2XTreeHandler = class(TD2XParserHandler)
   private
     fHasFiles: Boolean;
 
   protected
-    fXmlDoc: TD2XmlDoc;
-    fXmlNode: TD2XmlNode;
+    fTreeDoc: TD2XTreeDoc;
+    fTreeNode: TD2XTreeNode;
+    fWriter: TD2XTreeWriterClass;
 
     fFinalToken: ID2XFlag;
     fParseMode: TD2XStringRef;
 
   public
     constructor Create; override;
-    constructor CreateXml(pFinalToken: ID2XFlag; pParseMode: TD2XStringRef);
+    constructor CreateTree(pWriter: TD2XTreeWriterClass; pFinalToken: ID2XFlag; pParseMode: TD2XStringRef);
     destructor Destroy; override;
 
     function Description: string; override;
@@ -378,15 +381,15 @@ begin
   Result := False;
 end;
 
-{ TD2XXmlHandler }
+{ TD2XTreeHandler }
 
-procedure TD2XXmlHandler.AddAttr(pName, pValue: string);
+procedure TD2XTreeHandler.AddAttr(pName, pValue: string);
 var
-  lAttr: TD2XmlNode;
+  lAttr: TD2XTreeNode;
 begin
-  if Assigned(fXmlNode) then
+  if Assigned(fTreeNode) then
   begin
-    lAttr := fXmlNode.AddAttribute(pName);
+    lAttr := fTreeNode.AddAttribute(pName);
     if pValue = '' then
     begin
       lAttr.Text := fParser.LastTokens;
@@ -397,14 +400,14 @@ begin
   end;
 end;
 
-procedure TD2XXmlHandler.AddText(pText: string);
+procedure TD2XTreeHandler.AddText(pText: string);
 var
-  lText: TD2XmlNode;
+  lText: TD2XTreeNode;
 begin
-  if Assigned(fXmlNode) then
-    if fXmlNode.HasChildNodes then
+  if Assigned(fTreeNode) then
+    if fTreeNode.HasChildren then
     begin
-      lText := fXmlNode.AddChild('');
+      lText := fTreeNode.AddChild('');
       if pText = '' then
       begin
         lText.Text := fParser.LastTokens;
@@ -414,18 +417,18 @@ begin
         lText.Text := pText;
     end
     else
-      fXmlNode.Text := fXmlNode.Text + pText;
+      fTreeNode.Text := fTreeNode.Text + pText;
 end;
 
-procedure TD2XXmlHandler.BeginMethod(pMethod: string);
+procedure TD2XTreeHandler.BeginMethod(pMethod: string);
 begin
-  if Assigned(fXmlDoc) then
+  if Assigned(fTreeDoc) then
   begin
-    if Assigned(fXmlNode) then
-      fXmlNode := fXmlNode.AddChild(pMethod)
+    if Assigned(fTreeNode) then
+      fTreeNode := fTreeNode.AddChild(pMethod)
     else
     begin
-      fXmlNode := fXmlDoc.AddChild(pMethod);
+      fTreeNode := fTreeDoc.AddChild(pMethod);
       if Assigned(fParseMode) then
         AddAttr('parseMode', fParseMode); // TD2X.ToLabel(fOpts.ParseMode));
     end;
@@ -434,75 +437,76 @@ begin
   end;
 end;
 
-procedure TD2XXmlHandler.BeginResults;
+procedure TD2XTreeHandler.BeginResults;
 begin
-  fXmlDoc := NewXmlDocument;
-  fXmlDoc.Options := fXmlDoc.Options + [doNodeAutoIndent];
+  fTreeDoc := TD2XTreeDoc.CreateDoc(fWriter);
+  fTreeDoc.Options := fTreeDoc.Options + [toAutoIndent];
   fHasFiles := False;
 end;
 
-procedure TD2XXmlHandler.Copy(pFrom: TD2XHandler);
+procedure TD2XTreeHandler.Copy(pFrom: TD2XHandler);
 var
-  lFrom: TD2XXmlHandler;
+  lFrom: TD2XTreeHandler;
 begin
   if Assigned(pFrom) then
   begin
     inherited;
 
-    lFrom := TD2XXmlHandler(pFrom);
+    lFrom := TD2XTreeHandler(pFrom);
     fFinalToken := lFrom.fFinalToken;
     fParseMode := lFrom.fParseMode;
   end;
 end;
 
-constructor TD2XXmlHandler.Create;
+constructor TD2XTreeHandler.Create;
 begin
   raise EInvalidHandler.Create('Invalid constructor called');
 end;
 
-constructor TD2XXmlHandler.CreateXml(pFinalToken: ID2XFlag; pParseMode: TD2XStringRef);
+constructor TD2XTreeHandler.CreateTree(pWriter: TD2XTreeWriterClass; pFinalToken: ID2XFlag; pParseMode: TD2XStringRef);
 begin
   Assert(Assigned(pFinalToken), 'Final Token Flag must be specified');
 
   inherited Create;
 
-  fXmlDoc := nil;
-  fXmlNode := nil;
+  fTreeDoc := nil;
+  fTreeNode := nil;
 
   fParser := nil;
   fHasFiles := False;
 
+  fWriter := pWriter;
   fFinalToken := pFinalToken;
   fParseMode := pParseMode;
 end;
 
-function TD2XXmlHandler.Description: string;
+function TD2XTreeHandler.Description: string;
 begin
   Result := 'Xml';
 end;
 
-destructor TD2XXmlHandler.Destroy;
+destructor TD2XTreeHandler.Destroy;
 begin
-  fXmlNode := nil;
-  FreeAndNil(fXmlDoc);
+  fTreeNode := nil;
+  FreeAndNil(fTreeDoc);
 
   inherited;
 end;
 
-procedure TD2XXmlHandler.EndMethod(pMethod: string);
+procedure TD2XTreeHandler.EndMethod(pMethod: string);
 begin
-  if Assigned(fXmlNode) then
+  if Assigned(fTreeNode) then
   begin
     if Assigned(fFinalToken) and fFinalToken.Flag and Assigned(fParser) and
       not fParser.KeepTokens and (Length(fParser.LastTokens) > 1) then
       AddAttr('lastToken');
 
-    fXmlNode.Xml;
-    fXmlNode := fXmlNode.ParentNode;
+    fTreeNode.Stream;
+    fTreeNode := fTreeNode.ParentNode;
   end;
 end;
 
-procedure TD2XXmlHandler.EndResults(pOutput: TStreamWriterRef);
+procedure TD2XTreeHandler.EndResults(pOutput: TStreamWriterRef);
 var
   lFile: TStreamWriter;
 begin
@@ -510,15 +514,15 @@ begin
   begin
     lFile := pOutput;
     if Assigned(lFile) then
-      fXmlDoc.Xml.SaveToStream(lFile.BaseStream);
+      fTreeDoc.Stream.SaveToStream(lFile.BaseStream);
     fHasFiles := False;
   end;
 
-  fXmlNode := nil;
-  FreeAndNil(fXmlDoc);
+  fTreeNode := nil;
+  FreeAndNil(fTreeDoc);
 end;
 
-procedure TD2XXmlHandler.LexerInclude(const pFile: string; pX, pY: Integer);
+procedure TD2XTreeHandler.LexerInclude(const pFile: string; pX, pY: Integer);
 begin
   BeginMethod('IncludeFile');
   AddAttr('filename', pFile);
@@ -526,7 +530,7 @@ begin
   EndMethod('');
 end;
 
-procedure TD2XXmlHandler.ParserMessage(const pTyp: TMessageEventType;
+procedure TD2XTreeHandler.ParserMessage(const pTyp: TMessageEventType;
   const pMsg: string; pX, pY: Integer);
 begin
   case pTyp of
@@ -542,25 +546,25 @@ begin
   EndMethod('');
 end;
 
-procedure TD2XXmlHandler.RollbackTo(pNodeName: string);
+procedure TD2XTreeHandler.RollbackTo(pNodeName: string);
 var
-  lCurrNode: TD2XmlNode;
+  lCurrNode: TD2XTreeNode;
 begin
-  lCurrNode := fXmlNode;
+  lCurrNode := fTreeNode;
   while Assigned(lCurrNode) and (lCurrNode.LocalName <> pNodeName) do
     lCurrNode := lCurrNode.ParentNode;
 
   if Assigned(lCurrNode) then
-    fXmlNode := lCurrNode;
+    fTreeNode := lCurrNode;
 end;
 
-procedure TD2XXmlHandler.TrimChildren(pElement: string);
+procedure TD2XTreeHandler.TrimChildren(pElement: string);
 begin
-  if Assigned(fXmlNode) then
-    fXmlNode.TrimChildren(pElement);
+  if Assigned(fTreeNode) then
+    fTreeNode.TrimChildren(pElement);
 end;
 
-function TD2XXmlHandler.UseProxy: Boolean;
+function TD2XTreeHandler.UseProxy: Boolean;
 begin
   Result := True;
 end;

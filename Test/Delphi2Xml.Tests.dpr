@@ -52,6 +52,7 @@ uses
   D2X.Tree.Json in '..\Source\D2X.Tree.Json.pas',
   D2X.Tree in '..\Source\D2X.Tree.pas',
   D2X.Tree.Xml in '..\Source\D2X.Tree.Xml.pas',
+  Test.Tree in 'Source\Test.Tree.pas',
   Test.Tree.Xml in 'Source\Test.Tree.Xml.pas';
 
 {$R *.RES}

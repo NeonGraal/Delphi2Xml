@@ -262,6 +262,16 @@ type
     procedure TestParseOptionWDValue;
   end;
 
+  TestTD2XOptionsParseWriteJson = class(TOptionsParseTestCase)
+  published
+    procedure TestParseOptionWJOff;
+    procedure TestParseOptionWJOn;
+    procedure TestParseOptionWJBlank;
+    procedure TestParseOptionWJDir;
+    procedure TestParseOptionWJExtn;
+    procedure TestParseOptionWJValue;
+  end;
+
   TestTD2XOptionsParseWriteXml = class(TOptionsParseTestCase)
   published
     procedure TestParseOptionWXOff;
@@ -302,8 +312,8 @@ const
     'FinalToken+,LogErrors+,LogNotSupp+,Recurse+,Timestamp-,Verbose+ ' +
   //    'Recurse + Timestamp - Global name :Test Config dir :Test\ Log dir :Test\ ' +
   //    'Base dir :Test\ Parse mode Full Results per File Show elapsed Quiet ' +
-    'Parse mode Full Results per File Show elapsed Quiet ' +
-    'Write XML :Test,xml Write Defines :Test,def Count Children :.Test ' +
+    'Parse mode Full Results per File Show elapsed Quiet Write XML :Test,xml ' +
+    'Write JSON :Test,json Write Defines :Test,def Count Children :.Test ' +
     'Count Final Defines :.Test Count Defines Used :.Test Skipped Methods :Test.skip ' +
     'Defines TANGO, UNIFORM, VICTOR Held Defines TANGO, UNIFORM, VICTOR';
   ZERO_REPORT_OPTIONS = REPORT_HEADING + 'Flags ' +
@@ -311,9 +321,9 @@ const
   //    'Recurse - Timestamp - Global name Config dir - Log dir - Base dir - ' +
   //    'Parse mode Full Results per File Show elapsed None Write XML - ' +
     'Parse mode Full Results per File Show elapsed None Write XML -(,xml) ' +
-    'Write Defines -(,def) Count Children -(.chld) Count Final Defines -(.final) ' +
-    'Count Defines Used -(.used) Skipped Methods -(.skip) ' +
-    'Defines Default Held Defines Default';
+    'Write JSON -(,json) Write Defines -(,def) Count Children -(.chld) ' +
+    'Count Final Defines -(.final) Count Defines Used -(.used) ' +
+    'Skipped Methods -(.skip) Defines Default Held Defines Default';
   EMPTY_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Defines NONE Held Defines Default';
 {$IFDEF WIN32}
   DEFINED_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Defines ' +
@@ -368,8 +378,8 @@ var
   lPrm: TD2XSingleParam<TD2XElapsedMode>;
 begin
   lCalled := False;
-  lPrm := TD2XSingleParam<TD2XElapsedMode>.CreateParamValid('T', 'Test', '<tst>', 'Test Elapsed mode',
-    emQuiet, TD2X.CnvDflt<TD2XElapsedMode>, TD2X.ToLabel<TD2XElapsedMode>,
+  lPrm := TD2XSingleParam<TD2XElapsedMode>.CreateParamValid('T', 'Test', '<tst>',
+    'Test Elapsed mode', emQuiet, TD2X.CnvDflt<TD2XElapsedMode>, TD2X.ToLabel<TD2XElapsedMode>,
     function(pVal: TD2XElapsedMode): Boolean
     begin
       lCalled := True;
@@ -382,8 +392,8 @@ begin
   end;
 
   lCalled := False;
-  lPrm := TD2XSingleParam<TD2XElapsedMode>.CreateParamOnSet('T', 'Test', '<tst>', 'Test Elapsed mode',
-    emQuiet, TD2X.CnvDflt<TD2XElapsedMode>, TD2X.ToLabel<TD2XElapsedMode>,
+  lPrm := TD2XSingleParam<TD2XElapsedMode>.CreateParamOnSet('T', 'Test', '<tst>',
+    'Test Elapsed mode', emQuiet, TD2X.CnvDflt<TD2XElapsedMode>, TD2X.ToLabel<TD2XElapsedMode>,
     procedure(pOld, pNew, pDflt: TD2XElapsedMode)
     begin
       lCalled := True;
@@ -436,8 +446,8 @@ var
   lPrm: TD2XSingleParam<TD2XParseMode>;
 begin
   lCalled := False;
-  lPrm := TD2XSingleParam<TD2XParseMode>.CreateParamValid('T', 'Test', '<tst>', 'Test Elapsed mode',
-    pmFull, TD2X.CnvDflt<TD2XParseMode>, TD2X.ToLabel<TD2XParseMode>,
+  lPrm := TD2XSingleParam<TD2XParseMode>.CreateParamValid('T', 'Test', '<tst>',
+    'Test Elapsed mode', pmFull, TD2X.CnvDflt<TD2XParseMode>, TD2X.ToLabel<TD2XParseMode>,
     function(pVal: TD2XParseMode): Boolean
     begin
       lCalled := True;
@@ -450,8 +460,8 @@ begin
   end;
 
   lCalled := False;
-  lPrm := TD2XSingleParam<TD2XParseMode>.CreateParamOnSet('T', 'Test', '<tst>', 'Test Elapsed mode',
-    pmFull, TD2X.CnvDflt<TD2XParseMode>, TD2X.ToLabel<TD2XParseMode>,
+  lPrm := TD2XSingleParam<TD2XParseMode>.CreateParamOnSet('T', 'Test', '<tst>',
+    'Test Elapsed mode', pmFull, TD2X.CnvDflt<TD2XParseMode>, TD2X.ToLabel<TD2XParseMode>,
     procedure(pOld, pNew, pDflt: TD2XParseMode)
     begin
       lCalled := True;
@@ -504,8 +514,8 @@ var
   lPrm: TD2XSingleParam<TD2XResultPer>;
 begin
   lCalled := False;
-  lPrm := TD2XSingleParam<TD2XResultPer>.CreateParamValid('T', 'Test', '<tst>', 'Test Elapsed mode',
-    rpDir, TD2X.CnvDflt<TD2XResultPer>, TD2X.ToLabel<TD2XResultPer>,
+  lPrm := TD2XSingleParam<TD2XResultPer>.CreateParamValid('T', 'Test', '<tst>',
+    'Test Elapsed mode', rpDir, TD2X.CnvDflt<TD2XResultPer>, TD2X.ToLabel<TD2XResultPer>,
     function(pVal: TD2XResultPer): Boolean
     begin
       lCalled := True;
@@ -518,8 +528,8 @@ begin
   end;
 
   lCalled := False;
-  lPrm := TD2XSingleParam<TD2XResultPer>.CreateParamOnSet('T', 'Test', '<tst>', 'Test Elapsed mode',
-    rpDir, TD2X.CnvDflt<TD2XResultPer>, TD2X.ToLabel<TD2XResultPer>,
+  lPrm := TD2XSingleParam<TD2XResultPer>.CreateParamOnSet('T', 'Test', '<tst>',
+    'Test Elapsed mode', rpDir, TD2X.CnvDflt<TD2XResultPer>, TD2X.ToLabel<TD2XResultPer>,
     procedure(pOld, pNew, pDflt: TD2XResultPer)
     begin
       lCalled := True;
@@ -941,7 +951,7 @@ end;
 
 procedure TestTD2XOptions.TestRecurseDirectory;
 begin
-  Check(fOpts.RecurseDirectory('', 'Testing.Test*', false), 'Recurse Directory');
+  Check(fOpts.RecurseDirectory('', 'Testing.Test*', False), 'Recurse Directory');
   CheckLog(DIRECTORY_PROCESSING + ' ' + RECURSE_PROCESSING, 'Recurse Directory');
   CheckErrorLog('');
 end;
@@ -1836,6 +1846,38 @@ begin
   CheckSimple(fCode + pParam, fLabel + pResult);
 end;
 
+{ TestTD2XOptionsParseWriteJson }
+
+procedure TestTD2XOptionsParseWriteJson.TestParseOptionWJBlank;
+begin
+  CheckSimple('WJ:', 'Write JSON :,json');
+end;
+
+procedure TestTD2XOptionsParseWriteJson.TestParseOptionWJDir;
+begin
+  CheckSimple('WJ:Value', 'Write JSON :Value,json');
+end;
+
+procedure TestTD2XOptionsParseWriteJson.TestParseOptionWJExtn;
+begin
+  CheckSimple('WJ:,val', 'Write JSON :,val');
+end;
+
+procedure TestTD2XOptionsParseWriteJson.TestParseOptionWJOff;
+begin
+  CheckSimple('Wj-', 'Write JSON -(Json,json)');
+end;
+
+procedure TestTD2XOptionsParseWriteJson.TestParseOptionWJOn;
+begin
+  CheckSimple('WJ+', 'Write JSON :Json,json');
+end;
+
+procedure TestTD2XOptionsParseWriteJson.TestParseOptionWJValue;
+begin
+  CheckSimple('WJ:Value,val', 'Write JSON :Value,val');
+end;
+
 initialization
 
 RegisterTests('Options', [TestTD2XOptionEnums.Suite, TestTD2XOptions.Suite,
@@ -1844,7 +1886,8 @@ RegisterTests('Options', [TestTD2XOptionEnums.Suite, TestTD2XOptions.Suite,
   TestTD2XOptionsParseCountChildren.Suite, TestTD2XOptionsParseCountFinalDefines.Suite,
   TestTD2XOptionsParseDefines.Suite, TestTD2XOptionsParseHeldDefines.Suite,
   TestTD2XOptionsParseSkippedMethods.Suite, TestTD2XOptionsParseCountDefinesUsed.Suite,
-  TestTD2XOptionsParseWriteDefines.Suite, TestTD2XOptionsParseWriteXml.Suite,
-  TestTD2XOptionsGeneral.Suite, TestTD2XOptionsSpecific.Suite, TestTD2XOptionsXmlPer.Suite]);
+  TestTD2XOptionsParseWriteDefines.Suite, TestTD2XOptionsParseWriteJson.Suite,
+  TestTD2XOptionsParseWriteXml.Suite, TestTD2XOptionsGeneral.Suite,
+  TestTD2XOptionsSpecific.Suite, TestTD2XOptionsXmlPer.Suite]);
 
 end.

@@ -31,6 +31,7 @@ const
     'P<per> File Result per (F[ile], S[ubdir], D[ir], W[ildcard], P[aram], R[un]) ' +
     'E<mode> Quiet Elapsed time display (N[one], T[otal], D[ir], F[ile], P[rocessing], [Q]uiet) '
     + 'WX[+-]:<d/e> :Xml,xml Write XML files into current or given <d/e> ' +
+    'WJ[+-]:<d/e> :Json,json Write JSON files into current or given <d/e> ' +
     'WD[+-]:<d/e> -(Defines,def) Write Final Defines files into current or given <d/e> ' +
     'CC[+-]:<f/e> :.chld Report Min/Max Children into <f/e> ' +
     'CF[+-]:<f/e> :.final Count Final Defines into <f/e> ' +
@@ -46,8 +47,8 @@ const
 
   BASE_REPORT_OPTIONS = REPORT_HEADING +
     'Flags FinalToken+,LogErrors+,LogNotSupp-,Recurse-,Timestamp-,Verbose- ' +
-    'Parse mode Full Results per File Show elapsed Quiet ' +
-    'Write XML :Xml,xml Write Defines -(Defines,def) Count Children :.chld ' +
+    'Parse mode Full Results per File Show elapsed Quiet Write XML :Xml,xml ' +
+    'Write JSON :Json,json Write Defines -(Defines,def) Count Children :.chld ' +
     'Count Final Defines :.final Count Defines Used :.used Skipped Methods -(.skip) ';
   DEFAULT_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Defines Default Held Defines Default';
 {$IFDEF WIN32}

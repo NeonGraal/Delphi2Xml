@@ -12,6 +12,7 @@ uses
   D2X.IO,
   D2X.Param,
   D2X.Parser,
+  D2X.Tree,
   D2X.Tree.Xml,
   System.Classes,
   System.StrUtils,
@@ -147,10 +148,10 @@ type
     procedure TestEndResults;
   end;
 
-  TTestXmlHandler = class(TD2XXmlHandler)
+  TTestTreeHandler = class(TD2XTreeHandler)
   public
-    property XmlDoc: TD2XmlDoc read fXmlDoc;
-    property XmlNode: TD2XmlNode read fXmlNode;
+    property TreeDoc: TD2XTreeDoc read fTreeDoc;
+    property TreeNode: TD2XTreeNode read fTreeNode;
 
     property Parser: TD2XDefinesParser read fParser;
     property FinalToken: ID2XFlag read fFinalToken;
@@ -158,9 +159,9 @@ type
 
   end;
 
-  TestTD2XXmlHandler = class(TParserTestCase)
+  TestTD2XTreeHandler = class(TParserTestCase)
   strict private
-    fHndlr: TTestXmlHandler;
+    fHndlr: TTestTreeHandler;
     fFinalToken: TD2XBoolFlag;
     fCalledParseMode: Boolean;
 
@@ -406,16 +407,16 @@ begin
   CheckFalse(fHndlr.UseProxy, 'Uses proxy');
 end;
 
-{ TestTD2XXmlHandler }
+{ TestTD2XTreeHandler }
 
-procedure TestTD2XXmlHandler.SetUp;
+procedure TestTD2XTreeHandler.SetUp;
 begin
   inherited;
 
   fFinalToken := TD2XBoolFlag.Create;
   ID2XFlag(fFinalToken).Flag := True;
 
-  fHndlr := TTestXmlHandler.CreateXml(fFinalToken,
+  fHndlr := TTestTreeHandler.CreateTree(TD2XTreeWriter, fFinalToken,
     function: string
     begin
       fCalledParseMode := True;
@@ -423,7 +424,7 @@ begin
     end);
 end;
 
-procedure TestTD2XXmlHandler.TearDown;
+procedure TestTD2XTreeHandler.TearDown;
 begin
   FreeAndNil(fHndlr);
   FreeAndNil(fFinalToken);
@@ -431,37 +432,36 @@ begin
   inherited;
 end;
 
-procedure TestTD2XXmlHandler.TestAddAttr;
+procedure TestTD2XTreeHandler.TestAddAttr;
 begin
   fHndlr.BeginResults;
   fHndlr.HasFiles := True;
   fHndlr.BeginMethod('Test');
   fHndlr.AddAttr('Test', 'Test');
   fHndlr.EndResults(FileWriterRef(fDS));
-  CheckStream('<?xml version="1.0"?> <Test parseMode="ParseMode" Test="Test" />',
-    'End Results');
+  CheckStream('$Test< @parseMode:ParseMode; @Test:Test; >', 'End Results');
 end;
 
-procedure TestTD2XXmlHandler.TestAddText;
+procedure TestTD2XTreeHandler.TestAddText;
 begin
   fHndlr.BeginResults;
   fHndlr.HasFiles := True;
   fHndlr.BeginMethod('Test');
   fHndlr.AddText('Test');
   fHndlr.EndResults(FileWriterRef(fDS));
-  CheckStream('<?xml version="1.0"?> <Test parseMode="ParseMode">Test</Test>', 'End Results');
+  CheckStream('$Test< @parseMode:ParseMode; >:Test;', 'End Results');
 end;
 
-procedure TestTD2XXmlHandler.TestBeginMethod;
+procedure TestTD2XTreeHandler.TestBeginMethod;
 begin
   fHndlr.BeginResults;
   fHndlr.HasFiles := True;
   fHndlr.BeginMethod('Test');
   fHndlr.EndResults(FileWriterRef(fDS));
-  CheckStream('<?xml version="1.0"?> <Test parseMode="ParseMode" />', 'End Results');
+  CheckStream('$Test< @parseMode:ParseMode; >', 'End Results');
 end;
 
-procedure TestTD2XXmlHandler.TestBeginResults;
+procedure TestTD2XTreeHandler.TestBeginResults;
 begin
   fHndlr.HasFiles := True;
 
@@ -471,16 +471,16 @@ begin
   CheckFalse(fHndlr.HasFiles, 'Has files reset');
 end;
 
-procedure TestTD2XXmlHandler.TestCopy;
+procedure TestTD2XTreeHandler.TestCopy;
 var
-  pFrom: TD2XXmlHandler;
+  pFrom: TD2XTreeHandler;
 begin
   pFrom := nil;
   fCalledParseMode := False;
 
   fHndlr.Copy(pFrom);
   try
-    pFrom := TD2XXmlHandler.CreateXml(fFinalToken, nil);
+    pFrom := TD2XTreeHandler.CreateTree(TD2XTreeWriter, fFinalToken, nil);
 
     pFrom.InitParser(fParser);
 
@@ -494,22 +494,22 @@ begin
   end;
 end;
 
-procedure TestTD2XXmlHandler.TestDescription;
+procedure TestTD2XTreeHandler.TestDescription;
 begin
   CheckEqualsString('Xml', fHndlr.Description, 'Description');
 end;
 
-procedure TestTD2XXmlHandler.TestEndMethod;
+procedure TestTD2XTreeHandler.TestEndMethod;
 begin
   fHndlr.BeginResults;
   fHndlr.HasFiles := True;
   fHndlr.BeginMethod('Test');
   fHndlr.EndMethod('Test');
   fHndlr.EndResults(FileWriterRef(fDS));
-  CheckStream('<?xml version="1.0"?> <Test parseMode="ParseMode" />', 'End Results');
+  CheckStream('$Test< @parseMode:ParseMode; >', 'End Results');
 end;
 
-procedure TestTD2XXmlHandler.TestEndResults;
+procedure TestTD2XTreeHandler.TestEndResults;
 begin
   fHndlr.BeginResults;
   fHndlr.EndResults(FileWriterRef(fDS));
@@ -518,10 +518,10 @@ begin
   fHndlr.BeginResults;
   fHndlr.HasFiles := True;
   fHndlr.EndResults(FileWriterRef(fDS));
-  CheckStream('<?xml version="1.0"?>', 'End Results');
+  CheckStream(';', 'End Results');
 end;
 
-procedure TestTD2XXmlHandler.TestInitParser;
+procedure TestTD2XTreeHandler.TestInitParser;
 begin
   fCalledParseMode := False;
 
@@ -535,11 +535,11 @@ begin
   CheckTrue(fCalledParseMode, 'Parse Mode called');
 end;
 
-procedure TestTD2XXmlHandler.TestInvalidCreate;
+procedure TestTD2XTreeHandler.TestInvalidCreate;
 begin
   StartExpectingException(EInvalidHandler);
   try
-    TD2XXmlHandler.Create;
+    TD2XTreeHandler.Create;
   except
     on E: EInvalidHandler do
     begin
@@ -549,7 +549,7 @@ begin
   end;
 end;
 
-procedure TestTD2XXmlHandler.TestLexerInclude;
+procedure TestTD2XTreeHandler.TestLexerInclude;
 begin
   fHndlr.BeginResults;
   fHndlr.HasFiles := True;
@@ -558,12 +558,11 @@ begin
   fHndlr.LexerInclude('Test', 1, 2);
 
   fHndlr.EndResults(FileWriterRef(fDS));
-  CheckStream
-    ('<?xml version="1.0"?> <Test parseMode="ParseMode"> <IncludeFile filename="Test" msgAt="1,2" /> </Test>',
+  CheckStream('$Test< @parseMode:ParseMode; $IncludeFile< @filename:Test; @msgAt:1,2; > >',
     'End Results');
 end;
 
-procedure TestTD2XXmlHandler.TestParserMessage;
+procedure TestTD2XTreeHandler.TestParserMessage;
 begin
   fHndlr.BeginResults;
   fHndlr.HasFiles := True;
@@ -572,8 +571,7 @@ begin
   fHndlr.ParserMessage(meNotSupported, 'Test', 1, 2);
 
   fHndlr.EndResults(FileWriterRef(fDS));
-  CheckStream
-    ('<?xml version="1.0"?> <Test parseMode="ParseMode"> <D2X_notSuppMsg msgAt="1,2">Test</D2X_notSuppMsg> </Test>',
+  CheckStream('$Test< @parseMode:ParseMode; $D2X_notSuppMsg< @msgAt:1,2; >:Test; >',
     'End Results');
 
   fHndlr.BeginResults;
@@ -581,12 +579,11 @@ begin
   fHndlr.BeginMethod('Test');
   fHndlr.ParserMessage(meError, 'Test', 1, 2);
   fHndlr.EndResults(FileWriterRef(fDS));
-  CheckStream
-    ('<?xml version="1.0"?> <Test parseMode="ParseMode"> <D2X_errorMsg msgAt="1,2">Test</D2X_errorMsg> </Test>',
+  CheckStream('$Test< @parseMode:ParseMode; $D2X_errorMsg< @msgAt:1,2; >:Test; >',
     'End Results');
 end;
 
-procedure TestTD2XXmlHandler.TestProcessing;
+procedure TestTD2XTreeHandler.TestProcessing;
 begin
   fHndlr.BeginResults;
   fHndlr.HasFiles := True;
@@ -602,11 +599,11 @@ begin
   fHndlr.BeginMethod('Test4');
   fHndlr.EndResults(FileWriterRef(fDS));
   CheckStream
-    ('<?xml version="1.0"?> <Test parseMode="ParseMode"> <Test1 Test="Test"> <Test2>Test</Test2> <Test3 Test="Test" /> <Test4 /> </Test1> </Test>',
+    ('$Test< @parseMode:ParseMode; $Test1< @Test:Test; $Test2:Test; $Test3< @Test:Test; > $Test4 > >',
     'End Results');
 end;
 
-procedure TestTD2XXmlHandler.TestRollbackTo;
+procedure TestTD2XTreeHandler.TestRollbackTo;
 begin
   fHndlr.BeginResults;
   fHndlr.HasFiles := True;
@@ -617,12 +614,11 @@ begin
   fHndlr.RollbackTo('Test1');
   fHndlr.BeginMethod('Test4');
   fHndlr.EndResults(FileWriterRef(fDS));
-  CheckStream
-    ('<?xml version="1.0"?> <Test parseMode="ParseMode"> <Test1> <Test2> <Test3 /> </Test2> <Test4 /> </Test1> </Test>',
+  CheckStream('$Test< @parseMode:ParseMode; $Test1< $Test2< $Test3 > $Test4 > >',
     'End Results');
 end;
 
-procedure TestTD2XXmlHandler.TestTrimChildren;
+procedure TestTD2XTreeHandler.TestTrimChildren;
 begin
   fHndlr.BeginResults;
   fHndlr.HasFiles := True;
@@ -637,12 +633,11 @@ begin
   fHndlr.EndMethod('Test5');
   fHndlr.TrimChildren('Test4');
   fHndlr.EndResults(FileWriterRef(fDS));
-  CheckStream
-    ('<?xml version="1.0"?> <Test parseMode="ParseMode"> <Test1> <Test2> <Test3 /> </Test2> <Test5 /> </Test1> </Test>',
+  CheckStream('$Test< @parseMode:ParseMode; $Test1< $Test2< $Test3 > $Test5 > >',
     'End Results');
 end;
 
-procedure TestTD2XXmlHandler.TestUseProxy;
+procedure TestTD2XTreeHandler.TestUseProxy;
 begin
   CheckTrue(fHndlr.UseProxy, 'Uses proxy');
 end;
@@ -1089,7 +1084,7 @@ RegisterTests('Handlers', [TestTD2XCountChildrenHandler.Suite,
   TestTD2XCountFinalDefinesHandler.Suite, TestTD2XCountDefinesUsedHandler.Suite,
   TestTD2XParserDefinesHandler.Suite, TestTD2XHeldDefinesHandler.Suite,
   TestTD2XErrorHandler.Suite, TestTD2XSkipHandler.Suite, TestTD2XWriteDefinesHandler.Suite,
-  TestTD2XXmlHandler.Suite]);
+  TestTD2XTreeHandler.Suite]);
 
 //InitStringListLoad;
 

@@ -3,21 +3,22 @@ unit Test.Tree.Xml;
 interface
 
 uses
+  D2X.Tree,
   D2X.Tree.Xml,
   System.Classes,
+  Test.Tree,
   TestFramework;
 
 type
-  TD2XmlTestCase = class(TTestCase)
+  TD2XmlTestCase = class(TD2XTreeTestCase)
   protected
-    procedure CheckXml(pExpected, pLabel: String; pXml: TStringStream);
     procedure CheckDoc(pExpected, pLabel: String; pXml: TStringStream);
 
   end;
 
   TD2XmlDocTestCase = class(TD2XmlTestCase)
   protected
-    fDoc: TD2XmlDoc;
+    fDoc: TD2XTreeDoc;
 
   public
     procedure SetUp; override;
@@ -27,15 +28,11 @@ type
 
   TD2XmlElementTestCase = class(TD2XmlDocTestCase)
   protected
-    fElem: TD2XmlElement;
+    fElem: TD2XTreeElement;
 
   public
     procedure SetUp; override;
 
-  end;
-
-  TD2XmlNodeTester = class(TD2XmlNode)
-    constructor Create;
   end;
 
 implementation
@@ -53,26 +50,13 @@ begin
     pLabel + ' Document');
 end;
 
-procedure TD2XmlTestCase.CheckXml(pExpected, pLabel: String;
-  pXml: TStringStream);
-begin
-  CheckEqualsString(pExpected, ReduceString(pXml.DataString), pLabel + ' XML');
-end;
-
 { TD2XmlElementTestCase }
 
 procedure TD2XmlElementTestCase.SetUp;
 begin
   inherited;
 
-  fElem := fDoc.AddChild('Elem') as TD2XmlElement;
-end;
-
-{ TD2XmlNodeTester }
-
-constructor TD2XmlNodeTester.Create;
-begin
-  inherited CreateTag('Test', nil);
+  fElem := fDoc.AddChild('Elem') as TD2XTreeElement;
 end;
 
 { TD2XmlDocTestCase }
@@ -81,7 +65,7 @@ procedure TD2XmlDocTestCase.SetUp;
 begin
   inherited;
 
-  fDoc := NewXmlDocument;
+  fDoc := TD2XTreeDoc.CreateDoc(TD2XXmlWriter);
 end;
 
 procedure TD2XmlDocTestCase.TearDown;

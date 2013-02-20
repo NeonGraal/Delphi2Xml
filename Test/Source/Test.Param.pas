@@ -31,8 +31,8 @@ type
     procedure TearDown; override;
 
   published
-    procedure TestGetFlag; virtual; abstract;
-    procedure TestSetFlag; virtual; abstract;
+    procedure TestGetFlag; virtual;
+    procedure TestSetFlag; virtual;
 
   end;
 
@@ -92,6 +92,16 @@ begin
   CheckFalse(Assigned(fFlag), 'Flag should have been cleared before Teardown');
 
   inherited;
+end;
+
+procedure TFlagParamTestCase.TestGetFlag;
+begin
+
+end;
+
+procedure TFlagParamTestCase.TestSetFlag;
+begin
+
 end;
 
 end.

@@ -3,307 +3,121 @@ unit D2X.Tree.Json;
 interface
 
 uses
-  System.Classes,
-  System.Generics.Collections,
-  Xml.XMLIntf;
-// Xml.XMLDoc,
+  D2X.Tree,
+  System.Classes;
 
 type
-  TD2JsonDoc = class;
-
-  TD2JsonNode = class
-  strict private
-    fParent: TD2JsonNode;
-    fJson: TStringStream;
-
-  strict protected
-    fTag: string;
-    fText: string;
-    fDoc: TD2JsonDoc;
-
-    constructor CreateTag(pTag: string; pParent: TD2JsonNode); virtual;
-
+  TD2XJsonWriter = class(TD2XTreeWriter)
   protected
-    procedure MakeJson(pW: TTextWriter); virtual;
-    function GetJson: TStringStream;
-
-  public
-    constructor Create;
-    destructor Destroy; override;
-
-    function AddChild(pTag: string): TD2JsonNode; virtual;
-    function AddAttribute(pTag: string): TD2JsonNode; virtual;
-    function HasChildNodes: Boolean; virtual;
-    procedure TrimChildren(pElement: string); virtual;
-
-    property ParentNode: TD2JsonNode read fParent;
-    property LocalName: string read fTag;
-    property Text: string read fText write fText;
-    property Json: TStringStream read GetJson;
-  end;
-
-  TD2JsonAttribute = class(TD2JsonNode)
-  protected
-    procedure MakeJson(pW: TTextWriter); override;
-  end;
-
-  TD2JsonElement = class(TD2JsonNode)
-  private
-    fChildren: TObjectList<TD2JsonNode>;
-    fAtttributes: TObjectList<TD2JsonNode>;
-
-  strict protected
-    constructor CreateTag(pTag: string; pParent: TD2JsonNode = nil); override;
-
-  protected
-    procedure MakeJson(pW: TTextWriter); override;
-
-  public
-    destructor Destroy; override;
-
-    function AddChild(pTag: string): TD2JsonNode; override;
-    function AddAttribute(pTag: string): TD2JsonNode; override;
-    function HasChildNodes: Boolean; override;
-    procedure TrimChildren(pElement: string); override;
-  end;
-
-  TD2JsonDoc = class(TD2JsonElement)
-  private
-//    FOptions: TJsonDocOptions;
-
-  protected
-    procedure MakeJson(pW: TTextWriter); override;
-
-  public
-    constructor CreateDoc;
-    function AddChild(pTag: string): TD2JsonNode; override;
-
-//    property Options: TJsonDocOptions read FOptions write FOptions;
+    procedure WriteAttribute(pNode: TD2XTreeNode; pW: TTextWriter); override;
+    procedure WriteElement(pNode: TD2XTreeElement; pW: TTextWriter); override;
+    //    procedure WriteDoc(pNode: TD2XTreeDoc; pW: TTextWriter); override;
 
   end;
-
-function NewJsonDocument: TD2JsonDoc;
 
 implementation
 
 uses
   Data.Cloud.CloudAPI,
-  System.StrUtils,
   System.SysUtils;
 
-function NewJsonDocument: TD2JsonDoc;
+{ TD2XJsonWriter }
+
+procedure TD2XJsonWriter.WriteAttribute(pNode: TD2XTreeNode; pW: TTextWriter);
 begin
-  Result := TD2JsonDoc.CreateDoc;
+  pW.Write('_');
+  pW.Write(pNode.LocalName);
+  pW.Write(':"');
+  //  pW.Write(JsonEscape(pNode.Text));
+  pW.Write(pNode.Text);
+  pW.Write('"');
 end;
 
-{ TD2JsonDoc }
+type
+  TProcRef = reference to procedure;
 
-function TD2JsonDoc.AddChild(pTag: string): TD2JsonNode;
-begin
-  if fTag = '' then
-  begin
-    fTag := pTag;
-    Result := Self;
-  end
-  else
-    Result := inherited AddChild(pTag);
-end;
-
-constructor TD2JsonDoc.CreateDoc;
-begin
-  CreateTag('');
-  fDoc := Self;
-end;
-
-procedure TD2JsonDoc.MakeJson(pW: TTextWriter);
-begin
-  pW.WriteLine('<?Json version="1.0"?>');
-  inherited;
-end;
-
-{ TD2JsonNode }
-
-function TD2JsonNode.AddAttribute(pTag: string): TD2JsonNode;
-begin
-  Result := nil;
-end;
-
-function TD2JsonNode.AddChild(pTag: string): TD2JsonNode;
-begin
-  Result := nil;
-end;
-
-constructor TD2JsonNode.Create;
-begin
-  Assert(False, 'Invalid constructor called');
-end;
-
-constructor TD2JsonNode.CreateTag(pTag: string; pParent: TD2JsonNode);
-begin
-  fTag := pTag;
-  fParent := pParent;
-  if Assigned(fParent) then
-    fDoc := pParent.fDoc;
-  fJson := nil;
-end;
-
-destructor TD2JsonNode.Destroy;
-begin
-  FreeAndNil(fJson);
-
-  inherited;
-end;
-
-function TD2JsonNode.GetJson: TStringStream;
+procedure TD2XJsonWriter.WriteElement(pNode: TD2XTreeElement; pW: TTextWriter);
 var
-  lW: TStreamWriter;
-begin
-  if not Assigned(fJson) then
-    try
-      fJson := TStringStream.Create;
-      lW := TStreamWriter.Create(fJson);
-      MakeJson(lW)
-    finally
-      FreeAndNil(lW);
-    end;
-
-  fJson.Position := 0;
-  Result := fJson;
-end;
-
-function TD2JsonNode.HasChildNodes: Boolean;
-begin
-  Result := False;
-end;
-
-procedure TD2JsonNode.MakeJson(pW: TTextWriter);
-begin
-
-end;
-
-procedure TD2JsonNode.TrimChildren(pElement: string);
-begin
-
-end;
-
-{ TD2JsonElement }
-
-function TD2JsonElement.AddAttribute(pTag: string): TD2JsonNode;
-begin
-  Assert(Assigned(fAtttributes), 'AddAttribute called after Json Generated');
-
-  Result := TD2JsonAttribute.CreateTag(pTag, Self);
-  fAtttributes.Add(Result);
-end;
-
-function TD2JsonElement.AddChild(pTag: string): TD2JsonNode;
-begin
-  Assert(Assigned(fChildren), 'AddChild called after Json Generated');
-
-  Result := TD2JsonElement.CreateTag(pTag, Self);
-  fChildren.Add(Result);
-end;
-
-constructor TD2JsonElement.CreateTag(pTag: string; pParent: TD2JsonNode);
-begin
-  inherited;
-
-  fChildren := TObjectList<TD2JsonNode>.Create;
-  fAtttributes := TObjectList<TD2JsonNode>.Create;
-end;
-
-destructor TD2JsonElement.Destroy;
-begin
-  FreeAndNil(fAtttributes);
-  FreeAndNil(fChildren);
-
-  inherited;
-end;
-
-function TD2JsonElement.HasChildNodes: Boolean;
-begin
-  Assert(Assigned(fChildren), 'HasChildNodes called after Json Generated');
-
-  Result := fChildren.Count > 0;
-end;
-
-procedure TD2JsonElement.MakeJson(pW: TTextWriter);
-var
-  lN: TD2JsonNode;
-  lR: TStreamReader;
   lS: string;
-begin
-  if fTag > '' then
-  begin
-    pW.Write('<');
-    pW.Write(fTag);
-    if fAtttributes.Count > 0 then
-      for lN in fAtttributes do
-        lN.MakeJson(pW);
-    FreeAndNil(fAtttributes);
+  lWS: TProcRef;
 
-    if (fChildren.Count > 0) or (fText > '') then
+begin
+  if pNode.LocalName > '' then
+  begin
+    pW.Write(pNode.LocalName);
+    pW.Write(':');
+    if pNode.HasChildren or pNode.HasAttributes then
     begin
-      pW.Write('>');
-      if fText > '' then
-        pW.Write(fText)
+      pW.Write('{');
+      lWS := procedure
+        begin
+          if HasOption(pNode, toAutoIndent) then
+            pW.WriteLine;
+          pW.Write(lS);
+          lS := ',';
+        end;
+      if HasOption(pNode, toAutoIndent) then
+        lS := '  '
       else
+        lS := '';
+      ForeachAttribute(pNode,
+          procedure(pAttr: TD2XTreeNode)
+        begin
+          lWS;
+          WriteAttribute(pAttr, pW);
+        end);
+
+      if pNode.Text > '' then
       begin
-//        if doNodeAutoIndent in fDoc.Options then
-//        begin
-//          pW.WriteLine;
-//          for lN in fChildren do
-//            try
-//              lR := TStreamReader.Create(lN.GetJson);
-//              lR.BaseStream.Seek(0, soBeginning);
-//              while not lR.EndOfStream do
-//              begin
-//                lS := lR.ReadLine;
-//                pW.WriteLine('  ' + lS);
-//              end;
-//            finally
-//              FreeAndNil(lR);
-//            end;
-//        end
-//        else
-          for lN in fChildren do
-            pW.Write(lN.GetJson.DataString);
-        FreeAndNil(fChildren);
+        lWS;
+        pW.Write('_:"');
+        pW.Write(pNode.Text);
+        pW.Write('"');
       end;
-      pW.Write('</');
-      pW.Write(fTag);
-      pW.Write('>');
+      if HasOption(pNode, toAutoIndent) then
+      begin
+        pW.WriteLine;
+        ForeachChild(pNode,
+          procedure(pChild: TD2XTreeNode)
+          var
+            lR: TStreamReader;
+            lS: string;
+          begin
+            lWS;
+            try
+              lR := TStreamReader.Create(pChild.GetStream);
+              lR.BaseStream.Seek(0, soBeginning);
+              while not lR.EndOfStream do
+              begin
+                lS := lR.ReadLine;
+                pW.WriteLine('  ' + lS);
+              end;
+            finally
+              FreeAndNil(lR);
+            end;
+          end);
+      end
+      else
+        ForeachChild(pNode,
+          procedure(pChild: TD2XTreeNode)
+          begin
+            lWS;
+            pW.Write(pChild.GetStream.DataString);
+          end);
+      pW.Write('}');
+      lWS := nil;
     end
     else
-      pW.Write(' />');
-//    if doNodeAutoIndent in fDoc.Options then
-//      pW.WriteLine;
+    begin
+      pW.Write('"');
+      pW.Write(pNode.Text);
+      pW.Write('"');
+    end;
+    if HasOption(pNode, toAutoIndent) then
+      pW.WriteLine;
   end
   else
-    pW.Write(fText);
-end;
-
-procedure TD2JsonElement.TrimChildren(pElement: string);
-var
-  i: Integer;
-begin
-  Assert(Assigned(fChildren), 'TrimChildren called after Json Generated');
-
-  for i := fChildren.Count - 1 downto 0 do
-    if fChildren[i].LocalName = pElement then
-      fChildren.Delete(i);
-end;
-
-{ TD2JsonAttribute }
-
-procedure TD2JsonAttribute.MakeJson(pW: TTextWriter);
-begin
-  pW.Write(' ');
-  pW.Write(fTag);
-  pW.Write('="');
-//  pW.Write(JsonEscape(fText));
-  pW.Write(fText);
-  pW.Write('"');
+    pW.Write(pNode.Text);
 end;
 
 end.

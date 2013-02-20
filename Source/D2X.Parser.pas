@@ -24,6 +24,7 @@ type
     fLastTokens: string;
     fStartDefines: TStringList;
     fHeldDefines: TStringList;
+
     FAddAttribute: TD2XAddAttributeEvent;
     FAddText: TD2XAddTextEvent;
     fOnProgress: TD2XProgressEvent;
@@ -1623,6 +1624,11 @@ end;
 
 destructor TD2XDefinesParser.Destroy;
 begin
+  FAddAttribute := nil;
+  FAddText := nil;
+  fOnProgress := nil;
+  fTrimChildren := nil;
+
   FreeAndNil(fHeldDefines);
   FreeAndNil(fStartDefines);
 

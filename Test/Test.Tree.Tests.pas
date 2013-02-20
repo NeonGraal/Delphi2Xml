@@ -5,357 +5,343 @@ interface
 implementation
 
 uses
-  D2X.Tree.Xml,
+  D2X.Tree,
   System.Classes,
   System.SysUtils,
-  Test.Tree.Xml,
-  TestFramework,
-  Xml.XMLIntf;
+  Test.Tree,
+  TestFramework;
 
 type
-  TestTD2XmlNode = class(TD2XmlTestCase)
+  TestTD2XTreeNode = class(TD2XTreeTestCase)
   strict private
-    FD2XmlNode: TD2XmlNode;
+    FD2XTreeNode: TD2XTreeNode;
   public
     procedure SetUp; override;
     procedure TearDown; override;
   published
     procedure TestCreate;
-    procedure TestGetXml;
+    procedure TestGetStream;
     procedure TestAddChild;
     procedure TestAddAttribute;
-    procedure TestHasChildNodes;
+    procedure TestHasChildren;
+    procedure TestHasAttributes;
     procedure TestTrimChildren;
   end;
 
-  TestTD2XmlAttribute = class(TD2XmlElementTestCase)
+  TestTD2XTreeElement = class(TD2XTreeDocTestCase)
   strict private
-    FD2XmlAttribute: TD2XmlAttribute;
+    FD2XTreeElement: TD2XTreeElement;
   public
     procedure SetUp; override;
   published
-    procedure TestGetXml;
-    procedure TestText;
-  end;
-
-  TestTD2XmlElement = class(TD2XmlDocTestCase)
-  strict private
-    FD2XmlElement: TD2XmlElement;
-  public
-    procedure SetUp; override;
-  published
-    procedure TestGetXml;
+    procedure TestGetStream;
     procedure TestText;
     procedure TestAddChild;
     procedure TestAddChildren;
     procedure TestAddAttribute;
     procedure TestAddAttributes;
-    procedure TestHasChildNodes;
+    procedure TestHasChildren;
+    procedure TestHasAttributes;
     procedure TestTrimChildren;
   end;
 
-  TestTD2XmlDoc = class(TD2XmlTestCase)
+  TestTD2XTreeDoc = class(TD2XTreeTestCase)
   strict private
-    FD2XmlDoc: TD2XmlDoc;
+    FD2XTreeDoc: TD2XTreeDoc;
   public
     procedure SetUp; override;
     procedure TearDown; override;
   published
-    procedure TestGetXml;
-    procedure TestGetIndentedXml;
+    procedure TestGetStream;
+    procedure TestGetIndentedStream;
     procedure TestAddChild;
   end;
 
-  { TestTD2XmlNode }
+  { TestTD2XTreeNode }
 
-procedure TestTD2XmlNode.SetUp;
+procedure TestTD2XTreeNode.SetUp;
 begin
   inherited;
 
-  FD2XmlNode := TD2XmlNodeTester.Create;
+  FD2XTreeNode := TD2XTreeNodeTester.Create;
 end;
 
-procedure TestTD2XmlNode.TestAddChild;
+procedure TestTD2XTreeNode.TestAddChild;
 var
-  ReturnValue: TD2XmlNode;
+  ReturnValue: TD2XTreeNode;
   pTag: String;
 begin
   pTag := 'Child';
 
-  ReturnValue := FD2XmlNode.AddChild(pTag);
+  ReturnValue := FD2XTreeNode.AddChild(pTag);
 
   CheckFalse(Assigned(ReturnValue), 'No Child for Base Node');
 end;
 
-procedure TestTD2XmlNode.TestCreate;
+procedure TestTD2XTreeNode.TestCreate;
 begin
   StartExpectingException(EAssertionFailed);
-  TD2XmlNode.Create;
+  TD2XTreeNode.Create;
   StopExpectingException('Invalid Node Create');
 end;
 
-procedure TestTD2XmlNode.TestGetXml;
+procedure TestTD2XTreeNode.TestGetStream;
 var
   ReturnValue: TStringStream;
 begin
-  ReturnValue := FD2XmlNode.Xml;
-
-  CheckXml('', 'Base Node', ReturnValue);
+  StartExpectingException(ETreeWriter);
+  ReturnValue := FD2XTreeNode.Stream;
+  StopExpectingException('Invalid Node GetStream');
 end;
 
-procedure TestTD2XmlNode.TearDown;
+procedure TestTD2XTreeNode.TearDown;
 begin
-  FreeAndNil(FD2XmlNode);
+  FreeAndNil(FD2XTreeNode);
 end;
 
-procedure TestTD2XmlNode.TestAddAttribute;
+procedure TestTD2XTreeNode.TestAddAttribute;
 var
-  ReturnValue: TD2XmlNode;
+  ReturnValue: TD2XTreeNode;
   pTag: String;
 begin
   pTag := 'Attr';
 
-  ReturnValue := FD2XmlNode.AddAttribute(pTag);
+  ReturnValue := FD2XTreeNode.AddAttribute(pTag);
 
   CheckFalse(Assigned(ReturnValue), 'No Attribute for Base Node');
 end;
 
-procedure TestTD2XmlNode.TestHasChildNodes;
+procedure TestTD2XTreeNode.TestHasAttributes;
 var
   ReturnValue: Boolean;
 begin
-  ReturnValue := FD2XmlNode.HasChildNodes;
+  ReturnValue := FD2XTreeNode.HasAttributes;
+  CheckFalse(ReturnValue, 'No attribute Nodes');
+
+  FD2XTreeNode.AddAttribute('Attr1');
+  ReturnValue := FD2XTreeNode.HasAttributes;
+  CheckFalse(ReturnValue, 'Never attribute Nodes');
+end;
+
+procedure TestTD2XTreeNode.TestHasChildren;
+var
+  ReturnValue: Boolean;
+begin
+  ReturnValue := FD2XTreeNode.HasChildren;
   CheckFalse(ReturnValue, 'No child Nodes');
 
-  FD2XmlNode.AddChild('Child1');
-  ReturnValue := FD2XmlNode.HasChildNodes;
+  FD2XTreeNode.AddChild('Child1');
+  ReturnValue := FD2XTreeNode.HasChildren;
   CheckFalse(ReturnValue, 'Never child Nodes');
 end;
 
-procedure TestTD2XmlNode.TestTrimChildren;
+procedure TestTD2XTreeNode.TestTrimChildren;
 var
   ReturnValue: Boolean;
 begin
-  FD2XmlNode.TrimChildren('Child');
+  FD2XTreeNode.TrimChildren('Child');
 
-  ReturnValue := FD2XmlNode.HasChildNodes;
+  ReturnValue := FD2XTreeNode.HasChildren;
   CheckFalse(ReturnValue, 'No child Nodes');
 end;
 
-{ TestTD2XmlAttribute }
+{ TestTD2XTreeElement }
 
-procedure TestTD2XmlAttribute.SetUp;
+procedure TestTD2XTreeElement.SetUp;
 begin
   inherited;
 
-  FD2XmlAttribute := fElem.AddAttribute('Test') as TD2XmlAttribute;
+  FD2XTreeElement := fDoc.AddChild('Test') as TD2XTreeElement;
 end;
 
-procedure TestTD2XmlAttribute.TestGetXml;
+procedure TestTD2XTreeElement.TestAddChild;
 var
-  ReturnValue: TStringStream;
-begin
-  ReturnValue := FD2XmlAttribute.Xml;
-
-  CheckXml('Test=""', 'Attribute', ReturnValue);
-end;
-
-procedure TestTD2XmlAttribute.TestText;
-var
-  ReturnValue: TStringStream;
-begin
-  FD2XmlAttribute.Text := 'Value';
-
-  ReturnValue := FD2XmlAttribute.Xml;
-
-  CheckXml('Test="Value"', 'Attribute', ReturnValue);
-end;
-
-{ TestTD2XmlElement }
-
-procedure TestTD2XmlElement.SetUp;
-begin
-  inherited;
-
-  FD2XmlElement := fDoc.AddChild('Test') as TD2XmlElement;
-end;
-
-procedure TestTD2XmlElement.TestAddChild;
-var
-  ReturnValue: TD2XmlNode;
+  ReturnValue: TD2XTreeNode;
   pTag: String;
 begin
   pTag := 'Child';
 
-  ReturnValue := FD2XmlElement.AddChild(pTag);
+  ReturnValue := FD2XTreeElement.AddChild(pTag);
 
-  CheckXml('<Child />', 'Child Node', ReturnValue.Xml);
-  CheckDoc('<Test><Child /></Test>', 'Simple Node', FD2XmlElement.Xml);
+  CheckStream('$Child', 'Child Node', ReturnValue.Stream);
+  CheckStream('$Test< $Child >', 'Simple Node', FD2XTreeElement.Stream);
 end;
 
-procedure TestTD2XmlElement.TestAddChildren;
+procedure TestTD2XTreeElement.TestAddChildren;
 var
-  ReturnValue: TD2XmlNode;
+  ReturnValue: TD2XTreeNode;
   pTag: String;
 begin
   pTag := 'Child1';
-  ReturnValue := FD2XmlElement.AddChild(pTag);
-  CheckXml('<Child1 />', 'Child1 Node', ReturnValue.Xml);
+  ReturnValue := FD2XTreeElement.AddChild(pTag);
+  CheckStream('$Child1', 'Child1 Node', ReturnValue.Stream);
 
   pTag := 'Child2';
-  ReturnValue := FD2XmlElement.AddChild(pTag);
-  CheckXml('<Child2 />', 'Child2 Node', ReturnValue.Xml);
+  ReturnValue := FD2XTreeElement.AddChild(pTag);
+  CheckStream('$Child2', 'Child2 Node', ReturnValue.Stream);
 
-  CheckDoc('<Test><Child1 /><Child2 /></Test>', 'Simple Node', FD2XmlElement.Xml);
+  CheckStream('$Test< $Child1 $Child2 >', 'Simple Node', FD2XTreeElement.Stream);
 end;
 
-procedure TestTD2XmlElement.TestGetXml;
+procedure TestTD2XTreeElement.TestGetStream;
 var
   ReturnValue: TStringStream;
 begin
-  ReturnValue := FD2XmlElement.Xml;
+  ReturnValue := FD2XTreeElement.Stream;
 
-  CheckDoc('<Test />', 'Simple Node', ReturnValue);
+  CheckStream('$Test', 'Simple Node', ReturnValue);
 end;
 
-procedure TestTD2XmlElement.TestAddAttribute;
+procedure TestTD2XTreeElement.TestAddAttribute;
 var
-  ReturnValue: TD2XmlNode;
+  ReturnValue: TD2XTreeNode;
   pTag: String;
 begin
   pTag := 'Attr';
 
-  ReturnValue := FD2XmlElement.AddAttribute(pTag);
+  ReturnValue := FD2XTreeElement.AddAttribute(pTag);
 
-  CheckXml('Attr=""', 'Attr', ReturnValue.Xml);
-  CheckDoc('<Test Attr="" />', 'Simple Node', FD2XmlElement.Xml);
+  CheckStream('$Test< @Attr; >', 'Simple Node', FD2XTreeElement.Stream);
 end;
 
-procedure TestTD2XmlElement.TestAddAttributes;
+procedure TestTD2XTreeElement.TestAddAttributes;
 var
-  ReturnValue: TD2XmlNode;
+  ReturnValue: TD2XTreeNode;
   pTag: String;
 begin
   pTag := 'Attr1';
-  ReturnValue := FD2XmlElement.AddAttribute(pTag);
+  ReturnValue := FD2XTreeElement.AddAttribute(pTag);
   ReturnValue.Text := 'Value1';
-  CheckXml('Attr1="Value1"', 'Attr1', ReturnValue.Xml);
 
   pTag := 'Attr2';
-  ReturnValue := FD2XmlElement.AddAttribute(pTag);
+  ReturnValue := FD2XTreeElement.AddAttribute(pTag);
   ReturnValue.Text := 'Value2';
-  CheckXml('Attr2="Value2"', 'Attr2', ReturnValue.Xml);
 
-  CheckDoc('<Test Attr1="Value1" Attr2="Value2" />', 'Simple Node', FD2XmlElement.Xml);
+  CheckStream('$Test< @Attr1:Value1; @Attr2:Value2; >', 'Simple Node', FD2XTreeElement.Stream);
 end;
 
-procedure TestTD2XmlElement.TestHasChildNodes;
+procedure TestTD2XTreeElement.TestHasAttributes;
 var
   ReturnValue: Boolean;
 begin
-  ReturnValue := FD2XmlElement.HasChildNodes;
+  ReturnValue := FD2XTreeElement.HasAttributes;
+  CheckFalse(ReturnValue, 'No attribute Nodes');
+
+  FD2XTreeElement.AddAttribute('Attr1');
+  ReturnValue := FD2XTreeElement.HasAttributes;
+  Check(ReturnValue, 'Has attribute Node');
+
+  FD2XTreeElement.AddAttribute('Attr2');
+  ReturnValue := FD2XTreeElement.HasAttributes;
+  Check(ReturnValue, 'Has attribute Nodes');
+end;
+
+procedure TestTD2XTreeElement.TestHasChildren;
+var
+  ReturnValue: Boolean;
+begin
+  ReturnValue := FD2XTreeElement.HasChildren;
   CheckFalse(ReturnValue, 'No child Nodes');
 
-  FD2XmlElement.AddChild('Child1');
-  ReturnValue := FD2XmlElement.HasChildNodes;
+  FD2XTreeElement.AddChild('Child1');
+  ReturnValue := FD2XTreeElement.HasChildren;
   Check(ReturnValue, 'Has child Node');
 
-  FD2XmlElement.AddChild('Child2');
-  ReturnValue := FD2XmlElement.HasChildNodes;
+  FD2XTreeElement.AddChild('Child2');
+  ReturnValue := FD2XTreeElement.HasChildren;
   Check(ReturnValue, 'Has child Nodes');
 end;
 
-procedure TestTD2XmlElement.TestText;
+procedure TestTD2XTreeElement.TestText;
 var
   ReturnValue: TStringStream;
 begin
-  FD2XmlElement.Text := 'Value';
-  ReturnValue := FD2XmlElement.Xml;
+  FD2XTreeElement.Text := 'Value';
+  ReturnValue := FD2XTreeElement.Stream;
 
-  CheckDoc('<Test>Value</Test>', 'Simple Node', ReturnValue);
+  CheckStream('$Test:Value;', 'Simple Node', ReturnValue);
 end;
 
-procedure TestTD2XmlElement.TestTrimChildren;
+procedure TestTD2XTreeElement.TestTrimChildren;
 var
   ReturnValue: Boolean;
 begin
-  FD2XmlElement.TrimChildren('Child');
-  ReturnValue := FD2XmlElement.HasChildNodes;
+  FD2XTreeElement.TrimChildren('Child');
+  ReturnValue := FD2XTreeElement.HasChildren;
   CheckFalse(ReturnValue, 'No child Nodes');
 
-  FD2XmlElement.AddChild('Child1');
-  FD2XmlElement.TrimChildren('Child');
-  ReturnValue := FD2XmlElement.HasChildNodes;
+  FD2XTreeElement.AddChild('Child1');
+  FD2XTreeElement.TrimChildren('Child');
+  ReturnValue := FD2XTreeElement.HasChildren;
   Check(ReturnValue, 'Still has child Node');
 
-  FD2XmlElement.TrimChildren('Child1');
-  ReturnValue := FD2XmlElement.HasChildNodes;
+  FD2XTreeElement.TrimChildren('Child1');
+  ReturnValue := FD2XTreeElement.HasChildren;
   CheckFalse(ReturnValue, 'No child Nodes again');
 
-  FD2XmlElement.AddChild('Child1');
-  FD2XmlElement.AddChild('Child2');
+  FD2XTreeElement.AddChild('Child1');
+  FD2XTreeElement.AddChild('Child2');
 
-  FD2XmlElement.TrimChildren('Child2');
-  ReturnValue := FD2XmlElement.HasChildNodes;
+  FD2XTreeElement.TrimChildren('Child2');
+  ReturnValue := FD2XTreeElement.HasChildren;
   Check(ReturnValue, 'Still has child Nodes again');
 
-  FD2XmlElement.TrimChildren('Child1');
-  ReturnValue := FD2XmlElement.HasChildNodes;
+  FD2XTreeElement.TrimChildren('Child1');
+  ReturnValue := FD2XTreeElement.HasChildren;
   CheckFalse(ReturnValue, 'No child Nodes finally');
 end;
 
-{ TestTD2XmlDoc }
+{ TestTD2XTreeDoc }
 
-procedure TestTD2XmlDoc.SetUp;
+procedure TestTD2XTreeDoc.SetUp;
 begin
-  FD2XmlDoc := NewXmlDocument;
+  FD2XTreeDoc := NewTreeDocument;
 end;
 
-procedure TestTD2XmlDoc.TearDown;
+procedure TestTD2XTreeDoc.TearDown;
 begin
-  FreeAndNil(FD2XmlDoc);
+  FreeAndNil(FD2XTreeDoc);
 end;
 
-procedure TestTD2XmlDoc.TestAddChild;
+procedure TestTD2XTreeDoc.TestAddChild;
 var
-  ReturnValue: TD2XmlNode;
+  ReturnValue: TD2XTreeNode;
   pTag: String;
 begin
   pTag := 'Child';
 
-  ReturnValue := FD2XmlDoc.AddChild(pTag);
+  ReturnValue := FD2XTreeDoc.AddChild(pTag);
 
-  CheckDoc('<Child />', 'Child Node', ReturnValue.Xml);
-  CheckDoc('<Child />', 'Simple Doc', FD2XmlDoc.Xml);
+  CheckStream('$Child', 'Child Node', ReturnValue.Stream);
+  CheckStream('$Child', 'Simple Doc', FD2XTreeDoc.Stream);
 end;
 
-procedure TestTD2XmlDoc.TestGetIndentedXml;
+procedure TestTD2XTreeDoc.TestGetIndentedStream;
 var
   ReturnValue: TStringStream;
-  lNode: TD2XmlNode;
+  lNode: TD2XTreeNode;
 begin
-  lNode := FD2XmlDoc.AddChild('Test1');
+  lNode := FD2XTreeDoc.AddChild('Test1');
   lNode.AddChild('Test2');
-  FD2XmlDoc.Options := [doNodeAutoIndent];
+  FD2XTreeDoc.Options := [toAutoIndent];
 
-  ReturnValue := FD2XmlDoc.Xml;
+  ReturnValue := FD2XTreeDoc.Stream;
 
-  CheckDoc('<Test1> <Test2 /> </Test1>', 'Indented', ReturnValue);
+  CheckStream('$Test1< $Test2 >', 'Indented', ReturnValue);
 end;
 
-procedure TestTD2XmlDoc.TestGetXml;
+procedure TestTD2XTreeDoc.TestGetStream;
 var
   ReturnValue: TStringStream;
 begin
-  ReturnValue := FD2XmlDoc.Xml;
+  ReturnValue := FD2XTreeDoc.Stream;
 
-  CheckXml('<?xml version="1.0"?>', 'Simple Doc', ReturnValue);
+  CheckStream(';', 'Simple Doc', ReturnValue);
 end;
 
 initialization
 
 // Register any test cases with the test runner
-RegisterTests('Tree', [TestTD2XmlNode.Suite, TestTD2XmlAttribute.Suite, TestTD2XmlElement.Suite,
-    TestTD2XmlDoc.Suite]);
+RegisterTests('Tree', [TestTD2XTreeNode.Suite, TestTD2XTreeElement.Suite, TestTD2XTreeDoc.Suite]);
 
 end.

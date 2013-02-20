@@ -34,7 +34,8 @@ type
     fFilename: string;
     fCurrentMethod: string;
 
-    fXmlHandler: TD2XXmlHandler;
+    fXmlHandler: TD2XTreeHandler;
+    fJsonHandler: TD2XTreeHandler;
     fCountDefinesUsedHandler: TD2XCountDefinesUsedHandler;
 
     fIOFact: ID2XIOFactory;
@@ -124,6 +125,8 @@ uses
   D2X.Processors,
   D2X.IO.Actual,
   D2X.IO.Options,
+  D2X.Tree.Json,
+  D2X.Tree.Xml,
   System.IOUtils,
   System.StrUtils,
   System.TypInfo;
@@ -738,7 +741,7 @@ end;
 
 procedure TD2XOptions.InitProcessors(pFileOpts: ID2XIOFactory);
 var
-  lWriteXml: TD2XFlaggedStringParam;
+  lWriteXml, lWriteJson,
   lWriteDefines: TD2XFlaggedStringParam;
 begin
   InitFlags;
@@ -750,6 +753,8 @@ begin
     begin
       if Assigned(lWriteXml) then
         lWriteXml.Convert(pVal);
+      if Assigned(lWriteJson) then
+        lWriteJson.Convert(pVal);
       if Assigned(lWriteDefines) then
         lWriteDefines.Convert(pVal);
       Result := True;
@@ -771,7 +776,12 @@ begin
     'Elapsed time display (N[one], T[otal], D[ir], F[ile], P[rocessing], [Q]uiet)', emQuiet,
     TD2X.CnvEnum<TD2XElapsedMode>, TD2X.ToLabel<TD2XElapsedMode>);
 
-  fXmlHandler := TD2XXmlHandler.CreateXml(fFlags.ByLabel['FinalToken'],
+  fXmlHandler := TD2XTreeHandler.CreateTree(TD2XXmlWriter, fFlags.ByLabel['FinalToken'],
+    function: string
+    begin
+      Result := TD2X.ToLabel(fParseMode.Value);
+    end);
+  fJsonHandler := TD2XTreeHandler.CreateTree(TD2XJsonWriter, fFlags.ByLabel['FinalToken'],
     function: string
     begin
       Result := TD2X.ToLabel(fParseMode.Value);
@@ -780,12 +790,16 @@ begin
 
   lWriteXml := TD2XFlaggedStringParam.CreateFlagStr('WX', 'Write XML', '<d/e>',
     'Write XML files into current or given <d/e>', 'Xml,xml', True, ConvertDirExtn);
+  lWriteJson := TD2XFlaggedStringParam.CreateFlagStr('WJ', 'Write JSON', '<d/e>',
+    'Write JSON files into current or given <d/e>', 'Json,json', True, ConvertDirExtn);
   lWriteDefines := TD2XFlaggedStringParam.CreateFlagStr('WD', 'Write Defines', '<d/e>',
     'Write Final Defines files into current or given <d/e>', 'Defines,def', False,
     ConvertDirExtn);
 
   fProcs.Add(TD2XHandlerProcessor.CreateHandler(lWriteXml, fXmlHandler, True)
     .SetResultsOutput(MakeNamedRef(lWriteXml)));
+  fProcs.Add(TD2XHandlerProcessor.CreateHandler(lWriteJson, fJsonHandler, True)
+    .SetResultsOutput(MakeNamedRef(lWriteJson)));
   fProcs.Add(TD2XHandlerProcessor.CreateClass(lWriteDefines, TD2XWriteDefinesHandler)
     .SetResultsOutput(MakeNamedRef(lWriteDefines)));
 
@@ -793,7 +807,7 @@ begin
 
   fParams.AddRange([fFlags]);
   fIOFact.RegisterParams(fParams);
-  fParams.AddRange([fParseMode, fResultPer, fElapsedMode, lWriteXml, lWriteDefines]);
+  fParams.AddRange([fParseMode, fResultPer, fElapsedMode, lWriteXml, lWriteJson, lWriteDefines]);
 
   InitOtherProcessors;
 

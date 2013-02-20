@@ -1247,6 +1247,8 @@ end;
 
 procedure TestTD2XFlaggedStringParam.TestGetFlag;
 begin
+  inherited;
+
   CheckFlag(False, 'Check is Default');
 
   fFlagP.FlagValue := True;
@@ -1414,6 +1416,8 @@ end;
 
 procedure TestTD2XFlaggedStringParam.TestSetFlag;
 begin
+  inherited;
+
   CheckFalse(fFlagP.FlagValue, 'Check is Default');
 
   SetFlag(True);
@@ -1490,6 +1494,8 @@ end;
 
 procedure TestTD2XDefinesParam.TestGetFlag;
 begin
+  inherited;
+
   CheckFlag(False, 'Check is Default');
 
   fDefP.Value := True;
@@ -1638,6 +1644,8 @@ end;
 
 procedure TestTD2XDefinesParam.TestSetFlag;
 begin
+  inherited;
+
   CheckFalse(fDefP.Value, 'Check is Default');
 
   SetFlag(True);
@@ -2047,6 +2055,8 @@ end;
 
 procedure TestTD2XFlaggedStringConvertParam.TestGetFlag;
 begin
+  inherited;
+
   CheckFlag(False, 'Check is Default');
 
   fFlagP.FlagValue := True;
@@ -2145,6 +2155,8 @@ end;
 
 procedure TestTD2XFlaggedStringConvertParam.TestSetFlag;
 begin
+  inherited;
+
   CheckFalse(fFlagP.FlagValue, 'Check is Default');
 
   SetFlag(True);
@@ -2314,6 +2326,8 @@ end;
 
 procedure TestTD2XFlaggedStringFormatParam.TestGetFlag;
 begin
+  inherited;
+
   CheckFlag(False, 'Check is Default');
 
   fFlagP.FlagValue := True;
@@ -2361,6 +2375,8 @@ end;
 
 procedure TestTD2XFlaggedStringFormatParam.TestSetFlag;
 begin
+  inherited;
+
   CheckFalse(fFlagP.FlagValue, 'Check is Default');
 
   SetFlag(True);

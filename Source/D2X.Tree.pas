@@ -5,100 +5,123 @@ interface
 uses
   System.Classes,
   System.Generics.Collections,
-  Xml.XMLIntf;
-// Xml.XMLDoc,
+  System.SysUtils;
+// XTree.XTreeDoc,
 
 type
-  TD2XmlDoc = class;
+  ETreeWriter = class(Exception);
 
-  TD2XmlNode = class
+  TD2XTreeOption = (toNone, toAutoIndent);
+  TD2XTreeOptions = set of TD2XTreeOption;
+
+  TD2XTreeWriter = class;
+
+  TD2XTreeDoc = class;
+
+  TD2XTreeNode = class
   strict private
-    fParent: TD2XmlNode;
-    fXml: TStringStream;
-
-  strict protected
-    fTag: string;
-    fText: string;
-    fDoc: TD2XmlDoc;
-
-    constructor CreateTag(pTag: string; pParent: TD2XmlNode); virtual;
+    fParent: TD2XTreeNode;
+    fStream: TStringStream;
 
   protected
-    procedure MakeXml(pW: TTextWriter); virtual;
-    function GetXml: TStringStream;
+    fWriter: TD2XTreeWriter;
+    fTag: string;
+    fText: string;
+    fDoc: TD2XTreeDoc;
+
+    constructor CreateTag(pTag: string; pParent: TD2XTreeNode); virtual;
 
   public
     constructor Create;
     destructor Destroy; override;
 
-    function AddChild(pTag: string): TD2XmlNode; virtual;
-    function AddAttribute(pTag: string): TD2XmlNode; virtual;
-    function HasChildNodes: Boolean; virtual;
+    function AddChild(pTag: string): TD2XTreeNode; virtual;
+    function AddAttribute(pTag: string): TD2XTreeNode; virtual;
+    function HasChildren: Boolean; virtual;
+    function HasAttributes: Boolean; virtual;
     procedure TrimChildren(pElement: string); virtual;
 
-    property ParentNode: TD2XmlNode read fParent;
+    //  protected
+    function GetStream: TStringStream;
+
+  public
+    property ParentNode: TD2XTreeNode read fParent;
     property LocalName: string read fTag;
     property Text: string read fText write fText;
-    property Xml: TStringStream read GetXml;
+    property Stream: TStringStream read GetStream;
   end;
 
-  TD2XmlAttribute = class(TD2XmlNode)
-  protected
-    procedure MakeXml(pW: TTextWriter); override;
-  end;
-
-  TD2XmlElement = class(TD2XmlNode)
+  TD2XTreeElement = class(TD2XTreeNode)
   private
-    fChildren: TObjectList<TD2XmlNode>;
-    fAtttributes: TObjectList<TD2XmlNode>;
+    fChildren: TObjectList<TD2XTreeNode>;
+    fAtttributes: TObjectList<TD2XTreeNode>;
 
   strict protected
-    constructor CreateTag(pTag: string; pParent: TD2XmlNode = nil); override;
+    constructor CreateTag(pTag: string; pParent: TD2XTreeNode = nil); override;
 
-  protected
-    procedure MakeXml(pW: TTextWriter); override;
+  public type
+    TEachProc = reference to procedure(pChild: TD2XTreeNode);
 
   public
     destructor Destroy; override;
 
-    function AddChild(pTag: string): TD2XmlNode; override;
-    function AddAttribute(pTag: string): TD2XmlNode; override;
-    function HasChildNodes: Boolean; override;
+    function AddChild(pTag: string): TD2XTreeNode; override;
+    function AddAttribute(pTag: string): TD2XTreeNode; override;
+    function HasChildren: Boolean; override;
+    function HasAttributes: Boolean; override;
     procedure TrimChildren(pElement: string); override;
   end;
 
-  TD2XmlDoc = class(TD2XmlElement)
-  private
-    FOptions: TXMLDocOptions;
+  TD2XTreeWriterClass = class of TD2XTreeWriter;
 
-  protected
-    procedure MakeXml(pW: TTextWriter); override;
+  TD2XTreeDoc = class(TD2XTreeElement)
+  private
+    FOptions: TD2XTreeOptions;
 
   public
-    constructor CreateDoc;
-    function AddChild(pTag: string): TD2XmlNode; override;
+    constructor CreateDoc(pWriter: TD2XTreeWriterClass);
+    destructor Destroy; override;
 
-    property Options: TXMLDocOptions read FOptions write FOptions;
+    function AddChild(pTag: string): TD2XTreeNode; override;
+
+    property Options: TD2XTreeOptions read FOptions write FOptions;
 
   end;
 
-function NewXmlDocument: TD2XmlDoc;
+  TD2XTreeWriter = class
+  protected type
+    TEachProc = reference to procedure(pChild: TD2XTreeNode);
+
+  protected
+    procedure WriteAttribute(pNode: TD2XTreeNode; pW: TTextWriter); virtual;
+    procedure WriteElement(pNode: TD2XTreeElement; pW: TTextWriter); virtual;
+    procedure WriteDoc(pNode: TD2XTreeDoc; pW: TTextWriter); virtual;
+
+    procedure ForeachChild(pNode: TD2XTreeElement; pEach: TEachProc);
+    procedure ForeachAttribute(pNode: TD2XTreeElement; pEach: TEachProc);
+
+    function HasOption(pNode: TD2XTreeElement; pOption: TD2XTreeOption): Boolean;
+
+  public
+    procedure WriteNode(pNode: TD2XTreeNode; pW: TTextWriter);
+  end;
+
+function NewTreeDocument: TD2XTreeDoc;
 
 implementation
 
 uses
   Data.Cloud.CloudAPI,
-  System.StrUtils,
-  System.SysUtils;
+  System.StrUtils;
 
-function NewXmlDocument: TD2XmlDoc;
+function NewTreeDocument: TD2XTreeDoc;
 begin
-  Result := TD2XmlDoc.CreateDoc;
+  Result := TD2XTreeDoc.CreateDoc(TD2XTreeWriter);
 end;
 
-{ TD2XmlDoc }
+{ TD2XTreeDoc }
 
-function TD2XmlDoc.AddChild(pTag: string): TD2XmlNode;
+function TD2XTreeDoc.AddChild(pTag: string): TD2XTreeNode;
 begin
   if fTag = '' then
   begin
@@ -109,110 +132,115 @@ begin
     Result := inherited AddChild(pTag);
 end;
 
-constructor TD2XmlDoc.CreateDoc;
+constructor TD2XTreeDoc.CreateDoc(pWriter: TD2XTreeWriterClass);
 begin
   CreateTag('');
   fDoc := Self;
+  fWriter := pWriter.Create;
 end;
 
-procedure TD2XmlDoc.MakeXml(pW: TTextWriter);
+destructor TD2XTreeDoc.Destroy;
 begin
-  pW.WriteLine('<?xml version="1.0"?>');
+  FreeAndNil(fWriter);
+
   inherited;
 end;
 
-{ TD2XmlNode }
+{ TD2XTreeNode }
 
-function TD2XmlNode.AddAttribute(pTag: string): TD2XmlNode;
+function TD2XTreeNode.AddAttribute(pTag: string): TD2XTreeNode;
 begin
   Result := nil;
 end;
 
-function TD2XmlNode.AddChild(pTag: string): TD2XmlNode;
+function TD2XTreeNode.AddChild(pTag: string): TD2XTreeNode;
 begin
   Result := nil;
 end;
 
-constructor TD2XmlNode.Create;
+constructor TD2XTreeNode.Create;
 begin
   Assert(False, 'Invalid constructor called');
 end;
 
-constructor TD2XmlNode.CreateTag(pTag: string; pParent: TD2XmlNode);
+constructor TD2XTreeNode.CreateTag(pTag: string; pParent: TD2XTreeNode);
 begin
   fTag := pTag;
   fParent := pParent;
   if Assigned(fParent) then
+  begin
     fDoc := pParent.fDoc;
-  fXml := nil;
+    fWriter := pParent.fWriter;
+  end;
+  fStream := nil;
 end;
 
-destructor TD2XmlNode.Destroy;
+destructor TD2XTreeNode.Destroy;
 begin
-  FreeAndNil(fXml);
+  FreeAndNil(fStream);
 
   inherited;
 end;
 
-function TD2XmlNode.GetXml: TStringStream;
+function TD2XTreeNode.GetStream: TStringStream;
 var
   lW: TStreamWriter;
 begin
-  if not Assigned(fXml) then
+  if not Assigned(fStream) then
     try
-      fXml := TStringStream.Create;
-      lW := TStreamWriter.Create(fXml);
-      MakeXml(lW)
+      fStream := TStringStream.Create;
+      lW := TStreamWriter.Create(fStream);
+      fWriter.WriteNode(Self, lW);
     finally
       FreeAndNil(lW);
     end;
 
-  fXml.Position := 0;
-  Result := fXml;
+  fStream.Position := 0;
+  Result := fStream;
 end;
 
-function TD2XmlNode.HasChildNodes: Boolean;
+function TD2XTreeNode.HasAttributes: Boolean;
 begin
   Result := False;
 end;
 
-procedure TD2XmlNode.MakeXml(pW: TTextWriter);
+function TD2XTreeNode.HasChildren: Boolean;
+begin
+  Result := False;
+end;
+
+procedure TD2XTreeNode.TrimChildren(pElement: string);
 begin
 
 end;
 
-procedure TD2XmlNode.TrimChildren(pElement: string);
+{ TD2XTreeElement }
+
+function TD2XTreeElement.AddAttribute(pTag: string): TD2XTreeNode;
 begin
+  Assert(Assigned(fAtttributes), 'AddAttribute called after XTree Generated');
 
-end;
-
-{ TD2XmlElement }
-
-function TD2XmlElement.AddAttribute(pTag: string): TD2XmlNode;
-begin
-  Assert(Assigned(fAtttributes), 'AddAttribute called after Xml Generated');
-
-  Result := TD2XmlAttribute.CreateTag(pTag, Self);
+  Result := TD2XTreeNode.CreateTag(pTag, Self);
   fAtttributes.Add(Result);
 end;
 
-function TD2XmlElement.AddChild(pTag: string): TD2XmlNode;
+function TD2XTreeElement.AddChild(pTag: string): TD2XTreeNode;
 begin
-  Assert(Assigned(fChildren), 'AddChild called after Xml Generated');
+  Assert(Assigned(fChildren), 'AddChild called after XTree Generated');
 
-  Result := TD2XmlElement.CreateTag(pTag, Self);
+  Result := TD2XTreeElement.CreateTag(pTag, Self);
   fChildren.Add(Result);
 end;
 
-constructor TD2XmlElement.CreateTag(pTag: string; pParent: TD2XmlNode);
+constructor TD2XTreeElement.CreateTag(pTag: string; pParent: TD2XTreeNode);
 begin
   inherited;
 
-  fChildren := TObjectList<TD2XmlNode>.Create;
-  fAtttributes := TObjectList<TD2XmlNode>.Create;
+  fChildren := TObjectList<TD2XTreeNode>.Create;
+  fAtttributes := TObjectList<TD2XTreeNode>.Create;
 end;
 
-destructor TD2XmlElement.Destroy;
+destructor TD2XTreeElement.Destroy;
 begin
   FreeAndNil(fAtttributes);
   FreeAndNil(fChildren);
@@ -220,89 +248,131 @@ begin
   inherited;
 end;
 
-function TD2XmlElement.HasChildNodes: Boolean;
+function TD2XTreeElement.HasAttributes: Boolean;
 begin
-  Assert(Assigned(fChildren), 'HasChildNodes called after Xml Generated');
+  Assert(Assigned(fAtttributes), 'HasAttributes called after XTree Generated');
+
+  Result := fAtttributes.Count > 0;
+end;
+
+function TD2XTreeElement.HasChildren: Boolean;
+begin
+  Assert(Assigned(fChildren), 'HasChildren called after XTree Generated');
 
   Result := fChildren.Count > 0;
 end;
 
-procedure TD2XmlElement.MakeXml(pW: TTextWriter);
-var
-  lN: TD2XmlNode;
-  lR: TStreamReader;
-  lS: string;
-begin
-  if fTag > '' then
-  begin
-    pW.Write('<');
-    pW.Write(fTag);
-    if fAtttributes.Count > 0 then
-      for lN in fAtttributes do
-        lN.MakeXml(pW);
-    FreeAndNil(fAtttributes);
-
-    if (fChildren.Count > 0) or (fText > '') then
-    begin
-      pW.Write('>');
-      if fText > '' then
-        pW.Write(fText)
-      else
-      begin
-        if doNodeAutoIndent in fDoc.Options then
-        begin
-          pW.WriteLine;
-          for lN in fChildren do
-            try
-              lR := TStreamReader.Create(lN.GetXml);
-              lR.BaseStream.Seek(0, soBeginning);
-              while not lR.EndOfStream do
-              begin
-                lS := lR.ReadLine;
-                pW.WriteLine('  ' + lS);
-              end;
-            finally
-              FreeAndNil(lR);
-            end;
-        end
-        else
-          for lN in fChildren do
-            pW.Write(lN.GetXml.DataString);
-        FreeAndNil(fChildren);
-      end;
-      pW.Write('</');
-      pW.Write(fTag);
-      pW.Write('>');
-    end
-    else
-      pW.Write(' />');
-    if doNodeAutoIndent in fDoc.Options then
-      pW.WriteLine;
-  end
-  else
-    pW.Write(fText);
-end;
-
-procedure TD2XmlElement.TrimChildren(pElement: string);
+procedure TD2XTreeElement.TrimChildren(pElement: string);
 var
   i: Integer;
 begin
-  Assert(Assigned(fChildren), 'TrimChildren called after Xml Generated');
+  Assert(Assigned(fChildren), 'TrimChildren called after Stream Generated');
 
   for i := fChildren.Count - 1 downto 0 do
     if fChildren[i].LocalName = pElement then
       fChildren.Delete(i);
 end;
 
-{ TD2XmlAttribute }
+{ TD2XTreeWriter }
 
-procedure TD2XmlAttribute.MakeXml(pW: TTextWriter);
+procedure TD2XTreeWriter.ForeachAttribute(pNode: TD2XTreeElement; pEach: TEachProc);
+var
+  lNode: TD2XTreeNode;
 begin
-  pW.Write(' ');
-  pW.Write(fTag);
-  pW.Write('="');
-  pW.Write(XmlEscape(fText));
-  pW.Write('"');
+  if pNode.HasAttributes then
+    for lNode in pNode.fAtttributes do
+      pEach(lNode);
+  FreeAndNil(pNode.fAtttributes);
+end;
+
+procedure TD2XTreeWriter.ForeachChild(pNode: TD2XTreeElement; pEach: TEachProc);
+var
+  lNode: TD2XTreeNode;
+begin
+  for lNode in pNode.fChildren do
+    pEach(lNode);
+  FreeAndNil(pNode.fChildren);
+end;
+
+function TD2XTreeWriter.HasOption(pNode: TD2XTreeElement; pOption: TD2XTreeOption): Boolean;
+begin
+  Result := pOption in pNode.fDoc.Options;
+end;
+
+procedure TD2XTreeWriter.WriteAttribute(pNode: TD2XTreeNode; pW: TTextWriter);
+begin
+  pW.Write(' @');
+  pW.Write(pNode.fTag);
+  if pNode.fText > '' then
+  begin
+    pW.Write(':');
+    pW.Write(pNode.fText);
+  end;
+  pW.WriteLine(';');
+end;
+
+procedure TD2XTreeWriter.WriteDoc(pNode: TD2XTreeDoc; pW: TTextWriter);
+begin
+  WriteElement(pNode, pW);
+end;
+
+procedure TD2XTreeWriter.WriteElement(pNode: TD2XTreeElement; pW: TTextWriter);
+begin
+  if pNode.fTag > '' then
+  begin
+    pW.Write('$');
+    pW.Write(pNode.fTag);
+    if pNode.HasChildren or pNode.HasAttributes then
+    begin
+      pW.WriteLine('<');
+      ForeachAttribute(pNode,
+          procedure(pAttr: TD2XTreeNode)
+        begin
+          WriteAttribute(pAttr, pW);
+        end);
+      ForeachChild(pNode,
+        procedure(pChild: TD2XTreeNode)
+        var
+          lR: TStreamReader;
+          lS: string;
+        begin
+          try
+            lR := TStreamReader.Create(pChild.GetStream);
+            lR.BaseStream.Seek(0, soBeginning);
+            while not lR.EndOfStream do
+            begin
+              lS := lR.ReadLine;
+              pW.WriteLine(' ' + lS);
+            end;
+          finally
+            FreeAndNil(lR);
+          end;
+        end);
+      pW.Write('>');
+    end;
+    if pNode.fText > '' then
+    begin
+      pW.Write(':');
+      pW.Write(pNode.fText);
+      pW.WriteLine(';');
+    end;
+  end
+  else
+  begin
+    pW.Write(pNode.fText);
+    pW.WriteLine(';');
+  end;
+end;
+
+procedure TD2XTreeWriter.WriteNode(pNode: TD2XTreeNode; pW: TTextWriter);
+begin
+  if pNode is TD2XTreeDoc then
+    WriteDoc(TD2XTreeDoc(pNode), pW)
+  else
+    if pNode is TD2XTreeElement then
+      WriteElement(TD2XTreeElement(pNode), pW)
+    else
+      raise ETreeWriter.Create('Invalid class in WriteNode: ' + pNode.ClassName);
 end;
 
 end.
