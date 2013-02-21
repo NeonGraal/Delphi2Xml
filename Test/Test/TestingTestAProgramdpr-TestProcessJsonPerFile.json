@@ -1,34 +1,25 @@
 D2X_File:{
   _parseMode:"Full"
-,_fileName:"Testing.Test.AProgram.dpr"
-
-,  ProgramFile:{
-  
-      MainUnitName:{
+, _fileName:"Testing.Test.AProgram.dpr"
+, ProgramFile:{
+    MainUnitName:{
       _group:"Testing.Test"
-    ,_:"Testing.Test.AProgram"
+    , _:"Testing.Test.AProgram"
     }
-  
-  ,  ProgramBlock:{
-    
-        MainUsedUnitStatement:{
+  , ProgramBlock:{
+      MainUsedUnitStatement:{
         _file:"'Testing.Test.AUnit.pas'"
-      
-      ,  UsedUnitName:{
+      , UsedUnitName:{
           _group:"Testing.Test"
-        ,_:"Testing.Test.AUnit"
+        , _:"Testing.Test.AUnit"
         }
       }
-    
-    ,  Block:{
-      
-          CompoundStatement:{
+    , Block:{
+        CompoundStatement:{
           _lastToken:"end"
-        
-        ,  StatementList:""
+        , StatementList:""
         }
       }
     }
   }
 }
-

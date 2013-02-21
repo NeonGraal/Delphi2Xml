@@ -1,22 +1,17 @@
 D2X_File:{
   _parseMode:"Uses"
-,_fileName:"Config\Test\Testing.Test.SubDir.pas"
-
-,  UnitFile:{
+, _fileName:"Config\Test\Testing.Test.SubDir.pas"
+, UnitFile:{
     _lastToken:"end."
-  
-  ,  MainUnitName:{
+  , MainUnitName:{
       _group:"Testing.Test"
-    ,_:"Testing.Test.SubDir"
+    , _:"Testing.Test.SubDir"
     }
-  
-  ,  InterfaceSection:{
+  , InterfaceSection:{
       _lastToken:"interface"
     }
-  
-  ,  ImplementationSection:{
+  , ImplementationSection:{
       _lastToken:"implementation"
     }
   }
 }
-

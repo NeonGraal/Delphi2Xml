@@ -1,23 +1,18 @@
 D2X_File:{
   _parseMode:"Uses"
-,_fileName:"Testing.Test.AProgram.dpr"
-
-,  ProgramFile:{
+, _fileName:"Testing.Test.AProgram.dpr"
+, ProgramFile:{
     _lastToken:"beginend."
-  
-  ,  MainUnitName:{
+  , MainUnitName:{
       _group:"Testing.Test"
-    ,_:"Testing.Test.AProgram"
+    , _:"Testing.Test.AProgram"
     }
-  
-  ,  MainUsedUnitStatement:{
+  , MainUsedUnitStatement:{
       _file:"'Testing.Test.AUnit.pas'"
-    
-    ,  UsedUnitName:{
+    , UsedUnitName:{
         _group:"Testing.Test"
-      ,_:"Testing.Test.AUnit"
+      , _:"Testing.Test.AUnit"
       }
     }
   }
 }
-

@@ -1,26 +1,20 @@
 D2X_File:{
   _parseMode:"Full"
-,_fileName:"Testing.Test.APackage.dpk"
-
-,  PackageFile:{
+, _fileName:"Testing.Test.APackage.dpk"
+, PackageFile:{
     _lastToken:";end."
-  
-  ,  MainUnitName:{
+  , MainUnitName:{
       _group:"Testing.Test"
-    ,_:"Testing.Test.APackage"
+    , _:"Testing.Test.APackage"
     }
-  
-  ,  ContainsStatement:{
-    
-        ContainsIdentifier:{
+  , ContainsStatement:{
+      ContainsIdentifier:{
         _group:"Testing.Test"
-      ,_:"Testing.Test.AUnit"
+      , _:"Testing.Test.AUnit"
       }
-    
-    ,  ContainsExpression:{
+    , ContainsExpression:{
         _file:"'Testing.Test.AUnit.pas'"
       }
     }
   }
 }
-

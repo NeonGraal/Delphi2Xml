@@ -218,7 +218,8 @@ end;
 
 function TD2XTreeElement.AddAttribute(pTag: string): TD2XTreeNode;
 begin
-  Assert(Assigned(fAtttributes), 'AddAttribute called after Stream Generated: ' + Stream.DataString);
+  Assert(Assigned(fAtttributes), 'AddAttribute called after Stream Generated: ' +
+      Stream.DataString);
 
   Result := TD2XTreeNode.CreateTag(pTag, Self);
   fAtttributes.Add(Result);
@@ -250,14 +251,16 @@ end;
 
 function TD2XTreeElement.HasAttributes: Boolean;
 begin
-  Assert(Assigned(fAtttributes), 'HasAttributes called after Stream Generated: ' + Stream.DataString);
+  Assert(Assigned(fAtttributes), 'HasAttributes called after Stream Generated: ' +
+      Stream.DataString);
 
   Result := fAtttributes.Count > 0;
 end;
 
 function TD2XTreeElement.HasChildren: Boolean;
 begin
-  Assert(Assigned(fChildren), 'HasChildren called after Stream Generated: ' + Stream.DataString);
+  Assert(Assigned(fChildren), 'HasChildren called after Stream Generated: ' +
+      Stream.DataString);
 
   Result := fChildren.Count > 0;
 end;
@@ -266,7 +269,8 @@ procedure TD2XTreeElement.TrimChildren(pElement: string);
 var
   i: Integer;
 begin
-  Assert(Assigned(fChildren), 'TrimChildren called after Stream Generated: ' + Stream.DataString);
+  Assert(Assigned(fChildren), 'TrimChildren called after Stream Generated: ' +
+      Stream.DataString);
 
   for i := fChildren.Count - 1 downto 0 do
     if fChildren[i].LocalName = pElement then

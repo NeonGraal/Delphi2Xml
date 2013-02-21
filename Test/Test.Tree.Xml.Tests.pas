@@ -36,6 +36,7 @@ type
     procedure SetUp; override;
     procedure TearDown; override;
   published
+    procedure TestGetBlankXml;
     procedure TestGetXml;
     procedure TestGetIndentedXml;
     procedure TestAddChild;
@@ -199,18 +200,61 @@ end;
 procedure TestTD2XmlDoc.TestGetIndentedXml;
 var
   ReturnValue: TStringStream;
-  lNode: TD2XTreeNode;
+  lNode, lChild: TD2XTreeNode;
 begin
-  lNode := FD2XmlDoc.AddChild('Test1');
-  lNode.AddChild('Test2');
+  lNode := FD2XmlDoc.AddChild('Test');
+  lChild := lNode.AddChild('Test1');
+  lChild.AddAttribute('Test11').Text := 'Val11';
+  lChild.AddAttribute('Test12').Text := 'Val12';
+  lChild.AddChild('Test13').Text := 'Val13';
+  lChild.AddChild('Test14').Text := 'Val14';
+  lChild := lNode.AddChild('Test2');
+  lChild.AddAttribute('Test21').Text := 'Val21';
+  lChild.AddAttribute('Test22').Text := 'Val22';
+  lChild.AddChild('Test23').Text := 'Val23';
+  lChild.AddChild('Test24').Text := 'Val24';
+  lNode.AddAttribute('Test3').Text := 'Val3';
+  lNode.AddAttribute('Test4').Text := 'Val4';
   FD2XmlDoc.Options := [toAutoIndent];
 
   ReturnValue := FD2XmlDoc.Stream;
 
-  CheckDoc('<Test1> <Test2 /> </Test1>', 'Indented', ReturnValue);
+  CheckEqualsString('<?xml version="1.0"?>'#13#10'<Test Test3="Val3" Test4="Val4">'#13#10 +
+      '  <Test1 Test11="Val11" Test12="Val12">'#13#10'    <Test13>Val13</Test13>'#13#10 +
+      '    <Test14>Val14</Test14>'#13#10'  </Test1>'#13#10 +
+      '  <Test2 Test21="Val21" Test22="Val22">'#13#10'    <Test23>Val23</Test23>'#13#10 +
+      '    <Test24>Val24</Test24>'#13#10'  </Test2>'#13#10'</Test>'#13#10,
+    ReturnValue.DataString, 'Indented Document');
 end;
 
 procedure TestTD2XmlDoc.TestGetXml;
+var
+  ReturnValue: TStringStream;
+  lNode, lChild: TD2XTreeNode;
+begin
+  lNode := FD2XmlDoc.AddChild('Test');
+  lChild := lNode.AddChild('Test1');
+  lChild.AddAttribute('Test11').Text := 'Val11';
+  lChild.AddAttribute('Test12').Text := 'Val12';
+  lChild.AddChild('Test13').Text := 'Val13';
+  lChild.AddChild('Test14').Text := 'Val14';
+  lChild := lNode.AddChild('Test2');
+  lChild.AddAttribute('Test21').Text := 'Val21';
+  lChild.AddAttribute('Test22').Text := 'Val22';
+  lChild.AddChild('Test23').Text := 'Val23';
+  lChild.AddChild('Test24').Text := 'Val24';
+  lNode.AddAttribute('Test3').Text := 'Val3';
+  lNode.AddAttribute('Test4').Text := 'Val4';
+  FD2XmlDoc.Options := [];
+
+  ReturnValue := FD2XmlDoc.Stream;
+
+  CheckDoc('<Test Test3="Val3" Test4="Val4"><Test1 Test11="Val11" Test12="Val12"><Test13>' +
+      'Val13</Test13><Test14>Val14</Test14></Test1><Test2 Test21="Val21" Test22="Val22">' +
+      '<Test23>Val23</Test23><Test24>Val24</Test24></Test2></Test>', 'Complete', ReturnValue);
+end;
+
+procedure TestTD2XmlDoc.TestGetBlankXml;
 var
   ReturnValue: TStringStream;
 begin

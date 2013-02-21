@@ -1,44 +1,32 @@
 D2X_File:{
   _parseMode:"Full"
-,_fileName:"Testing.Test.AUnit.pas"
-
-,  UnitFile:{
-  
-      MainUnitName:{
+, _fileName:"Testing.Test.AUnit.pas"
+, UnitFile:{
+    MainUnitName:{
       _group:"Testing.Test"
-    ,_:"Testing.Test.AUnit"
+    , _:"Testing.Test.AUnit"
     }
-  
-  ,  InterfaceSection:{
-    
-        UsedUnitsList:{
-      
-          UsedUnitName:"System.Classes"
+  , InterfaceSection:{
+      UsedUnitsList:{
+        UsedUnitName:"System.Classes"
       }
-    
-    ,  IncludeFile:{
+    , IncludeFile:{
         _filename:"TEST.INC"
-      ,_msgAt:"71,0"
+      , _msgAt:"71,0"
       }
-    
-    ,  D2X_notSuppMsg:{
+    , D2X_notSuppMsg:{
         _msgAt:"91,0"
-      ,_:"Currently not supported {$D+}"
+      , _:"Currently not supported {$D+}"
       }
     }
-  
-  ,  ImplementationSection:{
+  , ImplementationSection:{
       _lastToken:";{$ELSE}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}"
-    
-    ,  UsedUnitsList:{
-      
-          UsedUnitName:"System.SysUtils"
+    , UsedUnitsList:{
+        UsedUnitName:"System.SysUtils"
       }
     }
-  
-  ,  InitializationSection:{
+  , InitializationSection:{
       _lastToken:"end"
     }
   }
 }
-

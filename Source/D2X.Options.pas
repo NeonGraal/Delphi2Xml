@@ -759,8 +759,7 @@ end;
 
 procedure TD2XOptions.InitProcessors(pFileOpts: ID2XIOFactory);
 var
-  lWriteXml, lWriteJson,
-  lWriteDefines: TD2XFlaggedStringParam;
+  lWriteXml, lWriteJson, lWriteDefines: TD2XFlaggedStringParam;
 begin
   InitFlags;
 
@@ -825,7 +824,8 @@ begin
 
   fParams.AddRange([fFlags]);
   fIOFact.RegisterParams(fParams);
-  fParams.AddRange([fParseMode, fResultPer, fElapsedMode, lWriteXml, lWriteJson, lWriteDefines]);
+  fParams.AddRange([fParseMode, fResultPer, fElapsedMode, lWriteXml, lWriteJson,
+    lWriteDefines]);
 
   InitOtherProcessors;
 

@@ -135,11 +135,14 @@ var
   i: integer;
 begin
   Result := False;
-  if Assigned(fExclude) then begin
-    if Length(fRegexs) <> fExclude.Count then begin
+  if Assigned(fExclude) then
+  begin
+    if Length(fRegexs) <> fExclude.Count then
+    begin
       SetLength(fRegexs, fExclude.Count);
       for i := 0 to fExclude.Count - 1 do
-        fRegexs[i] := TRegex.Create(fExclude[i], [roIgnoreCase,roExplicitCapture,roSingleLine,roIgnorePatternSpace]);
+        fRegexs[i] := TRegEx.Create(fExclude[i], [roIgnoreCase, roExplicitCapture,
+            roSingleLine, roIgnorePatternSpace]);
     end;
     for i := 0 to fExclude.Count - 1 do
     begin

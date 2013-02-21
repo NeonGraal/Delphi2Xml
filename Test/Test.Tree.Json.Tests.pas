@@ -37,6 +37,7 @@ type
     procedure SetUp; override;
     procedure TearDown; override;
   published
+    procedure TestGetBlankJson;
     procedure TestGetJson;
     procedure TestGetIndentedJson;
     procedure TestAddChild;
@@ -200,18 +201,60 @@ end;
 procedure TestTD2JsonDoc.TestGetIndentedJson;
 var
   ReturnValue: TStringStream;
-  lNode: TD2XTreeNode;
+  lNode, lChild: TD2XTreeNode;
 begin
-  lNode := FD2JsonDoc.AddChild('Test1');
-  lNode.AddChild('Test2');
+  lNode := FD2JsonDoc.AddChild('Test');
+  lChild := lNode.AddChild('Test1');
+  lChild.AddAttribute('Test11').Text := 'Val11';
+  lChild.AddAttribute('Test12').Text := 'Val12';
+  lChild.AddChild('Test13').Text := 'Val13';
+  lChild.AddChild('Test14').Text := 'Val14';
+  lChild := lNode.AddChild('Test2');
+  lChild.AddAttribute('Test21').Text := 'Val21';
+  lChild.AddAttribute('Test22').Text := 'Val22';
+  lChild.AddChild('Test23').Text := 'Val23';
+  lChild.AddChild('Test24').Text := 'Val24';
+  lNode.AddAttribute('Test3').Text := 'Val3';
+  lNode.AddAttribute('Test4').Text := 'Val4';
   FD2JsonDoc.Options := [toAutoIndent];
 
   ReturnValue := FD2JsonDoc.Stream;
 
-  CheckStream('Test1:{ Test2:"" }', 'Indented', ReturnValue);
+  CheckEqualsString('Test:{'#13#10'  _Test3:"Val3"'#13#10', _Test4:"Val4"'#13#10', Test1:{' +
+      #13#10'    _Test11:"Val11"'#13#10'  , _Test12:"Val12"'#13#10'  , Test13:"Val13"' +
+      #13#10'  , Test14:"Val14"'#13#10'  }'#13#10', Test2:{'#13#10'    _Test21:"Val21"' +
+      #13#10'  , _Test22:"Val22"'#13#10'  , Test23:"Val23"'#13#10'  , Test24:"Val24"' +
+      #13#10'  }'#13#10'}', ReturnValue.DataString, 'Indented Stream');
 end;
 
 procedure TestTD2JsonDoc.TestGetJson;
+var
+  ReturnValue: TStringStream;
+  lNode, lChild: TD2XTreeNode;
+begin
+  lNode := FD2JsonDoc.AddChild('Test');
+  lChild := lNode.AddChild('Test1');
+  lChild.AddAttribute('Test11').Text := 'Val11';
+  lChild.AddAttribute('Test12').Text := 'Val12';
+  lChild.AddChild('Test13').Text := 'Val13';
+  lChild.AddChild('Test14').Text := 'Val14';
+  lChild := lNode.AddChild('Test2');
+  lChild.AddAttribute('Test21').Text := 'Val21';
+  lChild.AddAttribute('Test22').Text := 'Val22';
+  lChild.AddChild('Test23').Text := 'Val23';
+  lChild.AddChild('Test24').Text := 'Val24';
+  lNode.AddAttribute('Test3').Text := 'Val3';
+  lNode.AddAttribute('Test4').Text := 'Val4';
+  FD2JsonDoc.Options := [];
+
+  ReturnValue := FD2JsonDoc.Stream;
+
+  CheckStream('Test:{_Test3:"Val3",_Test4:"Val4",Test1:{_Test11:"Val11",_Test12:"Val12",' +
+      'Test13:"Val13",Test14:"Val14"},Test2:{_Test21:"Val21",_Test22:"Val22",Test23:"Val23",' +
+      'Test24:"Val24"}}', 'Complete', ReturnValue);
+end;
+
+procedure TestTD2JsonDoc.TestGetBlankJson;
 var
   ReturnValue: TStringStream;
 begin

@@ -1,33 +1,25 @@
 D2X_SubDir:{
   _parseMode:"Full"
-,_fileName:"Config\Test"
-
-,  D2X_Pattern:{
+, _fileName:"Config\Test"
+, D2X_Pattern:{
     _fileName:"Config\Test\Pattern-TestingTest"
-  
-  ,  D2X_Group:{
+  , D2X_Group:{
       _name:"Testing.Test"
-    ,_fileName:"Config\Test\Group-Testing.Test"
-    
-    ,  D2X_File:{
+    , _fileName:"Config\Test\Group-Testing.Test"
+    , D2X_File:{
         _fileName:"Config\Test\Testing.Test.SubDir.pas"
-      
-      ,  UnitFile:{
-        
-            MainUnitName:{
+      , UnitFile:{
+          MainUnitName:{
             _group:"Testing.Test"
-          ,_:"Testing.Test.SubDir"
+          , _:"Testing.Test.SubDir"
           }
-        
-        ,  InterfaceSection:{
+        , InterfaceSection:{
             _lastToken:"interface"
           }
-        
-        ,  ImplementationSection:{
+        , ImplementationSection:{
             _lastToken:"implementation"
           }
-        
-        ,  InitializationSection:{
+        , InitializationSection:{
             _lastToken:"end"
           }
         }
@@ -35,4 +27,3 @@ D2X_SubDir:{
     }
   }
 }
-

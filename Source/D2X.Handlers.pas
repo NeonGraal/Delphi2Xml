@@ -186,7 +186,6 @@ type
     procedure BeginMethod(pMethod: string); override;
     procedure EndMethod(pMethod: string); override;
 
-
     procedure ParserMessage(const pTyp: TMessageEventType; const pMsg: string;
       pX, pY: Integer); override;
     procedure LexerInclude(const pFile: string; pX, pY: Integer); override;

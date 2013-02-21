@@ -342,6 +342,7 @@ end;
 initialization
 
 // Register any test cases with the test runner
-RegisterTests('Tree', [TestTD2XTreeNode.Suite, TestTD2XTreeElement.Suite, TestTD2XTreeDoc.Suite]);
+RegisterTests('Tree', [TestTD2XTreeNode.Suite, TestTD2XTreeElement.Suite,
+    TestTD2XTreeDoc.Suite]);
 
 end.

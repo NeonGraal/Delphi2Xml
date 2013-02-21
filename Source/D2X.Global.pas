@@ -277,5 +277,7 @@ begin
 end;
 
 initialization
-  gGroupRE := TRegEx.Create('^(\w+\.\w+)\.');
+
+gGroupRE := TRegEx.Create('^(\w+\.\w+)\.');
+
 end.

@@ -1,87 +1,66 @@
 D2X_Group:{
   _parseMode:"Uses"
-,_name:"Testing.Test"
-,_fileName:"Group-Testing.Test"
-
-,  D2X_File:{
+, _name:"Testing.Test"
+, _fileName:"Group-Testing.Test"
+, D2X_File:{
     _fileName:"Testing.Test.AUnit.pas"
-  
-  ,  UnitFile:{
+  , UnitFile:{
       _lastToken:"end."
-    
-    ,  MainUnitName:{
+    , MainUnitName:{
         _group:"Testing.Test"
-      ,_:"Testing.Test.AUnit"
+      , _:"Testing.Test.AUnit"
       }
-    
-    ,  InterfaceSection:{
-      
-          UsedUnitName:"System.Classes"
-      
-      ,  IncludeFile:{
+    , InterfaceSection:{
+        UsedUnitName:"System.Classes"
+      , IncludeFile:{
           _filename:"TEST.INC"
-        ,_msgAt:"71,0"
+        , _msgAt:"71,0"
         }
-      
-      ,  D2X_notSuppMsg:{
+      , D2X_notSuppMsg:{
           _msgAt:"91,0"
-        ,_:"Currently not supported {$D+}"
+        , _:"Currently not supported {$D+}"
         }
       }
-    
-    ,  ImplementationSection:{
+    , ImplementationSection:{
         _lastToken:";{$ELSE}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}"
-      
-      ,  UsedUnitName:"System.SysUtils"
+      , UsedUnitName:"System.SysUtils"
       }
     }
   }
-
-,  D2X_File:{
+, D2X_File:{
     _fileName:"Testing.Test.AProgram.dpr"
-  
-  ,  ProgramFile:{
+  , ProgramFile:{
       _lastToken:"beginend."
-    
-    ,  MainUnitName:{
+    , MainUnitName:{
         _group:"Testing.Test"
-      ,_:"Testing.Test.AProgram"
+      , _:"Testing.Test.AProgram"
       }
-    
-    ,  MainUsedUnitStatement:{
+    , MainUsedUnitStatement:{
         _file:"'Testing.Test.AUnit.pas'"
-      
-      ,  UsedUnitName:{
+      , UsedUnitName:{
           _group:"Testing.Test"
-        ,_:"Testing.Test.AUnit"
+        , _:"Testing.Test.AUnit"
         }
       }
     }
   }
-
-,  D2X_File:{
+, D2X_File:{
     _fileName:"Testing.Test.APackage.dpk"
-  
-  ,  PackageFile:{
+  , PackageFile:{
       _lastToken:";end."
-    
-    ,  MainUnitName:{
+    , MainUnitName:{
         _group:"Testing.Test"
-      ,_:"Testing.Test.APackage"
+      , _:"Testing.Test.APackage"
       }
-    
-    ,  ContainsStatement:{
-      
-          ContainsIdentifier:{
+    , ContainsStatement:{
+        ContainsIdentifier:{
           _group:"Testing.Test"
-        ,_:"Testing.Test.AUnit"
+        , _:"Testing.Test.AUnit"
         }
-      
-      ,  ContainsExpression:{
+      , ContainsExpression:{
           _file:"'Testing.Test.AUnit.pas'"
         }
       }
     }
   }
 }
-

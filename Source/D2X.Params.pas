@@ -608,7 +608,7 @@ end;
 
 function TD2XDefinesParam.UseConverter: TD2XSingleParam<Boolean>.TspConverter;
 begin
-  Result := function(pStr: string; pDflt: Boolean; out pVal: Boolean): Boolean
+  Result := function(pStr: String; pDflt: Boolean; out pVal: Boolean): Boolean
     var
       lStr: String;
     begin

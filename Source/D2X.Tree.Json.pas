@@ -38,7 +38,7 @@ type
 
 procedure TD2XJsonWriter.WriteElement(pNode: TD2XTreeElement; pW: TTextWriter);
 var
-  lS: string;
+  lSep: string;
   lWS: TProcRef;
 
 begin
@@ -53,13 +53,16 @@ begin
         begin
           if HasOption(pNode, toAutoIndent) then
             pW.WriteLine;
-          pW.Write(lS);
-          lS := ',';
+          pW.Write(lSep);
+          if HasOption(pNode, toAutoIndent) then
+            lSep := ', '
+          else
+            lSep := ',';
         end;
       if HasOption(pNode, toAutoIndent) then
-        lS := '  '
+        lSep := '  '
       else
-        lS := '';
+        lSep := '';
       ForeachAttribute(pNode,
           procedure(pAttr: TD2XTreeNode)
         begin
@@ -76,21 +79,26 @@ begin
       end;
       if HasOption(pNode, toAutoIndent) then
       begin
-        pW.WriteLine;
+        //        pW.WriteLine;
         ForeachChild(pNode,
           procedure(pChild: TD2XTreeNode)
           var
             lR: TStreamReader;
-            lS: string;
+            lL, lS: string;
           begin
             lWS;
             try
               lR := TStreamReader.Create(pChild.GetStream);
               lR.BaseStream.Seek(0, soBeginning);
+              lS := '';
               while not lR.EndOfStream do
               begin
-                lS := lR.ReadLine;
-                pW.WriteLine('  ' + lS);
+                if HasOption(pNode, toAutoIndent) and (lS > '') then
+                  pW.WriteLine;
+                lL := lR.ReadLine;
+                pW.Write(lS);
+                pW.Write(lL);
+                lS := '  ';
               end;
             finally
               FreeAndNil(lR);
@@ -104,6 +112,8 @@ begin
             lWS;
             pW.Write(pChild.GetStream.DataString);
           end);
+      if HasOption(pNode, toAutoIndent) then
+        pW.WriteLine;
       pW.Write('}');
       lWS := nil;
     end
@@ -113,8 +123,8 @@ begin
       pW.Write(pNode.Text);
       pW.Write('"');
     end;
-    if HasOption(pNode, toAutoIndent) then
-      pW.WriteLine;
+    //    if HasOption(pNode, toAutoIndent) then
+    //      pW.WriteLine;
   end
   else
     pW.Write(pNode.Text);

@@ -1,29 +1,21 @@
 D2X_File:{
   _parseMode:"Full"
-,_fileName:"Testing.Test.AProgram.dpr"
-
+, _fileName:"Testing.Test.AProgram.dpr"
 ,  ProgramFile:{
-  
       MainUnitName:{
       _group:"Testing.Test"
-    ,_:"Testing.Test.AProgram"
+    , _:"Testing.Test.AProgram"
     }
-  
   ,  ProgramBlock:{
-    
         MainUsedUnitStatement:{
         _file:"'Testing.Test.AUnit.pas'"
-      
-      ,  UsedUnitName:{
+      sedUnitName:{
           _group:"Testing.Test"
-        ,_:"Testing.Test.AUnit"
+        , _:"Testing.Test.AUnit"
         }
       }
-    
     ,  Block:{
-      
           CompoundStatement:{
-        
             StatementList:""
         }
       }
