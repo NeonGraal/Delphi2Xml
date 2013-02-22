@@ -4,94 +4,83 @@ interface
 
 uses
   CastaliaPasLexTypes,
+  D2X.Global,
   D2X.IO,
   D2X.Parser,
-  System.Classes,
-  System.Generics.Collections,
   System.SysUtils;
 
 type
   EInvalidHandler = class(Exception);
 
-  TD2XHandler = class abstract
+  ID2XHandler = interface
+    ['{3E71A83A-82B2-42DC-AA5F-F734D77306BE}']
+    function Description: String;
+    function UseProxy: Boolean;
+  end;
+
+  ID2XParserHandler = interface(ID2XHandler)
+    ['{7F3065AD-B574-4214-BDC9-B4DC211F5752}']
+    procedure InitParser(pParser: TD2XDefinesParser);
+  end;
+
+  ID2XProcessingHandler = interface(ID2XHandler)
+    ['{679284DC-8E45-471B-B303-528763507690}']
+    procedure EndProcessing(pOutput: TStreamWriterRef);
+  end;
+
+  ID2XFileHandler = interface(ID2XHandler)
+    ['{7FEC9B9F-1502-42F6-BF00-C969B4C6051F}']
+    procedure BeginFile(pFile: String; pInput: TStreamReaderRef);
+    procedure EndFile(pFile: String; pOutput: TStreamWriterRef);
+  end;
+
+  ID2XResultsHandler = interface(ID2XHandler)
+    ['{F3A952D9-E9A2-4923-8EA2-585DBD4C8125}']
+    procedure BeginResults;
+    procedure EndResults(pOutput: TStreamWriterRef);
+  end;
+
+  ID2XMethodHandler = interface(ID2XHandler)
+    ['{D95F54A0-45DD-48C9-949A-ECC913DDCB5E}']
+    procedure BeginMethod(pMethod: String);
+    procedure EndMethod(pMethod: String);
+  end;
+
+  ID2XCheckHandler = interface(ID2XHandler)
+    ['{125163C9-AB41-4DF4-8135-8D9E9EB1CF79}']
+    function CheckBeforeMethod(pMethod: String): Boolean;
+    function CheckAfterMethod(pMethod: String): Boolean;
+  end;
+
+  ID2XMessagesHandler = interface(ID2XHandler)
+    ['{D0406504-283B-4768-B6E4-27EBDEC4FBD0}']
+    procedure ParserMessage(const pTyp: TMessageEventType; const pMsg: String;
+      pX, pY: Integer);
+    procedure LexerInclude(const pFile: String; pX, pY: Integer);
+  end;
+
+  TD2XHandler = class abstract(TD2XLogger, ID2XHandler)
   public
     constructor Create; virtual;
 
     function Description: String; virtual;
     function UseProxy: Boolean; virtual;
-
-    procedure Copy(pFrom: TD2XHandler); virtual;
-
-    procedure BeginProcessing(pInput: TStreamReaderRef); virtual;
-    procedure EndProcessing(pOutput: TStreamWriterRef); virtual;
-
-    procedure BeginFile(pFile: String; pInput: TStreamReaderRef); virtual;
-    procedure EndFile(pFile: String; pOutput: TStreamWriterRef); virtual;
-
-    procedure BeginResults; virtual;
-    procedure EndResults(pOutput: TStreamWriterRef); virtual;
-
-    function CheckBeforeMethod(pMethod: String): Boolean; virtual;
-    function CheckAfterMethod(pMethod: String): Boolean; virtual;
-
-    procedure BeginMethod(pMethod: String); virtual;
-    procedure EndMethod(pMethod: String); virtual;
-
-    procedure ParserMessage(const pTyp: TMessageEventType; const pMsg: String;
-      pX, pY: Integer); virtual;
-    procedure LexerInclude(const pFile: String; pX, pY: Integer); virtual;
   end;
 
   TD2XHandlerClass = class of TD2XHandler;
 
-  TD2XParserHandler = class(TD2XHandler)
+  TD2XParserHandler = class(TD2XHandler, ID2XParserHandler)
   protected
     fParser: TD2XDefinesParser;
 
   public
     procedure InitParser(pParser: TD2XDefinesParser); virtual;
 
-    procedure Copy(pFrom: TD2XHandler); override;
   end;
 
 implementation
 
 { TD2XHandler }
-
-procedure TD2XHandler.BeginFile(pFile: String; pInput: TStreamReaderRef);
-begin
-
-end;
-
-procedure TD2XHandler.BeginMethod(pMethod: String);
-begin
-
-end;
-
-procedure TD2XHandler.BeginProcessing(pInput: TStreamReaderRef);
-begin
-
-end;
-
-procedure TD2XHandler.BeginResults;
-begin
-
-end;
-
-function TD2XHandler.CheckAfterMethod(pMethod: String): Boolean;
-begin
-  Result := True;
-end;
-
-function TD2XHandler.CheckBeforeMethod(pMethod: String): Boolean;
-begin
-  Result := True;
-end;
-
-procedure TD2XHandler.Copy(pFrom: TD2XHandler);
-begin
-
-end;
 
 constructor TD2XHandler.Create;
 begin
@@ -103,54 +92,12 @@ begin
   Result := 'Base Handler';
 end;
 
-procedure TD2XHandler.EndFile(pFile: String; pOutput: TStreamWriterRef);
-begin
-
-end;
-
-procedure TD2XHandler.EndMethod(pMethod: String);
-begin
-
-end;
-
-procedure TD2XHandler.EndProcessing(pOutput: TStreamWriterRef);
-begin
-
-end;
-
-procedure TD2XHandler.EndResults(pOutput: TStreamWriterRef);
-begin
-
-end;
-
-procedure TD2XHandler.LexerInclude(const pFile: String; pX, pY: Integer);
-begin
-
-end;
-
-procedure TD2XHandler.ParserMessage(const pTyp: TMessageEventType;
-  const pMsg: String; pX, pY: Integer);
-begin
-
-end;
-
 function TD2XHandler.UseProxy: Boolean;
 begin
   Result := False;
 end;
 
 { TD2XParserHandler }
-
-procedure TD2XParserHandler.Copy(pFrom: TD2XHandler);
-var
-  lFrom: TD2XParserHandler;
-begin
-  if Assigned(pFrom) then
-  begin
-    lFrom := TD2XParserHandler(pFrom);
-    fParser := lFrom.fParser;
-  end;
-end;
 
 procedure TD2XParserHandler.InitParser(pParser: TD2XDefinesParser);
 begin

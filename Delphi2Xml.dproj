@@ -116,6 +116,7 @@
 			<DCCReference Include="Source\D2X.Tree.pas"/>
 			<DCCReference Include="Source\D2X.Tree.Xml.pas"/>
 			<None Include="TODO.txt"/>
+			<None Include="FastMM4Options.inc"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>

@@ -9,10 +9,10 @@ uses
   D2X.Parser;
 
 type
-  TD2XHandlerTester = class(TD2XHandler)
+  TD2XHandlerTester = class(TD2XHandler, ID2XHandler, ID2XProcessingHandler, ID2XFileHandler,
+    ID2XResultsHandler, ID2XMethodHandler, ID2XCheckHandler, ID2XMessagesHandler)
   public
     CalledUseProxy: Boolean;
-    CalledBeginProcessing: Boolean;
     CalledEndProcessing: Boolean;
     CalledBeginFile: Boolean;
     CalledEndFile: Boolean;
@@ -22,7 +22,6 @@ type
     CalledCheckAfterMethod: Boolean;
     CalledBeginMethod: Boolean;
     CalledEndMethod: Boolean;
-    CalledCopy: Boolean;
     CalledLexerInclude: Boolean;
     CalledParserMessage: Boolean;
 
@@ -30,28 +29,26 @@ type
 
     function Description: String; override;
     function UseProxy: Boolean; override;
-    procedure BeginProcessing(pInput: TStreamReaderRef); override;
-    procedure EndProcessing(pOutput: TStreamWriterRef); override;
-    procedure BeginFile(pFile: String; pInput: TStreamReaderRef); override;
-    procedure EndFile(pFile: String; pOutput: TStreamWriterRef); override;
-    procedure BeginResults; override;
-    procedure EndResults(pOutput: TStreamWriterRef); override;
-    function CheckBeforeMethod(pMethod: String): Boolean; override;
-    function CheckAfterMethod(pMethod: String): Boolean; override;
-    procedure BeginMethod(pMethod: String); override;
-    procedure EndMethod(pMethod: String); override;
-    procedure Copy(pFrom: TD2XHandler); override;
+    procedure EndProcessing(pOutput: TStreamWriterRef);
+    procedure BeginFile(pFile: String; pInput: TStreamReaderRef);
+    procedure EndFile(pFile: String; pOutput: TStreamWriterRef);
+    procedure BeginResults;
+    procedure EndResults(pOutput: TStreamWriterRef);
+    function CheckBeforeMethod(pMethod: String): Boolean;
+    function CheckAfterMethod(pMethod: String): Boolean;
+    procedure BeginMethod(pMethod: String);
+    procedure EndMethod(pMethod: String);
     procedure ParserMessage(const pTyp: TMessageEventType; const pMsg: String;
-      pX, pY: Integer); override;
-    procedure LexerInclude(const pFile: String; pX, pY: Integer); override;
+      pX, pY: Integer);
+    procedure LexerInclude(const pFile: String; pX, pY: Integer);
 
   end;
 
-  TD2XParserHandlerTester = class(TD2XParserHandler)
+  TD2XParserHandlerTester = class(TD2XHandler, ID2XParserHandler)
   public
     CalledInitParser: Boolean;
 
-    procedure InitParser(pParser: TD2XDefinesParser); override;
+    procedure InitParser(pParser: TD2XDefinesParser);
   end;
 
 implementation
@@ -72,14 +69,6 @@ begin
     pInput;
 end;
 
-procedure TD2XHandlerTester.BeginProcessing(pInput: TStreamReaderRef);
-begin
-  CalledBeginProcessing := true;
-  inherited;
-  if CreateStreams then
-    pInput;
-end;
-
 procedure TD2XHandlerTester.BeginResults;
 begin
   CalledBeginResults := true;
@@ -90,20 +79,14 @@ function TD2XHandlerTester.CheckAfterMethod(pMethod: String): Boolean;
 begin
   CalledCheckAfterMethod := true;
 
-  Result := inherited CheckAfterMethod(pMethod);
+  Result := True;
 end;
 
 function TD2XHandlerTester.CheckBeforeMethod(pMethod: String): Boolean;
 begin
   CalledCheckBeforeMethod := true;
 
-  Result := inherited CheckBeforeMethod(pMethod);
-end;
-
-procedure TD2XHandlerTester.Copy(pFrom: TD2XHandler);
-begin
-  CalledCopy := true;
-  inherited;
+  Result := True;
 end;
 
 function TD2XHandlerTester.Description: String;
@@ -166,7 +149,6 @@ end;
 procedure TD2XParserHandlerTester.InitParser(pParser: TD2XDefinesParser);
 begin
   CalledInitParser := true;
-  inherited;
 end;
 
 end.

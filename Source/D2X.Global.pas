@@ -31,6 +31,7 @@ type
   end;
 
   ID2XLogger = interface
+    ['{75BB3877-8B9A-4E1A-B7AE-25FCC93CA28C}']
     procedure JoinLog(pLogger: ID2XLogger);
     procedure Log(pFmt: string; pArgs: array of const; pLine: Boolean = True);
   end;

@@ -22,7 +22,6 @@ type
   published
     procedure TestDescription;
     procedure TestUseProxy;
-    procedure TestBeginProcessing;
     procedure TestEndProcessing;
     procedure TestBeginFile;
     procedure TestEndFile;
@@ -32,7 +31,6 @@ type
     procedure TestCheckAfterMethod;
     procedure TestBeginMethod;
     procedure TestEndMethod;
-    procedure TestCopy;
     procedure TestParserMessage;
     procedure TestLexerInclude;
   end;
@@ -50,46 +48,32 @@ begin
   FreeAndNil(FD2XHandler);
 end;
 
-procedure TestTD2XHandler.TestBeginProcessing;
-begin
-  FD2XHandler.BeginProcessing(nil);
-
-  CheckTrue(FD2XTester.CalledBeginProcessing, 'Called Begin Processing');
-end;
-
 procedure TestTD2XHandler.TestEndProcessing;
 begin
-  FD2XHandler.EndProcessing(nil);
+  (FD2XHandler as ID2XProcessingHandler).EndProcessing(nil);
 
   CheckTrue(FD2XTester.CalledEndProcessing, 'Called End Processing');
 end;
 
 procedure TestTD2XHandler.TestBeginResults;
 begin
-  FD2XHandler.BeginResults;
+  (FD2XHandler as ID2XResultsHandler).BeginResults;
 
   CheckTrue(FD2XTester.CalledBeginResults, 'Called Begin Results');
 end;
 
 procedure TestTD2XHandler.TestCheckAfterMethod;
 begin
-  FD2XHandler.CheckAfterMethod('');
+  (FD2XHandler as ID2XCheckHandler).CheckAfterMethod('');
 
   CheckTrue(FD2XTester.CalledCheckAfterMethod, 'Called Check After Method');
 end;
 
 procedure TestTD2XHandler.TestCheckBeforeMethod;
 begin
-  FD2XHandler.CheckBeforeMethod('');
+  (FD2XHandler as ID2XCheckHandler).CheckBeforeMethod('');
 
   CheckTrue(FD2XTester.CalledCheckBeforeMethod, 'Called Check Before Method');
-end;
-
-procedure TestTD2XHandler.TestCopy;
-begin
-  FD2XHandler.Copy(nil);
-
-  CheckTrue(FD2XTester.CalledCopy, 'Called Copy');
 end;
 
 procedure TestTD2XHandler.TestDescription;
@@ -99,35 +83,35 @@ end;
 
 procedure TestTD2XHandler.TestBeginMethod;
 begin
-  FD2XHandler.BeginMethod('');
+  (FD2XHandler as ID2XMethodHandler).BeginMethod('');
 
   CheckTrue(FD2XTester.CalledBeginMethod, 'Called Begin Method');
 end;
 
 procedure TestTD2XHandler.TestEndMethod;
 begin
-  FD2XHandler.EndMethod('');
+  (FD2XHandler as ID2XMethodHandler).EndMethod('');
 
   CheckTrue(FD2XTester.CalledEndMethod, 'Called End Method');
 end;
 
 procedure TestTD2XHandler.TestEndResults;
 begin
-  FD2XHandler.EndResults(nil);
+  (FD2XHandler as ID2XResultsHandler).EndResults(nil);
 
   CheckTrue(FD2XTester.CalledEndResults, 'Called End Results');
 end;
 
 procedure TestTD2XHandler.TestLexerInclude;
 begin
-  FD2XHandler.LexerInclude('', 0, 0);
+  (FD2XHandler as ID2XMessagesHandler).LexerInclude('', 0, 0);
 
   CheckTrue(FD2XTester.CalledLexerInclude, 'Called Lexer Include');
 end;
 
 procedure TestTD2XHandler.TestParserMessage;
 begin
-  FD2XHandler.ParserMessage(meError, '', 0, 0);
+  (FD2XHandler as ID2XMessagesHandler).ParserMessage(meError, '', 0, 0);
 
   CheckTrue(FD2XTester.CalledParserMessage, 'Called Parser Message');
 end;
@@ -139,14 +123,14 @@ end;
 
 procedure TestTD2XHandler.TestBeginFile;
 begin
-  FD2XHandler.BeginFile('', nil);
+  (FD2XHandler as ID2XFileHandler).BeginFile('', nil);
 
   CheckTrue(FD2XTester.CalledBeginFile, 'Called Begin File');
 end;
 
 procedure TestTD2XHandler.TestEndFile;
 begin
-  FD2XHandler.EndFile('', nil);
+  (FD2XHandler as ID2XFileHandler).EndFile('', nil);
 
   CheckTrue(FD2XTester.CalledEndFile, 'Called End File');
 end;

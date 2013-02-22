@@ -220,7 +220,7 @@ Set the default options for FastMM here.
   {Set this option to require the presence of debug info ($D+ option) in the
    compiled unit to perform memory leak checking. This option has no effect if
    the option "EnableMemoryLeakReporting" is not also set.}
-  {.$define RequireDebugInfoForLeakReporting}
+  {$define RequireDebugInfoForLeakReporting}
 
   {Set this option to enable manual control of the memory leak report. When
    this option is set the ReportMemoryLeaksOnShutdown variable (default = false)

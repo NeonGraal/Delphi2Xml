@@ -24,7 +24,6 @@ type
 
     procedure SetParser(pParser: TD2XDefinesParser); virtual;
 
-    procedure BeginProcessing; virtual;
     procedure EndProcessing; virtual;
 
     procedure BeginFile(pFile: string); virtual;
@@ -58,11 +57,6 @@ begin
 end;
 
 procedure TD2XProcessor.BeginMethod(pMethod: string);
-begin
-
-end;
-
-procedure TD2XProcessor.BeginProcessing;
 begin
 
 end;

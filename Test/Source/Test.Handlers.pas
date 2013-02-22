@@ -5,6 +5,7 @@ interface
 uses
   Test.Global,
   D2X.Handler,
+  D2X.Handlers,
   D2X.Parser;
 
 type
@@ -19,6 +20,12 @@ type
   TTestParserHandler = class(TD2XParserHandler)
   public
     property Parser: TD2XDefinesParser read fParser;
+
+  end;
+
+  TTestLogHandler = class(TD2XLogHandler)
+  public
+    property Lexer: TD2XLexer read fLexer;
 
   end;
 

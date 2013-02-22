@@ -13,26 +13,6 @@ uses
   System.Generics.Collections;
 
 type
-  TD2XLexerProcessor = class(TD2XProcessor)
-  protected
-    fLexer: TD2XLexer;
-  public
-    procedure SetParser(pParser: TD2XDefinesParser); override;
-  end;
-
-  TD2XLogProcessor = class(TD2XLexerProcessor)
-  public
-    function UseProxy: Boolean; override;
-
-    procedure BeginMethod(pMethod: string); override;
-    procedure EndMethod(pMethod: string); override;
-
-    procedure ParserMessage(const pTyp: TMessageEventType; const pMsg: string;
-      pX, pY: Integer); override;
-    procedure LexerInclude(const pFile: string; pX, pY: Integer); override;
-
-  end;
-
   TD2XHandlerProcessor = class(TD2XProcessor)
   public
     constructor Create; override;
@@ -45,7 +25,6 @@ type
 
     procedure SetParser(pParser: TD2XDefinesParser); override;
 
-    procedure BeginProcessing; override;
     procedure EndProcessing; override;
 
     procedure BeginFile(pFile: string); override;
@@ -64,7 +43,6 @@ type
       pX, pY: Integer); override;
     procedure LexerInclude(const pFile: string; pX, pY: Integer); override;
 
-    function SetProcessingInput(pFilename: TD2XFileRef): TD2XHandlerProcessor;
     function SetProcessingOutput(pFilename: TD2XFileRef): TD2XHandlerProcessor;
     function SetResultsOutput(pFilename: TD2XNamedStreamRef): TD2XHandlerProcessor;
     function SetFileInput(pFilename: TD2XFileRef): TD2XHandlerProcessor;
@@ -96,12 +74,13 @@ uses
 procedure TD2XHandlerProcessor.BeginFile(pFile: string);
 var
   lS: ID2XFile;
+  lFls: ID2XFileHandler;
 begin
   lS := nil;
-  if fActive.Flag then
+  if fHandler.GetInterface(ID2XFileHandler,lFls) and fActive.Flag then
     if Assigned(fFileInput) then
       try
-        fHandler.BeginFile(pFile,
+        lFls.BeginFile(pFile,
             function: TStreamReader
           begin
             Result := nil;
@@ -116,55 +95,37 @@ begin
         DisposeOf(lS);
       end
     else
-      fHandler.BeginFile(pFile, nil);
+      lFls.BeginFile(pFile, nil);
 end;
 
 procedure TD2XHandlerProcessor.BeginMethod(pMethod: string);
-begin
-  if fActive.Flag then
-    fHandler.BeginMethod(pMethod);
-end;
-
-procedure TD2XHandlerProcessor.BeginProcessing;
 var
-  lS: ID2XFile;
+  lMthds: ID2XMethodHandler;
 begin
-  lS := nil;
-  if fActive.Flag then
-    if Assigned(fProcessingInput) then
-      try
-        fHandler.BeginProcessing(
-          function: TStreamReader
-          begin
-            Result := nil;
-            lS := fProcessingInput;
-            if Assigned(lS) then
-              if lS.Exists then
-                Result := lS.ReadFrom
-              else
-                Log('WARNING: %1 file "%2" not found', [fHandler.Description, lS.Description]);
-          end);
-      finally
-        DisposeOf(lS);
-      end
-    else
-      fHandler.BeginProcessing(nil);
+  if fHandler.GetInterface(ID2XMethodHandler, lMthds) and fActive.Flag then
+    lMthds.BeginMethod(pMethod);
 end;
 
 procedure TD2XHandlerProcessor.BeginResults;
+var
+  lRslts: ID2XResultsHandler;
 begin
-  if fActive.Flag then
-    fHandler.BeginResults;
+  if fHandler.GetInterface(ID2XResultsHandler,lRslts) and fActive.Flag then
+    lRslts.BeginResults;
 end;
 
 function TD2XHandlerProcessor.CheckAfterMethod(pMethod: string): Boolean;
+var
+  lChks: ID2XCheckHandler;
 begin
-  Result := not fActive.Flag or fHandler.CheckAfterMethod(pMethod);
+  Result := not(fHandler.GetInterface(ID2XCheckHandler,lChks) and fActive.Flag) or lChks.CheckAfterMethod(pMethod);
 end;
 
 function TD2XHandlerProcessor.CheckBeforeMethod(pMethod: string): Boolean;
+var
+  lChks: ID2XCheckHandler;
 begin
-  Result := not fActive.Flag or fHandler.CheckBeforeMethod(pMethod);
+  Result := not(fHandler.GetInterface(ID2XCheckHandler,lChks) and fActive.Flag) or lChks.CheckBeforeMethod(pMethod);
 end;
 
 constructor TD2XHandlerProcessor.Create;
@@ -180,19 +141,20 @@ end;
 constructor TD2XHandlerProcessor.CreateClass(pActive: ID2XFlag;
   pHandler: TD2XHandlerClass);
 begin
-  inherited CreateActive(pActive);
-
-  fMyHandler := True;
-  fHandler := pHandler.Create;
+  CreateHandler(pActive, pHandler.Create, True);
 end;
 
 constructor TD2XHandlerProcessor.CreateHandler(pActive: ID2XFlag; pHandler: TD2XHandler;
   pMine: Boolean);
+var
+  lLog: ID2XLogger;
 begin
   inherited CreateActive(pActive);
 
   fMyHandler := pMine;
   fHandler := pHandler;
+  if fHandler.GetInterface(ID2XLogger, lLog) then
+    lLog.JoinLog(Self);
 end;
 
 destructor TD2XHandlerProcessor.Destroy;
@@ -206,12 +168,13 @@ end;
 procedure TD2XHandlerProcessor.EndFile(pFile: string);
 var
   lS: ID2XFile;
+  lFls: ID2XFileHandler;
 begin
   lS := nil;
-  if fActive.Flag then
+  if fHandler.GetInterface(ID2XFileHandler,lFls) and fActive.Flag then
     if Assigned(fFileOutput) then
       try
-        fHandler.EndFile(pFile,
+        lFls.EndFile(pFile,
           function: TStreamWriter
           begin
             lS := fFileOutput;
@@ -224,24 +187,27 @@ begin
         DisposeOf(lS);
       end
     else
-      fHandler.EndFile(pFile, nil);
+      lFls.EndFile(pFile, nil);
 end;
 
 procedure TD2XHandlerProcessor.EndMethod(pMethod: string);
+var
+  lMthds: ID2XMethodHandler;
 begin
-  if fActive.Flag then
-    fHandler.EndMethod(pMethod);
+  if fHandler.GetInterface(ID2XMethodHandler, lMthds) and fActive.Flag then
+    lMthds.EndMethod(pMethod);
 end;
 
 procedure TD2XHandlerProcessor.EndProcessing;
 var
   lS: ID2XFile;
+  lPrcs: ID2XProcessingHandler;
 begin
   lS := nil;
-  if fActive.Flag then
+  if fHandler.GetInterface(ID2XProcessingHandler,lPrcs) and fActive.Flag then
     if Assigned(fProcessingOutput) then
       try
-        fHandler.EndProcessing(
+        lPrcs.EndProcessing(
           function: TStreamWriter
           begin
             lS := fProcessingOutput;
@@ -254,18 +220,19 @@ begin
         DisposeOf(lS);
       end
     else
-      fHandler.EndProcessing(nil);
+      lPrcs.EndProcessing(nil);
 end;
 
 procedure TD2XHandlerProcessor.EndResults(pFile: string);
 var
   lS: ID2XFile;
+  lRslts: ID2XResultsHandler;
 begin
   lS := nil;
-  if fActive.Flag then
+  if fHandler.GetInterface(ID2XResultsHandler,lRslts) and fActive.Flag then
     if Assigned(fResultsOutput) then
       try
-        fHandler.EndResults(
+        lRslts.EndResults(
           function: TStreamWriter
           begin
             lS := fResultsOutput(pFile);
@@ -278,7 +245,7 @@ begin
         DisposeOf(lS);
       end
     else
-      fHandler.EndResults(nil);
+      lRslts.EndResults(nil);
 end;
 
 function TD2XHandlerProcessor.HandlerIs(pHandler: TD2XHandlerClass): Boolean;
@@ -287,16 +254,20 @@ begin
 end;
 
 procedure TD2XHandlerProcessor.LexerInclude(const pFile: string; pX, pY: Integer);
+var
+  lMsgs: ID2XMessagesHandler;
 begin
-  if fActive.Flag then
-    fHandler.LexerInclude(pFile, pX, pY);
+  if fHandler.GetInterface(ID2XMessagesHandler, lMsgs) and fActive.Flag then
+    lMsgs.LexerInclude(pFile, pX, pY);
 end;
 
 procedure TD2XHandlerProcessor.ParserMessage(const pTyp: TMessageEventType;
   const pMsg: string; pX, pY: Integer);
+var
+  lMsgs: ID2XMessagesHandler;
 begin
-  if fActive.Flag then
-    fHandler.ParserMessage(pTyp, pMsg, pX, pY);
+  if fHandler.GetInterface(ID2XMessagesHandler, lMsgs) and fActive.Flag then
+    lMsgs.ParserMessage(pTyp, pMsg, pX, pY);
 end;
 
 function TD2XHandlerProcessor.SetFileInput(pFilename: TD2XFileRef): TD2XHandlerProcessor;
@@ -312,17 +283,13 @@ begin
 end;
 
 procedure TD2XHandlerProcessor.SetParser(pParser: TD2XDefinesParser);
+var
+  lPrsrs: ID2XParserHandler;
 begin
   inherited;
 
-  if fHandler is TD2XParserHandler then
-    TD2XParserHandler(fHandler).InitParser(pParser);
-end;
-
-function TD2XHandlerProcessor.SetProcessingInput(pFilename: TD2XFileRef): TD2XHandlerProcessor;
-begin
-  fProcessingInput := pFilename;
-  Result := Self;
+  if fHandler.GetInterface(ID2XParserHandler, lPrsrs) then
+    lPrsrs.InitParser(pParser);
 end;
 
 function TD2XHandlerProcessor.SetProcessingOutput(pFilename: TD2XFileRef)
@@ -342,59 +309,6 @@ end;
 function TD2XHandlerProcessor.UseProxy: Boolean;
 begin
   Result := fActive.Flag and fHandler.UseProxy;
-end;
-
-{ TD2XLogProcessor }
-
-procedure TD2XLogProcessor.BeginMethod(pMethod: string);
-begin
-  if fActive.Flag then
-  begin
-    if Assigned(fLexer) then
-      Log('BEFORE %s @ %s', [pMethod, fLexer.Token])
-    else
-      Log('BEFORE %s ', [pMethod]);
-  end;
-end;
-
-procedure TD2XLogProcessor.EndMethod(pMethod: string);
-begin
-  if fActive.Flag then
-    Log('AFTER  %s', [pMethod]);
-end;
-
-procedure TD2XLogProcessor.LexerInclude(const pFile: string; pX, pY: Integer);
-begin
-  if fActive.Flag then
-    Log('INCLUDE @ %d,%d: %s', [pX, pY, pFile]);
-end;
-
-procedure TD2XLogProcessor.ParserMessage(const pTyp: TMessageEventType;
-  const pMsg: string; pX, pY: Integer);
-begin
-  if fActive.Flag then
-    case pTyp of
-      meError:
-        Log('ERROR @ %d,%d: %s', [pX, pY, pMsg]);
-      meNotSupported:
-        Log('NOT SUPPORTED @ %d,%d: %s', [pX, pY, pMsg]);
-    else
-      Log('???? @ %d,%d: %s', [pX, pY, pMsg]);
-    end;
-end;
-
-function TD2XLogProcessor.UseProxy: Boolean;
-begin
-  Result := fActive.Flag;
-end;
-
-{ TD2XLexerProcessor }
-
-procedure TD2XLexerProcessor.SetParser(pParser: TD2XDefinesParser);
-begin
-  inherited;
-
-  fLexer := pParser.Lexer;
 end;
 
 end.

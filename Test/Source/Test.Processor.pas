@@ -14,7 +14,6 @@ type
   public
     CalledUseProxy: Boolean;
     CalledSetParser: Boolean;
-    CalledBeginProcessing: Boolean;
     CalledEndProcessing: Boolean;
     CalledBeginFile: Boolean;
     CalledEndFile: Boolean;
@@ -29,7 +28,6 @@ type
 
     function UseProxy: Boolean; override;
     procedure SetParser(pParser: TD2XDefinesParser); override;
-    procedure BeginProcessing; override;
     procedure EndProcessing; override;
     procedure BeginFile(pFile: string); override;
     procedure EndFile(pFile: string); override;
@@ -72,12 +70,6 @@ end;
 procedure TTestProcessor.BeginMethod(pMethod: string);
 begin
   CalledBeginMethod := True;
-  inherited;
-end;
-
-procedure TTestProcessor.BeginProcessing;
-begin
-  CalledBeginProcessing := True;
   inherited;
 end;
 

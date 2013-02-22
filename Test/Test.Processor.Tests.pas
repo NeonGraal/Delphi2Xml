@@ -33,7 +33,6 @@ type
     procedure TestInvalidCreate;
     procedure TestUseProxy;
     procedure TestSetParser;
-    procedure TestBeginProcessing;
     procedure TestEndProcessing;
     procedure TestBeginFile;
     procedure TestEndFile;
@@ -75,13 +74,6 @@ begin
   FD2XProcessor.BeginMethod('Test');
 
   CheckTrue(FD2XProcessor.CalledBeginMethod, 'Called Begin Method');
-end;
-
-procedure TestTD2XProcessor.TestBeginProcessing;
-begin
-  FD2XProcessor.BeginProcessing;
-
-  CheckTrue(FD2XProcessor.CalledBeginProcessing, 'Called Begin Processing');
 end;
 
 procedure TestTD2XProcessor.TestBeginResults;

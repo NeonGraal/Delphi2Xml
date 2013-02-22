@@ -127,13 +127,10 @@ implementation
 
 uses
   D2X.Processors,
-  D2X.IO.Actual,
   D2X.IO.Options,
   D2X.Tree.Json,
   D2X.Tree.Xml,
-  System.IOUtils,
-  System.StrUtils,
-  System.TypInfo;
+  System.StrUtils;
 
 { TD2XOptions }
 
@@ -569,17 +566,13 @@ begin
 end;
 
 procedure TD2XOptions.InitFirstProcessors;
-var
-  lLogProcessor: TD2XLogProcessor;
 begin
   fProcs.Add(TD2XHandlerProcessor.CreateHandler(fFlags.ByLabel['LogErrors'],
       TD2XErrorHandler.CreateError(meError, LogMessage), True));
   fProcs.Add(TD2XHandlerProcessor.CreateHandler(fFlags.ByLabel['LogNotSupp'],
       TD2XErrorHandler.CreateError(meNotSupported, LogMessage), True));
 
-  lLogProcessor := TD2XLogProcessor.CreateActive(fFlags.ByLabel['Verbose']);
-  lLogProcessor.JoinLog(Self);
-  fProcs.Add(lLogProcessor);
+  fProcs.Add(TD2XHandlerProcessor.CreateClass(fFlags.ByLabel['Verbose'], TD2XLogHandler));
 
   fParams.Add(TD2XParam.Create('?', 'Options', '', 'Show valid options',
         function(pStr: string): Boolean
