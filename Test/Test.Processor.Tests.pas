@@ -6,53 +6,87 @@ implementation
 
 uses
   CastaliaPasLexTypes,
-  D2X.Tree.Xml,
   D2X.Handler,
-  D2X.Options,
+  D2X.IO,
   D2X.Param,
   D2X.Parser,
   D2X.Processor,
-  System.Classes,
-  System.Diagnostics,
-  System.Generics.Collections,
   System.SysUtils,
-  System.Rtti,
   Test.Global,
   Test.Handler,
+  Test.Handlers,
+  Test.Parser,
   Test.Processor,
   TestFramework;
 
 type
   TestTD2XProcessor = class(TFlagTestCase)
   strict private
-    FD2XProcessor: TTestProcessor;
+    FHandler: TD2XHandlerTester;
+    FD2XProcessor: TD2XProcessor;
   public
     procedure SetUp; override;
     procedure TearDown; override;
   published
     procedure TestInvalidCreate;
-    procedure TestUseProxy;
+
+    procedure TestCreateClass;
+
+    procedure TestSetProcessingOutput;
+    procedure TestSetResultsOutput;
+    procedure TestSetFileInput;
+    procedure TestSetFileOutput;
+
     procedure TestSetParser;
+    procedure TestUseProxy;
+
     procedure TestEndProcessing;
+
     procedure TestBeginFile;
     procedure TestEndFile;
+
     procedure TestBeginResults;
     procedure TestEndResults;
+
     procedure TestCheckBeforeMethod;
     procedure TestCheckAfterMethod;
+
     procedure TestBeginMethod;
     procedure TestEndMethod;
-    procedure TestParserMessage;
+
     procedure TestLexerInclude;
+    procedure TestParserMessage;
   end;
 
-  { TestTD2XProcessor }
+  TestTD2XParserHandlerProcessor = class(TFlagTestCase)
+  strict private
+    FHandler: TD2XParserHandlerTester;
+    FD2XProcessor: TD2XProcessor;
+  public
+    procedure SetUp; override;
+    procedure TearDown; override;
+  published
+    procedure TestSetParser;
+  end;
+
+function NilFile: ID2XFile;
+begin
+  Result := nil;
+end;
+
+function NilNamedFile(pName: string): ID2XFile;
+begin
+  Result := nil;
+end;
+
+{ TestTD2XProcessor }
 
 procedure TestTD2XProcessor.SetUp;
 begin
   inherited;
 
-  FD2XProcessor := TTestProcessor.CreateActive(fActive);
+  FHandler := TD2XHandlerTester.Create;
+  FD2XProcessor := TD2XProcessor.CreateHandler(fActive, FHandler, True);
 end;
 
 procedure TestTD2XProcessor.TearDown;
@@ -64,107 +98,263 @@ end;
 
 procedure TestTD2XProcessor.TestBeginFile;
 begin
-  FD2XProcessor.BeginFile('');
+  FD2XProcessor.SetFileInput(NilFile);
 
-  CheckTrue(FD2XProcessor.CalledBeginFile, 'Called Begin File');
+  FD2XProcessor.BeginFile('');
+  CheckFalse(FHandler.CalledBeginFile, 'Ignored Begin File');
+
+  fActive.Flag := True;
+  FD2XProcessor.BeginFile('');
+  CheckTrue(FHandler.CalledBeginFile, 'Called Begin File');
 end;
 
 procedure TestTD2XProcessor.TestBeginMethod;
 begin
-  FD2XProcessor.BeginMethod('Test');
+  FD2XProcessor.BeginMethod('');
+  CheckFalse(FHandler.CalledBeginMethod, 'Ignored Begin Method');
 
-  CheckTrue(FD2XProcessor.CalledBeginMethod, 'Called Begin Method');
+  fActive.Flag := True;
+  FD2XProcessor.BeginMethod('');
+  CheckTrue(FHandler.CalledBeginMethod, 'Called Begin Method');
 end;
 
 procedure TestTD2XProcessor.TestBeginResults;
 begin
   FD2XProcessor.BeginResults;
+  CheckFalse(FHandler.CalledBeginResults, 'Ignored Begin Results');
 
-  CheckTrue(FD2XProcessor.CalledBeginResults, 'Called Begin Results');
+  fActive.Flag := True;
+  FD2XProcessor.BeginResults;
+  CheckTrue(FHandler.CalledBeginResults, 'Called Begin Results');
 end;
 
 procedure TestTD2XProcessor.TestCheckAfterMethod;
 begin
-  CheckTrue(FD2XProcessor.CheckAfterMethod('Test'), 'Call Check After Method');
+  FD2XProcessor.CheckAfterMethod('');
+  CheckFalse(FHandler.CalledCheckAfterMethod, 'Ignored Check After Method');
 
-  CheckTrue(FD2XProcessor.CalledCheckAfterMethod, 'Called Check After Method');
+  fActive.Flag := True;
+  FD2XProcessor.CheckAfterMethod('');
+  CheckTrue(FHandler.CalledCheckAfterMethod, 'Called Check After Method');
 end;
 
 procedure TestTD2XProcessor.TestCheckBeforeMethod;
 begin
-  CheckTrue(FD2XProcessor.CheckBeforeMethod('Test'), 'Call Check Before Method');
+  FD2XProcessor.CheckBeforeMethod('');
+  CheckFalse(FHandler.CalledCheckBeforeMethod, 'Ignored Check Before Method');
 
-  CheckTrue(FD2XProcessor.CalledCheckBeforeMethod, 'Called Check Before Method');
+  fActive.Flag := True;
+  FD2XProcessor.CheckBeforeMethod('');
+  CheckTrue(FHandler.CalledCheckBeforeMethod, 'Called Check Before Method');
+end;
+
+procedure TestTD2XProcessor.TestCreateClass;
+begin
+  FreeAndNil(FD2XProcessor);
+  FD2XProcessor := TD2XProcessor.CreateClass(fActive, TD2XHandlerTester);
+  CheckTrue(FD2XProcessor.HandlerIs(TD2XHandlerTester), 'Check Handler class');
 end;
 
 procedure TestTD2XProcessor.TestEndFile;
 begin
-  FD2XProcessor.EndFile('');
+  FD2XProcessor.SetFileOutput(NilFile);
 
-  CheckTrue(FD2XProcessor.CalledEndFile, 'Called End File');
+  FD2XProcessor.EndFile('');
+  CheckFalse(FHandler.CalledEndFile, 'Ignored End File');
+
+  fActive.Flag := True;
+  FD2XProcessor.EndFile('');
+  CheckTrue(FHandler.CalledEndFile, 'Called End File');
 end;
 
 procedure TestTD2XProcessor.TestEndMethod;
 begin
-  FD2XProcessor.EndMethod('Test');
+  FD2XProcessor.EndMethod('');
+  CheckFalse(FHandler.CalledEndMethod, 'Ignored End Method');
 
-  CheckTrue(FD2XProcessor.CalledEndMethod, 'Called End Method');
+  fActive.Flag := True;
+  FD2XProcessor.EndMethod('');
+  CheckTrue(FHandler.CalledEndMethod, 'Called End Method');
 end;
 
 procedure TestTD2XProcessor.TestEndProcessing;
 begin
-  FD2XProcessor.EndProcessing;
+  FD2XProcessor.SetProcessingOutput(NilFile);
 
-  CheckTrue(FD2XProcessor.CalledEndProcessing, 'Called End Processing');
+  FD2XProcessor.EndProcessing;
+  CheckFalse(FHandler.CalledEndProcessing, 'Ignored End Processing');
+
+  fActive.Flag := True;
+  FD2XProcessor.EndProcessing;
+  CheckTrue(FHandler.CalledEndProcessing, 'Called End Processing');
 end;
 
 procedure TestTD2XProcessor.TestEndResults;
 begin
-  FD2XProcessor.EndResults('Test');
+  FD2XProcessor.SetResultsOutput(NilNamedFile);
 
-  CheckTrue(FD2XProcessor.CalledEndResults, 'Called End Results');
+  FD2XProcessor.EndResults('');
+  CheckFalse(FHandler.CalledEndResults, 'Ignored End Results');
+
+  fActive.Flag := True;
+  FD2XProcessor.EndResults('');
+  CheckTrue(FHandler.CalledEndResults, 'Called End Results');
 end;
 
 procedure TestTD2XProcessor.TestInvalidCreate;
 begin
-  CheckInvalidParam('Need to use correct constructor', 'TTestProcessor.Create',
+  CheckInvalidParam('Need to use correct constructor', 'TD2XProcessor.Create',
       procedure
     begin
-      TTestProcessor.Create;
+      TD2XProcessor.Create;
     end);
 end;
 
 procedure TestTD2XProcessor.TestLexerInclude;
 begin
-  FD2XProcessor.LexerInclude('Test', 0, 0);
+  FD2XProcessor.LexerInclude('Test', 1, 2);
+  CheckFalse(FHandler.CalledLexerInclude, 'Ignored Lexer Include');
 
-  CheckTrue(FD2XProcessor.CalledLexerInclude, 'Called Lexer Include');
+  fActive.Flag := True;
+  FD2XProcessor.LexerInclude('Test', 1, 2);
+  CheckTrue(FHandler.CalledLexerInclude, 'Called Lexer Include');
 end;
 
 procedure TestTD2XProcessor.TestParserMessage;
 begin
-  FD2XProcessor.ParserMessage(meNotSupported, 'Test', 0, 0);
+  FD2XProcessor.ParserMessage(meNotSupported, 'Test', 1, 2);
+  CheckFalse(FHandler.CalledParserMessage, 'Ignored Parser Message');
 
-  CheckTrue(FD2XProcessor.CalledParserMessage, 'Called Parser Message');
+  fActive.Flag := True;
+  FD2XProcessor.ParserMessage(meNotSupported, 'Test', 1, 2);
+  CheckTrue(FHandler.CalledParserMessage, 'Called Parser Message');
+end;
+
+procedure TestTD2XProcessor.TestSetFileInput;
+var
+  lCalled: Boolean;
+begin
+  FHandler.CreateStreams := True;
+  lCalled := False;
+
+  FD2XProcessor.SetFileInput(
+    function: ID2XFile
+    begin
+      lCalled := True;
+      Result := nil;
+    end);
+
+  FD2XProcessor.BeginFile('');
+  CheckFalse(lCalled, 'Ignored File Input');
+
+  fActive.Flag := True;
+  FD2XProcessor.BeginFile('');
+  CheckTrue(lCalled, 'Called File Input');
+end;
+
+procedure TestTD2XProcessor.TestSetFileOutput;
+var
+  lCalled: Boolean;
+begin
+  FHandler.CreateStreams := True;
+  lCalled := False;
+
+  FD2XProcessor.SetFileOutput(
+    function: ID2XFile
+    begin
+      lCalled := True;
+      Result := nil;
+    end);
+
+  FD2XProcessor.EndFile('');
+  CheckFalse(lCalled, 'Ignored File Output');
+
+  fActive.Flag := True;
+  FD2XProcessor.EndFile('');
+  CheckTrue(lCalled, 'Called File Output');
 end;
 
 procedure TestTD2XProcessor.TestSetParser;
 begin
-  FD2XProcessor.SetParser(nil);
+  FD2XProcessor.InitParser(nil);
+  CheckTrue(True, 'Init Parser missing');
+end;
 
-  CheckTrue(FD2XProcessor.CalledSetParser, 'Called Set Parser');
+procedure TestTD2XProcessor.TestSetProcessingOutput;
+var
+  lCalled: Boolean;
+begin
+  FHandler.CreateStreams := True;
+  lCalled := False;
+  FD2XProcessor.SetProcessingOutput(
+    function: ID2XFile
+    begin
+      lCalled := True;
+      Result := nil;
+    end);
+
+  FD2XProcessor.EndProcessing;
+  CheckFalse(lCalled, 'Ignored Processing Output');
+
+  fActive.Flag := True;
+  FD2XProcessor.EndProcessing;
+  CheckTrue(lCalled, 'Called Processing Output');
+end;
+
+procedure TestTD2XProcessor.TestSetResultsOutput;
+var
+  lCalled: Boolean;
+begin
+  FHandler.CreateStreams := True;
+  lCalled := False;
+  FD2XProcessor.SetResultsOutput(
+    function(pFile: string): ID2XFile
+    begin
+      lCalled := True;
+      Result := nil;
+    end);
+
+  FD2XProcessor.EndResults('');
+  CheckFalse(lCalled, 'Ignored Results Output');
+
+  fActive.Flag := True;
+  FD2XProcessor.EndResults('');
+  CheckTrue(lCalled, 'Called Results Output');
 end;
 
 procedure TestTD2XProcessor.TestUseProxy;
 begin
-  CheckFalse(FD2XProcessor.UseProxy, 'Call Use Proxy');
+  CheckFalse(FD2XProcessor.UseProxy, 'Dont Use Proxy');
 
-  CheckTrue(FD2XProcessor.CalledUseProxy, 'Called Use Proxy');
+  fActive.Flag := True;
+  CheckFalse(FD2XProcessor.UseProxy, 'Use Proxy');
+end;
+
+{ TestTD2XParserHandlerProcessor }
+
+procedure TestTD2XParserHandlerProcessor.SetUp;
+begin
+  inherited;
+
+  FHandler := TD2XParserHandlerTester.Create;
+  FD2XProcessor := TD2XProcessor.CreateHandler(fActive, FHandler, True);
+end;
+
+procedure TestTD2XParserHandlerProcessor.TearDown;
+begin
+  FreeAndNil(FD2XProcessor);
+
+  inherited;
+end;
+
+procedure TestTD2XParserHandlerProcessor.TestSetParser;
+begin
+  FD2XProcessor.InitParser(nil);
+  CheckTrue(FHandler.CalledInitParser, 'Called Init Parser');
 end;
 
 initialization
 
-// Register any test cases with the test runner
-RegisterTests('Processor', [TestTD2XProcessor.Suite]);
+RegisterTests('Processors', [TestTD2XProcessor.Suite, TestTD2XParserHandlerProcessor.Suite]);
 
 end.

@@ -10,9 +10,8 @@ uses
 
 type
   TD2XHandlerTester = class(TD2XHandler, ID2XHandler, ID2XProcessingHandler, ID2XFileHandler,
-    ID2XResultsHandler, ID2XMethodHandler, ID2XCheckHandler, ID2XMessagesHandler)
+    ID2XResultsHandler, ID2XMethods, ID2XChecks, ID2XMessages)
   public
-    CalledUseProxy: Boolean;
     CalledEndProcessing: Boolean;
     CalledBeginFile: Boolean;
     CalledEndFile: Boolean;
@@ -28,7 +27,6 @@ type
     CreateStreams: Boolean;
 
     function Description: String; override;
-    function UseProxy: Boolean; override;
     procedure EndProcessing(pOutput: TStreamWriterRef);
     procedure BeginFile(pFile: String; pInput: TStreamReaderRef);
     procedure EndFile(pFile: String; pOutput: TStreamWriterRef);
@@ -44,7 +42,7 @@ type
 
   end;
 
-  TD2XParserHandlerTester = class(TD2XHandler, ID2XParserHandler)
+  TD2XParserHandlerTester = class(TD2XHandler, ID2XParser)
   public
     CalledInitParser: Boolean;
 
@@ -136,12 +134,6 @@ procedure TD2XHandlerTester.ParserMessage(const pTyp: TMessageEventType;
 begin
   CalledParserMessage := true;
   inherited;
-end;
-
-function TD2XHandlerTester.UseProxy: Boolean;
-begin
-  CalledUseProxy := true;
-  Result := inherited UseProxy;
 end;
 
 { TD2XParserHandlerTester }

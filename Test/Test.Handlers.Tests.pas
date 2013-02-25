@@ -255,7 +255,7 @@ end;
 
 procedure TestTD2XCountChildrenHandler.TestUseProxy;
 begin
-  CheckTrue(fHndlr.UseProxy, 'Uses proxy');
+  CheckInterface(ID2XFullProxy, fHndlr, 'Uses full proxy');
 end;
 
 procedure TestTD2XCountChildrenHandler.TestBeginFile;
@@ -408,7 +408,7 @@ end;
 
 procedure TestTD2XSkipHandler.TestUseProxy;
 begin
-  CheckFalse(fHndlr.UseProxy, 'Uses proxy');
+  CheckNotInterface(ID2XFullProxy, fHndlr, 'Full proxy');
 end;
 
 { TestTD2XTreeHandler }
@@ -620,7 +620,7 @@ end;
 
 procedure TestTD2XTreeHandler.TestUseProxy;
 begin
-  CheckTrue(fHndlr.UseProxy, 'Uses proxy');
+  CheckInterface(ID2XFullProxy, fHndlr, 'Full proxy');
 end;
 
 { TestTD2XWriteDefinesHandler }
@@ -668,7 +668,7 @@ end;
 
 procedure TestTD2XWriteDefinesHandler.TestUseProxy;
 begin
-  CheckFalse(fHndlr.UseProxy, 'Uses proxy');
+  CheckNotInterface(ID2XFullProxy, fHndlr, 'Full proxy');
 end;
 
 { TestTD2XDefinesUsedHandler }
@@ -740,7 +740,7 @@ end;
 
 procedure TestTD2XCountDefinesUsedHandler.TestUseProxy;
 begin
-  CheckFalse(fHndlr.UseProxy, 'Uses proxy');
+  CheckNotInterface(ID2XFullProxy, fHndlr, 'Full proxy');
 end;
 
 { TestTD2XParserDefinesHandler }
@@ -801,7 +801,7 @@ end;
 
 procedure TestTD2XParserDefinesHandler.TestUseProxy;
 begin
-  CheckFalse(fHndlr.UseProxy, 'Uses proxy');
+  CheckNotInterface(ID2XFullProxy, fHndlr, 'Full proxy');
 end;
 
 { TestTD2XErrorHandler }
@@ -858,7 +858,7 @@ end;
 
 procedure TestTD2XErrorHandler.TestUseProxy;
 begin
-  CheckFalse(fHndlr.UseProxy, 'Uses proxy');
+  CheckNotInterface(ID2XFullProxy, fHndlr, 'Full proxy');
 end;
 
 { TestTD2XCountDefinesHandler }
@@ -973,7 +973,7 @@ end;
 
 procedure TestTD2XCountFinalDefinesHandler.TestUseProxy;
 begin
-  CheckTrue(fHndlr.UseProxy, 'Uses proxy');
+  CheckInterface(ID2XFullProxy, fHndlr, 'Full proxy');
 end;
 
 { TestTD2XHeldDefinesHandler }
@@ -1033,7 +1033,7 @@ end;
 
 procedure TestTD2XHeldDefinesHandler.TestUseProxy;
 begin
-  CheckFalse(fHndlr.UseProxy, 'Uses proxy');
+  CheckNotInterface(ID2XFullProxy, fHndlr, 'Full proxy');
 end;
 
 { TestTD2XLogHandler }
@@ -1094,7 +1094,7 @@ end;
 
 procedure TestTD2XLogHandler.TestUseProxy;
 begin
-  CheckFalse(fHndlr.UseProxy, 'Uses proxy');
+  CheckNotInterface(ID2XFullProxy, fHndlr, 'Full proxy');
 end;
 
 initialization

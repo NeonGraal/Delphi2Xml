@@ -17,7 +17,6 @@ uses
   D2X.Params in 'Source\D2X.Params.pas',
   D2X.Parser in 'Source\D2X.Parser.pas',
   D2X.Processor in 'Source\D2X.Processor.pas',
-  D2X.Processors in 'Source\D2X.Processors.pas',
   D2X.IO in 'Source\D2X.IO.pas',
   D2X.IO.Actual in 'Source\D2X.IO.Actual.pas',
   D2X.Param in 'Source\D2X.Param.pas',

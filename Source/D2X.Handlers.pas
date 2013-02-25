@@ -19,8 +19,8 @@ type
     Children: Integer;
   end;
 
-  TD2XCountChildrenHandler = class(TD2XHandler, ID2XProcessingHandler, ID2XFileHandler,
-    ID2XMethodHandler)
+  TD2XCountChildrenHandler = class(TD2XHandler, ID2XFullProxy, ID2XProcessingHandler, ID2XFileHandler,
+    ID2XMethods)
   private
     fCurrent: TMethodCount;
     fStack: TStack<TMethodCount>;
@@ -35,7 +35,6 @@ type
     destructor Destroy; override;
 
     function Description: string; override;
-    function UseProxy: Boolean; override;
 
     procedure EndProcessing(pOutput: TStreamWriterRef);
 
@@ -46,7 +45,7 @@ type
     procedure EndMethod(pMethod: string);
   end;
 
-  TD2XCountFinalDefinesHandler = class(TD2XParserHandler, ID2XProcessingHandler,
+  TD2XCountFinalDefinesHandler = class(TD2XParserHandler, ID2XFullProxy, ID2XProcessingHandler,
     ID2XFileHandler)
   private
     fDefines: TStrIntDict;
@@ -56,7 +55,6 @@ type
     destructor Destroy; override;
 
     function Description: string; override;
-    function UseProxy: Boolean; override;
 
     procedure EndProcessing(pOutput: TStreamWriterRef);
 
@@ -73,21 +71,18 @@ type
     destructor Destroy; override;
 
     function Description: string; override;
-    function UseProxy: Boolean; override;
-
     procedure EndProcessing(pOutput: TStreamWriterRef);
 
     procedure DefineUsed(pDef: string);
 
   end;
 
-  TD2XErrorHandler = class(TD2XParserHandler, ID2XMessagesHandler)
+  TD2XErrorHandler = class(TD2XParserHandler, ID2XMessages)
   public
     constructor Create; override;
     constructor CreateError(pTyp: TMessageEventType; pLogMessage: TD2XLogMessage);
 
     function Description: string; override;
-    function UseProxy: Boolean; override;
 
     procedure ParserMessage(const pTyp: TMessageEventType; const pMsg: string;
       pX, pY: Integer);
@@ -99,7 +94,7 @@ type
 
   end;
 
-  TD2XLogHandler = class(TD2XHandler, ID2XParserHandler, ID2XMethodHandler, ID2XMessagesHandler)
+  TD2XLogHandler = class(TD2XHandler, ID2XParser, ID2XMethods, ID2XMessages)
   protected
     fLexer: TD2XLexer;
 
@@ -108,8 +103,7 @@ type
 
     procedure InitParser(pParser: TD2XDefinesParser);
 
-    function Description: string;
-    function UseProxy: Boolean;
+    function Description: string; override;
 
     procedure BeginMethod(pMethod: string);
     procedure EndMethod(pMethod: string);
@@ -134,7 +128,6 @@ type
     procedure InitParser(pParser: TD2XDefinesParser); override;
 
     function Description: string; override;
-    function UseProxy: Boolean; override;
 
     procedure BeginFile(pFile: string; pInput: TStreamReaderRef);
     procedure EndFile(pFile: string; pOutput: TStreamWriterRef);
@@ -148,14 +141,13 @@ type
     constructor CreateDefines(pDefines: TStringList);
 
     function Description: string; override;
-    function UseProxy: Boolean; override;
 
     procedure BeginFile(pFile: string; pInput: TStreamReaderRef);
     procedure EndFile(pFile: string; pOutput: TStreamWriterRef);
   end;
 
   TD2XSkipHandler = class(TD2XHandler, ID2XProcessingHandler, ID2XFileHandler,
-    ID2XCheckHandler)
+    ID2XChecks)
   private
     fSkippedMethods: TStrIntDict;
 
@@ -164,7 +156,6 @@ type
     destructor Destroy; override;
 
     function Description: string; override;
-    function UseProxy: Boolean; override;
 
     function CheckBeforeMethod(pMethod: string): Boolean;
     function CheckAfterMethod(pMethod: string): Boolean;
@@ -178,14 +169,13 @@ type
   TD2XWriteDefinesHandler = class(TD2XParserHandler, ID2XResultsHandler)
   public
     function Description: string; override;
-    function UseProxy: Boolean; override;
 
     procedure BeginResults;
     procedure EndResults(pOutput: TStreamWriterRef);
   end;
 
-  TD2XTreeHandler = class(TD2XParserHandler, ID2XResultsHandler, ID2XMethodHandler,
-    ID2XMessagesHandler)
+  TD2XTreeHandler = class(TD2XParserHandler, ID2XFullProxy, ID2XResultsHandler, ID2XMethods,
+    ID2XMessages)
   private
     fHasFiles: Boolean;
 
@@ -204,7 +194,6 @@ type
     destructor Destroy; override;
 
     function Description: string; override;
-    function UseProxy: Boolean; override;
 
     procedure BeginResults;
     procedure EndResults(pOutput: TStreamWriterRef);
@@ -338,11 +327,6 @@ begin
     Result := '0,' + IntToStr(pPair.Value);
 end;
 
-function TD2XCountChildrenHandler.UseProxy: Boolean;
-begin
-  Result := True;
-end;
-
 { TD2XSkipHandler }
 
 procedure TD2XSkipHandler.BeginFile(pFile: string; pInput: TStreamReaderRef);
@@ -408,11 +392,6 @@ end;
 procedure TD2XSkipHandler.EndProcessing(pOutput: TStreamWriterRef);
 begin
   OutputStrIntDict(fSkippedMethods, pOutput, PairToStr);
-end;
-
-function TD2XSkipHandler.UseProxy: Boolean;
-begin
-  Result := False;
 end;
 
 { TD2XTreeHandler }
@@ -585,11 +564,6 @@ begin
     fTreeNode.TrimChildren(pElement);
 end;
 
-function TD2XTreeHandler.UseProxy: Boolean;
-begin
-  Result := True;
-end;
-
 { TD2XWriteDefinesHandler }
 
 procedure TD2XWriteDefinesHandler.BeginResults;
@@ -637,11 +611,6 @@ begin
   end;
 end;
 
-function TD2XWriteDefinesHandler.UseProxy: Boolean;
-begin
-  Result := False;
-end;
-
 { TD2XDefinesUsedHandler }
 
 constructor TD2XCountDefinesUsedHandler.Create;
@@ -677,11 +646,6 @@ end;
 procedure TD2XCountDefinesUsedHandler.EndProcessing(pOutput: TStreamWriterRef);
 begin
   OutputStrIntDict(fDefinesDict, pOutput, PairToStr);
-end;
-
-function TD2XCountDefinesUsedHandler.UseProxy: Boolean;
-begin
-  Result := False;
 end;
 
 { TD2XParserDefinesHandler }
@@ -734,11 +698,6 @@ begin
   InitDefines;
 end;
 
-function TD2XParserDefinesHandler.UseProxy: Boolean;
-begin
-  Result := False;
-end;
-
 { TD2XErrorHandler }
 
 constructor TD2XErrorHandler.Create;
@@ -781,10 +740,6 @@ begin
     end;
 end;
 
-function TD2XErrorHandler.UseProxy: Boolean;
-begin
-  Result := False;
-end;
 
 { TD2XCountDefinesHandler }
 
@@ -841,11 +796,6 @@ begin
   OutputStrIntDict(fDefines, pOutput, PairToStr);
 end;
 
-function TD2XCountFinalDefinesHandler.UseProxy: Boolean;
-begin
-  Result := True;
-end;
-
 { TD2XHeldDefinesHandler }
 
 procedure TD2XHeldDefinesHandler.BeginFile(pFile: string; pInput: TStreamReaderRef);
@@ -868,11 +818,6 @@ end;
 procedure TD2XHeldDefinesHandler.EndFile(pFile: string; pOutput: TStreamWriterRef);
 begin
 // Empty
-end;
-
-function TD2XHeldDefinesHandler.UseProxy: Boolean;
-begin
-  Result := False;
 end;
 
 { TD2XLogHandler }
@@ -925,11 +870,6 @@ begin
   else
     Log('???? @ %d,%d: %s', [pX, pY, pMsg]);
   end;
-end;
-
-function TD2XLogHandler.UseProxy: Boolean;
-begin
-  Result := False;
 end;
 
 end.

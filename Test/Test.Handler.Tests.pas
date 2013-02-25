@@ -21,7 +21,6 @@ type
     procedure TearDown; override;
   published
     procedure TestDescription;
-    procedure TestUseProxy;
     procedure TestEndProcessing;
     procedure TestBeginFile;
     procedure TestEndFile;
@@ -64,14 +63,14 @@ end;
 
 procedure TestTD2XHandler.TestCheckAfterMethod;
 begin
-  (FD2XHandler as ID2XCheckHandler).CheckAfterMethod('');
+  (FD2XHandler as ID2XChecks).CheckAfterMethod('');
 
   CheckTrue(FD2XTester.CalledCheckAfterMethod, 'Called Check After Method');
 end;
 
 procedure TestTD2XHandler.TestCheckBeforeMethod;
 begin
-  (FD2XHandler as ID2XCheckHandler).CheckBeforeMethod('');
+  (FD2XHandler as ID2XChecks).CheckBeforeMethod('');
 
   CheckTrue(FD2XTester.CalledCheckBeforeMethod, 'Called Check Before Method');
 end;
@@ -83,14 +82,14 @@ end;
 
 procedure TestTD2XHandler.TestBeginMethod;
 begin
-  (FD2XHandler as ID2XMethodHandler).BeginMethod('');
+  (FD2XHandler as ID2XMethods).BeginMethod('');
 
   CheckTrue(FD2XTester.CalledBeginMethod, 'Called Begin Method');
 end;
 
 procedure TestTD2XHandler.TestEndMethod;
 begin
-  (FD2XHandler as ID2XMethodHandler).EndMethod('');
+  (FD2XHandler as ID2XMethods).EndMethod('');
 
   CheckTrue(FD2XTester.CalledEndMethod, 'Called End Method');
 end;
@@ -104,21 +103,16 @@ end;
 
 procedure TestTD2XHandler.TestLexerInclude;
 begin
-  (FD2XHandler as ID2XMessagesHandler).LexerInclude('', 0, 0);
+  (FD2XHandler as ID2XMessages).LexerInclude('', 0, 0);
 
   CheckTrue(FD2XTester.CalledLexerInclude, 'Called Lexer Include');
 end;
 
 procedure TestTD2XHandler.TestParserMessage;
 begin
-  (FD2XHandler as ID2XMessagesHandler).ParserMessage(meError, '', 0, 0);
+  (FD2XHandler as ID2XMessages).ParserMessage(meError, '', 0, 0);
 
   CheckTrue(FD2XTester.CalledParserMessage, 'Called Parser Message');
-end;
-
-procedure TestTD2XHandler.TestUseProxy;
-begin
-  CheckFalse(FD2XHandler.UseProxy, 'Use Proxy');
 end;
 
 procedure TestTD2XHandler.TestBeginFile;

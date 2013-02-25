@@ -126,8 +126,8 @@ type
 implementation
 
 uses
-  D2X.Processors,
   D2X.IO.Options,
+  D2X.Handler,
   D2X.Tree.Json,
   D2X.Tree.Xml,
   System.StrUtils;
@@ -567,12 +567,12 @@ end;
 
 procedure TD2XOptions.InitFirstProcessors;
 begin
-  fProcs.Add(TD2XHandlerProcessor.CreateHandler(fFlags.ByLabel['LogErrors'],
+  fProcs.Add(TD2XProcessor.CreateHandler(fFlags.ByLabel['LogErrors'],
       TD2XErrorHandler.CreateError(meError, LogMessage), True));
-  fProcs.Add(TD2XHandlerProcessor.CreateHandler(fFlags.ByLabel['LogNotSupp'],
+  fProcs.Add(TD2XProcessor.CreateHandler(fFlags.ByLabel['LogNotSupp'],
       TD2XErrorHandler.CreateError(meNotSupported, LogMessage), True));
 
-  fProcs.Add(TD2XHandlerProcessor.CreateClass(fFlags.ByLabel['Verbose'], TD2XLogHandler));
+  fProcs.Add(TD2XProcessor.CreateClass(fFlags.ByLabel['Verbose'], TD2XLogHandler));
 
   fParams.Add(TD2XParam.Create('?', 'Options', '', 'Show valid options',
         function(pStr: string): Boolean
@@ -678,20 +678,20 @@ begin
   lParserDefinesHandler := TD2XParserDefinesHandler.CreateDefines(fParserDefines.Defines);
   lHeldDefinesHandler := TD2XHeldDefinesHandler.CreateDefines(fHeldDefines.Defines);
 
-  fProcs.Add(TD2XHandlerProcessor.CreateClass(lSkipMethods, TD2XSkipHandler).SetFileInput(
+  fProcs.Add(TD2XProcessor.CreateClass(lSkipMethods, TD2XSkipHandler).SetFileInput(
     function: ID2XFile
     begin
       Result := fIOFact.ConfigFileOrExtn(lSkipMethods.Value);
     end).SetProcessingOutput(MakeFileRef(lSkipMethods, '.log')));
-  fProcs.Add(TD2XHandlerProcessor.CreateClass(lCountChildren, TD2XCountChildrenHandler)
+  fProcs.Add(TD2XProcessor.CreateClass(lCountChildren, TD2XCountChildrenHandler)
     .SetFileInput(NilFileRef()).SetFileOutput(NilFileRef())
     .SetProcessingOutput(MakeFileRef(lCountChildren)));
-  fProcs.Add(TD2XHandlerProcessor.CreateClass(lCountFinalDefines, TD2XCountFinalDefinesHandler)
+  fProcs.Add(TD2XProcessor.CreateClass(lCountFinalDefines, TD2XCountFinalDefinesHandler)
     .SetFileOutput(NilFileRef()).SetProcessingOutput(MakeFileRef(lCountFinalDefines)));
-  fProcs.Add(TD2XHandlerProcessor.CreateHandler(lCountDefinesUsed, fCountDefinesUsedHandler,
+  fProcs.Add(TD2XProcessor.CreateHandler(lCountDefinesUsed, fCountDefinesUsedHandler,
     True).SetProcessingOutput(MakeFileRef(lCountDefinesUsed)));
-  fProcs.Add(TD2XHandlerProcessor.CreateHandler(fParserDefines, lParserDefinesHandler, True));
-  fProcs.Add(TD2XHandlerProcessor.CreateHandler(fHeldDefines, lHeldDefinesHandler, True));
+  fProcs.Add(TD2XProcessor.CreateHandler(fParserDefines, lParserDefinesHandler, True));
+  fProcs.Add(TD2XProcessor.CreateHandler(fHeldDefines, lHeldDefinesHandler, True));
 
   fParams.AddRange([lCountChildren, lCountFinalDefines, lCountDefinesUsed, lSkipMethods,
     fParserDefines, fHeldDefines]);
@@ -736,7 +736,7 @@ begin
     // fParser.Lexer.OnIfEndDirect := LexerOnIfEnd;
 
     for lP in fProcs do
-      lP.SetParser(fParser);
+      lP.InitParser(fParser);
   end;
 
   if fElapsedMode.Value = emProcessing then
@@ -806,11 +806,11 @@ begin
     'Write Final Defines files into current or given <d/e>', 'Defines,def', False,
     ConvertDirExtn);
 
-  fProcs.Add(TD2XHandlerProcessor.CreateHandler(lWriteXml, fXmlHandler, True)
+  fProcs.Add(TD2XProcessor.CreateHandler(lWriteXml, fXmlHandler, True)
     .SetResultsOutput(MakeNamedRef(lWriteXml)));
-  fProcs.Add(TD2XHandlerProcessor.CreateHandler(lWriteJson, fJsonHandler, True)
+  fProcs.Add(TD2XProcessor.CreateHandler(lWriteJson, fJsonHandler, True)
     .SetResultsOutput(MakeNamedRef(lWriteJson)));
-  fProcs.Add(TD2XHandlerProcessor.CreateClass(lWriteDefines, TD2XWriteDefinesHandler)
+  fProcs.Add(TD2XProcessor.CreateClass(lWriteDefines, TD2XWriteDefinesHandler)
     .SetResultsOutput(MakeNamedRef(lWriteDefines)));
 
   InitFirstProcessors;

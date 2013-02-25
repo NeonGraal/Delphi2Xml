@@ -15,6 +15,8 @@ type
   TBaseTestCase = class(TTestCase)
   protected
     procedure CheckInvalidParam(pExp, pLabel: string; pProc: TTestProc);
+    procedure CheckInterface(pExp: TGUID; pObj: TD2XInterfaced; pLabel: string);
+    procedure CheckNotInterface(pExp: TGUID; pObj: TD2XInterfaced; pLabel: string);
   end;
 
   TStringTestCase = class(TBaseTestCase)
@@ -203,6 +205,13 @@ end;
 
 { TBaseTestCase }
 
+procedure TBaseTestCase.CheckInterface(pExp: TGUID; pObj: TD2XInterfaced; pLabel: string);
+var
+  lObj: IUnknown;
+begin
+  CheckTrue(pObj.GetInterface(pExp, lObj), 'Has ' + pLabel + ' interface');
+end;
+
 procedure TBaseTestCase.CheckInvalidParam(pExp, pLabel: string; pProc: TTestProc);
 begin
   StartExpectingException(EInvalidParam);
@@ -215,6 +224,13 @@ begin
       raise;
     end;
   end;
+end;
+
+procedure TBaseTestCase.CheckNotInterface(pExp: TGUID; pObj: TD2XInterfaced; pLabel: string);
+var
+  lObj: IUnknown;
+begin
+  CheckFalse(pObj.GetInterface(pExp, lObj), 'Not ' + pLabel + ' interface');
 end;
 
 end.

@@ -4,13 +4,14 @@ interface
 
 uses
   CastaliaPasLexTypes,
+  D2X.Handler,
   D2X.Param,
   D2X.Parser,
   D2X.Processor,
   Test.Global;
 
 type
-  TTestProcessor = class(TD2XProcessor)
+  TTestProcessor = class(TD2XProcessor, ID2XParser, ID2XChecks, ID2XMethods, ID2XMessages)
   public
     CalledUseProxy: Boolean;
     CalledSetParser: Boolean;
@@ -27,19 +28,19 @@ type
     CalledLexerInclude: Boolean;
 
     function UseProxy: Boolean; override;
-    procedure SetParser(pParser: TD2XDefinesParser); override;
+    procedure InitParser(pParser: TD2XDefinesParser);
     procedure EndProcessing; override;
     procedure BeginFile(pFile: string); override;
     procedure EndFile(pFile: string); override;
     procedure BeginResults; override;
     procedure EndResults(pFile: string); override;
-    function CheckBeforeMethod(pMethod: string): Boolean; override;
-    function CheckAfterMethod(pMethod: string): Boolean; override;
-    procedure BeginMethod(pMethod: string); override;
-    procedure EndMethod(pMethod: string); override;
+    function CheckBeforeMethod(pMethod: string): Boolean;
+    function CheckAfterMethod(pMethod: string): Boolean;
+    procedure BeginMethod(pMethod: string);
+    procedure EndMethod(pMethod: string);
     procedure ParserMessage(const pTyp: TMessageEventType; const pMsg: string;
-      pX, pY: Integer); override;
-    procedure LexerInclude(const pFile: string; pX, pY: Integer); override;
+      pX, pY: Integer);
+    procedure LexerInclude(const pFile: string; pX, pY: Integer);
 
   end;
 
@@ -82,13 +83,13 @@ end;
 function TTestProcessor.CheckAfterMethod(pMethod: string): Boolean;
 begin
   CalledCheckAfterMethod := True;
-  Result := inherited CheckAfterMethod(pMethod);
+  Result := True;
 end;
 
 function TTestProcessor.CheckBeforeMethod(pMethod: string): Boolean;
 begin
   CalledCheckBeforeMethod := True;
-  Result := inherited CheckBeforeMethod(pMethod);
+  Result := True;
 end;
 
 procedure TTestProcessor.EndFile(pFile: string);
@@ -128,7 +129,7 @@ begin
   inherited;
 end;
 
-procedure TTestProcessor.SetParser(pParser: TD2XDefinesParser);
+procedure TTestProcessor.InitParser(pParser: TD2XDefinesParser);
 begin
   CalledSetParser := True;
   inherited;
