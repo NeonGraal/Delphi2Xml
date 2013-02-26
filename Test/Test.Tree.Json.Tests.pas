@@ -92,12 +92,11 @@ end;
 
 procedure TestTD2JsonElement.TestAddAttribute;
 var
-  ReturnValue: TD2XTreeNode;
   pTag: String;
 begin
   pTag := 'Attr';
 
-  ReturnValue := FD2JsonElement.AddAttribute(pTag);
+  FD2JsonElement.AddAttribute(pTag);
 
   CheckStream('Test:{_Attr:""}', 'Simple Node', FD2JsonElement.Stream);
 end;

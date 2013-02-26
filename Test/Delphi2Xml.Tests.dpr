@@ -24,7 +24,6 @@ uses
   Test.Constants in 'Source\Test.Constants.pas',
   Test.Global.Tests in 'Test.Global.Tests.pas',
   Test.Handler in 'Source\Test.Handler.pas',
-  Test.Handler.Tests in 'Test.Handler.Tests.pas',
   Test.Handlers in 'Source\Test.Handlers.pas',
   Test.Handlers.Tests in 'Test.Handlers.Tests.pas',
   Test.IO in 'Source\Test.IO.pas',

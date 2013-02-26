@@ -4,12 +4,13 @@ interface
 
 uses
   CastaliaPasLexTypes,
+  D2X.Global,
   D2X.Handler,
   D2X.IO,
   D2X.Parser;
 
 type
-  TD2XHandlerTester = class(TD2XHandler, ID2XHandler, ID2XProcessingHandler, ID2XFileHandler,
+  TD2XHandlerTester = class(TD2XLogger, ID2XHandler, ID2XProcessingHandler, ID2XFileHandler,
     ID2XResultsHandler, ID2XMethods, ID2XChecks, ID2XMessages)
   public
     CalledEndProcessing: Boolean;
@@ -26,7 +27,7 @@ type
 
     CreateStreams: Boolean;
 
-    function Description: String; override;
+    function Description: String;
     procedure EndProcessing(pOutput: TStreamWriterRef);
     procedure BeginFile(pFile: String; pInput: TStreamReaderRef);
     procedure EndFile(pFile: String; pOutput: TStreamWriterRef);
@@ -42,10 +43,11 @@ type
 
   end;
 
-  TD2XParserHandlerTester = class(TD2XHandler, ID2XParser)
+  TD2XParserHandlerTester = class(TD2XLogger, ID2XHandler, ID2XParser)
   public
     CalledInitParser: Boolean;
 
+    function Description: String;
     procedure InitParser(pParser: TD2XDefinesParser);
   end;
 
@@ -77,19 +79,18 @@ function TD2XHandlerTester.CheckAfterMethod(pMethod: String): Boolean;
 begin
   CalledCheckAfterMethod := true;
 
-  Result := True;
+  Result := true;
 end;
 
 function TD2XHandlerTester.CheckBeforeMethod(pMethod: String): Boolean;
 begin
   CalledCheckBeforeMethod := true;
 
-  Result := True;
+  Result := true;
 end;
 
 function TD2XHandlerTester.Description: String;
 begin
-  inherited;
   Result := 'Handler Tester';
 end;
 
@@ -137,6 +138,11 @@ begin
 end;
 
 { TD2XParserHandlerTester }
+
+function TD2XParserHandlerTester.Description: String;
+begin
+  Result := 'Parser Handler Tester';
+end;
 
 procedure TD2XParserHandlerTester.InitParser(pParser: TD2XDefinesParser);
 begin

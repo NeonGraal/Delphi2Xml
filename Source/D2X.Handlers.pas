@@ -14,13 +14,22 @@ uses
   System.Generics.Collections;
 
 type
+  TD2XParserHandler = class(TD2XLogger, ID2XParser)
+  protected
+    fParser: TD2XDefinesParser;
+
+  public
+    procedure InitParser(pParser: TD2XDefinesParser); virtual;
+
+  end;
+
   TMethodCount = record
     Method: string;
     Children: Integer;
   end;
 
-  TD2XCountChildrenHandler = class(TD2XHandler, ID2XFullProxy, ID2XProcessingHandler, ID2XFileHandler,
-    ID2XMethods)
+  TD2XCountChildrenHandler = class(TD2XLogger, ID2XHandler, ID2XFullProxy,
+    ID2XProcessingHandler, ID2XFileHandler, ID2XMethods)
   private
     fCurrent: TMethodCount;
     fStack: TStack<TMethodCount>;
@@ -34,7 +43,7 @@ type
     constructor Create; override;
     destructor Destroy; override;
 
-    function Description: string; override;
+    function Description: string;
 
     procedure EndProcessing(pOutput: TStreamWriterRef);
 
@@ -45,8 +54,8 @@ type
     procedure EndMethod(pMethod: string);
   end;
 
-  TD2XCountFinalDefinesHandler = class(TD2XParserHandler, ID2XFullProxy, ID2XProcessingHandler,
-    ID2XFileHandler)
+  TD2XCountFinalDefinesHandler = class(TD2XParserHandler, ID2XHandler, ID2XFullProxy,
+    ID2XProcessingHandler, ID2XFileHandler)
   private
     fDefines: TStrIntDict;
 
@@ -54,7 +63,7 @@ type
     constructor Create; override;
     destructor Destroy; override;
 
-    function Description: string; override;
+    function Description: string;
 
     procedure EndProcessing(pOutput: TStreamWriterRef);
 
@@ -62,7 +71,7 @@ type
     procedure EndFile(pFile: string; pOutput: TStreamWriterRef);
   end;
 
-  TD2XCountDefinesUsedHandler = class(TD2XHandler, ID2XProcessingHandler)
+  TD2XCountDefinesUsedHandler = class(TD2XLogger, ID2XHandler, ID2XProcessingHandler)
   private
     fDefinesDict: TStrIntDict;
 
@@ -70,19 +79,19 @@ type
     constructor Create; override;
     destructor Destroy; override;
 
-    function Description: string; override;
+    function Description: string;
     procedure EndProcessing(pOutput: TStreamWriterRef);
 
     procedure DefineUsed(pDef: string);
 
   end;
 
-  TD2XErrorHandler = class(TD2XParserHandler, ID2XMessages)
+  TD2XErrorHandler = class(TD2XParserHandler, ID2XHandler, ID2XMessages)
   public
     constructor Create; override;
     constructor CreateError(pTyp: TMessageEventType; pLogMessage: TD2XLogMessage);
 
-    function Description: string; override;
+    function Description: string;
 
     procedure ParserMessage(const pTyp: TMessageEventType; const pMsg: string;
       pX, pY: Integer);
@@ -94,7 +103,7 @@ type
 
   end;
 
-  TD2XLogHandler = class(TD2XHandler, ID2XParser, ID2XMethods, ID2XMessages)
+  TD2XLogHandler = class(TD2XLogger, ID2XHandler, ID2XParser, ID2XMethods, ID2XMessages)
   protected
     fLexer: TD2XLexer;
 
@@ -103,7 +112,7 @@ type
 
     procedure InitParser(pParser: TD2XDefinesParser);
 
-    function Description: string; override;
+    function Description: string;
 
     procedure BeginMethod(pMethod: string);
     procedure EndMethod(pMethod: string);
@@ -114,39 +123,38 @@ type
 
   end;
 
-  TD2XParserDefinesHandler = class(TD2XParserHandler, ID2XFileHandler)
+  TD2XParserDefinesHandler = class(TD2XParserHandler, ID2XHandler, ID2XFileHandler)
   private
     fDefines: TStringList;
     fInitOnce: Boolean;
 
     procedure InitDefines;
-    procedure Copy(pFrom: TD2XHandler);
 
   public
     constructor CreateDefines(pDefines: TStringList);
 
     procedure InitParser(pParser: TD2XDefinesParser); override;
 
-    function Description: string; override;
+    function Description: string;
 
     procedure BeginFile(pFile: string; pInput: TStreamReaderRef);
     procedure EndFile(pFile: string; pOutput: TStreamWriterRef);
   end;
 
-  TD2XHeldDefinesHandler = class(TD2XParserHandler, ID2XFileHandler)
+  TD2XHeldDefinesHandler = class(TD2XParserHandler, ID2XHandler, ID2XFileHandler)
   private
     fDefines: TStringList;
 
   public
     constructor CreateDefines(pDefines: TStringList);
 
-    function Description: string; override;
+    function Description: string;
 
     procedure BeginFile(pFile: string; pInput: TStreamReaderRef);
     procedure EndFile(pFile: string; pOutput: TStreamWriterRef);
   end;
 
-  TD2XSkipHandler = class(TD2XHandler, ID2XProcessingHandler, ID2XFileHandler,
+  TD2XSkipHandler = class(TD2XLogger, ID2XHandler, ID2XProcessingHandler, ID2XFileHandler,
     ID2XChecks)
   private
     fSkippedMethods: TStrIntDict;
@@ -155,7 +163,7 @@ type
     constructor Create; override;
     destructor Destroy; override;
 
-    function Description: string; override;
+    function Description: string;
 
     function CheckBeforeMethod(pMethod: string): Boolean;
     function CheckAfterMethod(pMethod: string): Boolean;
@@ -166,16 +174,16 @@ type
     procedure EndProcessing(pOutput: TStreamWriterRef);
   end;
 
-  TD2XWriteDefinesHandler = class(TD2XParserHandler, ID2XResultsHandler)
+  TD2XWriteDefinesHandler = class(TD2XParserHandler, ID2XHandler, ID2XResultsHandler)
   public
-    function Description: string; override;
+    function Description: string;
 
     procedure BeginResults;
     procedure EndResults(pOutput: TStreamWriterRef);
   end;
 
-  TD2XTreeHandler = class(TD2XParserHandler, ID2XFullProxy, ID2XResultsHandler, ID2XMethods,
-    ID2XMessages)
+  TD2XTreeHandler = class(TD2XParserHandler, ID2XHandler, ID2XFullProxy, ID2XResultsHandler,
+    ID2XMethods, ID2XMessages)
   private
     fHasFiles: Boolean;
 
@@ -193,7 +201,7 @@ type
       pParseMode: TD2XStringRef);
     destructor Destroy; override;
 
-    function Description: string; override;
+    function Description: string;
 
     procedure BeginResults;
     procedure EndResults(pOutput: TStreamWriterRef);
@@ -225,6 +233,13 @@ uses
 function PairToStr(pPair: TStrIntPair): string;
 begin
   Result := IntToStr(pPair.Value);
+end;
+
+{ TD2XParserHandler }
+
+procedure TD2XParserHandler.InitParser(pParser: TD2XDefinesParser);
+begin
+  fParser := pParser;
 end;
 
 { TD2XCountChildrenHandler }
@@ -386,7 +401,7 @@ end;
 
 procedure TD2XSkipHandler.EndFile(pFile: string; pOutput: TStreamWriterRef);
 begin
-// Empty
+  // Empty
 end;
 
 procedure TD2XSkipHandler.EndProcessing(pOutput: TStreamWriterRef);
@@ -568,7 +583,7 @@ end;
 
 procedure TD2XWriteDefinesHandler.BeginResults;
 begin
-// Empty
+  // Empty
 end;
 
 function TD2XWriteDefinesHandler.Description: string;
@@ -656,13 +671,6 @@ begin
   fParser.StartDefines.Assign(fDefines);
 end;
 
-procedure TD2XParserDefinesHandler.Copy(pFrom: TD2XHandler);
-begin
-  inherited;
-  if Assigned(pFrom) then
-    InitDefines;
-end;
-
 constructor TD2XParserDefinesHandler.CreateDefines(pDefines: TStringList);
 begin
   Create;
@@ -678,7 +686,7 @@ end;
 
 procedure TD2XParserDefinesHandler.EndFile(pFile: string; pOutput: TStreamWriterRef);
 begin
-// Empty
+  // Empty
 end;
 
 procedure TD2XParserDefinesHandler.InitDefines;
@@ -721,7 +729,7 @@ end;
 
 procedure TD2XErrorHandler.LexerInclude(const pFile: string; pX, pY: Integer);
 begin
-// Empty
+  // Empty
 end;
 
 procedure TD2XErrorHandler.ParserMessage(const pTyp: TMessageEventType;
@@ -740,12 +748,11 @@ begin
     end;
 end;
 
-
 { TD2XCountDefinesHandler }
 
 procedure TD2XCountFinalDefinesHandler.BeginFile(pFile: string; pInput: TStreamReaderRef);
 begin
-// Empty
+  // Empty
 end;
 
 constructor TD2XCountFinalDefinesHandler.Create;
@@ -817,7 +824,7 @@ end;
 
 procedure TD2XHeldDefinesHandler.EndFile(pFile: string; pOutput: TStreamWriterRef);
 begin
-// Empty
+  // Empty
 end;
 
 { TD2XLogHandler }

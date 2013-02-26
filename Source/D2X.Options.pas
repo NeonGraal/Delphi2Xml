@@ -24,8 +24,6 @@ type
   strict private
     fProcs: TObjectList<TD2XProcessor>;
 
-    fProgramDir: string;
-
     fDuration: TStopwatch;
 
     fParser: TD2XDefinesParser;
@@ -163,7 +161,6 @@ constructor TD2XOptions.Create;
 begin
   inherited Create;
 
-  fProgramDir := ExtractFilePath(ParamStr(0));
   fDuration := TStopwatch.StartNew;
 
   fParams := TD2XParams.Create;
@@ -688,8 +685,8 @@ begin
     .SetProcessingOutput(MakeFileRef(lCountChildren)));
   fProcs.Add(TD2XProcessor.CreateClass(lCountFinalDefines, TD2XCountFinalDefinesHandler)
     .SetFileOutput(NilFileRef()).SetProcessingOutput(MakeFileRef(lCountFinalDefines)));
-  fProcs.Add(TD2XProcessor.CreateHandler(lCountDefinesUsed, fCountDefinesUsedHandler,
-    True).SetProcessingOutput(MakeFileRef(lCountDefinesUsed)));
+  fProcs.Add(TD2XProcessor.CreateHandler(lCountDefinesUsed, fCountDefinesUsedHandler, True)
+    .SetProcessingOutput(MakeFileRef(lCountDefinesUsed)));
   fProcs.Add(TD2XProcessor.CreateHandler(fParserDefines, lParserDefinesHandler, True));
   fProcs.Add(TD2XProcessor.CreateHandler(fHeldDefines, lHeldDefinesHandler, True));
 
@@ -753,6 +750,7 @@ end;
 procedure TD2XOptions.InitProcessors(pFileOpts: ID2XIOFactory);
 var
   lWriteXml, lWriteJson, lWriteDefines: TD2XFlaggedStringParam;
+  lGetParseMode: TD2XStringRef;
 begin
   InitFlags;
 
@@ -786,16 +784,14 @@ begin
     'Elapsed time display (N[one], T[otal], D[ir], F[ile], P[rocessing], [Q]uiet)', emQuiet,
     TD2X.CnvEnum<TD2XElapsedMode>, TD2X.ToLabel<TD2XElapsedMode>);
 
+  lGetParseMode := function: string
+    begin
+      Result := TD2X.ToLabel(fParseMode.Value);
+    end;
   fXmlHandler := TD2XTreeHandler.CreateTree(TD2XXmlWriter, fFlags.ByLabel['FinalToken'],
-    function: string
-    begin
-      Result := TD2X.ToLabel(fParseMode.Value);
-    end);
+    lGetParseMode);
   fJsonHandler := TD2XTreeHandler.CreateTree(TD2XJsonWriter, fFlags.ByLabel['FinalToken'],
-    function: string
-    begin
-      Result := TD2X.ToLabel(fParseMode.Value);
-    end);
+    lGetParseMode);
   fCountDefinesUsedHandler := TD2XCountDefinesUsedHandler.Create;
 
   lWriteXml := TD2XFlaggedStringParam.CreateFlagStr('WX', 'Write XML', '<d/e>',

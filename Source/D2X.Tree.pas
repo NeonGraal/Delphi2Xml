@@ -6,7 +6,6 @@ uses
   System.Classes,
   System.Generics.Collections,
   System.SysUtils;
-// XTree.XTreeDoc,
 
 type
   ETreeWriter = class(Exception);

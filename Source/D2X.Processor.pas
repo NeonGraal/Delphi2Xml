@@ -15,7 +15,7 @@ type
   TD2XProcessor = class(TD2XLogger)
   public
     constructor Create; override;
-    constructor CreateHandler(pActive: ID2XFlag; pHandler: TD2XHandler; pMine: Boolean);
+    constructor CreateHandler(pActive: ID2XFlag; pHandler: TD2XLogger; pMine: Boolean);
     constructor CreateClass(pActive: ID2XFlag; pHandler: TD2XHandlerClass);
     destructor Destroy; override;
 
@@ -50,9 +50,8 @@ type
   private
     fActive: ID2XFlag;
     fMyHandler: Boolean;
-    fHandler: TD2XHandler;
+    fHandler: TD2XLogger;
 
-    fProcessingInput: TD2XFileRef;
     fProcessingOutput: TD2XFileRef;
     fResultsOutput: TD2XNamedStreamRef;
     fFileInput: TD2XFileRef;
@@ -76,7 +75,7 @@ var
   lFls: ID2XFileHandler;
 begin
   lS := nil;
-  if fHandler.GetInterface(ID2XFileHandler,lFls) and fActive.Flag then
+  if fHandler.GetInterface(ID2XFileHandler, lFls) and fActive.Flag then
     if Assigned(fFileInput) then
       try
         lFls.BeginFile(pFile,
@@ -88,7 +87,8 @@ begin
               if lS.Exists then
                 Result := lS.ReadFrom
               else
-                Log('WARNING: %1 file "%2" not found', [fHandler.Description, lS.Description]);
+                Log('WARNING: %1 file "%2" not found', [(fHandler as ID2XHandler).Description,
+                    lS.Description]);
           end);
       finally
         DisposeOf(lS);
@@ -109,7 +109,7 @@ procedure TD2XProcessor.BeginResults;
 var
   lRslts: ID2XResultsHandler;
 begin
-  if fHandler.GetInterface(ID2XResultsHandler,lRslts) and fActive.Flag then
+  if fHandler.GetInterface(ID2XResultsHandler, lRslts) and fActive.Flag then
     lRslts.BeginResults;
 end;
 
@@ -117,14 +117,16 @@ function TD2XProcessor.CheckAfterMethod(pMethod: string): Boolean;
 var
   lChks: ID2XChecks;
 begin
-  Result := not(fHandler.GetInterface(ID2XChecks,lChks) and fActive.Flag) or lChks.CheckAfterMethod(pMethod);
+  Result := not(fHandler.GetInterface(ID2XChecks, lChks) and fActive.Flag) or
+    lChks.CheckAfterMethod(pMethod);
 end;
 
 function TD2XProcessor.CheckBeforeMethod(pMethod: string): Boolean;
 var
   lChks: ID2XChecks;
 begin
-  Result := not(fHandler.GetInterface(ID2XChecks,lChks) and fActive.Flag) or lChks.CheckBeforeMethod(pMethod);
+  Result := not(fHandler.GetInterface(ID2XChecks, lChks) and fActive.Flag) or
+    lChks.CheckBeforeMethod(pMethod);
 end;
 
 constructor TD2XProcessor.Create;
@@ -138,10 +140,8 @@ begin
   CreateHandler(pActive, pHandler.Create, True);
 end;
 
-constructor TD2XProcessor.CreateHandler(pActive: ID2XFlag; pHandler: TD2XHandler;
+constructor TD2XProcessor.CreateHandler(pActive: ID2XFlag; pHandler: TD2XLogger;
   pMine: Boolean);
-var
-  lLog: ID2XLogger;
 begin
   Assert(Assigned(pActive), 'Active Flag must exist');
 
@@ -150,8 +150,7 @@ begin
   fActive := pActive;
   fMyHandler := pMine;
   fHandler := pHandler;
-  if fHandler.GetInterface(ID2XLogger, lLog) then
-    lLog.JoinLog(Self);
+  fHandler.JoinLog(Self);
 end;
 
 destructor TD2XProcessor.Destroy;
@@ -169,7 +168,7 @@ var
   lFls: ID2XFileHandler;
 begin
   lS := nil;
-  if fHandler.GetInterface(ID2XFileHandler,lFls) and fActive.Flag then
+  if fHandler.GetInterface(ID2XFileHandler, lFls) and fActive.Flag then
     if Assigned(fFileOutput) then
       try
         lFls.EndFile(pFile,
@@ -202,7 +201,7 @@ var
   lPrcs: ID2XProcessingHandler;
 begin
   lS := nil;
-  if fHandler.GetInterface(ID2XProcessingHandler,lPrcs) and fActive.Flag then
+  if fHandler.GetInterface(ID2XProcessingHandler, lPrcs) and fActive.Flag then
     if Assigned(fProcessingOutput) then
       try
         lPrcs.EndProcessing(
@@ -227,7 +226,7 @@ var
   lRslts: ID2XResultsHandler;
 begin
   lS := nil;
-  if fHandler.GetInterface(ID2XResultsHandler,lRslts) and fActive.Flag then
+  if fHandler.GetInterface(ID2XResultsHandler, lRslts) and fActive.Flag then
     if Assigned(fResultsOutput) then
       try
         lRslts.EndResults(
@@ -290,15 +289,13 @@ begin
     lPrsrs.InitParser(pParser);
 end;
 
-function TD2XProcessor.SetProcessingOutput(pFilename: TD2XFileRef)
-  : TD2XProcessor;
+function TD2XProcessor.SetProcessingOutput(pFilename: TD2XFileRef): TD2XProcessor;
 begin
   fProcessingOutput := pFilename;
   Result := Self;
 end;
 
-function TD2XProcessor.SetResultsOutput(pFilename: TD2XNamedStreamRef)
-  : TD2XProcessor;
+function TD2XProcessor.SetResultsOutput(pFilename: TD2XNamedStreamRef): TD2XProcessor;
 begin
   fResultsOutput := pFilename;
   Result := Self;

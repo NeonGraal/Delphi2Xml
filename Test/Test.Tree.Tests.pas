@@ -86,11 +86,9 @@ begin
 end;
 
 procedure TestTD2XTreeNode.TestGetStream;
-var
-  ReturnValue: TStringStream;
 begin
   StartExpectingException(ETreeWriter);
-  ReturnValue := FD2XTreeNode.Stream;
+  FD2XTreeNode.Stream;
   StopExpectingException('Invalid Node GetStream');
 end;
 
@@ -194,12 +192,11 @@ end;
 
 procedure TestTD2XTreeElement.TestAddAttribute;
 var
-  ReturnValue: TD2XTreeNode;
   pTag: String;
 begin
   pTag := 'Attr';
 
-  ReturnValue := FD2XTreeElement.AddAttribute(pTag);
+  FD2XTreeElement.AddAttribute(pTag);
 
   CheckStream('$Test< @Attr; >', 'Simple Node', FD2XTreeElement.Stream);
 end;

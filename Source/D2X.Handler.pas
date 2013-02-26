@@ -62,43 +62,8 @@ type
     procedure LexerInclude(const pFile: String; pX, pY: Integer);
   end;
 
-  TD2XHandler = class(TD2XLogger, ID2XHandler)
-  public
-    constructor Create; virtual;
-
-    function Description: String; virtual;
-  end;
-
-  TD2XHandlerClass = class of TD2XHandler;
-
-  TD2XParserHandler = class(TD2XHandler, ID2XParser)
-  protected
-    fParser: TD2XDefinesParser;
-
-  public
-    procedure InitParser(pParser: TD2XDefinesParser); virtual;
-
-  end;
+  TD2XHandlerClass = class of TD2XLogger;
 
 implementation
-
-{ TD2XHandler }
-
-constructor TD2XHandler.Create;
-begin
-
-end;
-
-function TD2XHandler.Description: String;
-begin
-  Result := 'Base Handler';
-end;
-
-{ TD2XParserHandler }
-
-procedure TD2XParserHandler.InitParser(pParser: TD2XDefinesParser);
-begin
-  fParser := pParser;
-end;
 
 end.

@@ -91,12 +91,11 @@ end;
 
 procedure TestTD2XmlElement.TestAddAttribute;
 var
-  ReturnValue: TD2XTreeNode;
   pTag: String;
 begin
   pTag := 'Attr';
 
-  ReturnValue := FD2XmlElement.AddAttribute(pTag);
+  FD2XmlElement.AddAttribute(pTag);
 
   CheckDoc('<Test Attr="" />', 'Simple Node', FD2XmlElement.Stream);
 end;

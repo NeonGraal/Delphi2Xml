@@ -162,7 +162,6 @@
 			<DCCReference Include="Source\Test.Constants.pas"/>
 			<DCCReference Include="Test.Global.Tests.pas"/>
 			<DCCReference Include="Source\Test.Handler.pas"/>
-			<DCCReference Include="Test.Handler.Tests.pas"/>
 			<DCCReference Include="Source\Test.Handlers.pas"/>
 			<DCCReference Include="Test.Handlers.Tests.pas"/>
 			<DCCReference Include="Source\Test.IO.pas"/>
@@ -255,13 +254,13 @@
 					<DeployFile LocalName="Delphi2XmlTests" Configuration="Debug" Class="ProjectOutput">
 						<Platform Name="All Platforms"/>
 					</DeployFile>
-					<DeployFile LocalName="$(BDS)\Redist\osx32\libcgunwind.1.0.dylib" Class="DependencyModule">
-						<Platform Name="OSX32"/>
-					</DeployFile>
 					<DeployFile LocalName="Delphi2XmlTests.rsm" Configuration="Debug" Class="DebugSymbols">
 						<Platform Name="Win64">
 							<RemoteName>Delphi2XmlTests.rsm</RemoteName>
 						</Platform>
+					</DeployFile>
+					<DeployFile LocalName="$(BDS)\Redist\osx32\libcgunwind.1.0.dylib" Class="DependencyModule">
+						<Platform Name="OSX32"/>
 					</DeployFile>
 					<DeployFile LocalName="Delphi2XmlTests.exe" Configuration="Debug" Class="ProjectOutput">
 						<Platform Name="Win64"/>
