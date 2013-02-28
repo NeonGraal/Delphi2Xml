@@ -27,7 +27,7 @@ type
     function Exists: Boolean;
   end;
 
-  TTestDir = class(TTestIO, ID2XDir)
+  TTestDir = class(TTestIO, ID2XIODir)
   private
     fDirs, fFiles: TStringDynArray;
     fCurr: TStack<string>;
@@ -69,11 +69,11 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    function ConfigFileOrExtn(pFileOrExtn: string): ID2XFile;
-    function LogFileOrExtn(pFileOrExtn: string): ID2XFile;
-    function BaseFile(pFileOrDir: string): ID2XFile;
-    function BaseDir(pFileOrDir: string): ID2XDir;
-    function SimpleFile(pFile: string): ID2XFile;
+    function ConfigFileOrExtn(pFileOrExtn: string): ID2XIOFile;
+    function LogFileOrExtn(pFileOrExtn: string): ID2XIOFile;
+    function BaseFile(pFileOrDir: string): ID2XIOFile;
+    function BaseDir(pFileOrDir: string): ID2XIODir;
+    function SimpleFile(pFile: string): ID2XIOFile;
 
     procedure SetGlobalName(const pName: string);
     procedure SetGlobalValidator(pValidator: TD2XSingleParam<string>.TspValidator);
@@ -89,7 +89,7 @@ type
     property GlobalName: string read fGlobalName write SetGlobalName;
   end;
 
-  TTestFile = class(TTestIO, ID2XFile)
+  TTestFile = class(TTestIO, ID2XIOFile)
   private
     fSR: TStreamReader;
     fSW: TStreamWriter;
@@ -282,7 +282,7 @@ end;
 
 { TTestFactor }
 
-function TTestFactory.BaseDir(pFileOrDir: string): ID2XDir;
+function TTestFactory.BaseDir(pFileOrDir: string): ID2XIODir;
 var
   lD: TATestDir;
 begin
@@ -295,7 +295,7 @@ begin
   Result := TTestDir.Create(pFileOrDir, True, lD.Dirs, lD.Files);
 end;
 
-function TTestFactory.BaseFile(pFileOrDir: string): ID2XFile;
+function TTestFactory.BaseFile(pFileOrDir: string): ID2XIOFile;
 var
   lInput: string;
 begin
@@ -318,7 +318,7 @@ begin
     fOutputFiles.Remove(pFile);
 end;
 
-function TTestFactory.ConfigFileOrExtn(pFileOrExtn: string): ID2XFile;
+function TTestFactory.ConfigFileOrExtn(pFileOrExtn: string): ID2XIOFile;
 var
   lInput: string;
 begin
@@ -406,7 +406,7 @@ begin
   fBaseDirs.Add('Test', TATestDir.Create([], []));
 end;
 
-function TTestFactory.LogFileOrExtn(pFileOrExtn: string): ID2XFile;
+function TTestFactory.LogFileOrExtn(pFileOrExtn: string): ID2XIOFile;
 var
   lInput: string;
   lExtn: string;
@@ -447,7 +447,7 @@ begin
   fTimestampFlag := pFlag;
 end;
 
-function TTestFactory.SimpleFile(pFile: string): ID2XFile;
+function TTestFactory.SimpleFile(pFile: string): ID2XIOFile;
 var
   lInput: string;
 begin

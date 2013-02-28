@@ -10,7 +10,7 @@ uses
   System.RegularExpressions;
 
 type
-  TD2XFileStream = class(TD2XInterfaced, ID2XFile)
+  TD2XFileStream = class(TD2XInterfaced, ID2XIOFile)
   private
     fSW: TStreamWriter;
     fSR: TStreamReader;
@@ -26,7 +26,7 @@ type
     function WriteTo(pAppend: Boolean = False): TStreamWriter;
   end;
 
-  TD2XDirPath = class(TD2XInterfaced, ID2XDir)
+  TD2XDirPath = class(TD2XInterfaced, ID2XIODir)
   private
     fBase, fPath: string;
     fSR: TSearchRec;
@@ -55,8 +55,7 @@ type
 
 implementation
 
-uses
-  System.StrUtils;
+
 
 { TD2XFileStream }
 

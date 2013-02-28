@@ -4,7 +4,7 @@ interface
 
 uses
   Test.Global,
-  D2X.Handler,
+
   D2X.Handlers,
   D2X.Parser;
 

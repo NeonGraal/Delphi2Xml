@@ -7,7 +7,7 @@ implementation
 uses
   D2X.Global,
   D2X.IO,
-  D2X.IO.Actual,
+
   D2X.Param,
   D2X.Params,
   System.Classes,
@@ -18,7 +18,6 @@ uses
   Test.Global,
   Test.IO,
   Test.Param,
-  Test.Utils,
   TestFramework;
 
 type
@@ -1471,7 +1470,7 @@ begin
   inherited;
 
   fDefP := TD2XDefinesParam.CreateDefines('T', 'Test',
-    function(pFile: string): ID2XFile
+    function(pFile: string): ID2XIOFile
     begin
       Result := TTestFile.Create('Config\' + pFile, True, 'Tango'#13#10'Uniform', nil);
     end);
@@ -1902,7 +1901,7 @@ begin
   inherited;
 
   fListP := TD2XListParam.CreateList('T', 'Test', 'Test', '.tst',
-    function(pFile: string): ID2XFile
+    function(pFile: string): ID2XIOFile
     begin
       Result := TTestFile.Create('Config\' + pFile, True, 'Tango'#13#10'Uniform', nil);
     end);

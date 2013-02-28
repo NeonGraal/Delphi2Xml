@@ -26,7 +26,7 @@ type
     fW: TStringWriter;
     fL: TStringList;
 
-    fDS: ID2XFile;
+    fDS: ID2XIOFile;
 
     procedure CheckBuilder(pExp, pLabel: string; pB: TStringBuilder = nil);
     procedure CheckList(pExp, pLabel: string; pL: TStringList = nil);
@@ -59,7 +59,7 @@ uses
   System.StrUtils;
 
 type
-  TD2XTestStream = class(TD2XInterfaced, ID2XFile)
+  TD2XTestStream = class(TD2XInterfaced, ID2XIOFile)
   private
     fSW: TStreamWriter;
     fSR: TStreamReader;

@@ -52,7 +52,7 @@ type
     constructor Create(pCode, pLabel, pSample, pDescr: String;
       pParser: TD2XStringCheckRef); override;
     constructor CreateList(pCode, pLabel, pDescr, pExtn: String;
-      pListFileName: TD2XNamedStreamRef);
+      pListFileName: TD2XNamedFileRef);
     destructor Destroy; override;
 
     procedure Output(pSL: TStringList); override;
@@ -69,7 +69,7 @@ type
   private
     fList: TStringList;
     fExtn: String;
-    fListFileName: TD2XNamedStreamRef;
+    fListFileName: TD2XNamedFileRef;
 
     function UseParser: TD2XStringCheckRef;
 
@@ -161,7 +161,7 @@ type
     constructor CreateParam(pCode, pLabel, pSample, pDescr: String; pDefault: Boolean;
       pConverter: TD2XSingleParam<Boolean>.TspConverter;
       pFormatter: TD2XSingleParam<Boolean>.TspFormatter); override;
-    constructor CreateDefines(pCode, pLabel: String; pDefinesFileName: TD2XNamedStreamRef);
+    constructor CreateDefines(pCode, pLabel: String; pDefinesFileName: TD2XNamedFileRef);
     destructor Destroy; override;
 
     procedure Output(pSL: TStringList); override;
@@ -176,7 +176,7 @@ type
 
   private
     fDefines: TStringList;
-    fDefinesFileName: TD2XNamedStreamRef;
+    fDefinesFileName: TD2XNamedFileRef;
 
     function UseConverter: TD2XSingleParam<Boolean>.TspConverter;
     function UseFormatter: TD2XSingleParam<Boolean>.TspFormatter;
@@ -447,7 +447,7 @@ end;
 { TD2XDefinesParam }
 
 constructor TD2XDefinesParam.CreateDefines(pCode, pLabel: String;
-  pDefinesFileName: TD2XNamedStreamRef);
+  pDefinesFileName: TD2XNamedFileRef);
 begin
   fDefines := TStringList.Create;
   fDefines.Sorted := True;
@@ -533,7 +533,7 @@ end;
 
 procedure TD2XDefinesParam.LoadDefines(pName: String; pFunc: TDefineProc);
 var
-  lF: ID2XFile;
+  lF: ID2XIOFile;
   lSL: TStringList;
   lS: String;
 begin
@@ -977,7 +977,7 @@ begin
 end;
 
 constructor TD2XListParam.CreateList(pCode, pLabel, pDescr, pExtn: String;
-  pListFileName: TD2XNamedStreamRef);
+  pListFileName: TD2XNamedFileRef);
 begin
   inherited Create(pCode, pLabel, '[!:]<list>', 'Clear(!), Load(:,' + pExtn +
       ') or Add items to ' + pDescr, UseParser());
@@ -1040,7 +1040,7 @@ end;
 
 procedure TD2XListParam.LoadItems(pFilename: String; pFunc: TItemProc);
 var
-  lF: ID2XFile;
+  lF: ID2XIOFile;
   lSL: TStringList;
   lS: String;
 begin

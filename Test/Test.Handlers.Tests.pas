@@ -13,7 +13,7 @@ uses
   D2X.Param,
   D2X.Parser,
   D2X.Tree,
-  D2X.Tree.Xml,
+
   System.Classes,
   System.StrUtils,
   System.SysUtils,
@@ -195,6 +195,8 @@ type
     procedure TestInitParser;
     procedure TestBeginResults;
     procedure TestEndResults;
+    procedure TestBeginFile;
+    procedure TestEndFile;
     procedure TestBeginMethod;
     procedure TestEndMethod;
     procedure TestAddAttr;
@@ -439,7 +441,7 @@ end;
 procedure TestTD2XTreeHandler.TestAddAttr;
 begin
   fHndlr.BeginResults;
-  fHndlr.HasFiles := True;
+  fHndlr.BeginFile('Test', nil);
   fHndlr.BeginMethod('Test');
   fHndlr.AddAttr('Test', 'Test');
   fHndlr.EndResults(FileWriterRef(fDS));
@@ -449,17 +451,26 @@ end;
 procedure TestTD2XTreeHandler.TestAddText;
 begin
   fHndlr.BeginResults;
-  fHndlr.HasFiles := True;
+  fHndlr.BeginFile('Test', nil);
   fHndlr.BeginMethod('Test');
   fHndlr.AddText('Test');
   fHndlr.EndResults(FileWriterRef(fDS));
   CheckStream('$Test< @parseMode:ParseMode; >:Test;', 'End Results');
 end;
 
+procedure TestTD2XTreeHandler.TestBeginFile;
+begin
+  CheckFalse(fHndlr.HasFiles, 'Has files not set');
+
+  fHndlr.BeginFile('Test', nil);
+
+  CheckTrue(fHndlr.HasFiles, 'Has files set');
+end;
+
 procedure TestTD2XTreeHandler.TestBeginMethod;
 begin
   fHndlr.BeginResults;
-  fHndlr.HasFiles := True;
+  fHndlr.BeginFile('Test', nil);
   fHndlr.BeginMethod('Test');
   fHndlr.EndResults(FileWriterRef(fDS));
   CheckStream('$Test< @parseMode:ParseMode; >', 'End Results');
@@ -467,7 +478,7 @@ end;
 
 procedure TestTD2XTreeHandler.TestBeginResults;
 begin
-  fHndlr.HasFiles := True;
+  fHndlr.BeginFile('Test', nil);
 
   CheckTrue(fHndlr.HasFiles, 'Has files set');
 
@@ -480,10 +491,17 @@ begin
   CheckEqualsString('Xml', fHndlr.Description, 'Description');
 end;
 
+procedure TestTD2XTreeHandler.TestEndFile;
+begin
+  fHndlr.EndFile('Test', nil);
+
+  CheckTrue(True, 'Check');
+end;
+
 procedure TestTD2XTreeHandler.TestEndMethod;
 begin
   fHndlr.BeginResults;
-  fHndlr.HasFiles := True;
+  fHndlr.BeginFile('Test', nil);
   fHndlr.BeginMethod('Test');
   fHndlr.EndMethod('Test');
   fHndlr.EndResults(FileWriterRef(fDS));
@@ -497,7 +515,7 @@ begin
   CheckStream('', 'End Results');
 
   fHndlr.BeginResults;
-  fHndlr.HasFiles := True;
+  fHndlr.BeginFile('Test', nil);
   fHndlr.EndResults(FileWriterRef(fDS));
   CheckStream(';', 'End Results');
 end;
@@ -533,7 +551,7 @@ end;
 procedure TestTD2XTreeHandler.TestLexerInclude;
 begin
   fHndlr.BeginResults;
-  fHndlr.HasFiles := True;
+  fHndlr.BeginFile('Test', nil);
   fHndlr.BeginMethod('Test');
 
   fHndlr.LexerInclude('Test', 1, 2);
@@ -546,7 +564,7 @@ end;
 procedure TestTD2XTreeHandler.TestParserMessage;
 begin
   fHndlr.BeginResults;
-  fHndlr.HasFiles := True;
+  fHndlr.BeginFile('Test', nil);
   fHndlr.BeginMethod('Test');
 
   fHndlr.ParserMessage(meNotSupported, 'Test', 1, 2);
@@ -556,7 +574,7 @@ begin
     'End Results');
 
   fHndlr.BeginResults;
-  fHndlr.HasFiles := True;
+  fHndlr.BeginFile('Test', nil);
   fHndlr.BeginMethod('Test');
   fHndlr.ParserMessage(meError, 'Test', 1, 2);
   fHndlr.EndResults(FileWriterRef(fDS));
@@ -567,7 +585,7 @@ end;
 procedure TestTD2XTreeHandler.TestProcessing;
 begin
   fHndlr.BeginResults;
-  fHndlr.HasFiles := True;
+  fHndlr.BeginFile('Test', nil);
   fHndlr.BeginMethod('Test');
   fHndlr.BeginMethod('Test1');
   fHndlr.AddAttr('Test', 'Test');
@@ -587,7 +605,7 @@ end;
 procedure TestTD2XTreeHandler.TestRollbackTo;
 begin
   fHndlr.BeginResults;
-  fHndlr.HasFiles := True;
+  fHndlr.BeginFile('Test', nil);
   fHndlr.BeginMethod('Test');
   fHndlr.BeginMethod('Test1');
   fHndlr.BeginMethod('Test2');
@@ -602,7 +620,7 @@ end;
 procedure TestTD2XTreeHandler.TestTrimChildren;
 begin
   fHndlr.BeginResults;
-  fHndlr.HasFiles := True;
+  fHndlr.BeginFile('Test', nil);
   fHndlr.BeginMethod('Test');
   fHndlr.BeginMethod('Test1');
   fHndlr.BeginMethod('Test2');

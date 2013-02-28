@@ -6,13 +6,12 @@ implementation
 
 uses
   D2X.Global,
-  D2X.IO,
+
   D2X.IO.Actual,
   System.Classes,
   System.SysUtils,
   Test.Constants,
   Test.Global,
-  Test.IO,
   TestFramework;
 
 type

@@ -19,30 +19,43 @@ type
     constructor CreateClass(pActive: ID2XFlag; pHandler: TD2XHandlerClass);
     destructor Destroy; override;
 
-    function UseProxy: Boolean; virtual;
+    function UseProxy: Boolean;
 
+//  ID2XParser interface
     procedure InitParser(pParser: TD2XDefinesParser);
 
-    procedure EndProcessing; virtual;
+//  ID2XProcessing interface
+    procedure EndProcessing;
 
-    procedure BeginFile(pFile: string); virtual;
-    procedure EndFile(pFile: string); virtual;
+//  ID2XFiles interface
+    procedure BeginFile(pFile: string);
+    procedure EndFile(pFile: string);
 
-    procedure BeginResults; virtual;
-    procedure EndResults(pFile: string); virtual;
+//  ID2XResults interface
+    procedure BeginResults;
+    procedure EndResults(pFile: string);
 
+//  ID2XTrees interface
+    procedure AddAttr(pName: string; pValue: string);
+    procedure AddText(pText: string);
+    procedure RollBackTo(pElement: string);
+    procedure TrimChildren(pElement: string);
+
+//  ID2XChecks interface
     function CheckBeforeMethod(pMethod: string): Boolean;
     function CheckAfterMethod(pMethod: string): Boolean;
 
+//  ID2XMethods interface
     procedure BeginMethod(pMethod: string);
     procedure EndMethod(pMethod: string);
 
+//  ID2XMessages interface
     procedure ParserMessage(const pTyp: TMessageEventType; const pMsg: string;
       pX, pY: Integer);
     procedure LexerInclude(const pFile: string; pX, pY: Integer);
 
     function SetProcessingOutput(pFilename: TD2XFileRef): TD2XProcessor;
-    function SetResultsOutput(pFilename: TD2XNamedStreamRef): TD2XProcessor;
+    function SetResultsOutput(pFilename: TD2XNamedFileRef): TD2XProcessor;
     function SetFileInput(pFilename: TD2XFileRef): TD2XProcessor;
     function SetFileOutput(pFilename: TD2XFileRef): TD2XProcessor;
 
@@ -53,7 +66,7 @@ type
     fHandler: TD2XLogger;
 
     fProcessingOutput: TD2XFileRef;
-    fResultsOutput: TD2XNamedStreamRef;
+    fResultsOutput: TD2XNamedFileRef;
     fFileInput: TD2XFileRef;
     fFileOutput: TD2XFileRef;
 
@@ -62,20 +75,35 @@ type
 implementation
 
 uses
-  D2X.Handlers,
+
   System.Classes,
-  System.IOUtils,
   System.SysUtils;
 
 { TD2XProcessor  }
 
+procedure TD2XProcessor.AddAttr(pName, pValue: string);
+var
+  lTrees: ID2XTrees;
+begin
+  if fHandler.GetInterface(ID2XTrees, lTrees) and fActive.Flag then
+    lTrees.AddAttr(pName, pValue);
+end;
+
+procedure TD2XProcessor.AddText(pText: string);
+var
+  lTrees: ID2XTrees;
+begin
+  if fHandler.GetInterface(ID2XTrees, lTrees) and fActive.Flag then
+    lTrees.AddText(pText);
+end;
+
 procedure TD2XProcessor.BeginFile(pFile: string);
 var
-  lS: ID2XFile;
-  lFls: ID2XFileHandler;
+  lS: ID2XIOFile;
+  lFls: ID2XFiles;
 begin
   lS := nil;
-  if fHandler.GetInterface(ID2XFileHandler, lFls) and fActive.Flag then
+  if fHandler.GetInterface(ID2XFiles, lFls) and fActive.Flag then
     if Assigned(fFileInput) then
       try
         lFls.BeginFile(pFile,
@@ -107,9 +135,9 @@ end;
 
 procedure TD2XProcessor.BeginResults;
 var
-  lRslts: ID2XResultsHandler;
+  lRslts: ID2XResults;
 begin
-  if fHandler.GetInterface(ID2XResultsHandler, lRslts) and fActive.Flag then
+  if fHandler.GetInterface(ID2XResults, lRslts) and fActive.Flag then
     lRslts.BeginResults;
 end;
 
@@ -164,11 +192,11 @@ end;
 
 procedure TD2XProcessor.EndFile(pFile: string);
 var
-  lS: ID2XFile;
-  lFls: ID2XFileHandler;
+  lS: ID2XIOFile;
+  lFls: ID2XFiles;
 begin
   lS := nil;
-  if fHandler.GetInterface(ID2XFileHandler, lFls) and fActive.Flag then
+  if fHandler.GetInterface(ID2XFiles, lFls) and fActive.Flag then
     if Assigned(fFileOutput) then
       try
         lFls.EndFile(pFile,
@@ -197,11 +225,11 @@ end;
 
 procedure TD2XProcessor.EndProcessing;
 var
-  lS: ID2XFile;
-  lPrcs: ID2XProcessingHandler;
+  lS: ID2XIOFile;
+  lPrcs: ID2XProcessing;
 begin
   lS := nil;
-  if fHandler.GetInterface(ID2XProcessingHandler, lPrcs) and fActive.Flag then
+  if fHandler.GetInterface(ID2XProcessing, lPrcs) and fActive.Flag then
     if Assigned(fProcessingOutput) then
       try
         lPrcs.EndProcessing(
@@ -222,11 +250,11 @@ end;
 
 procedure TD2XProcessor.EndResults(pFile: string);
 var
-  lS: ID2XFile;
-  lRslts: ID2XResultsHandler;
+  lS: ID2XIOFile;
+  lRslts: ID2XResults;
 begin
   lS := nil;
-  if fHandler.GetInterface(ID2XResultsHandler, lRslts) and fActive.Flag then
+  if fHandler.GetInterface(ID2XResults, lRslts) and fActive.Flag then
     if Assigned(fResultsOutput) then
       try
         lRslts.EndResults(
@@ -267,6 +295,14 @@ begin
     lMsgs.ParserMessage(pTyp, pMsg, pX, pY);
 end;
 
+procedure TD2XProcessor.RollBackTo(pElement: string);
+var
+  lTrees: ID2XTrees;
+begin
+  if fHandler.GetInterface(ID2XTrees, lTrees) and fActive.Flag then
+    lTrees.RollBackTo(pElement);
+end;
+
 function TD2XProcessor.SetFileInput(pFilename: TD2XFileRef): TD2XProcessor;
 begin
   fFileInput := pFilename;
@@ -295,10 +331,18 @@ begin
   Result := Self;
 end;
 
-function TD2XProcessor.SetResultsOutput(pFilename: TD2XNamedStreamRef): TD2XProcessor;
+function TD2XProcessor.SetResultsOutput(pFilename: TD2XNamedFileRef): TD2XProcessor;
 begin
   fResultsOutput := pFilename;
   Result := Self;
+end;
+
+procedure TD2XProcessor.TrimChildren(pElement: string);
+var
+  lTrees: ID2XTrees;
+begin
+  if fHandler.GetInterface(ID2XTrees, lTrees) and fActive.Flag then
+    lTrees.TrimChildren(pElement);
 end;
 
 function TD2XProcessor.UseProxy: Boolean;

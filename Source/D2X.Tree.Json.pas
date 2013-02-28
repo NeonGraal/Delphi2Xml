@@ -18,7 +18,6 @@ type
 implementation
 
 uses
-  Data.Cloud.CloudAPI,
   System.SysUtils;
 
 { TD2XJsonWriter }

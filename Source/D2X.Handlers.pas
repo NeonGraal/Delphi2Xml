@@ -29,7 +29,7 @@ type
   end;
 
   TD2XCountChildrenHandler = class(TD2XLogger, ID2XHandler, ID2XFullProxy,
-    ID2XProcessingHandler, ID2XFileHandler, ID2XMethods)
+    ID2XProcessing, ID2XFiles, ID2XMethods)
   private
     fCurrent: TMethodCount;
     fStack: TStack<TMethodCount>;
@@ -55,7 +55,7 @@ type
   end;
 
   TD2XCountFinalDefinesHandler = class(TD2XParserHandler, ID2XHandler, ID2XFullProxy,
-    ID2XProcessingHandler, ID2XFileHandler)
+    ID2XProcessing, ID2XFiles)
   private
     fDefines: TStrIntDict;
 
@@ -71,7 +71,7 @@ type
     procedure EndFile(pFile: string; pOutput: TStreamWriterRef);
   end;
 
-  TD2XCountDefinesUsedHandler = class(TD2XLogger, ID2XHandler, ID2XProcessingHandler)
+  TD2XCountDefinesUsedHandler = class(TD2XLogger, ID2XHandler, ID2XProcessing)
   private
     fDefinesDict: TStrIntDict;
 
@@ -123,7 +123,7 @@ type
 
   end;
 
-  TD2XParserDefinesHandler = class(TD2XParserHandler, ID2XHandler, ID2XFileHandler)
+  TD2XParserDefinesHandler = class(TD2XParserHandler, ID2XHandler, ID2XFiles)
   private
     fDefines: TStringList;
     fInitOnce: Boolean;
@@ -141,7 +141,7 @@ type
     procedure EndFile(pFile: string; pOutput: TStreamWriterRef);
   end;
 
-  TD2XHeldDefinesHandler = class(TD2XParserHandler, ID2XHandler, ID2XFileHandler)
+  TD2XHeldDefinesHandler = class(TD2XParserHandler, ID2XHandler, ID2XFiles)
   private
     fDefines: TStringList;
 
@@ -154,7 +154,7 @@ type
     procedure EndFile(pFile: string; pOutput: TStreamWriterRef);
   end;
 
-  TD2XSkipHandler = class(TD2XLogger, ID2XHandler, ID2XProcessingHandler, ID2XFileHandler,
+  TD2XSkipHandler = class(TD2XLogger, ID2XHandler, ID2XProcessing, ID2XFiles,
     ID2XChecks)
   private
     fSkippedMethods: TStrIntDict;
@@ -174,7 +174,7 @@ type
     procedure EndProcessing(pOutput: TStreamWriterRef);
   end;
 
-  TD2XWriteDefinesHandler = class(TD2XParserHandler, ID2XHandler, ID2XResultsHandler)
+  TD2XWriteDefinesHandler = class(TD2XParserHandler, ID2XHandler, ID2XResults)
   public
     function Description: string;
 
@@ -182,8 +182,8 @@ type
     procedure EndResults(pOutput: TStreamWriterRef);
   end;
 
-  TD2XTreeHandler = class(TD2XParserHandler, ID2XHandler, ID2XFullProxy, ID2XResultsHandler,
-    ID2XMethods, ID2XMessages)
+  TD2XTreeHandler = class(TD2XParserHandler, ID2XHandler, ID2XFullProxy, ID2XResults,
+    ID2XFiles, ID2XMethods, ID2XMessages, ID2XTrees)
   private
     fHasFiles: Boolean;
 
@@ -206,6 +206,9 @@ type
     procedure BeginResults;
     procedure EndResults(pOutput: TStreamWriterRef);
 
+    procedure BeginFile(pFile: String; pInput: TStreamReaderRef);
+    procedure EndFile(pFile: String; pOutput: TStreamWriterRef);
+
     procedure BeginMethod(pMethod: string);
     procedure EndMethod(pMethod: string);
 
@@ -213,20 +216,19 @@ type
       pX, pY: Integer);
     procedure LexerInclude(const pFile: string; pX, pY: Integer);
 
-    procedure AddAttr(pName: string; pValue: string = '');
-    procedure AddText(pText: string = '');
+    procedure AddAttr(pName: string; pValue: string);
+    procedure AddText(pText: string);
     procedure TrimChildren(pElement: string);
-
     procedure RollbackTo(pNodeName: string);
 
-    property HasFiles: Boolean read fHasFiles write fHasFiles;
+    property HasFiles: Boolean read fHasFiles;
   end;
 
 implementation
 
 uses
-  D2X.Options,
-  System.IOUtils,
+
+
   System.SysUtils,
   Xml.XMLIntf;
 
@@ -448,6 +450,11 @@ begin
       fTreeNode.Text := fTreeNode.Text + pText;
 end;
 
+procedure TD2XTreeHandler.BeginFile(pFile: String; pInput: TStreamReaderRef);
+begin
+  fHasFiles := True;
+end;
+
 procedure TD2XTreeHandler.BeginMethod(pMethod: string);
 begin
   if Assigned(fTreeDoc) then
@@ -508,13 +515,18 @@ begin
   inherited;
 end;
 
+procedure TD2XTreeHandler.EndFile(pFile: String; pOutput: TStreamWriterRef);
+begin
+
+end;
+
 procedure TD2XTreeHandler.EndMethod(pMethod: string);
 begin
   if Assigned(fTreeNode) then
   begin
     if Assigned(fFinalToken) and fFinalToken.Flag and Assigned(fParser) and
       not fParser.KeepTokens and (Length(fParser.LastTokens) > 1) then
-      AddAttr('lastToken');
+      AddAttr('lastToken', '');
 
     fTreeNode.Stream;
     fTreeNode := fTreeNode.ParentNode;

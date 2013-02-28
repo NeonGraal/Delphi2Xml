@@ -27,13 +27,13 @@ type
     CalledParserMessage: Boolean;
     CalledLexerInclude: Boolean;
 
-    function UseProxy: Boolean; override;
+    function UseProxy: Boolean;
     procedure InitParser(pParser: TD2XDefinesParser);
-    procedure EndProcessing; override;
-    procedure BeginFile(pFile: string); override;
-    procedure EndFile(pFile: string); override;
-    procedure BeginResults; override;
-    procedure EndResults(pFile: string); override;
+    procedure EndProcessing;
+    procedure BeginFile(pFile: string);
+    procedure EndFile(pFile: string);
+    procedure BeginResults;
+    procedure EndResults(pFile: string);
     function CheckBeforeMethod(pMethod: string): Boolean;
     function CheckAfterMethod(pMethod: string): Boolean;
     procedure BeginMethod(pMethod: string);

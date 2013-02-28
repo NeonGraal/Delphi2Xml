@@ -26,21 +26,29 @@ type
     procedure InitParser(pParser: TD2XDefinesParser);
   end;
 
-  ID2XProcessingHandler = interface
+  ID2XProcessing = interface
     ['{679284DC-8E45-471B-B303-528763507690}']
     procedure EndProcessing(pOutput: TStreamWriterRef);
   end;
 
-  ID2XFileHandler = interface
+  ID2XFiles = interface
     ['{7FEC9B9F-1502-42F6-BF00-C969B4C6051F}']
     procedure BeginFile(pFile: String; pInput: TStreamReaderRef);
     procedure EndFile(pFile: String; pOutput: TStreamWriterRef);
   end;
 
-  ID2XResultsHandler = interface
+  ID2XResults = interface
     ['{F3A952D9-E9A2-4923-8EA2-585DBD4C8125}']
     procedure BeginResults;
     procedure EndResults(pOutput: TStreamWriterRef);
+  end;
+
+  ID2XTrees = interface
+    ['{6A368D3F-23ED-4ED6-A8CF-5B885C112ACA}']
+    procedure AddAttr(pName: string; pValue: string);
+    procedure AddText(pText: string);
+    procedure RollBackTo(pElement: string);
+    procedure TrimChildren(pElement: string);
   end;
 
   ID2XMethods = interface

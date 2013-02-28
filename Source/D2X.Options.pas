@@ -32,8 +32,6 @@ type
     fFilename: string;
     fCurrentMethod: string;
 
-    fXmlHandler: TD2XTreeHandler;
-    fJsonHandler: TD2XTreeHandler;
     fCountDefinesUsedHandler: TD2XCountDefinesUsedHandler;
 
     fIOFact: ID2XIOFactory;
@@ -80,12 +78,8 @@ type
 
     function GetRecurse: Boolean;
 
-    function MakeNamedRef(pVal: TD2XSingleParam<string>): TD2XNamedStreamRef;
+    function MakeNamedRef(pVal: TD2XSingleParam<string>): TD2XNamedFileRef;
     function MakeFileRef(pVal: TD2XSingleParam<string>; pSuffix: string = ''): TD2XFileRef;
-
-    procedure AddAttr(pName: string; pValue: string = '');
-    procedure AddText(pText: string = '');
-    procedure TrimChildren(pElement: string);
 
   protected
     fParams: TD2XParams;
@@ -102,7 +96,7 @@ type
     procedure InitOtherProcessors;
 
     function ProcessOption(pOpt: string): Boolean;
-    function ConfigFileOrExtn(pFileOrExtn: string): ID2XFile;
+    function ConfigFileOrExtn(pFileOrExtn: string): ID2XIOFile;
 
     procedure BeginResults(pNodename: string; pPer: TD2XResultPer);
     procedure EndResults(pFilename: string; pPer: TD2XResultPer);
@@ -125,24 +119,12 @@ implementation
 
 uses
   D2X.IO.Options,
-  D2X.Handler,
+
   D2X.Tree.Json,
   D2X.Tree.Xml,
   System.StrUtils;
 
 { TD2XOptions }
-
-procedure TD2XOptions.AddAttr(pName, pValue: string);
-begin
-  fXmlHandler.AddAttr(pName, pValue);
-  fJsonHandler.AddAttr(pName, pValue);
-end;
-
-procedure TD2XOptions.AddText(pText: string);
-begin
-  fXmlHandler.AddText(pText);
-  fJsonHandler.AddText(pText);
-end;
 
 procedure TD2XOptions.BeginResults(pNodename: string; pPer: TD2XResultPer);
 var
@@ -207,11 +189,11 @@ var
   lP: TD2XProcessor;
 begin
   if fResultPer.Value >= pPer then
-  begin
-    AddAttr('fileName', pFilename);
     for lP in fProcs do
+    begin
+      lP.AddAttr('fileName', pFilename);
       lP.EndMethod('');
-  end;
+    end;
 
   if fResultPer.Value = pPer then
   begin
@@ -249,15 +231,15 @@ end;
 
 function TD2XOptions.MakeFileRef(pVal: TD2XSingleParam<string>; pSuffix: string): TD2XFileRef;
 begin
-  Result := function: ID2XFile
+  Result := function: ID2XIOFile
     begin
       Result := fIOFact.LogFileOrExtn(pVal.Value + pSuffix);
     end;
 end;
 
-function TD2XOptions.MakeNamedRef(pVal: TD2XSingleParam<string>): TD2XNamedStreamRef;
+function TD2XOptions.MakeNamedRef(pVal: TD2XSingleParam<string>): TD2XNamedFileRef;
 begin
-  Result := function(pFilename: string): ID2XFile
+  Result := function(pFilename: string): ID2XIOFile
     var
       lDir, lExtn: string;
     begin
@@ -272,7 +254,7 @@ end;
 
 procedure TD2XOptions.LogMessage(pType, pMsg: string; pX, pY: Integer);
 var
-  lErrFile: ID2XFile;
+  lErrFile: ID2XIOFile;
   lExists: Boolean;
   lDS: TD2XInterfaced;
 begin
@@ -326,9 +308,10 @@ end;
 
 function TD2XOptions.ProcessDirectory(pDir, pWildCards: string): Boolean;
 var
-  lPath: ID2XDir;
+  lPath: ID2XIODir;
   lFile, lGroup, lS: string;
   lTimer: TStopwatch;
+  lP: TD2XProcessor;
 const
   INIT_GROUP = '~~~~';
   procedure DirEndResults(pName: string; pPer: TD2XResultPer);
@@ -365,7 +348,8 @@ begin
                 DirEndResults('Group-' + lGroup, rpGroup);
               lGroup := lS;
               BeginResults('D2X_Group', rpGroup);
-              AddAttr('name', lGroup);
+              for lP in fProcs do
+                lP.AddAttr('name', lGroup);
             end;
             Result := ProcessFile(lPath.Current, True) or Result;
           until not lPath.Next;
@@ -399,7 +383,7 @@ end;
 
 function TD2XOptions.ProcessFile(pFilename: string; pInDir: Boolean): Boolean;
 var
-  lFile: ID2XFile;
+  lFile: ID2XIOFile;
 begin
   Result := False;
   lFile := fIOFact.BaseFile(pFilename);
@@ -590,7 +574,7 @@ begin
     function(pStr: string): Boolean
     var
       lSL: TStringList;
-      lFile: ID2XFile;
+      lFile: ID2XIOFile;
       lPrm: TD2XParam;
     begin
       Result := True;
@@ -653,7 +637,7 @@ var
 
   function NilFileRef: TD2XFileRef;
   begin
-    Result := function: ID2XFile
+    Result := function: ID2XIOFile
       begin
         Result := nil;
       end;
@@ -676,7 +660,7 @@ begin
   lHeldDefinesHandler := TD2XHeldDefinesHandler.CreateDefines(fHeldDefines.Defines);
 
   fProcs.Add(TD2XProcessor.CreateClass(lSkipMethods, TD2XSkipHandler).SetFileInput(
-    function: ID2XFile
+    function: ID2XIOFile
     begin
       Result := fIOFact.ConfigFileOrExtn(lSkipMethods.Value);
     end).SetProcessingOutput(MakeFileRef(lSkipMethods, '.log')));
@@ -716,9 +700,28 @@ begin
     fParser := lC.Create;
 
     fParser.OnMessage := ParserMessage;
-    fParser.AddAttribute := AddAttr;
-    fParser.AddText := AddText;
-    fParser.TrimChildren := TrimChildren;
+    fParser.AddAttribute := procedure(pName, pValue: string)
+      var
+        lP: TD2XProcessor;
+      begin
+        for lP in fProcs do
+          lP.AddAttr(pName, pValue);
+      end;
+
+    fParser.AddText := procedure(pText: string)
+      var
+        lP: TD2XProcessor;
+      begin
+        for lP in fProcs do
+          lP.AddText(pText);
+      end;
+    fParser.TrimChildren := procedure(pElement: string)
+      var
+        lP: TD2XProcessor;
+      begin
+        for lP in fProcs do
+          lP.TrimChildren(pElement);
+      end;
 
     fParser.Lexer.OnIncludeDirect := LexerOnInclude;
     // fParser.Lexer.OnDefineDirect := LexerOnDefine;
@@ -788,10 +791,6 @@ begin
     begin
       Result := TD2X.ToLabel(fParseMode.Value);
     end;
-  fXmlHandler := TD2XTreeHandler.CreateTree(TD2XXmlWriter, fFlags.ByLabel['FinalToken'],
-    lGetParseMode);
-  fJsonHandler := TD2XTreeHandler.CreateTree(TD2XJsonWriter, fFlags.ByLabel['FinalToken'],
-    lGetParseMode);
   fCountDefinesUsedHandler := TD2XCountDefinesUsedHandler.Create;
 
   lWriteXml := TD2XFlaggedStringParam.CreateFlagStr('WX', 'Write XML', '<d/e>',
@@ -802,9 +801,11 @@ begin
     'Write Final Defines files into current or given <d/e>', 'Defines,def', False,
     ConvertDirExtn);
 
-  fProcs.Add(TD2XProcessor.CreateHandler(lWriteXml, fXmlHandler, True)
+  fProcs.Add(TD2XProcessor.CreateHandler(lWriteXml, TD2XTreeHandler.CreateTree(TD2XXmlWriter,
+      fFlags.ByLabel['FinalToken'], lGetParseMode), True)
     .SetResultsOutput(MakeNamedRef(lWriteXml)));
-  fProcs.Add(TD2XProcessor.CreateHandler(lWriteJson, fJsonHandler, True)
+  fProcs.Add(TD2XProcessor.CreateHandler(lWriteJson, TD2XTreeHandler.CreateTree(TD2XJsonWriter,
+      fFlags.ByLabel['FinalToken'], lGetParseMode), True)
     .SetResultsOutput(MakeNamedRef(lWriteJson)));
   fProcs.Add(TD2XProcessor.CreateClass(lWriteDefines, TD2XWriteDefinesHandler)
     .SetResultsOutput(MakeNamedRef(lWriteDefines)));
@@ -821,7 +822,7 @@ begin
   InitParser;
 end;
 
-function TD2XOptions.ConfigFileOrExtn(pFileOrExtn: string): ID2XFile;
+function TD2XOptions.ConfigFileOrExtn(pFileOrExtn: string): ID2XIOFile;
 begin
   Result := fIOFact.ConfigFileOrExtn(pFileOrExtn);
 end;
@@ -849,8 +850,6 @@ begin
       Exit;
 
     BeginResults('D2X_File', rpFile);
-    fXmlHandler.HasFiles := True;
-    fJsonHandler.HasFiles := True;
 
     fFilename := pFilename;
     for lP in fProcs do
@@ -869,8 +868,8 @@ begin
       begin
         LogParser('EXCEPTION', '(' + e.ClassName + ')' + e.Message);
 
-        fXmlHandler.RollbackTo('D2X_File');
-        fJsonHandler.RollbackTo('D2X_File');
+        for lP in fProcs do
+          lP.RollbackTo('D2X_File');
       end;
     end;
 
@@ -893,7 +892,7 @@ end;
 function TD2XOptions.RecurseDirectory(pDir, pWildCards: string;
   pMainDir: Boolean): Boolean;
 var
-  lPath: ID2XDir;
+  lPath: ID2XIODir;
   lFile: string;
 begin
   Result := False;
@@ -973,12 +972,6 @@ begin
       pDoInvoke := True;
       fCurrentMethod := pMethod.Name;
     end;
-end;
-
-procedure TD2XOptions.TrimChildren(pElement: string);
-begin
-  fXmlHandler.TrimChildren(pElement);
-  fJsonHandler.TrimChildren(pElement);
 end;
 
 procedure TD2XOptions.SetBaseProxy;

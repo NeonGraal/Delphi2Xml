@@ -14,7 +14,7 @@ uses
   System.SysUtils,
   Test.Constants,
   Test.IO.Options,
-  Test.Param,
+
   TestFramework,
   Winapi.Windows;
 
@@ -203,7 +203,7 @@ end;
 
 procedure TestTD2XFileFactory.TestFull;
 var
-  lD, lSD: ID2XDir;
+  lD, lSD: ID2XIODir;
 begin
   lSD := nil;
   lD := fFileOpts.BaseDir('Test');
@@ -242,7 +242,7 @@ end;
 
 procedure TestTD2XFileFactory.TestFullBase;
 var
-  lD, lSD: ID2XDir;
+  lD, lSD: ID2XIODir;
 begin
   ForCode('B').Parse('B:Test');
 
@@ -283,7 +283,7 @@ end;
 
 procedure TestTD2XFileFactory.TestFullBaseExcluding;
 var
-  lD, lSD: ID2XDir;
+  lD, lSD: ID2XIODir;
 begin
   ForCode('X').Parse('XEx\w+de');
   ForCode('B').Parse('B:Test');
@@ -319,7 +319,7 @@ end;
 
 procedure TestTD2XFileFactory.TestFullExcluding;
 var
-  lD, lSD: ID2XDir;
+  lD, lSD: ID2XIODir;
 begin
   ForCode('X').Parse('XEx\w+de');
 

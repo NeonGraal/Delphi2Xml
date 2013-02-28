@@ -14,11 +14,11 @@ uses
 type
   TD2XFileOptions = class(TD2XInterfaced, ID2XIOFactory)
   public
-    function ConfigFileOrExtn(pFileOrExtn: string): ID2XFile;
-    function LogFileOrExtn(pFileOrExtn: string): ID2XFile;
-    function BaseFile(pFileOrDir: string): ID2XFile;
-    function BaseDir(pFileOrDir: string): ID2XDir;
-    function SimpleFile(pFile: string): ID2XFile;
+    function ConfigFileOrExtn(pFileOrExtn: string): ID2XIOFile;
+    function LogFileOrExtn(pFileOrExtn: string): ID2XIOFile;
+    function BaseFile(pFileOrDir: string): ID2XIOFile;
+    function BaseDir(pFileOrDir: string): ID2XIODir;
+    function SimpleFile(pFile: string): ID2XIOFile;
 
     procedure SetGlobalName(const pName: string);
     procedure SetGlobalValidator(pValidator: TD2XSingleParam<string>.TspValidator);
@@ -153,7 +153,7 @@ begin
   Result := fTimestampFiles.Flag;
 end;
 
-function TD2XFileOptions.BaseDir(pFileOrDir: string): ID2XDir;
+function TD2XFileOptions.BaseDir(pFileOrDir: string): ID2XIODir;
 begin
   if fInputBase.FlagValue then
     Result := TD2XDirPath.Create(fInputBase.Value, pFileOrDir, fExcludeDirs.List)
@@ -161,7 +161,7 @@ begin
     Result := TD2XDirPath.Create('', pFileOrDir, fExcludeDirs.List);
 end;
 
-function TD2XFileOptions.BaseFile(pFileOrDir: string): ID2XFile;
+function TD2XFileOptions.BaseFile(pFileOrDir: string): ID2XIOFile;
 begin
   if fInputBase.FlagValue and (fInputBase.Value > '') then
     Result := TD2XFileStream.Create(IncludeTrailingPathDelimiter(fInputBase.Value) +
@@ -170,7 +170,7 @@ begin
     Result := TD2XFileStream.Create(pFileOrDir);
 end;
 
-function TD2XFileOptions.ConfigFileOrExtn(pFileOrExtn: string): ID2XFile;
+function TD2XFileOptions.ConfigFileOrExtn(pFileOrExtn: string): ID2XIOFile;
   function GlobalFileOrExtn(pFileOrExtn: string): string;
   begin
     if StartsText('.', pFileOrExtn) then
@@ -187,7 +187,7 @@ begin
     Result := TD2XFileStream.Create(GlobalFileOrExtn(pFileOrExtn));
 end;
 
-function TD2XFileOptions.LogFileOrExtn(pFileOrExtn: string): ID2XFile;
+function TD2XFileOptions.LogFileOrExtn(pFileOrExtn: string): ID2XIOFile;
   function GlobalFileOrExtn(pFileOrExtn: string): string;
   var
     lExtn: string;
@@ -258,7 +258,7 @@ begin
   fTimestampFiles := pFlag;
 end;
 
-function TD2XFileOptions.SimpleFile(pFile: string): ID2XFile;
+function TD2XFileOptions.SimpleFile(pFile: string): ID2XIOFile;
 begin
   Result := TD2XFileStream.Create(pFile);
 end;

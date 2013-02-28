@@ -10,22 +10,13 @@ uses
   D2X.Parser;
 
 type
-  TD2XHandlerTester = class(TD2XLogger, ID2XHandler, ID2XProcessingHandler, ID2XFileHandler,
-    ID2XResultsHandler, ID2XMethods, ID2XChecks, ID2XMessages)
+  TD2XHandlerTester = class(TD2XLogger, ID2XHandler, ID2XProcessing, ID2XFiles, ID2XResults,
+    ID2XMethods, ID2XChecks, ID2XMessages, ID2XTrees)
   public
-    CalledEndProcessing: Boolean;
-    CalledBeginFile: Boolean;
-    CalledEndFile: Boolean;
-    CalledBeginResults: Boolean;
-    CalledEndResults: Boolean;
-    CalledCheckBeforeMethod: Boolean;
-    CalledCheckAfterMethod: Boolean;
-    CalledBeginMethod: Boolean;
-    CalledEndMethod: Boolean;
-    CalledLexerInclude: Boolean;
-    CalledParserMessage: Boolean;
-
-    CreateStreams: Boolean;
+    CalledEndProcessing, CalledBeginFile, CalledEndFile, CalledBeginResults, CalledEndResults,
+      CalledAddAttr, CalledAddText, CalledRollBackTo, CalledTrimChildren,
+      CalledCheckBeforeMethod, CalledCheckAfterMethod, CalledBeginMethod, CalledEndMethod,
+      CalledLexerInclude, CalledParserMessage, CreateStreams: Boolean;
 
     function Description: String;
     procedure EndProcessing(pOutput: TStreamWriterRef);
@@ -33,6 +24,10 @@ type
     procedure EndFile(pFile: String; pOutput: TStreamWriterRef);
     procedure BeginResults;
     procedure EndResults(pOutput: TStreamWriterRef);
+    procedure AddAttr(pName: String; pValue: String);
+    procedure AddText(pText: String);
+    procedure RollBackTo(pElement: String);
+    procedure TrimChildren(pElement: String);
     function CheckBeforeMethod(pMethod: String): Boolean;
     function CheckAfterMethod(pMethod: String): Boolean;
     procedure BeginMethod(pMethod: String);
@@ -59,6 +54,16 @@ procedure TD2XHandlerTester.BeginMethod(pMethod: String);
 begin
   CalledBeginMethod := true;
   inherited;
+end;
+
+procedure TD2XHandlerTester.AddAttr(pName, pValue: String);
+begin
+  CalledAddAttr := true;
+end;
+
+procedure TD2XHandlerTester.AddText(pText: String);
+begin
+  CalledAddText := true;
 end;
 
 procedure TD2XHandlerTester.BeginFile(pFile: String; pInput: TStreamReaderRef);
@@ -135,6 +140,16 @@ procedure TD2XHandlerTester.ParserMessage(const pTyp: TMessageEventType;
 begin
   CalledParserMessage := true;
   inherited;
+end;
+
+procedure TD2XHandlerTester.RollBackTo(pElement: String);
+begin
+  CalledRollBackTo := true;
+end;
+
+procedure TD2XHandlerTester.TrimChildren(pElement: String);
+begin
+  CalledTrimChildren := true;
 end;
 
 { TD2XParserHandlerTester }

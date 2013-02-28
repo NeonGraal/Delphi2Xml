@@ -18,7 +18,7 @@ type
     function Exists: Boolean;
   end;
 
-  ID2XDir = interface(ID2XIO)
+  ID2XIODir = interface(ID2XIO)
     ['{DCF21FAD-CBAD-4224-B87C-6B33F898B116}']
     function FirstFile(pWildcard: String): Boolean;
     function FirstDir: Boolean;
@@ -27,7 +27,7 @@ type
     function Current: String;
   end;
 
-  ID2XFile = interface(ID2XIO)
+  ID2XIOFile = interface(ID2XIO)
     ['{2A2D2153-4F7D-413A-99A0-75A2CDA80B01}']
     function ReadFrom: TStreamReader;
     function WriteTo(pAppend: Boolean = False): TStreamWriter;
@@ -35,11 +35,11 @@ type
 
   ID2XIOFactory = interface
     ['{ADCB308E-8D54-4B8A-A687-3EC1BD1DFB4C}']
-    function ConfigFileOrExtn(pFileOrExtn: String): ID2XFile;
-    function LogFileOrExtn(pFileOrExtn: String): ID2XFile;
-    function BaseFile(pFileOrDir: String): ID2XFile;
-    function BaseDir(pFileOrDir: String): ID2XDir;
-    function SimpleFile(pFile: String): ID2XFile;
+    function ConfigFileOrExtn(pFileOrExtn: String): ID2XIOFile;
+    function LogFileOrExtn(pFileOrExtn: String): ID2XIOFile;
+    function BaseFile(pFileOrDir: String): ID2XIOFile;
+    function BaseDir(pFileOrDir: String): ID2XIODir;
+    function SimpleFile(pFile: String): ID2XIOFile;
 
     procedure SetGlobalName(const pName: String);
     procedure SetGlobalValidator(pValidator: TD2XSingleParam<String>.TspValidator);
@@ -50,19 +50,19 @@ type
     function GetInputStream: TStreamReader;
   end;
 
-  TD2XFileRef = reference to function: ID2XFile;
-  TD2XNamedStreamRef = reference to function(pFile: String): ID2XFile;
+  TD2XFileRef = reference to function: ID2XIOFile;
+  TD2XNamedFileRef = reference to function(pFile: String): ID2XIOFile;
 
   TStreamReaderRef = reference to function: TStreamReader;
   TStreamWriterRef = reference to function: TStreamWriter;
 
 procedure DisposeOf(var pIO: ID2XIO); overload;
-procedure DisposeOf(var pFile: ID2XFile); overload;
-procedure DisposeOf(var pDir: ID2XDir); overload;
+procedure DisposeOf(var pFile: ID2XIOFile); overload;
+procedure DisposeOf(var pDir: ID2XIODir); overload;
 procedure DisposeOf(var pFact: ID2XIOFactory); overload;
 
-function FileReaderRef(pFile: ID2XFile): TStreamReaderRef;
-function FileWriterRef(pFile: ID2XFile): TStreamWriterRef;
+function FileReaderRef(pFile: ID2XIOFile): TStreamReaderRef;
+function FileWriterRef(pFile: ID2XIOFile): TStreamWriterRef;
 
 implementation
 
@@ -78,7 +78,7 @@ begin
   end;
 end;
 
-procedure DisposeOf(var pFile: ID2XFile); overload;
+procedure DisposeOf(var pFile: ID2XIOFile); overload;
 var
   lDS: TD2XInterfaced;
 begin
@@ -90,7 +90,7 @@ begin
   end;
 end;
 
-procedure DisposeOf(var pDir: ID2XDir); overload;
+procedure DisposeOf(var pDir: ID2XIODir); overload;
 var
   lDS: TD2XInterfaced;
 begin
@@ -114,7 +114,7 @@ begin
   end;
 end;
 
-function FileReaderRef(pFile: ID2XFile): TStreamReaderRef;
+function FileReaderRef(pFile: ID2XIOFile): TStreamReaderRef;
 begin
   Result := function: TStreamReader
     begin
@@ -122,7 +122,7 @@ begin
     end;
 end;
 
-function FileWriterRef(pFile: ID2XFile): TStreamWriterRef;
+function FileWriterRef(pFile: ID2XIOFile): TStreamWriterRef;
 begin
   Result := function: TStreamWriter
     begin

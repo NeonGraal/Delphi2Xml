@@ -109,7 +109,7 @@ function TD2XRunParam.ProcessParamsFile(pFileOrExtn: string): Boolean;
 var
   lSL: TStringList;
   i: Integer;
-  lFile: ID2XFile;
+  lFile: ID2XIOFile;
 begin
   lSL := nil;
   lFile := nil;

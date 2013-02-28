@@ -13,9 +13,9 @@ uses
   System.Generics.Collections,
   System.SysUtils,
   System.Types,
-  System.RegularExpressions,
-  System.StrUtils,
-  Test.Constants,
+
+
+
   Test.IO,
   TestFramework;
 
@@ -32,7 +32,7 @@ type
 
   end;
 
-  TestID2XFile = class(TTestCase)
+  TestID2XIOFile = class(TTestCase)
   private
     fFile: TTestFile;
   public
@@ -90,36 +90,36 @@ type
 
   { TestTD2XFile }
 
-procedure TestID2XFile.SetUp;
+procedure TestID2XIOFile.SetUp;
 begin
   inherited;
 
   fFile := TTestFile.Create('Test', True, 'Test Input', nil);
 end;
 
-procedure TestID2XFile.TearDown;
+procedure TestID2XIOFile.TearDown;
 begin
   FreeAndNil(fFile);
 
   inherited;
 end;
 
-procedure TestID2XFile.TestDescription;
+procedure TestID2XIOFile.TestDescription;
 begin
   CheckEqualsString('Test', fFile.Description, 'Description');
 end;
 
-procedure TestID2XFile.TestExists;
+procedure TestID2XIOFile.TestExists;
 begin
   CheckTrue(fFile.Exists, 'Exists');
 end;
 
-procedure TestID2XFile.TestReadFrom;
+procedure TestID2XIOFile.TestReadFrom;
 begin
   CheckEqualsString('Test Input', fFile.ReadFrom.ReadToEnd, 'Read From');
 end;
 
-procedure TestID2XFile.TestWriteTo;
+procedure TestID2XIOFile.TestWriteTo;
 begin
   with fFile.WriteTo do
   begin
@@ -225,7 +225,7 @@ end;
 
 procedure TestID2XIOFactory.TestBaseDir;
 var
-  lDir: ID2XDir;
+  lDir: ID2XIODir;
 begin
   lDir := fFact.BaseDir('Test');
   try
@@ -237,7 +237,7 @@ end;
 
 procedure TestID2XIOFactory.TestBaseFile;
 var
-  lFile: ID2XFile;
+  lFile: ID2XIOFile;
 begin
   lFile := fFact.BaseFile('File');
   try
@@ -249,7 +249,7 @@ end;
 
 procedure TestID2XIOFactory.TestCheckOutput;
 var
-  lFile: ID2XFile;
+  lFile: ID2XIOFile;
 begin
   lFile := fFact.SimpleFile('File');
   try
@@ -263,7 +263,7 @@ end;
 
 procedure TestID2XIOFactory.TestConfigFileOrExtn;
 var
-  lFile: ID2XFile;
+  lFile: ID2XIOFile;
 begin
   lFile := fFact.ConfigFileOrExtn('File');
   try
@@ -302,7 +302,7 @@ end;
 
 procedure TestID2XIOFactory.TestLogFileOrExtn;
 var
-  lFile: ID2XFile;
+  lFile: ID2XIOFile;
 begin
   lFile := fFact.LogFileOrExtn('File');
   try
@@ -351,7 +351,7 @@ end;
 procedure TestID2XIOFactory.TestSetTimestampFlag;
 var
   lFlag: TD2XBoolFlag;
-  lFile: ID2XFile;
+  lFile: ID2XIOFile;
 begin
   lFlag := TD2XBoolFlag.Create;
   try
@@ -375,7 +375,7 @@ end;
 
 procedure TestID2XIOFactory.TestSimpleFile;
 var
-  lFile: ID2XFile;
+  lFile: ID2XIOFile;
 begin
   lFile := fFact.SimpleFile('File');
   try
@@ -387,7 +387,7 @@ end;
 
 initialization
 
-RegisterTests('IO', [TestID2XIO.Suite, TestID2XFile.Suite, TestID2XDir.Suite,
+RegisterTests('IO', [TestID2XIO.Suite, TestID2XIOFile.Suite, TestID2XDir.Suite,
   TestID2XIOFactory.Suite]);
 
 end.

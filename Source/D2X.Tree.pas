@@ -109,9 +109,7 @@ function NewTreeDocument: TD2XTreeDoc;
 
 implementation
 
-uses
-  Data.Cloud.CloudAPI,
-  System.StrUtils;
+
 
 function NewTreeDocument: TD2XTreeDoc;
 begin

@@ -853,7 +853,7 @@ end;
 
 procedure TestTD2XOptions.TestConfigFileOrExtn;
 var
-  ReturnValue: ID2XFile;
+  ReturnValue: ID2XIOFile;
 begin
   ReturnValue := fOpts.ConfigFileOrExtn('File');
   //  CheckEqualsString('Config\File', ReturnValue.Description, 'Default File');

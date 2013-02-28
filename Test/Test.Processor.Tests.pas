@@ -6,16 +6,16 @@ implementation
 
 uses
   CastaliaPasLexTypes,
-  D2X.Handler,
+
   D2X.IO,
   D2X.Param,
-  D2X.Parser,
+
   D2X.Processor,
   System.SysUtils,
   Test.Global,
   Test.Handler,
-  Test.Handlers,
-  Test.Parser,
+
+
   Test.Processor,
   TestFramework;
 
@@ -48,6 +48,11 @@ type
     procedure TestBeginResults;
     procedure TestEndResults;
 
+    procedure TestAddAttr;
+    procedure TestAddText;
+    procedure TestRollBackTo;
+    procedure TestTrimChildren;
+
     procedure TestCheckBeforeMethod;
     procedure TestCheckAfterMethod;
 
@@ -69,12 +74,12 @@ type
     procedure TestSetParser;
   end;
 
-function NilFile: ID2XFile;
+function NilFile: ID2XIOFile;
 begin
   Result := nil;
 end;
 
-function NilNamedFile(pName: string): ID2XFile;
+function NilNamedFile(pName: string): ID2XIOFile;
 begin
   Result := nil;
 end;
@@ -94,6 +99,26 @@ begin
   FreeAndNil(FD2XProcessor);
 
   inherited;
+end;
+
+procedure TestTD2XProcessor.TestAddAttr;
+begin
+  FD2XProcessor.AddAttr('Test', 'test');
+  CheckFalse(FHandler.CalledAddAttr, 'Ignored Add Attr');
+
+  fActive.Flag := True;
+  FD2XProcessor.AddAttr('Test', 'test');
+  CheckTrue(FHandler.CalledAddAttr, 'Called Add Attr');
+end;
+
+procedure TestTD2XProcessor.TestAddText;
+begin
+  FD2XProcessor.AddText('Test');
+  CheckFalse(FHandler.CalledAddText, 'Ignored Add Text');
+
+  fActive.Flag := True;
+  FD2XProcessor.AddText('Test');
+  CheckTrue(FHandler.CalledAddText, 'Called Add Text');
 end;
 
 procedure TestTD2XProcessor.TestBeginFile;
@@ -230,6 +255,16 @@ begin
   CheckTrue(FHandler.CalledParserMessage, 'Called Parser Message');
 end;
 
+procedure TestTD2XProcessor.TestRollBackTo;
+begin
+  FD2XProcessor.RollBackTo('Test');
+  CheckFalse(FHandler.CalledRollBackTo, 'Ignored RollBack To');
+
+  fActive.Flag := True;
+  FD2XProcessor.RollBackTo('Test');
+  CheckTrue(FHandler.CalledRollBackTo, 'Called RollBack To');
+end;
+
 procedure TestTD2XProcessor.TestSetFileInput;
 var
   lCalled: Boolean;
@@ -238,7 +273,7 @@ begin
   lCalled := False;
 
   FD2XProcessor.SetFileInput(
-    function: ID2XFile
+    function: ID2XIOFile
     begin
       lCalled := True;
       Result := nil;
@@ -260,7 +295,7 @@ begin
   lCalled := False;
 
   FD2XProcessor.SetFileOutput(
-    function: ID2XFile
+    function: ID2XIOFile
     begin
       lCalled := True;
       Result := nil;
@@ -287,7 +322,7 @@ begin
   FHandler.CreateStreams := True;
   lCalled := False;
   FD2XProcessor.SetProcessingOutput(
-    function: ID2XFile
+    function: ID2XIOFile
     begin
       lCalled := True;
       Result := nil;
@@ -308,7 +343,7 @@ begin
   FHandler.CreateStreams := True;
   lCalled := False;
   FD2XProcessor.SetResultsOutput(
-    function(pFile: string): ID2XFile
+    function(pFile: string): ID2XIOFile
     begin
       lCalled := True;
       Result := nil;
@@ -320,6 +355,16 @@ begin
   fActive.Flag := True;
   FD2XProcessor.EndResults('');
   CheckTrue(lCalled, 'Called Results Output');
+end;
+
+procedure TestTD2XProcessor.TestTrimChildren;
+begin
+  FD2XProcessor.TrimChildren('Test');
+  CheckFalse(FHandler.CalledTrimChildren, 'Ignored Trim Children');
+
+  fActive.Flag := True;
+  FD2XProcessor.TrimChildren('Test');
+  CheckTrue(FHandler.CalledTrimChildren, 'Called Trim Children');
 end;
 
 procedure TestTD2XProcessor.TestUseProxy;
