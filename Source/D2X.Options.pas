@@ -11,6 +11,7 @@ uses
   D2X.Parser,
   D2X.Processor,
   D2X.IO,
+  D2X.IO.ErrorLog,
   System.Classes,
   System.Diagnostics,
   System.Generics.Collections,
@@ -29,8 +30,7 @@ type
     fParser: TD2XDefinesParser;
     fVMI: TVirtualMethodInterceptor;
 
-    fFilename: string;
-    fCurrentMethod: string;
+    fErrorLog: TD2XErrorLog;
 
     fCountDefinesUsedHandler: TD2XCountDefinesUsedHandler;
 
@@ -43,9 +43,6 @@ type
     fParserDefines: TD2XDefinesParam;
     fHeldDefines: TD2XDefinesParam;
 
-    fLastType, fLastMsg: string;
-    fLastX, fLastY: Integer;
-
     procedure RemoveProxy;
     procedure SetBaseProxy;
     procedure SetMinProxy;
@@ -55,7 +52,6 @@ type
     function IsInternalMethod(pMethod: string): Boolean;
 
     procedure LogParser(pType, pMsg: string);
-    procedure LogMessage(pType, pMsg: string; pX, pY: Integer);
 
     procedure ParserMessage(pSender: TObject; const pTyp: TMessageEventType;
       const pMsg: string; pX, pY: Integer);
@@ -159,6 +155,7 @@ destructor TD2XOptions.Destroy;
 begin
   RemoveProxy;
   FreeAndNil(fParser);
+  FreeAndNil(fErrorLog);
 
   DisposeOf(fIOFact);
   FreeAndNil(fProcs);
@@ -226,7 +223,7 @@ end;
 
 procedure TD2XOptions.LogParser(pType, pMsg: string);
 begin
-  LogMessage(pType, pMsg, fParser.Lexer.PosXY.X, fParser.Lexer.PosXY.Y);
+  fErrorLog.LogMessage(pType, pMsg, fParser.Lexer.PosXY.X, fParser.Lexer.PosXY.Y);
 end;
 
 function TD2XOptions.MakeFileRef(pVal: TD2XSingleParam<string>; pSuffix: string): TD2XFileRef;
@@ -250,51 +247,6 @@ begin
         lExtn := '.' + lExtn;
       Result := fIOFact.SimpleFile(lDir + pFilename + lExtn);
     end;
-end;
-
-procedure TD2XOptions.LogMessage(pType, pMsg: string; pX, pY: Integer);
-var
-  lErrFile: ID2XIOFile;
-  lExists: Boolean;
-  lDS: TD2XInterfaced;
-begin
-  if ((pX = 0) and (pY = 0) and ((fLastType <> pType) or (fLastMsg <> pMsg))) or (fLastX <> pX)
-    or (fLastY <> pY) then
-  begin
-    lErrFile := fIOFact.LogFileOrExtn('.err');
-    try
-      lExists := lErrFile.Exists;
-      with lErrFile.WriteTo(True) do
-      begin
-        if not lExists then
-          WriteLine('Filename,Timestamp,Line,Char,Method,Type,Message');
-        write(fFilename);
-        write(',');
-        write(fIOFact.GetNow);
-        write(',');
-        write(pY);
-        write(',');
-        write(pX);
-        write(',');
-        write(fCurrentMethod);
-        write(',');
-        write(pType);
-        write(',');
-        WriteLine(pMsg);
-      end;
-    finally
-      if Assigned(lErrFile) then
-      begin
-        lDS := lErrFile as TD2XInterfaced;
-        lErrFile := nil;
-        lDS.Free;
-      end;
-    end;
-    fLastType := pType;
-    fLastMsg := pMsg;
-    fLastX := pX;
-    fLastY := pY;
-  end;
 end;
 
 procedure TD2XOptions.ParserMessage(pSender: TObject; const pTyp: TMessageEventType;
@@ -400,7 +352,7 @@ begin
       end;
     except
       on e: Exception do
-        LogMessage('EXCEPTION', '(' + e.ClassName + ')' + e.Message, 0, 0);
+        fErrorLog.LogMessage('EXCEPTION', '(' + e.ClassName + ')' + e.Message, 0, 0);
     end;
 end;
 
@@ -549,9 +501,9 @@ end;
 procedure TD2XOptions.InitFirstProcessors;
 begin
   fProcs.Add(TD2XProcessor.CreateHandler(fFlags.ByLabel['LogErrors'],
-      TD2XErrorHandler.CreateError(meError, LogMessage), True));
+      TD2XErrorHandler.CreateError(meError, fErrorLog.LogMessage), True));
   fProcs.Add(TD2XProcessor.CreateHandler(fFlags.ByLabel['LogNotSupp'],
-      TD2XErrorHandler.CreateError(meNotSupported, LogMessage), True));
+      TD2XErrorHandler.CreateError(meNotSupported, fErrorLog.LogMessage), True));
 
   fProcs.Add(TD2XProcessor.CreateClass(fFlags.ByLabel['Verbose'], TD2XLogHandler));
 
@@ -758,6 +710,7 @@ begin
   InitFlags;
 
   fIOFact := pFileOpts;
+  fErrorLog := TD2XErrorLog.Create(pFileOpts);
 
   fIOFact.SetGlobalValidator(
     function(pVal: string): Boolean
@@ -851,15 +804,12 @@ begin
 
     BeginResults('D2X_File', rpFile);
 
-    fFilename := pFilename;
+    fErrorLog.SetFilename(pFilename);
     for lP in fProcs do
       lP.BeginFile(pFilename);
 
     try
-      fLastType := '~';
-      fLastMsg := '~';
-      fLastX := -2;
-      fLastY := -2;
+      fErrorLog.ResetFile;
 
       fParser.ProcessString(pFilename, lContent);
       Result := True;
@@ -937,7 +887,7 @@ begin
       lP: TD2XProcessor;
     begin
       pDoInvoke := True;
-      fCurrentMethod := pMethod.Name;
+      fErrorLog.SetMethod(pMethod.Name);
       if IsInternalMethod(pMethod.Name) then
         Exit;
       for lP in fProcs do
@@ -970,7 +920,7 @@ begin
     out pDoInvoke: Boolean; out pResult: TValue)
     begin
       pDoInvoke := True;
-      fCurrentMethod := pMethod.Name;
+      fErrorLog.SetMethod(pMethod.Name);
     end;
 end;
 

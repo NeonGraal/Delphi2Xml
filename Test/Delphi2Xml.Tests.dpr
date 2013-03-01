@@ -50,7 +50,8 @@ uses
   D2X.Tree in '..\Source\D2X.Tree.pas',
   D2X.Tree.Xml in '..\Source\D2X.Tree.Xml.pas',
   Test.Tree in 'Source\Test.Tree.pas',
-  Test.Tree.Xml in 'Source\Test.Tree.Xml.pas';
+  Test.Tree.Xml in 'Source\Test.Tree.Xml.pas',
+  D2X.IO.ErrorLog in '..\Source\D2X.IO.ErrorLog.pas';
 
 {$R *.RES}
 
