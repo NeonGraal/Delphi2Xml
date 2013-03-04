@@ -6,18 +6,11 @@ uses
   System.Classes,
   System.Generics.Collections,
   System.SysUtils,
+  D2X.Flag,
   D2X.Global;
 
 type
   EInvalidParam = class(Exception);
-
-  ID2XFlag = interface
-    ['{1986FC52-3D32-4988-BE5E-9C936D0890C5}']
-    function GetFlag: Boolean;
-    procedure SetFlag(pVal: Boolean);
-
-    property Flag: Boolean read GetFlag write SetFlag;
-  end;
 
   TD2XParam = class(TD2XInterfaced)
   public
@@ -106,13 +99,6 @@ type
 
   public
     property Value: T read fValue write SetValue;
-  end;
-
-  TD2XBoolFlag = class(TD2XInterfaced, ID2XFlag)
-  private
-    fFlag: Boolean;
-    function GetFlag: Boolean;
-    procedure SetFlag(pVal: Boolean);
   end;
 
   TD2XFlagDefine = record
@@ -321,18 +307,6 @@ var
 begin
   for lP in Self do
     lP.Zero;
-end;
-
-{ TD2XBoolFlag }
-
-function TD2XBoolFlag.GetFlag: Boolean;
-begin
-  Result := fFlag;
-end;
-
-procedure TD2XBoolFlag.SetFlag(pVal: Boolean);
-begin
-  fFlag := pVal;
 end;
 
 { TD2XSingleParam<T> }

@@ -5,6 +5,7 @@ interface
 uses
   System.Classes,
   System.Types,
+  D2X.Flag,
   D2X.Global,
   D2X.IO,
   D2X.Param;

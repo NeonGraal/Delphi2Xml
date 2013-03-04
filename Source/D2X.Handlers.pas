@@ -3,7 +3,9 @@ unit D2X.Handlers;
 interface
 
 uses
+  CastaliaPasLex,
   CastaliaPasLexTypes,
+  D2X.Flag,
   D2X.Global,
   D2X.Param,
   D2X.Parser,
@@ -15,11 +17,27 @@ uses
 
 type
   TD2XParserHandler = class(TD2XLogger, ID2XParser)
+  strict private
+    fPrevParserMessage: TMessageEvent;
+    fPrevLexerInclude: TDirectiveEvent;
+
+    procedure DoParserMessage(pSender: TObject; const pTyp: TMessageEventType;
+      const pMsg: string; pX, pY: Integer);
+    procedure DoLexerInclude(pSender: TmwBasePasLex);
+
   protected
     fParser: TD2XDefinesParser;
+    fActive: ID2XFlag;
+
+    procedure SetupParserMessage;
+    procedure SetupLexerInclude;
+
+    procedure OnParserMessage(const pTyp: TMessageEventType; const pMsg: string;
+      pX, pY: Integer); virtual;
+    procedure OnLexerInclude(const pFile: string; pX, pY: Integer); virtual;
 
   public
-    procedure InitParser(pParser: TD2XDefinesParser); virtual;
+    procedure InitParser(pParser: TD2XDefinesParser; pActive: ID2XFlag); virtual;
 
   end;
 
@@ -28,7 +46,7 @@ type
     Children: Integer;
   end;
 
-  TD2XCountChildrenHandler = class(TD2XLogger, ID2XHandler, ID2XFullProxy,
+  TD2XCountChildrenHandler = class(TD2XParserHandler, ID2XHandler, ID2XFullProxy,
     ID2XProcessing, ID2XFiles, ID2XMethods)
   private
     fCurrent: TMethodCount;
@@ -71,31 +89,39 @@ type
     procedure EndFile(pFile: string; pOutput: TStreamWriterRef);
   end;
 
-  TD2XCountDefinesUsedHandler = class(TD2XLogger, ID2XHandler, ID2XProcessing)
+  TD2XCountDefinesUsedHandler = class(TD2XParserHandler, ID2XHandler, ID2XProcessing)
   private
     fDefinesDict: TStrIntDict;
+
+    procedure OnIf(pLex: TD2XLexer);
+    procedure OnIfDef(pLex: TD2XLexer);
 
   public
     constructor Create; override;
     destructor Destroy; override;
 
     function Description: string;
+
+    procedure InitParser(pParser: TD2XDefinesParser; pActive: ID2XFlag); override;
+
     procedure EndProcessing(pOutput: TStreamWriterRef);
 
     procedure DefineUsed(pDef: string);
 
   end;
 
-  TD2XErrorHandler = class(TD2XParserHandler, ID2XHandler, ID2XMessages)
+  TD2XErrorHandler = class(TD2XParserHandler, ID2XHandler)
   public
     constructor Create; override;
     constructor CreateError(pTyp: TMessageEventType; pLogMessage: TD2XLogMessage);
 
     function Description: string;
 
-    procedure ParserMessage(const pTyp: TMessageEventType; const pMsg: string;
-      pX, pY: Integer);
-    procedure LexerInclude(const pFile: string; pX, pY: Integer);
+    procedure InitParser(pParser: TD2XDefinesParser; pActive: ID2XFlag); override;
+
+  protected
+    procedure OnParserMessage(const pTyp: TMessageEventType; const pMsg: string;
+      pX, pY: Integer); override;
 
   private
     fTyp: TMessageEventType;
@@ -103,23 +129,19 @@ type
 
   end;
 
-  TD2XLogHandler = class(TD2XLogger, ID2XHandler, ID2XParser, ID2XMethods, ID2XMessages)
-  protected
-    fLexer: TD2XLexer;
-
+  TD2XLogHandler = class(TD2XParserHandler, ID2XHandler, ID2XMethods)
   public
-    constructor Create; override;
-
-    procedure InitParser(pParser: TD2XDefinesParser);
+    procedure InitParser(pParser: TD2XDefinesParser; pActive: ID2XFlag); override;
 
     function Description: string;
 
     procedure BeginMethod(pMethod: string);
     procedure EndMethod(pMethod: string);
 
-    procedure ParserMessage(const pTyp: TMessageEventType; const pMsg: string;
-      pX, pY: Integer);
-    procedure LexerInclude(const pFile: string; pX, pY: Integer);
+  protected
+    procedure OnParserMessage(const pTyp: TMessageEventType;
+      const pMsg: string; pX, pY: Integer); override;
+    procedure OnLexerInclude(const pFile: string; pX, pY: Integer); override;
 
   end;
 
@@ -133,7 +155,7 @@ type
   public
     constructor CreateDefines(pDefines: TStringList);
 
-    procedure InitParser(pParser: TD2XDefinesParser); override;
+    procedure InitParser(pParser: TD2XDefinesParser; pActive: ID2XFlag); override;
 
     function Description: string;
 
@@ -154,8 +176,7 @@ type
     procedure EndFile(pFile: string; pOutput: TStreamWriterRef);
   end;
 
-  TD2XSkipHandler = class(TD2XLogger, ID2XHandler, ID2XProcessing, ID2XFiles,
-    ID2XChecks)
+  TD2XSkipHandler = class(TD2XLogger, ID2XHandler, ID2XProcessing, ID2XFiles, ID2XChecks)
   private
     fSkippedMethods: TStrIntDict;
 
@@ -183,7 +204,7 @@ type
   end;
 
   TD2XTreeHandler = class(TD2XParserHandler, ID2XHandler, ID2XFullProxy, ID2XResults,
-    ID2XFiles, ID2XMethods, ID2XMessages, ID2XTrees)
+    ID2XFiles, ID2XMethods, ID2XTrees)
   private
     fHasFiles: Boolean;
 
@@ -195,6 +216,10 @@ type
     fFinalToken: ID2XFlag;
     fParseMode: TD2XStringRef;
 
+    procedure OnParserMessage(const pTyp: TMessageEventType;
+      const pMsg: string; pX, pY: Integer); override;
+    procedure OnLexerInclude(const pFile: string; pX, pY: Integer); override;
+
   public
     constructor Create; override;
     constructor CreateTree(pWriter: TD2XTreeWriterClass; pFinalToken: ID2XFlag;
@@ -203,18 +228,16 @@ type
 
     function Description: string;
 
+    procedure InitParser(pParser: TD2XDefinesParser; pActive: ID2XFlag); override;
+
     procedure BeginResults;
     procedure EndResults(pOutput: TStreamWriterRef);
 
-    procedure BeginFile(pFile: String; pInput: TStreamReaderRef);
-    procedure EndFile(pFile: String; pOutput: TStreamWriterRef);
+    procedure BeginFile(pFile: string; pInput: TStreamReaderRef);
+    procedure EndFile(pFile: string; pOutput: TStreamWriterRef);
 
     procedure BeginMethod(pMethod: string);
     procedure EndMethod(pMethod: string);
-
-    procedure ParserMessage(const pTyp: TMessageEventType; const pMsg: string;
-      pX, pY: Integer);
-    procedure LexerInclude(const pFile: string; pX, pY: Integer);
 
     procedure AddAttr(pName: string; pValue: string);
     procedure AddText(pText: string);
@@ -228,7 +251,6 @@ implementation
 
 uses
 
-
   System.SysUtils,
   Xml.XMLIntf;
 
@@ -239,9 +261,55 @@ end;
 
 { TD2XParserHandler }
 
-procedure TD2XParserHandler.InitParser(pParser: TD2XDefinesParser);
+procedure TD2XParserHandler.DoLexerInclude(pSender: TmwBasePasLex);
+begin
+  if fActive.Flag then
+    OnLexerInclude(pSender.DirectiveParam, pSender.PosXY.X, pSender.PosXY.Y);
+
+  if Assigned(fPrevLexerInclude) then
+    fPrevLexerInclude(pSender);
+end;
+
+procedure TD2XParserHandler.DoParserMessage(pSender: TObject; const pTyp: TMessageEventType;
+  const pMsg: string; pX, pY: Integer);
+begin
+  if fActive.Flag then
+    OnParserMessage(pTyp, pMsg, pX, pY);
+
+  if Assigned(fPrevParserMessage) then
+    fPrevParserMessage(pSender, pTyp, pMsg, pX, pY);
+end;
+
+procedure TD2XParserHandler.InitParser(pParser: TD2XDefinesParser; pActive: ID2XFlag);
 begin
   fParser := pParser;
+  fActive := pActive;
+
+  fPrevParserMessage := fParser.OnMessage;
+  fPrevLexerInclude := fParser.Lexer.OnIncludeDirect;
+end;
+
+procedure TD2XParserHandler.OnLexerInclude(const pFile: string; pX, pY: Integer);
+begin
+
+end;
+
+procedure TD2XParserHandler.OnParserMessage(const pTyp: TMessageEventType; const pMsg: string;
+  pX, pY: Integer);
+begin
+
+end;
+
+procedure TD2XParserHandler.SetupLexerInclude;
+begin
+  fPrevLexerInclude := fParser.Lexer.OnIncludeDirect;
+  fParser.Lexer.OnIncludeDirect := DoLexerInclude;
+end;
+
+procedure TD2XParserHandler.SetupParserMessage;
+begin
+  fPrevParserMessage := fParser.OnMessage;
+  fParser.OnMessage := DoParserMessage;
 end;
 
 { TD2XCountChildrenHandler }
@@ -450,7 +518,7 @@ begin
       fTreeNode.Text := fTreeNode.Text + pText;
 end;
 
-procedure TD2XTreeHandler.BeginFile(pFile: String; pInput: TStreamReaderRef);
+procedure TD2XTreeHandler.BeginFile(pFile: string; pInput: TStreamReaderRef);
 begin
   fHasFiles := True;
 end;
@@ -515,7 +583,7 @@ begin
   inherited;
 end;
 
-procedure TD2XTreeHandler.EndFile(pFile: String; pOutput: TStreamWriterRef);
+procedure TD2XTreeHandler.EndFile(pFile: string; pOutput: TStreamWriterRef);
 begin
 
 end;
@@ -549,7 +617,15 @@ begin
   FreeAndNil(fTreeDoc);
 end;
 
-procedure TD2XTreeHandler.LexerInclude(const pFile: string; pX, pY: Integer);
+procedure TD2XTreeHandler.InitParser(pParser: TD2XDefinesParser; pActive: ID2XFlag);
+begin
+  inherited;
+
+  SetupParserMessage;
+  SetupLexerInclude;
+end;
+
+procedure TD2XTreeHandler.OnLexerInclude(const pFile: string; pX, pY: Integer);
 begin
   BeginMethod('IncludeFile');
   AddAttr('filename', pFile);
@@ -557,7 +633,7 @@ begin
   EndMethod('');
 end;
 
-procedure TD2XTreeHandler.ParserMessage(const pTyp: TMessageEventType;
+procedure TD2XTreeHandler.OnParserMessage(const pTyp: TMessageEventType;
   const pMsg: string; pX, pY: Integer);
 begin
   case pTyp of
@@ -675,6 +751,29 @@ begin
   OutputStrIntDict(fDefinesDict, pOutput, PairToStr);
 end;
 
+procedure TD2XCountDefinesUsedHandler.InitParser(pParser: TD2XDefinesParser;
+  pActive: ID2XFlag);
+begin
+  inherited;
+
+  pParser.Lexer.OnIfDirect := OnIf;
+  pParser.Lexer.OnIfDefDirect := OnIfDef;
+  pParser.Lexer.OnIfNDefDirect := OnIfDef;
+  pParser.Lexer.OnIfOptDirect := OnIf;
+  pParser.Lexer.OnElseIfDirect := OnIf;
+end;
+
+procedure TD2XCountDefinesUsedHandler.OnIf(pLex: TD2XLexer);
+begin
+  pLex.Next;
+end;
+
+procedure TD2XCountDefinesUsedHandler.OnIfDef(pLex: TD2XLexer);
+begin
+  DefineUsed(pLex.DirectiveParam);
+  pLex.Next;
+end;
+
 { TD2XParserDefinesHandler }
 
 procedure TD2XParserDefinesHandler.BeginFile(pFile: string;
@@ -711,7 +810,7 @@ begin
   end;
 end;
 
-procedure TD2XParserDefinesHandler.InitParser(pParser: TD2XDefinesParser);
+procedure TD2XParserDefinesHandler.InitParser(pParser: TD2XDefinesParser; pActive: ID2XFlag);
 begin
   inherited;
 
@@ -739,16 +838,16 @@ begin
   Result := 'Error Logging';
 end;
 
-procedure TD2XErrorHandler.LexerInclude(const pFile: string; pX, pY: Integer);
-begin
-  // Empty
-end;
-
-procedure TD2XErrorHandler.ParserMessage(const pTyp: TMessageEventType;
-  const pMsg: string; pX, pY: Integer);
+procedure TD2XErrorHandler.InitParser(pParser: TD2XDefinesParser; pActive: ID2XFlag);
 begin
   inherited;
 
+  SetupParserMessage;
+end;
+
+procedure TD2XErrorHandler.OnParserMessage(const pTyp: TMessageEventType;
+  const pMsg: string; pX, pY: Integer);
+begin
   if pTyp = fTyp then
     case pTyp of
       meError:
@@ -843,17 +942,10 @@ end;
 
 procedure TD2XLogHandler.BeginMethod(pMethod: string);
 begin
-  if Assigned(fLexer) then
-    Log('BEFORE %s @ %s', [pMethod, fLexer.Token])
+  if Assigned(fParser) and Assigned(fParser.Lexer) then
+    Log('BEFORE %s @ %s', [pMethod, fParser.Lexer.Token])
   else
     Log('BEFORE %s ', [pMethod]);
-end;
-
-constructor TD2XLogHandler.Create;
-begin
-  inherited;
-
-  fLexer := nil;
 end;
 
 function TD2XLogHandler.Description: string;
@@ -866,20 +958,21 @@ begin
   Log('AFTER  %s', [pMethod]);
 end;
 
-procedure TD2XLogHandler.InitParser(pParser: TD2XDefinesParser);
+procedure TD2XLogHandler.InitParser(pParser: TD2XDefinesParser; pActive: ID2XFlag);
 begin
   inherited;
 
-  fLexer := pParser.Lexer;
+  SetupParserMessage;
+  SetupLexerInclude;
 end;
 
-procedure TD2XLogHandler.LexerInclude(const pFile: string; pX, pY: Integer);
+procedure TD2XLogHandler.OnLexerInclude(const pFile: string; pX, pY: Integer);
 begin
   Log('INCLUDE @ %d,%d: %s', [pX, pY, pFile]);
 end;
 
-procedure TD2XLogHandler.ParserMessage(const pTyp: TMessageEventType; const pMsg: string;
-  pX, pY: Integer);
+procedure TD2XLogHandler.OnParserMessage(const pTyp: TMessageEventType;
+  const pMsg: string; pX, pY: Integer);
 begin
   case pTyp of
     meError:

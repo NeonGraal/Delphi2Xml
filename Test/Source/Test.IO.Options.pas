@@ -3,6 +3,7 @@ unit Test.IO.Options;
 interface
 
 uses
+  D2X.Flag,
   D2X.Param,
   D2X.IO.Options,
   Test.Param;

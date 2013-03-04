@@ -4,6 +4,7 @@ interface
 
 uses
   CastaliaPasLexTypes,
+  D2X.Flag,
   D2X.Global,
   D2X.Param,
   D2X.Parser,
@@ -48,11 +49,6 @@ type
 //  ID2XMethods interface
     procedure BeginMethod(pMethod: string);
     procedure EndMethod(pMethod: string);
-
-//  ID2XMessages interface
-    procedure ParserMessage(const pTyp: TMessageEventType; const pMsg: string;
-      pX, pY: Integer);
-    procedure LexerInclude(const pFile: string; pX, pY: Integer);
 
     function SetProcessingOutput(pFilename: TD2XFileRef): TD2XProcessor;
     function SetResultsOutput(pFilename: TD2XNamedFileRef): TD2XProcessor;
@@ -278,23 +274,6 @@ begin
   Result := fHandler is pHandler;
 end;
 
-procedure TD2XProcessor.LexerInclude(const pFile: string; pX, pY: Integer);
-var
-  lMsgs: ID2XMessages;
-begin
-  if fHandler.GetInterface(ID2XMessages, lMsgs) and fActive.Flag then
-    lMsgs.LexerInclude(pFile, pX, pY);
-end;
-
-procedure TD2XProcessor.ParserMessage(const pTyp: TMessageEventType;
-  const pMsg: string; pX, pY: Integer);
-var
-  lMsgs: ID2XMessages;
-begin
-  if fHandler.GetInterface(ID2XMessages, lMsgs) and fActive.Flag then
-    lMsgs.ParserMessage(pTyp, pMsg, pX, pY);
-end;
-
 procedure TD2XProcessor.RollBackTo(pElement: string);
 var
   lTrees: ID2XTrees;
@@ -322,7 +301,7 @@ begin
   inherited;
 
   if fHandler.GetInterface(ID2XParser, lPrsrs) then
-    lPrsrs.InitParser(pParser);
+    lPrsrs.InitParser(pParser, fActive);
 end;
 
 function TD2XProcessor.SetProcessingOutput(pFilename: TD2XFileRef): TD2XProcessor;

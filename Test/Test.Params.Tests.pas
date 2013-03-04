@@ -5,9 +5,9 @@ interface
 implementation
 
 uses
+  D2X.Flag,
   D2X.Global,
   D2X.IO,
-
   D2X.Param,
   D2X.Params,
   System.Classes,

@@ -4,6 +4,7 @@ interface
 
 uses
   CastaliaPasLexTypes,
+  D2X.Flag,
   D2X.Global,
   D2X.Handler,
   D2X.IO,
@@ -11,7 +12,7 @@ uses
 
 type
   TD2XHandlerTester = class(TD2XLogger, ID2XHandler, ID2XProcessing, ID2XFiles, ID2XResults,
-    ID2XMethods, ID2XChecks, ID2XMessages, ID2XTrees)
+    ID2XMethods, ID2XChecks, ID2XTrees)
   public
     CalledEndProcessing, CalledBeginFile, CalledEndFile, CalledBeginResults, CalledEndResults,
       CalledAddAttr, CalledAddText, CalledRollBackTo, CalledTrimChildren,
@@ -32,9 +33,6 @@ type
     function CheckAfterMethod(pMethod: String): Boolean;
     procedure BeginMethod(pMethod: String);
     procedure EndMethod(pMethod: String);
-    procedure ParserMessage(const pTyp: TMessageEventType; const pMsg: String;
-      pX, pY: Integer);
-    procedure LexerInclude(const pFile: String; pX, pY: Integer);
 
   end;
 
@@ -43,7 +41,7 @@ type
     CalledInitParser: Boolean;
 
     function Description: String;
-    procedure InitParser(pParser: TD2XDefinesParser);
+    procedure InitParser(pParser: TD2XDefinesParser; pActive: ID2XFlag);
   end;
 
 implementation
@@ -129,19 +127,6 @@ begin
     pOutput;
 end;
 
-procedure TD2XHandlerTester.LexerInclude(const pFile: String; pX, pY: Integer);
-begin
-  CalledLexerInclude := true;
-  inherited;
-end;
-
-procedure TD2XHandlerTester.ParserMessage(const pTyp: TMessageEventType;
-  const pMsg: String; pX, pY: Integer);
-begin
-  CalledParserMessage := true;
-  inherited;
-end;
-
 procedure TD2XHandlerTester.RollBackTo(pElement: String);
 begin
   CalledRollBackTo := true;
@@ -159,7 +144,7 @@ begin
   Result := 'Parser Handler Tester';
 end;
 
-procedure TD2XParserHandlerTester.InitParser(pParser: TD2XDefinesParser);
+procedure TD2XParserHandlerTester.InitParser(pParser: TD2XDefinesParser; pActive: ID2XFlag);
 begin
   CalledInitParser := true;
 end;

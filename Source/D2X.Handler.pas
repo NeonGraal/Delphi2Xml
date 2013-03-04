@@ -4,6 +4,7 @@ interface
 
 uses
   CastaliaPasLexTypes,
+  D2X.Flag,
   D2X.Global,
   D2X.IO,
   D2X.Parser,
@@ -23,7 +24,7 @@ type
 
   ID2XParser = interface
     ['{7F3065AD-B574-4214-BDC9-B4DC211F5752}']
-    procedure InitParser(pParser: TD2XDefinesParser);
+    procedure InitParser(pParser: TD2XDefinesParser; pActive: ID2XFlag);
   end;
 
   ID2XProcessing = interface
@@ -63,12 +64,12 @@ type
     function CheckAfterMethod(pMethod: String): Boolean;
   end;
 
-  ID2XMessages = interface
-    ['{D0406504-283B-4768-B6E4-27EBDEC4FBD0}']
-    procedure ParserMessage(const pTyp: TMessageEventType; const pMsg: String;
-      pX, pY: Integer);
-    procedure LexerInclude(const pFile: String; pX, pY: Integer);
-  end;
+//  ID2XMessages = interface
+//    ['{D0406504-283B-4768-B6E4-27EBDEC4FBD0}']
+//    procedure ParserMessage(const pTyp: TMessageEventType; const pMsg: String;
+//      pX, pY: Integer);
+//    procedure LexerInclude(const pFile: String; pX, pY: Integer);
+//  end;
 
   TD2XHandlerClass = class of TD2XLogger;
 

@@ -59,8 +59,8 @@ type
     procedure TestBeginMethod;
     procedure TestEndMethod;
 
-    procedure TestLexerInclude;
-    procedure TestParserMessage;
+//    procedure TestLexerInclude;
+//    procedure TestParserMessage;
   end;
 
   TestTD2XParserHandlerProcessor = class(TFlagTestCase)
@@ -235,25 +235,25 @@ begin
     end);
 end;
 
-procedure TestTD2XProcessor.TestLexerInclude;
-begin
-  FD2XProcessor.LexerInclude('Test', 1, 2);
-  CheckFalse(FHandler.CalledLexerInclude, 'Ignored Lexer Include');
-
-  fActive.Flag := True;
-  FD2XProcessor.LexerInclude('Test', 1, 2);
-  CheckTrue(FHandler.CalledLexerInclude, 'Called Lexer Include');
-end;
-
-procedure TestTD2XProcessor.TestParserMessage;
-begin
-  FD2XProcessor.ParserMessage(meNotSupported, 'Test', 1, 2);
-  CheckFalse(FHandler.CalledParserMessage, 'Ignored Parser Message');
-
-  fActive.Flag := True;
-  FD2XProcessor.ParserMessage(meNotSupported, 'Test', 1, 2);
-  CheckTrue(FHandler.CalledParserMessage, 'Called Parser Message');
-end;
+//procedure TestTD2XProcessor.TestLexerInclude;
+//begin
+//  FD2XProcessor.LexerInclude('Test', 1, 2);
+//  CheckFalse(FHandler.CalledLexerInclude, 'Ignored Lexer Include');
+//
+//  fActive.Flag := True;
+//  FD2XProcessor.LexerInclude('Test', 1, 2);
+//  CheckTrue(FHandler.CalledLexerInclude, 'Called Lexer Include');
+//end;
+//
+//procedure TestTD2XProcessor.TestParserMessage;
+//begin
+//  FD2XProcessor.ParserMessage(meNotSupported, 'Test', 1, 2);
+//  CheckFalse(FHandler.CalledParserMessage, 'Ignored Parser Message');
+//
+//  fActive.Flag := True;
+//  FD2XProcessor.ParserMessage(meNotSupported, 'Test', 1, 2);
+//  CheckTrue(FHandler.CalledParserMessage, 'Called Parser Message');
+//end;
 
 procedure TestTD2XProcessor.TestRollBackTo;
 begin

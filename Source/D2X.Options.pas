@@ -32,8 +32,6 @@ type
 
     fErrorLog: TD2XErrorLog;
 
-    fCountDefinesUsedHandler: TD2XCountDefinesUsedHandler;
-
     fIOFact: ID2XIOFactory;
 
     fFlags: TD2XFlagsParam;
@@ -53,22 +51,7 @@ type
 
     procedure LogParser(pType, pMsg: string);
 
-    procedure ParserMessage(pSender: TObject; const pTyp: TMessageEventType;
-      const pMsg: string; pX, pY: Integer);
-
     procedure LexerOnInclude(pLex: TD2XLexer);
-
-    // procedure LexerOnDefine(pLex: TD2XLexer);
-    // procedure LexerOnUnDef(pLex: TD2XLexer);
-
-    procedure LexerOnIfDef(pLex: TD2XLexer);
-    procedure LexerOnIfNDef(pLex: TD2XLexer);
-    procedure LexerOnIfOpt(pLex: TD2XLexer);
-    procedure LexerOnIf(pLex: TD2XLexer);
-    procedure LexerOnElseIf(pLex: TD2XLexer);
-    // procedure LexerOnElse(pLex: TD2XLexer);
-    // procedure LexerOnEndIf(pLex: TD2XLexer);
-    // procedure LexerOnIfEnd(pLex: TD2XLexer);
 
     procedure InitParser;
 
@@ -249,15 +232,6 @@ begin
     end;
 end;
 
-procedure TD2XOptions.ParserMessage(pSender: TObject; const pTyp: TMessageEventType;
-  const pMsg: string; pX, pY: Integer);
-var
-  lP: TD2XProcessor;
-begin
-  for lP in fProcs do
-    lP.ParserMessage(pTyp, pMsg, pX, pY);
-end;
-
 function TD2XOptions.ProcessDirectory(pDir, pWildCards: string): Boolean;
 var
   lPath: ID2XIODir;
@@ -368,78 +342,10 @@ begin
   end;
 end;
 
-(*
- procedure TD2XOptions.LexerOnDefine(pLex: TD2XLexer);
- begin
- pLex.Next;
- end;
-
- procedure TD2XOptions.LexerOnElse(pLex: TD2XLexer);
- begin
- pLex.Next;
- end;
-*)
-procedure TD2XOptions.LexerOnElseIf(pLex: TD2XLexer);
-begin
-  pLex.Next;
-end;
-
-(*
- procedure TD2XOptions.LexerOnEndIf(pLex: TD2XLexer);
- begin
- pLex.Next;
- end;
-*)
-procedure TD2XOptions.LexerOnIf(pLex: TD2XLexer);
-begin
-  pLex.Next;
-end;
-
-procedure TD2XOptions.LexerOnIfDef(pLex: TD2XLexer);
-begin
-  fCountDefinesUsedHandler.DefineUsed(pLex.DirectiveParam);
-  pLex.Next;
-end;
-
-(*
- procedure TD2XOptions.LexerOnIfEnd(pLex: TD2XLexer);
- begin
- pLex.Next;
- end;
-*)
-procedure TD2XOptions.LexerOnIfNDef(pLex: TD2XLexer);
-begin
-  fCountDefinesUsedHandler.DefineUsed(pLex.DirectiveParam);
-  pLex.Next;
-end;
-
-procedure TD2XOptions.LexerOnIfOpt(pLex: TD2XLexer);
-begin
-  pLex.Next;
-end;
-
 procedure TD2XOptions.LexerOnInclude(pLex: TD2XLexer);
-var
-  lFile: string;
-  lX, lY: Integer;
-  lP: TD2XProcessor;
 begin
-  lFile := pLex.DirectiveParam;
-  lX := pLex.PosXY.X;
-  lY := pLex.PosXY.Y;
-
-  for lP in fProcs do
-    lP.LexerInclude(lFile, lX, lY);
-
   pLex.Next;
 end;
-
-(*
- procedure TD2XOptions.LexerOnUnDef(pLex: TD2XLexer);
- begin
- pLex.Next;
- end;
-*)
 
 function TD2XOptions.ProcessParam(pParam, pFrom: string): Boolean;
 var
@@ -621,7 +527,7 @@ begin
     .SetProcessingOutput(MakeFileRef(lCountChildren)));
   fProcs.Add(TD2XProcessor.CreateClass(lCountFinalDefines, TD2XCountFinalDefinesHandler)
     .SetFileOutput(NilFileRef()).SetProcessingOutput(MakeFileRef(lCountFinalDefines)));
-  fProcs.Add(TD2XProcessor.CreateHandler(lCountDefinesUsed, fCountDefinesUsedHandler, True)
+  fProcs.Add(TD2XProcessor.CreateClass(lCountDefinesUsed, TD2XCountDefinesUsedHandler)
     .SetProcessingOutput(MakeFileRef(lCountDefinesUsed)));
   fProcs.Add(TD2XProcessor.CreateHandler(fParserDefines, lParserDefinesHandler, True));
   fProcs.Add(TD2XProcessor.CreateHandler(fHeldDefines, lHeldDefinesHandler, True));
@@ -651,7 +557,6 @@ begin
   begin
     fParser := lC.Create;
 
-    fParser.OnMessage := ParserMessage;
     fParser.AddAttribute := procedure(pName, pValue: string)
       var
         lP: TD2XProcessor;
@@ -676,16 +581,6 @@ begin
       end;
 
     fParser.Lexer.OnIncludeDirect := LexerOnInclude;
-    // fParser.Lexer.OnDefineDirect := LexerOnDefine;
-    // fParser.Lexer.OnUnDefDirect := LexerOnUnDef;
-    fParser.Lexer.OnIfDirect := LexerOnIf;
-    fParser.Lexer.OnIfDefDirect := LexerOnIfDef;
-    fParser.Lexer.OnIfNDefDirect := LexerOnIfNDef;
-    fParser.Lexer.OnIfOptDirect := LexerOnIfOpt;
-    // fParser.Lexer.OnElseDirect := LexerOnElse;
-    fParser.Lexer.OnElseIfDirect := LexerOnElseIf;
-    // fParser.Lexer.OnEndIfDirect := LexerOnEndIf;
-    // fParser.Lexer.OnIfEndDirect := LexerOnIfEnd;
 
     for lP in fProcs do
       lP.InitParser(fParser);
@@ -744,7 +639,6 @@ begin
     begin
       Result := TD2X.ToLabel(fParseMode.Value);
     end;
-  fCountDefinesUsedHandler := TD2XCountDefinesUsedHandler.Create;
 
   lWriteXml := TD2XFlaggedStringParam.CreateFlagStr('WX', 'Write XML', '<d/e>',
     'Write XML files into current or given <d/e>', 'Xml,xml', True, ConvertDirExtn);

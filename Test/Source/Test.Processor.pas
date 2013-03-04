@@ -4,6 +4,7 @@ interface
 
 uses
   CastaliaPasLexTypes,
+  D2X.Flag,
   D2X.Handler,
   D2X.Param,
   D2X.Parser,
@@ -11,7 +12,7 @@ uses
   Test.Global;
 
 type
-  TTestProcessor = class(TD2XProcessor, ID2XParser, ID2XChecks, ID2XMethods, ID2XMessages)
+  TTestProcessor = class(TD2XProcessor, ID2XChecks, ID2XMethods)
   public
     CalledUseProxy: Boolean;
     CalledSetParser: Boolean;
@@ -38,9 +39,6 @@ type
     function CheckAfterMethod(pMethod: string): Boolean;
     procedure BeginMethod(pMethod: string);
     procedure EndMethod(pMethod: string);
-    procedure ParserMessage(const pTyp: TMessageEventType; const pMsg: string;
-      pX, pY: Integer);
-    procedure LexerInclude(const pFile: string; pX, pY: Integer);
 
   end;
 
@@ -116,18 +114,18 @@ begin
   inherited;
 end;
 
-procedure TTestProcessor.LexerInclude(const pFile: string; pX, pY: Integer);
-begin
-  CalledLexerInclude := True;
-  inherited;
-end;
-
-procedure TTestProcessor.ParserMessage(const pTyp: TMessageEventType;
-  const pMsg: string; pX, pY: Integer);
-begin
-  CalledParserMessage := True;
-  inherited;
-end;
+//procedure TTestProcessor.LexerInclude(const pFile: string; pX, pY: Integer);
+//begin
+//  CalledLexerInclude := True;
+//  inherited;
+//end;
+//
+//procedure TTestProcessor.ParserMessage(const pTyp: TMessageEventType;
+//  const pMsg: string; pX, pY: Integer);
+//begin
+//  CalledParserMessage := True;
+//  inherited;
+//end;
 
 procedure TTestProcessor.InitParser(pParser: TD2XDefinesParser);
 begin

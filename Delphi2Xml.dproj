@@ -115,6 +115,7 @@
 			<DCCReference Include="Source\D2X.Tree.pas"/>
 			<DCCReference Include="Source\D2X.Tree.Xml.pas"/>
 			<DCCReference Include="Source\D2X.IO.ErrorLog.pas"/>
+			<DCCReference Include="Source\D2X.Flag.pas"/>
 			<None Include="TODO.txt"/>
 			<None Include="FastMM4Options.inc"/>
 			<BuildConfiguration Include="Release">
