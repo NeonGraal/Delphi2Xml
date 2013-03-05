@@ -49,7 +49,7 @@ type
 
 function TTestRunParam.GetParserDefines: TStringList;
 begin
-  Result := TTestOptions(fOpts).ParserDefines;
+  Result := TTestOptions(fOpts).ParserDefines();
 end;
 
 { TestTD2XRunParam }

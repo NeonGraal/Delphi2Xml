@@ -59,6 +59,7 @@ type
 
   TD2XCheckRef = reference to function: Boolean;
   TD2XStringRef = reference to function: string;
+  TD2XStringListRef = reference to function: TStringList;
   TD2XStringCheckRef = reference to function(pStr: string): Boolean;
   TD2XLogMessage = reference to procedure(pType, pMsg: string; pX, pY: Integer);
 

@@ -904,12 +904,12 @@ end;
 
 procedure TestTD2XOptions.TestHeldDefines;
 begin
-  CheckList('', 'Defines', fOpts.HeldDefines);
+  CheckList('', 'Defines', fOpts.HeldDefines());
 end;
 
 procedure TestTD2XOptions.TestParserDefines;
 begin
-  CheckList(ReplaceStr(EXPECTED_DEFINES, ',', ' '), 'Defines', fOpts.ParserDefines);
+  CheckList(ReplaceStr(EXPECTED_DEFINES, ',', ' '), 'Defines', fOpts.ParserDefines());
 end;
 
 procedure TestTD2XOptions.TestProcessDirectory;
@@ -1341,7 +1341,7 @@ procedure TestTD2XOptionsParseDefines.SetUp;
 begin
   inherited;
 
-  fOpts.ParserDefines.CommaText := 'ALPHA,BETA,GAMMA,UNIFORM';
+  fOpts.ParserDefines().CommaText := 'ALPHA,BETA,GAMMA,UNIFORM';
 
   fCode := 'D';
   fLabel := 'Defines ';
@@ -1637,7 +1637,7 @@ procedure TestTD2XOptionsParseHeldDefines.SetUp;
 begin
   inherited;
 
-  fOpts.HeldDefines.CommaText := 'ALPHA,BETA,GAMMA,UNIFORM';
+  fOpts.HeldDefines().CommaText := 'ALPHA,BETA,GAMMA,UNIFORM';
 
   fCode := 'H';
   fLabel := 'Held Defines ';

@@ -24,6 +24,21 @@ uses
   TestFramework;
 
 type
+  TestTD2XParserHandler = class(TParserTestCase)
+  strict private
+    fHndlr: TTestParserHandler;
+  public
+    procedure SetUp; override;
+    procedure TearDown; override;
+  published
+    procedure TestInitParser;
+    procedure TestDoParserMessage;
+    procedure TestDoLexerInclude;
+    procedure TestOnParserMessage;
+    procedure TestOnLexerInclude;
+
+  end;
+
   TestTD2XCountChildrenHandler = class(TStringTestCase)
   strict private
     fHndlr: TD2XCountChildrenHandler;
@@ -58,24 +73,27 @@ type
     procedure TestProcessing;
   end;
 
-  TestTD2XCountDefinesUsedHandler = class(TStringTestCase)
+  TestTD2XCountDefinesUsedHandler = class(TParserTestCase)
   strict private
-    fHndlr: TD2XCountDefinesUsedHandler;
+    fHndlr: TTestCountDefinesUsedHandler;
   public
     procedure SetUp; override;
     procedure TearDown; override;
   published
     procedure TestDescription;
+    procedure TestInitParser;
     procedure TestUseProxy;
     procedure TestEndProcessing;
+    procedure TestOnIf;
+    procedure TestOnIfDef;
     procedure TestDefineUsed;
 
     procedure TestProcessing;
   end;
 
-  TestTD2XErrorHandler = class(TStringTestCase)
+  TestTD2XErrorHandler = class(TParserTestCase)
   strict private
-    fHndlr: TD2XErrorHandler;
+    fHndlr: TTestErrorHandler;
 
     procedure LogMessage(pType, pMsg: string; pX, pY: Integer);
 
@@ -84,26 +102,26 @@ type
     procedure TearDown; override;
   published
     procedure TestInvalidCreate;
+    procedure TestInitParser;
     procedure TestDescription;
     procedure TestUseProxy;
-//    procedure TestParserMessage;
-//    procedure TestLexerInclude;
+    procedure TestOnParserMessage;
   end;
 
   TestTD2XLogHandler = class(TParserTestCase)
   strict private
-    fHndlr: TD2XLogHandler;
+    fHndlr: TTestLogHandler;
   public
     procedure SetUp; override;
     procedure TearDown; override;
   published
-//    procedure TestInitParser;
+    procedure TestInitParser;
     procedure TestDescription;
     procedure TestUseProxy;
     procedure TestBeginMethod;
     procedure TestEndMethod;
-//    procedure TestParserMessage;
-//    procedure TestLexerInclude;
+    procedure TestOnParserMessage;
+    procedure TestOnLexerInclude;
 
   end;
 
@@ -169,17 +187,6 @@ type
     procedure TestEndResults;
   end;
 
-  TTestTreeHandler = class(TD2XTreeHandler)
-  public
-    property TreeDoc: TD2XTreeDoc read fTreeDoc;
-    property TreeNode: TD2XTreeNode read fTreeNode;
-
-    property Parser: TD2XDefinesParser read fParser;
-    property FinalToken: ID2XFlag read fFinalToken;
-    property ParseMode: TD2XStringRef read fParseMode;
-
-  end;
-
   TestTD2XTreeHandler = class(TParserTestCase)
   strict private
     fHndlr: TTestTreeHandler;
@@ -203,8 +210,8 @@ type
     procedure TestAddAttr;
     procedure TestAddText;
     procedure TestRollbackTo;
-//    procedure TestLexerInclude;
-//    procedure TestParserMessage;
+    procedure TestOnLexerInclude;
+    procedure TestOnParserMessage;
     procedure TestTrimChildren;
 
     procedure TestProcessing;
@@ -549,39 +556,39 @@ begin
   end;
 end;
 
-//procedure TestTD2XTreeHandler.TestLexerInclude;
-//begin
-//  fHndlr.BeginResults;
-//  fHndlr.BeginFile('Test', nil);
-//  fHndlr.BeginMethod('Test');
-//
-//  fHndlr.LexerInclude('Test', 1, 2);
-//
-//  fHndlr.EndResults(FileWriterRef(fDS));
-//  CheckStream('$Test< @parseMode:ParseMode; $IncludeFile< @filename:Test; @msgAt:1,2; > >',
-//    'End Results');
-//end;
-//
-//procedure TestTD2XTreeHandler.TestParserMessage;
-//begin
-//  fHndlr.BeginResults;
-//  fHndlr.BeginFile('Test', nil);
-//  fHndlr.BeginMethod('Test');
-//
-//  fHndlr.ParserMessage(meNotSupported, 'Test', 1, 2);
-//
-//  fHndlr.EndResults(FileWriterRef(fDS));
-//  CheckStream('$Test< @parseMode:ParseMode; $D2X_notSuppMsg< @msgAt:1,2; >:Test; >',
-//    'End Results');
-//
-//  fHndlr.BeginResults;
-//  fHndlr.BeginFile('Test', nil);
-//  fHndlr.BeginMethod('Test');
-//  fHndlr.ParserMessage(meError, 'Test', 1, 2);
-//  fHndlr.EndResults(FileWriterRef(fDS));
-//  CheckStream('$Test< @parseMode:ParseMode; $D2X_errorMsg< @msgAt:1,2; >:Test; >',
-//    'End Results');
-//end;
+procedure TestTD2XTreeHandler.TestOnLexerInclude;
+begin
+  fHndlr.BeginResults;
+  fHndlr.BeginFile('Test', nil);
+  fHndlr.BeginMethod('Test');
+
+  fHndlr.TestLexerInclude('Test', 1, 2);
+
+  fHndlr.EndResults(FileWriterRef(fDS));
+  CheckStream('$Test< @parseMode:ParseMode; $IncludeFile< @filename:Test; @msgAt:1,2; > >',
+    'End Results');
+end;
+
+procedure TestTD2XTreeHandler.TestOnParserMessage;
+begin
+  fHndlr.BeginResults;
+  fHndlr.BeginFile('Test', nil);
+  fHndlr.BeginMethod('Test');
+
+  fHndlr.TestParserMessage(meNotSupported, 'Test', 1, 2);
+
+  fHndlr.EndResults(FileWriterRef(fDS));
+  CheckStream('$Test< @parseMode:ParseMode; $D2X_notSuppMsg< @msgAt:1,2; >:Test; >',
+    'End Results');
+
+  fHndlr.BeginResults;
+  fHndlr.BeginFile('Test', nil);
+  fHndlr.BeginMethod('Test');
+  fHndlr.TestParserMessage(meError, 'Test', 1, 2);
+  fHndlr.EndResults(FileWriterRef(fDS));
+  CheckStream('$Test< @parseMode:ParseMode; $D2X_errorMsg< @msgAt:1,2; >:Test; >',
+    'End Results');
+end;
 
 procedure TestTD2XTreeHandler.TestProcessing;
 begin
@@ -696,7 +703,7 @@ procedure TestTD2XCountDefinesUsedHandler.SetUp;
 begin
   inherited;
 
-  fHndlr := TD2XCountDefinesUsedHandler.Create;
+  fHndlr := TTestCountDefinesUsedHandler.Create;
 end;
 
 procedure TestTD2XCountDefinesUsedHandler.TearDown;
@@ -708,9 +715,9 @@ end;
 
 procedure TestTD2XCountDefinesUsedHandler.TestDefineUsed;
 begin
-  fHndlr.DefineUsed('Test');
-  fHndlr.DefineUsed(' Test');
-  fHndlr.DefineUsed('Test ');
+  fHndlr.TestDefineUsed('Test');
+  fHndlr.TestDefineUsed(' Test');
+  fHndlr.TestDefineUsed('Test ');
 
   fHndlr.EndProcessing(FileWriterRef(fDS));
   CheckStream('Test=3', 'Define Used');
@@ -744,14 +751,35 @@ begin
   end;
 end;
 
+procedure TestTD2XCountDefinesUsedHandler.TestInitParser;
+begin
+  fHndlr.InitParser(fParser, fActive);
+
+  CheckTrue(fHndlr.fInitParserCalled, 'Init Parser called');
+end;
+
+procedure TestTD2XCountDefinesUsedHandler.TestOnIf;
+begin
+  StartExpectingException(EAccessViolation);
+
+  fHndlr.TestOnIf;
+end;
+
+procedure TestTD2XCountDefinesUsedHandler.TestOnIfDef;
+begin
+  StartExpectingException(EAccessViolation);
+
+  fHndlr.TestOnIfDef;
+end;
+
 procedure TestTD2XCountDefinesUsedHandler.TestProcessing;
 begin
-  fHndlr.DefineUsed('Alpha');
-  fHndlr.DefineUsed('Beta');
-  fHndlr.DefineUsed('Alpha');
-  fHndlr.DefineUsed('Gamma');
-  fHndlr.DefineUsed('Alpha');
-  fHndlr.DefineUsed('Beta');
+  fHndlr.TestDefineUsed('Alpha');
+  fHndlr.TestDefineUsed('Beta');
+  fHndlr.TestDefineUsed('Alpha');
+  fHndlr.TestDefineUsed('Gamma');
+  fHndlr.TestDefineUsed('Alpha');
+  fHndlr.TestDefineUsed('Beta');
 
   fHndlr.EndProcessing(FileWriterRef(fDS));
   CheckStream('Alpha=3 Beta=2 Gamma=1', 'Define Used');
@@ -834,7 +862,7 @@ procedure TestTD2XErrorHandler.SetUp;
 begin
   inherited;
 
-  fHndlr := TD2XErrorHandler.CreateError(meError, Self.LogMessage);
+  fHndlr := TTestErrorHandler.CreateError(meError, Self.LogMessage);
 end;
 
 procedure TestTD2XErrorHandler.TearDown;
@@ -847,6 +875,13 @@ end;
 procedure TestTD2XErrorHandler.TestDescription;
 begin
   CheckEqualsString('Error Logging', fHndlr.Description, 'Description');
+end;
+
+procedure TestTD2XErrorHandler.TestInitParser;
+begin
+  fHndlr.InitParser(fParser, fActive);
+
+  CheckTrue(fHndlr.fInitParserCalled, 'Init Parser called');
 end;
 
 procedure TestTD2XErrorHandler.TestInvalidCreate;
@@ -863,17 +898,11 @@ begin
   end;
 end;
 
-//procedure TestTD2XErrorHandler.TestLexerInclude;
-//begin
-//  fHndlr.LexerInclude('', 0, 0);
-//  CheckBuilder('', 'No Lexer Include');
-//end;
-//
-//procedure TestTD2XErrorHandler.TestParserMessage;
-//begin
-//  fHndlr.ParserMessage(meError, 'Test', 1, 2);
-//  CheckBuilder('Error: Test (1,2)', 'Correct Parser Message');
-//end;
+procedure TestTD2XErrorHandler.TestOnParserMessage;
+begin
+  fHndlr.TestParserMessage(meError, 'Test', 1, 2);
+  CheckBuilder('Error: Test (1,2)', 'Correct Parser Message');
+end;
 
 procedure TestTD2XErrorHandler.TestUseProxy;
 begin
@@ -1061,7 +1090,7 @@ procedure TestTD2XLogHandler.SetUp;
 begin
   inherited;
 
-  fHndlr := TD2XLogHandler.Create;
+  fHndlr := TTestLogHandler.Create;
   fHndlr.StartLog(fLog);
 end;
 
@@ -1096,35 +1125,85 @@ begin
   CheckLog('AFTER Test', 'Begin Method');
 end;
 
-//procedure TestTD2XLogHandler.TestInitParser;
-//begin
-//  fHndlr.InitParser(fParser);
-//
-//  CheckTrue(Assigned(TTestLogHandler(fHndlr).Lexer), 'Parse Mode set');
-//  Check(fParser.Lexer = TTestLogHandler(fHndlr).Lexer, 'Parser set');
-//end;
-//
-//procedure TestTD2XLogHandler.TestLexerInclude;
-//begin
-//  fHndlr.LexerInclude('Test', 1, 2);
-//  CheckLog('INCLUDE @ 1,2: Test', 'Correct Parser Message');
-//end;
-//
-//procedure TestTD2XLogHandler.TestParserMessage;
-//begin
-//  fHndlr.ParserMessage(meError, 'Test', 1, 2);
-//  CheckLog('ERROR @ 1,2: Test', 'Correct Parser Message');
-//end;
+procedure TestTD2XLogHandler.TestInitParser;
+begin
+  fHndlr.InitParser(fParser, fActive);
+
+  CheckTrue(fHndlr.fInitParserCalled, 'Init Parser called');
+end;
+
+procedure TestTD2XLogHandler.TestOnLexerInclude;
+begin
+  fHndlr.TestLexerInclude('Test', 1, 2);
+  CheckLog('INCLUDE @ 1,2: Test', 'Correct Parser Message');
+end;
+
+procedure TestTD2XLogHandler.TestOnParserMessage;
+begin
+  fHndlr.TestParserMessage(meError, 'Test', 1, 2);
+  CheckLog('ERROR @ 1,2: Test', 'Correct Parser Message');
+end;
 
 procedure TestTD2XLogHandler.TestUseProxy;
 begin
   CheckNotInterface(ID2XFullProxy, fHndlr, 'Full proxy');
 end;
 
+{ TestTD2XParserHandler }
+
+procedure TestTD2XParserHandler.SetUp;
+begin
+  inherited;
+
+  fHndlr := TTestParserHandler.Create;
+end;
+
+procedure TestTD2XParserHandler.TearDown;
+begin
+  FreeAndNil(fHndlr);
+
+  inherited;
+end;
+
+procedure TestTD2XParserHandler.TestDoLexerInclude;
+begin
+  fHndlr.InitParser(fParser, fActive);
+
+  fHndlr.TestDoLexerInclude('Test', 1, 2);
+  CheckTrue(fHndlr.fLexerIncludeCalled, 'Lexer Include called');
+end;
+
+procedure TestTD2XParserHandler.TestDoParserMessage;
+begin
+  fHndlr.InitParser(fParser, fActive);
+
+  fHndlr.TestDoParserMessage(meError, 'Test', 1, 2);
+  CheckTrue(fHndlr.fParserMessageCalled, 'Parser Message called');
+end;
+
+procedure TestTD2XParserHandler.TestInitParser;
+begin
+  fHndlr.InitParser(fParser, fActive);
+
+  CheckTrue(fHndlr.fInitParserCalled, 'Init Parser called');
+end;
+
+procedure TestTD2XParserHandler.TestOnLexerInclude;
+begin
+  fHndlr.TestOnLexerInclude('Test', 1, 2);
+  CheckTrue(fHndlr.fLexerIncludeCalled, 'Lexer Include called');
+end;
+
+procedure TestTD2XParserHandler.TestOnParserMessage;
+begin
+  fHndlr.TestOnParserMessage(meError, 'Test', 1, 2);
+  CheckTrue(fHndlr.fParserMessageCalled, 'Parser Message called');
+end;
+
 initialization
 
 // Register any test cases with the test runner
-RegisterTests('Handlers', [TestTD2XCountChildrenHandler.Suite,
+RegisterTests('Handlers', [TestTD2XParserHandler.Suite, TestTD2XCountChildrenHandler.Suite,
   TestTD2XCountFinalDefinesHandler.Suite, TestTD2XCountDefinesUsedHandler.Suite,
   TestTD2XParserDefinesHandler.Suite, TestTD2XHeldDefinesHandler.Suite,
   TestTD2XErrorHandler.Suite, TestTD2XLogHandler.Suite, TestTD2XSkipHandler.Suite,

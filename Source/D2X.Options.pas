@@ -38,8 +38,6 @@ type
     fParseMode: TD2XSingleParam<TD2XParseMode>;
     fResultPer: TD2XSingleParam<TD2XResultPer>;
     fElapsedMode: TD2XSingleParam<TD2XElapsedMode>;
-    fParserDefines: TD2XDefinesParam;
-    fHeldDefines: TD2XDefinesParam;
 
     procedure RemoveProxy;
     procedure SetBaseProxy;
@@ -62,8 +60,8 @@ type
 
   protected
     fParams: TD2XParams;
-    function GetParserDefines: TStringList;
-    function GetHeldDefines: TStringList;
+    fGetParserDefines: TD2XStringListRef;
+    fGetHeldDefines: TD2XStringListRef;
 
   public
     constructor Create; override;
@@ -182,16 +180,6 @@ begin
     for lP in fProcs do
       lP.EndResults(pFilename);
   end;
-end;
-
-function TD2XOptions.GetHeldDefines: TStringList;
-begin
-  Result := fHeldDefines.Defines;
-end;
-
-function TD2XOptions.GetParserDefines: TStringList;
-begin
-  Result := fParserDefines.Defines;
 end;
 
 function TD2XOptions.GetRecurse: Boolean;
@@ -493,6 +481,9 @@ var
   lCountChildren: TD2XFlaggedStringParam;
   lCountFinalDefines: TD2XFlaggedStringParam;
 
+  lParserDefines: TD2XDefinesParam;
+  lHeldDefines: TD2XDefinesParam;
+
   function NilFileRef: TD2XFileRef;
   begin
     Result := function: ID2XIOFile
@@ -502,8 +493,8 @@ var
   end;
 
 begin
-  fParserDefines := TD2XDefinesParam.CreateDefines('D', 'Defines', ConfigFileOrExtn);
-  fHeldDefines := TD2XDefinesParam.CreateDefines('H', 'Held Defines', ConfigFileOrExtn);
+  lParserDefines := TD2XDefinesParam.CreateDefines('D', 'Defines', ConfigFileOrExtn);
+  lHeldDefines := TD2XDefinesParam.CreateDefines('H', 'Held Defines', ConfigFileOrExtn);
 
   lCountDefinesUsed := TD2XFlaggedStringParam.CreateFlagStr('CU', 'Count Defines Used',
     '<f/e>', 'Count Defines Used into <f/e>', '.used', True, ConvertExtn);
@@ -514,8 +505,17 @@ begin
   lCountFinalDefines := TD2XFlaggedStringParam.CreateFlagStr('CF', 'Count Final Defines',
     '<f/e>', 'Count Final Defines into <f/e>', '.final', True, ConvertExtn);
 
-  lParserDefinesHandler := TD2XParserDefinesHandler.CreateDefines(fParserDefines.Defines);
-  lHeldDefinesHandler := TD2XHeldDefinesHandler.CreateDefines(fHeldDefines.Defines);
+  fGetParserDefines := function: TStringList
+    begin
+      Result := lParserDefines.Defines;
+    end;
+  fGetHeldDefines := function: TStringList
+    begin
+      Result := lHeldDefines.Defines;
+    end;
+
+  lParserDefinesHandler := TD2XParserDefinesHandler.CreateDefines(lParserDefines.Defines);
+  lHeldDefinesHandler := TD2XHeldDefinesHandler.CreateDefines(lHeldDefines.Defines);
 
   fProcs.Add(TD2XProcessor.CreateClass(lSkipMethods, TD2XSkipHandler).SetFileInput(
     function: ID2XIOFile
@@ -529,11 +529,11 @@ begin
     .SetFileOutput(NilFileRef()).SetProcessingOutput(MakeFileRef(lCountFinalDefines)));
   fProcs.Add(TD2XProcessor.CreateClass(lCountDefinesUsed, TD2XCountDefinesUsedHandler)
     .SetProcessingOutput(MakeFileRef(lCountDefinesUsed)));
-  fProcs.Add(TD2XProcessor.CreateHandler(fParserDefines, lParserDefinesHandler, True));
-  fProcs.Add(TD2XProcessor.CreateHandler(fHeldDefines, lHeldDefinesHandler, True));
+  fProcs.Add(TD2XProcessor.CreateHandler(lParserDefines, lParserDefinesHandler, True));
+  fProcs.Add(TD2XProcessor.CreateHandler(lHeldDefines, lHeldDefinesHandler, True));
 
   fParams.AddRange([lCountChildren, lCountFinalDefines, lCountDefinesUsed, lSkipMethods,
-    fParserDefines, fHeldDefines]);
+    lParserDefines, lHeldDefines]);
 end;
 
 procedure TD2XOptions.InitParser;

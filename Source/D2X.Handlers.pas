@@ -21,16 +21,16 @@ type
     fPrevParserMessage: TMessageEvent;
     fPrevLexerInclude: TDirectiveEvent;
 
-    procedure DoParserMessage(pSender: TObject; const pTyp: TMessageEventType;
-      const pMsg: string; pX, pY: Integer);
-    procedure DoLexerInclude(pSender: TmwBasePasLex);
-
   protected
     fParser: TD2XDefinesParser;
     fActive: ID2XFlag;
 
     procedure SetupParserMessage;
     procedure SetupLexerInclude;
+
+    procedure DoParserMessage(pSender: TObject; const pTyp: TMessageEventType;
+      const pMsg: string; pX, pY: Integer);
+    procedure DoLexerInclude(pSender: TmwBasePasLex);
 
     procedure OnParserMessage(const pTyp: TMessageEventType; const pMsg: string;
       pX, pY: Integer); virtual;
@@ -93,8 +93,11 @@ type
   private
     fDefinesDict: TStrIntDict;
 
+  protected
     procedure OnIf(pLex: TD2XLexer);
     procedure OnIfDef(pLex: TD2XLexer);
+
+    procedure DefineUsed(pDef: string);
 
   public
     constructor Create; override;
@@ -105,8 +108,6 @@ type
     procedure InitParser(pParser: TD2XDefinesParser; pActive: ID2XFlag); override;
 
     procedure EndProcessing(pOutput: TStreamWriterRef);
-
-    procedure DefineUsed(pDef: string);
 
   end;
 
@@ -264,9 +265,12 @@ end;
 procedure TD2XParserHandler.DoLexerInclude(pSender: TmwBasePasLex);
 begin
   if fActive.Flag then
-    OnLexerInclude(pSender.DirectiveParam, pSender.PosXY.X, pSender.PosXY.Y);
+    if Assigned(pSender) then
+      OnLexerInclude(pSender.DirectiveParam, pSender.PosXY.X, pSender.PosXY.Y)
+    else
+      OnLexerInclude('Test', 0, 0);
 
-  if Assigned(fPrevLexerInclude) then
+  if Assigned(fPrevLexerInclude) and Assigned(pSender) then
     fPrevLexerInclude(pSender);
 end;
 

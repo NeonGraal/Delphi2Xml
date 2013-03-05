@@ -4,6 +4,7 @@ interface
 
 uses
   D2X.Flag,
+  D2X.Global,
   D2X.Options,
   D2X.Param,
   System.Classes;
@@ -18,8 +19,8 @@ type
   end;
 
   TTestOptions = class(TD2XOptions)
-    property ParserDefines: TStringList read GetParserDefines;
-    property HeldDefines: TStringList read GetHeldDefines;
+    property ParserDefines: TD2XStringListRef read fGetParserDefines;
+    property HeldDefines: TD2XStringListRef read fGetHeldDefines;
   end;
 
 implementation
