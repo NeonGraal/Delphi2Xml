@@ -31,7 +31,7 @@ type
     procedure OnLexerInclude(const pFile: string; pX, pY: Integer); override;
 
   public
-    fInitParserCalled : Boolean;
+    fInitParserCalled: Boolean;
     fParserMessageCalled: Boolean;
     fLexerIncludeCalled: Boolean;
 
@@ -51,7 +51,7 @@ type
 
   TTestCountDefinesUsedHandler = class(TD2XCountDefinesUsedHandler)
   public
-    fInitParserCalled : Boolean;
+    fInitParserCalled: Boolean;
 
     procedure InitParser(pParser: TD2XDefinesParser; pActive: ID2XFlag); override;
 
@@ -63,7 +63,7 @@ type
 
   TTestErrorHandler = class(TD2XErrorHandler)
   public
-    fInitParserCalled : Boolean;
+    fInitParserCalled: Boolean;
 
     procedure InitParser(pParser: TD2XDefinesParser; pActive: ID2XFlag); override;
 
@@ -73,7 +73,7 @@ type
 
   TTestLogHandler = class(TD2XLogHandler)
   public
-    fInitParserCalled : Boolean;
+    fInitParserCalled: Boolean;
 
     procedure InitParser(pParser: TD2XDefinesParser; pActive: ID2XFlag); override;
 
@@ -96,7 +96,6 @@ type
     property ParseMode: TD2XStringRef read fParseMode;
 
   end;
-
 
 implementation
 
@@ -131,7 +130,7 @@ procedure TTestCountDefinesUsedHandler.InitParser(pParser: TD2XDefinesParser;
 begin
   inherited;
 
-  fInitParserCalled := true;
+  fInitParserCalled := True;
 end;
 
 procedure TTestCountDefinesUsedHandler.TestDefineUsed(pDef: string);
@@ -155,7 +154,7 @@ procedure TTestErrorHandler.InitParser(pParser: TD2XDefinesParser; pActive: ID2X
 begin
   inherited;
 
-  fInitParserCalled := true;
+  fInitParserCalled := True;
 end;
 
 procedure TTestErrorHandler.TestParserMessage(const pTyp: TMessageEventType;
@@ -170,7 +169,7 @@ procedure TTestLogHandler.InitParser(pParser: TD2XDefinesParser; pActive: ID2XFl
 begin
   inherited;
 
-  fInitParserCalled := true;
+  fInitParserCalled := True;
 end;
 
 procedure TTestLogHandler.TestLexerInclude(const pFile: string; pX, pY: Integer);
@@ -203,7 +202,7 @@ procedure TTestParserHandler.InitParser(pParser: TD2XDefinesParser; pActive: ID2
 begin
   inherited;
 
-  fInitParserCalled := true;
+  fInitParserCalled := True;
 end;
 
 procedure TTestParserHandler.OnLexerInclude(const pFile: string; pX, pY: Integer);

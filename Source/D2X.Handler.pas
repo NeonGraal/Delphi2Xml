@@ -46,10 +46,10 @@ type
 
   ID2XTrees = interface
     ['{6A368D3F-23ED-4ED6-A8CF-5B885C112ACA}']
-    procedure AddAttr(pName: string; pValue: string);
-    procedure AddText(pText: string);
-    procedure RollBackTo(pElement: string);
-    procedure TrimChildren(pElement: string);
+    procedure AddAttr(pName: String; pValue: String);
+    procedure AddText(pText: String);
+    procedure RollBackTo(pElement: String);
+    procedure TrimChildren(pElement: String);
   end;
 
   ID2XMethods = interface
@@ -63,13 +63,6 @@ type
     function CheckBeforeMethod(pMethod: String): Boolean;
     function CheckAfterMethod(pMethod: String): Boolean;
   end;
-
-//  ID2XMessages = interface
-//    ['{D0406504-283B-4768-B6E4-27EBDEC4FBD0}']
-//    procedure ParserMessage(const pTyp: TMessageEventType; const pMsg: String;
-//      pX, pY: Integer);
-//    procedure LexerInclude(const pFile: String; pX, pY: Integer);
-//  end;
 
   TD2XHandlerClass = class of TD2XLogger;
 

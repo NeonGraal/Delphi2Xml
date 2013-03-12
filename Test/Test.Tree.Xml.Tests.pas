@@ -214,7 +214,7 @@ begin
   lChild.AddChild('Test24').Text := 'Val24';
   lNode.AddAttribute('Test3').Text := 'Val3';
   lNode.AddAttribute('Test4').Text := 'Val4';
-  FD2XmlDoc.Options := [toAutoIndent];
+  FD2XmlDoc.AddOptions([toAutoIndent]);
 
   ReturnValue := FD2XmlDoc.Stream;
 
@@ -244,7 +244,7 @@ begin
   lChild.AddChild('Test24').Text := 'Val24';
   lNode.AddAttribute('Test3').Text := 'Val3';
   lNode.AddAttribute('Test4').Text := 'Val4';
-  FD2XmlDoc.Options := [];
+  FD2XmlDoc.RemoveOptions([toAutoIndent]);
 
   ReturnValue := FD2XmlDoc.Stream;
 

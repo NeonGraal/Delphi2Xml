@@ -547,7 +547,7 @@ end;
 procedure TD2XTreeHandler.BeginResults;
 begin
   fTreeDoc := TD2XTreeDoc.CreateDoc(fWriter);
-  fTreeDoc.Options := fTreeDoc.Options + [toAutoIndent];
+  fTreeDoc.AddOptions([toAutoIndent]);
   fHasFiles := False;
 end;
 

@@ -15,7 +15,6 @@ uses
   System.Classes,
   System.Diagnostics,
   System.Generics.Collections,
-  System.Rtti,
   System.SysUtils;
 
 type
@@ -28,7 +27,6 @@ type
     fDuration: TStopwatch;
 
     fParser: TD2XDefinesParser;
-    fVMI: TVirtualMethodInterceptor;
 
     fErrorLog: TD2XErrorLog;
 
@@ -39,8 +37,6 @@ type
     fResultPer: TD2XSingleParam<TD2XResultPer>;
     fElapsedMode: TD2XSingleParam<TD2XElapsedMode>;
 
-    procedure RemoveProxy;
-    procedure SetBaseProxy;
     procedure SetMinProxy;
     procedure SetFullProxy;
     function UseFullProxy: Boolean;
@@ -134,7 +130,6 @@ end;
 
 destructor TD2XOptions.Destroy;
 begin
-  RemoveProxy;
   FreeAndNil(fParser);
   FreeAndNil(fErrorLog);
 
@@ -546,12 +541,8 @@ begin
   else
     lC := TD2XFullParser;
 
-  if Assigned(fParser) then
-  begin
-    RemoveProxy;
-    if not(fParser is lC) then
-      FreeAndNil(fParser);
-  end;
+  if Assigned(fParser) and not(fParser is lC) then
+    FreeAndNil(fParser);
 
   if not Assigned(fParser) then
   begin
@@ -762,66 +753,41 @@ begin
   end;
 end;
 
-procedure TD2XOptions.RemoveProxy;
-begin
-  if Assigned(fVMI) then
-  begin
-    fVMI.Unproxify(fParser);
-    FreeAndNil(fVMI);
-  end;
-end;
-
 procedure TD2XOptions.SetFullProxy;
 begin
-  SetBaseProxy;
-  fVMI.OnBefore :=
-      procedure(pInst: TObject; pMethod: TRttiMethod; const pArgs: TArray<TValue>;
-    out pDoInvoke: Boolean; out pResult: TValue)
+  fParser.OnBeforeMethod := procedure(pMethod: string)
     var
       lP: TD2XProcessor;
     begin
-      pDoInvoke := True;
-      fErrorLog.SetMethod(pMethod.Name);
-      if IsInternalMethod(pMethod.Name) then
+      fErrorLog.SetMethod(pMethod);
+      if IsInternalMethod(pMethod) then
         Exit;
       for lP in fProcs do
-        if not lP.CheckBeforeMethod(pMethod.Name) then
+        if not lP.CheckBeforeMethod(pMethod) then
           Exit;
       for lP in fProcs do
-        lP.BeginMethod(pMethod.Name);
+        lP.BeginMethod(pMethod);
     end;
-  fVMI.OnAfter :=
-      procedure(pInst: TObject; pMethod: TRttiMethod; const pArgs: TArray<TValue>;
-    var pResult: TValue)
+  fParser.OnAfterMethod := procedure(pMethod: string)
     var
       lP: TD2XProcessor;
     begin
-      if IsInternalMethod(pMethod.Name) then
+      if IsInternalMethod(pMethod) then
         Exit;
       for lP in fProcs do
-        if not lP.CheckAfterMethod(pMethod.Name) then
+        if not lP.CheckAfterMethod(pMethod) then
           Exit;
       for lP in fProcs do
-        lP.EndMethod(pMethod.Name);
+        lP.EndMethod(pMethod);
     end;
 end;
 
 procedure TD2XOptions.SetMinProxy;
 begin
-  SetBaseProxy;
-  fVMI.OnBefore :=
-      procedure(pInst: TObject; pMethod: TRttiMethod; const pArgs: TArray<TValue>;
-    out pDoInvoke: Boolean; out pResult: TValue)
+  fParser.OnBeforeMethod := procedure(pMethod: string)
     begin
-      pDoInvoke := True;
-      fErrorLog.SetMethod(pMethod.Name);
+      fErrorLog.SetMethod(pMethod);
     end;
-end;
-
-procedure TD2XOptions.SetBaseProxy;
-begin
-  fVMI := TVirtualMethodInterceptor.Create(TObject(fParser).ClassType);
-  fVMI.Proxify(fParser);
 end;
 
 function TD2XOptions.UseFullProxy: Boolean;

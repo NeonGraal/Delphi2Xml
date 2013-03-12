@@ -55,8 +55,6 @@ type
 
 implementation
 
-
-
 { TD2XFileStream }
 
 constructor TD2XFileStream.Create(pFilename: string);

@@ -4,6 +4,7 @@ interface
 
 uses
   System.Classes,
+  System.Rtti,
   CastaliaPasLex,
   CastaliaPasLexTypes,
   CastaliaSimplePasPar;
@@ -16,6 +17,7 @@ type
   TD2XAddTextEvent = reference to procedure(pText: string);
   TD2XProgressEvent = reference to procedure(pProgress: Integer);
   TD2XTrimChildrenEvent = reference to procedure(pElement: string);
+  TD2XMethodEvent = reference to procedure(pMethod: string);
 
   TD2XDefinesParser = class(TD2XParser)
   private
@@ -29,6 +31,11 @@ type
     FAddText: TD2XAddTextEvent;
     fOnProgress: TD2XProgressEvent;
     fTrimChildren: TD2XTrimChildrenEvent;
+
+    fVMI: TVirtualMethodInterceptor;
+
+    fOnAfterMethod: TD2XMethodEvent;
+    fOnBeforeMethod: TD2XMethodEvent;
 
     function GetStartDefines: TStringList;
     function GetHeldDefines: TStringList;
@@ -77,6 +84,9 @@ type
     property AddAttribute: TD2XAddAttributeEvent read FAddAttribute write FAddAttribute;
     property AddText: TD2XAddTextEvent read FAddText write FAddText;
     property TrimChildren: TD2XTrimChildrenEvent read fTrimChildren write fTrimChildren;
+
+    property OnBeforeMethod: TD2XMethodEvent read fOnBeforeMethod write fOnBeforeMethod;
+    property OnAfterMethod: TD2XMethodEvent read fOnAfterMethod write fOnAfterMethod;
   end;
 
   TD2XDefinesParserClass = class of TD2XDefinesParser;
@@ -1620,10 +1630,32 @@ begin
   fProcessed := 0;
   fOnProgress := nil;
   fKeepTokens := False;
+
+  fVMI := TVirtualMethodInterceptor.Create(TObject(Self).ClassType);
+  fVMI.Proxify(Self);
+
+  fVMI.OnBefore :=
+      procedure(pInst: TObject; pMethod: TRttiMethod; const pArgs: TArray<TValue>;
+      out pDoInvoke: Boolean; out pResult: TValue)
+    begin
+      pDoInvoke := true;
+      if Assigned(fOnBeforeMethod) then
+        fOnBeforeMethod(pMethod.Name);
+    end;
+  fVMI.OnAfter :=
+      procedure(pInst: TObject; pMethod: TRttiMethod; const pArgs: TArray<TValue>;
+      var pResult: TValue)
+    begin
+      if Assigned(fOnAfterMethod) then
+        fOnAfterMethod(pMethod.Name);
+    end;
 end;
 
 destructor TD2XDefinesParser.Destroy;
 begin
+  fVMI.Unproxify(Self);
+  FreeAndNil(fVMI);
+
   FAddAttribute := nil;
   FAddText := nil;
   fOnProgress := nil;

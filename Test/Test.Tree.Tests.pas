@@ -320,7 +320,7 @@ var
 begin
   lNode := FD2XTreeDoc.AddChild('Test1');
   lNode.AddChild('Test2');
-  FD2XTreeDoc.Options := [toAutoIndent];
+  FD2XTreeDoc.AddOptions([toAutoIndent]);
 
   ReturnValue := FD2XTreeDoc.Stream;
 

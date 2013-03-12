@@ -15,7 +15,6 @@ uses
   Test.Global,
   Test.Handler,
 
-
   Test.Processor,
   TestFramework;
 
@@ -59,8 +58,8 @@ type
     procedure TestBeginMethod;
     procedure TestEndMethod;
 
-//    procedure TestLexerInclude;
-//    procedure TestParserMessage;
+    //    procedure TestLexerInclude;
+    //    procedure TestParserMessage;
   end;
 
   TestTD2XParserHandlerProcessor = class(TFlagTestCase)

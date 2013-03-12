@@ -22,31 +22,31 @@ type
 
     function UseProxy: Boolean;
 
-//  ID2XParser interface
+    //  ID2XParser interface
     procedure InitParser(pParser: TD2XDefinesParser);
 
-//  ID2XProcessing interface
+    //  ID2XProcessing interface
     procedure EndProcessing;
 
-//  ID2XFiles interface
+    //  ID2XFiles interface
     procedure BeginFile(pFile: string);
     procedure EndFile(pFile: string);
 
-//  ID2XResults interface
+    //  ID2XResults interface
     procedure BeginResults;
     procedure EndResults(pFile: string);
 
-//  ID2XTrees interface
+    //  ID2XTrees interface
     procedure AddAttr(pName: string; pValue: string);
     procedure AddText(pText: string);
     procedure RollBackTo(pElement: string);
     procedure TrimChildren(pElement: string);
 
-//  ID2XChecks interface
+    //  ID2XChecks interface
     function CheckBeforeMethod(pMethod: string): Boolean;
     function CheckAfterMethod(pMethod: string): Boolean;
 
-//  ID2XMethods interface
+    //  ID2XMethods interface
     procedure BeginMethod(pMethod: string);
     procedure EndMethod(pMethod: string);
 

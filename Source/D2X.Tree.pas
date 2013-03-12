@@ -75,7 +75,7 @@ type
 
   TD2XTreeDoc = class(TD2XTreeElement)
   private
-    FOptions: TD2XTreeOptions;
+    fOptions: TD2XTreeOptions;
 
   public
     constructor CreateDoc(pWriter: TD2XTreeWriterClass);
@@ -83,7 +83,8 @@ type
 
     function AddChild(pTag: string): TD2XTreeNode; override;
 
-    property Options: TD2XTreeOptions read FOptions write FOptions;
+    procedure AddOptions(pOptions: TD2XTreeOptions);
+    procedure RemoveOptions(pOptions: TD2XTreeOptions);
 
   end;
 
@@ -109,8 +110,6 @@ function NewTreeDocument: TD2XTreeDoc;
 
 implementation
 
-
-
 function NewTreeDocument: TD2XTreeDoc;
 begin
   Result := TD2XTreeDoc.CreateDoc(TD2XTreeWriter);
@@ -129,6 +128,11 @@ begin
     Result := inherited AddChild(pTag);
 end;
 
+procedure TD2XTreeDoc.AddOptions(pOptions: TD2XTreeOptions);
+begin
+  fOptions := fOptions + pOptions;
+end;
+
 constructor TD2XTreeDoc.CreateDoc(pWriter: TD2XTreeWriterClass);
 begin
   CreateTag('');
@@ -141,6 +145,11 @@ begin
   FreeAndNil(fWriter);
 
   inherited;
+end;
+
+procedure TD2XTreeDoc.RemoveOptions(pOptions: TD2XTreeOptions);
+begin
+  fOptions := fOptions - pOptions;
 end;
 
 { TD2XTreeNode }
@@ -297,7 +306,7 @@ end;
 
 function TD2XTreeWriter.HasOption(pNode: TD2XTreeElement; pOption: TD2XTreeOption): Boolean;
 begin
-  Result := pOption in pNode.fDoc.Options;
+  Result := pOption in pNode.fDoc.fOptions;
 end;
 
 procedure TD2XTreeWriter.WriteAttribute(pNode: TD2XTreeNode; pW: TTextWriter);
