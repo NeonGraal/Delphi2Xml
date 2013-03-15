@@ -41,7 +41,7 @@ type
     CalledInitParser: Boolean;
 
     function Description: String;
-    procedure InitParser(pParser: TD2XDefinesParser; pActive: ID2XFlag);
+    procedure InitParser(pParser: TD2XDefinesParser; pActive: TD2XFlagRef);
   end;
 
 implementation
@@ -144,7 +144,7 @@ begin
   Result := 'Parser Handler Tester';
 end;
 
-procedure TD2XParserHandlerTester.InitParser(pParser: TD2XDefinesParser; pActive: ID2XFlag);
+procedure TD2XParserHandlerTester.InitParser(pParser: TD2XDefinesParser; pActive: TD2XFlagRef);
 begin
   CalledInitParser := true;
 end;

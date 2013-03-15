@@ -23,7 +23,7 @@ type
 
     procedure SetGlobalName(const pName: string);
     procedure SetGlobalValidator(pValidator: TD2XSingleParam<string>.TspValidator);
-    procedure SetTimestampFlag(pFlag: ID2XFlag);
+    procedure SetTimestampFlag(pFlag: TD2XFlagRef);
     procedure RegisterParams(pParams: TD2XParams);
     function GetNow: string;
     function GetDuration(pWatch: TStopwatch): Double;
@@ -34,7 +34,7 @@ type
     fConfigBase: TD2XFlaggedStringParam;
     fInputBase: TD2XFlaggedStringParam;
     fGlobalName: TD2XStringParam;
-    fTimestampFiles: ID2XFlag;
+    fTimestampFiles: TD2XFlagRef;
     fExcludeDirs: TD2XListParam;
 
     function GetGlobalName: string;
@@ -151,7 +151,7 @@ end;
 
 function TD2XFileOptions.GetTimestampFiles: Boolean;
 begin
-  Result := fTimestampFiles.Flag;
+  Result := fTimestampFiles();
 end;
 
 function TD2XFileOptions.BaseDir(pFileOrDir: string): ID2XIODir;
@@ -181,7 +181,7 @@ function TD2XFileOptions.ConfigFileOrExtn(pFileOrExtn: string): ID2XIOFile;
   end;
 
 begin
-  if ID2XFlag(fConfigBase).Flag and (fConfigBase.Value > '') then
+  if fConfigBase.FlagValue and (fConfigBase.Value > '') then
     Result := TD2XFileStream.Create(IncludeTrailingPathDelimiter(fConfigBase.Value) +
         GlobalFileOrExtn(pFileOrExtn))
   else
@@ -194,12 +194,12 @@ function TD2XFileOptions.LogFileOrExtn(pFileOrExtn: string): ID2XIOFile;
     lExtn: string;
   begin
     if StartsText('.', pFileOrExtn) then
-      if fTimestampFiles.Flag then
+      if fTimestampFiles()then
         Result := fGlobalName.Value + fOutputTimestamp + pFileOrExtn
       else
         Result := fGlobalName.Value + pFileOrExtn
     else
-      if fTimestampFiles.Flag then
+      if fTimestampFiles()then
       begin
         lExtn := ExtractFileExt(pFileOrExtn);
         Result := ChangeFileExt(pFileOrExtn, fOutputTimestamp + lExtn);
@@ -209,7 +209,7 @@ function TD2XFileOptions.LogFileOrExtn(pFileOrExtn: string): ID2XIOFile;
   end;
 
 begin
-  if ID2XFlag(fLogBase).Flag and (fLogBase.Value > '') then
+  if fLogBase.FlagValue and (fLogBase.Value > '') then
     Result := TD2XFileStream.Create(IncludeTrailingPathDelimiter(fLogBase.Value) +
         GlobalFileOrExtn(pFileOrExtn))
   else
@@ -254,7 +254,7 @@ begin
   fOutputTimestamp := FormatDateTime('-HH-mm', Now);
 end;
 
-procedure TD2XFileOptions.SetTimestampFlag(pFlag: ID2XFlag);
+procedure TD2XFileOptions.SetTimestampFlag(pFlag: TD2XFlagRef);
 begin
   fTimestampFiles := pFlag;
 end;

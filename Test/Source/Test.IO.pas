@@ -60,7 +60,7 @@ type
 
     fGlobalName: string;
     fValidator: TD2XSingleParam<string>.TspValidator;
-    fTimestampFlag: ID2XFlag;
+    fTimestampFlag: TD2XFlagRef;
 
     procedure InitFiles;
 
@@ -78,7 +78,7 @@ type
 
     procedure SetGlobalName(const pName: string);
     procedure SetGlobalValidator(pValidator: TD2XSingleParam<string>.TspValidator);
-    procedure SetTimestampFlag(pFlag: ID2XFlag);
+    procedure SetTimestampFlag(pFlag: TD2XFlagRef);
     procedure RegisterParams(pParams: TD2XParams);
     function GetNow: string;
     function GetDuration(pWatch: TStopwatch): Double;
@@ -412,7 +412,7 @@ var
   lInput: string;
   lExtn: string;
 begin
-  if Assigned(fTimestampFlag) and fTimestampFlag.Flag then
+  if Assigned(fTimestampFlag) and fTimestampFlag()then
   begin
     lExtn := ExtractFileExt(pFileOrExtn);
     Result := TTestFile.Create(ChangeFileExt(pFileOrExtn, '-Timestamp' + lExtn), True,
@@ -443,7 +443,7 @@ begin
   fValidator := pValidator;
 end;
 
-procedure TTestFactory.SetTimestampFlag(pFlag: ID2XFlag);
+procedure TTestFactory.SetTimestampFlag(pFlag: TD2XFlagRef);
 begin
   fTimestampFlag := pFlag;
 end;

@@ -1010,7 +1010,7 @@ begin
   lBP.Value := True;
   lSP.Value := 'Value';
   lFP.Value := 'Value';
-  ID2XFlag(lFP).Flag := False;
+  lFP.FlagValue := False;
   fPs.ReportAll(fLog);
   CheckLog(REPORT_HEADING + 'Boolean + String Value Flagged -(Value)', 'All Params Changed');
 
@@ -1741,7 +1741,7 @@ procedure TestTD2XFlagsParam.TestIsDefault;
 begin
   Check(fFlagsP.IsDefault, 'Check is Default');
 
-  fFlagsP.ByCode['1'].Flag := True;
+  fFlagsP.SetCode('1', True);
   CheckFalse(fFlagsP.IsDefault, 'Check is not Default');
 
   fFlagsP.Reset;
@@ -1753,7 +1753,7 @@ begin
   fFlagsP.Output(fL);
   CheckList('', 'Output Default Value');
 
-  fFlagsP.ByCode['1'].Flag := True;
+  fFlagsP.SetCode('1', True);
   fFlagsP.Output(fL);
   CheckList('-F! -F+1', 'Output True Value');
 
@@ -1774,61 +1774,61 @@ end;
 procedure TestTD2XFlagsParam.TestParseCode;
 begin
   Check(fFlagsP.Parse('F+1'), 'Parse right code with True code');
-  CheckEquals(True, fFlagsP.ByCode['1'].Flag, 'Frue Value');
+  CheckEquals(True, fFlagsP.RefCode['1'](), 'Frue Value');
 
   Check(fFlagsP.Parse('F-12'), 'Parse right code with multiple False codes');
-  CheckEquals(False, fFlagsP.ByCode['1'].Flag, 'False 1 Value');
-  CheckEquals(False, fFlagsP.ByCode['2'].Flag, 'False 2 Value');
+  CheckEquals(False, fFlagsP.RefCode['1'](), 'False 1 Value');
+  CheckEquals(False, fFlagsP.RefCode['2'](), 'False 2 Value');
 
   Check(fFlagsP.Parse('F+12'), 'Parse right code with multiple True codes');
-  CheckEquals(True, fFlagsP.ByCode['1'].Flag, 'Frue 1 Value');
-  CheckEquals(True, fFlagsP.ByCode['2'].Flag, 'Frue 2 Value');
+  CheckEquals(True, fFlagsP.RefCode['1'](), 'Frue 1 Value');
+  CheckEquals(True, fFlagsP.RefCode['2'](), 'Frue 2 Value');
 
   Check(fFlagsP.Parse('F-1'), 'Parse right code with False code');
-  CheckEquals(False, fFlagsP.ByCode['1'].Flag, 'False Value');
+  CheckEquals(False, fFlagsP.RefCode['1'](), 'False Value');
 
   Check(fFlagsP.Parse('F+u'), 'Parse right code with Lowercase code');
-  CheckEquals(True, fFlagsP.ByCode['u'].Flag, 'True Lowercase Value');
-  CheckEquals(True, fFlagsP.ByCode['U'].Flag, 'True Uppercase Value');
+  CheckEquals(True, fFlagsP.RefCode['u'](), 'True Lowercase Value');
+  CheckEquals(True, fFlagsP.RefCode['U'](), 'True Uppercase Value');
 
   Check(fFlagsP.Parse('F-U'), 'Parse right code with Uppercase code');
-  CheckEquals(False, fFlagsP.ByCode['u'].Flag, 'False Lowercase Value');
-  CheckEquals(False, fFlagsP.ByCode['U'].Flag, 'False Uppercase Value');
+  CheckEquals(False, fFlagsP.RefCode['u'](), 'False Lowercase Value');
+  CheckEquals(False, fFlagsP.RefCode['U'](), 'False Uppercase Value');
 
   Check(fFlagsP.Parse('F+l'), 'Parse right code with Lowercase code');
-  CheckEquals(True, fFlagsP.ByCode['l'].Flag, 'True Lowercase Value');
-  CheckEquals(True, fFlagsP.ByCode['L'].Flag, 'True Uppercase Value');
+  CheckEquals(True, fFlagsP.RefCode['l'](), 'True Lowercase Value');
+  CheckEquals(True, fFlagsP.RefCode['L'](), 'True Uppercase Value');
 
   Check(fFlagsP.Parse('F-L'), 'Parse right code with Uppercase code');
-  CheckEquals(False, fFlagsP.ByCode['l'].Flag, 'False Lowercase Value');
-  CheckEquals(False, fFlagsP.ByCode['L'].Flag, 'False Uppercase Value');
+  CheckEquals(False, fFlagsP.RefCode['l'](), 'False Lowercase Value');
+  CheckEquals(False, fFlagsP.RefCode['L'](), 'False Uppercase Value');
 end;
 
 procedure TestTD2XFlagsParam.TestParseLabel;
 begin
   Check(fFlagsP.Parse('F:Test1'), 'Parse right label with True label');
-  CheckEquals(True, fFlagsP.ByLabel['Test1'].Flag, 'Frue Value');
+  CheckEquals(True, fFlagsP.RefLabel['Test1'](), 'Frue Value');
 
   Check(fFlagsP.Parse('F:Test1-,-Test2'), 'Parse right label with multiple False labels');
-  CheckEquals(False, fFlagsP.ByLabel['Test1'].Flag, 'False 1 Value');
-  CheckEquals(False, fFlagsP.ByLabel['Test2'].Flag, 'False 2 Value');
+  CheckEquals(False, fFlagsP.RefLabel['Test1'](), 'False 1 Value');
+  CheckEquals(False, fFlagsP.RefLabel['Test2'](), 'False 2 Value');
 
   Check(fFlagsP.Parse('F:+Test1,Test2+'), 'Parse right label with multiple True labels');
-  CheckEquals(True, fFlagsP.ByLabel['Test1'].Flag, 'Frue 1 Value');
-  CheckEquals(True, fFlagsP.ByLabel['Test2'].Flag, 'Frue 2 Value');
+  CheckEquals(True, fFlagsP.RefLabel['Test1'](), 'Frue 1 Value');
+  CheckEquals(True, fFlagsP.RefLabel['Test2'](), 'Frue 2 Value');
 
   Check(fFlagsP.Parse('F:-Test1'), 'Parse right label with False label');
-  CheckEquals(False, fFlagsP.ByLabel['Test1'].Flag, 'False Value');
+  CheckEquals(False, fFlagsP.RefLabel['Test1'](), 'False Value');
 
   Check(fFlagsP.Parse('F:testu'), 'Parse right label with Lowercase label');
-  CheckEquals(True, fFlagsP.ByLabel['testu'].Flag, 'True Lowercase Value');
-  CheckEquals(True, fFlagsP.ByLabel['TestU'].Flag, 'True Uppercase Value');
-  CheckEquals(True, fFlagsP.ByLabel['TESTU'].Flag, 'True Uppercase Value');
+  CheckEquals(True, fFlagsP.RefLabel['testu'](), 'True Lowercase Value');
+  CheckEquals(True, fFlagsP.RefLabel['TestU'](), 'True Uppercase Value');
+  CheckEquals(True, fFlagsP.RefLabel['TESTU'](), 'True Uppercase Value');
 
   Check(fFlagsP.Parse('F:TESTL-'), 'Parse right label with Uppercase label');
-  CheckEquals(False, fFlagsP.ByLabel['testl'].Flag, 'False Lowercase Value');
-  CheckEquals(False, fFlagsP.ByLabel['Testl'].Flag, 'False Lowercase Value');
-  CheckEquals(False, fFlagsP.ByLabel['TESTL'].Flag, 'False Uppercase Value');
+  CheckEquals(False, fFlagsP.RefLabel['testl'](), 'False Lowercase Value');
+  CheckEquals(False, fFlagsP.RefLabel['Testl'](), 'False Lowercase Value');
+  CheckEquals(False, fFlagsP.RefLabel['TESTL'](), 'False Uppercase Value');
 end;
 
 procedure TestTD2XFlagsParam.TestReport;
@@ -1836,9 +1836,9 @@ begin
   fFlagsP.Report(fLog);
   CheckLog('Flags Test1-,Test2+,Testl-,TestU-', 'Report Default Value');
 
-  fFlagsP.ByCode['1'].Flag := True;
-  fFlagsP.ByCode['U'].Flag := True;
-  fFlagsP.ByCode['l'].Flag := True;
+  fFlagsP.SetCode('1', True);
+  fFlagsP.SetCode('U', True);
+  fFlagsP.SetCode('l', True);
   fFlagsP.Report(fLog);
   CheckLog('Flags Test1+,Test2+,Testl+,TestU+', 'Report True Value');
 
@@ -1849,24 +1849,24 @@ end;
 
 procedure TestTD2XFlagsParam.TestReset;
 begin
-  CheckEquals(False, fFlagsP.ByCode['1'].Flag, 'Default Value Set');
-  CheckEquals(True, fFlagsP.ByCode['2'].Flag, 'Default Value Set');
+  CheckEquals(False, fFlagsP.RefCode['1'](), 'Default Value Set');
+  CheckEquals(True, fFlagsP.RefCode['2'](), 'Default Value Set');
 
-  fFlagsP.ByCode['2'].Flag := False;
-  CheckEquals(False, fFlagsP.ByCode['2'].Flag, 'Set Value');
+  fFlagsP.SetCode('2', False);
+  CheckEquals(False, fFlagsP.RefCode['2'](), 'Set Value');
 
   fFlagsP.Reset;
-  CheckEquals(False, fFlagsP.ByCode['1'].Flag, 'Value Zeroed');
-  CheckEquals(True, fFlagsP.ByCode['2'].Flag, 'Default Value Set');
+  CheckEquals(False, fFlagsP.RefCode['1'](), 'Value Zeroed');
+  CheckEquals(True, fFlagsP.RefCode['2'](), 'Default Value Set');
 end;
 
 procedure TestTD2XFlagsParam.TestToString;
 begin
   CheckEqualsString('F+2-1UL', fFlagsP.ToString, 'Report Default Value');
 
-  fFlagsP.ByCode['1'].Flag := True;
-  fFlagsP.ByCode['U'].Flag := True;
-  fFlagsP.ByCode['l'].Flag := True;
+  fFlagsP.SetCode('1', True);
+  fFlagsP.SetCode('U', True);
+  fFlagsP.SetCode('l', True);
   CheckEqualsString('F+12UL', fFlagsP.ToString, 'Report True Value');
 
   fFlagsP.Zero;
@@ -1875,15 +1875,15 @@ end;
 
 procedure TestTD2XFlagsParam.TestZero;
 begin
-  CheckEquals(False, fFlagsP.ByCode['1'].Flag, 'Default Value Set');
-  CheckEquals(True, fFlagsP.ByCode['2'].Flag, 'Default Value Set');
+  CheckEquals(False, fFlagsP.RefCode['1'](), 'Default Value Set');
+  CheckEquals(True, fFlagsP.RefCode['2'](), 'Default Value Set');
 
-  fFlagsP.ByCode['1'].Flag := True;
-  CheckEquals(True, fFlagsP.ByCode['1'].Flag, 'Set Value');
+  fFlagsP.SetCode('1', True);
+  CheckEquals(True, fFlagsP.RefCode['1'](), 'Set Value');
 
   fFlagsP.Zero;
-  CheckEquals(False, fFlagsP.ByCode['1'].Flag, 'Value Zeroed');
-  CheckEquals(False, fFlagsP.ByCode['2'].Flag, 'Default Value Set');
+  CheckEquals(False, fFlagsP.RefCode['1'](), 'Value Zeroed');
+  CheckEquals(False, fFlagsP.RefCode['2'](), 'Default Value Set');
 end;
 
 { TestTD2XListParam }

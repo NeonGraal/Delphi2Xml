@@ -16,8 +16,8 @@ type
   TD2XProcessor = class(TD2XLogger)
   public
     constructor Create; override;
-    constructor CreateHandler(pActive: ID2XFlag; pHandler: TD2XLogger; pMine: Boolean);
-    constructor CreateClass(pActive: ID2XFlag; pHandler: TD2XHandlerClass);
+    constructor CreateHandler(pActive: TD2XFlagRef; pHandler: TD2XLogger; pMine: Boolean);
+    constructor CreateClass(pActive: TD2XFlagRef; pHandler: TD2XHandlerClass);
     destructor Destroy; override;
 
     function UseProxy: Boolean;
@@ -57,7 +57,7 @@ type
 
     function HandlerIs(pHandler: TD2XHandlerClass): Boolean;
   private
-    fActive: ID2XFlag;
+    fActive: TD2XFlagRef;
     fMyHandler: Boolean;
     fHandler: TD2XLogger;
 
@@ -81,7 +81,7 @@ procedure TD2XProcessor.AddAttr(pName, pValue: string);
 var
   lTrees: ID2XTrees;
 begin
-  if fHandler.GetInterface(ID2XTrees, lTrees) and fActive.Flag then
+  if fHandler.GetInterface(ID2XTrees, lTrees) and fActive() then
     lTrees.AddAttr(pName, pValue);
 end;
 
@@ -89,7 +89,7 @@ procedure TD2XProcessor.AddText(pText: string);
 var
   lTrees: ID2XTrees;
 begin
-  if fHandler.GetInterface(ID2XTrees, lTrees) and fActive.Flag then
+  if fHandler.GetInterface(ID2XTrees, lTrees) and fActive() then
     lTrees.AddText(pText);
 end;
 
@@ -99,7 +99,7 @@ var
   lFls: ID2XFiles;
 begin
   lS := nil;
-  if fHandler.GetInterface(ID2XFiles, lFls) and fActive.Flag then
+  if fHandler.GetInterface(ID2XFiles, lFls) and fActive() then
     if Assigned(fFileInput) then
       try
         lFls.BeginFile(pFile,
@@ -125,7 +125,7 @@ procedure TD2XProcessor.BeginMethod(pMethod: string);
 var
   lMthds: ID2XMethods;
 begin
-  if fHandler.GetInterface(ID2XMethods, lMthds) and fActive.Flag then
+  if fHandler.GetInterface(ID2XMethods, lMthds) and fActive() then
     lMthds.BeginMethod(pMethod);
 end;
 
@@ -133,7 +133,7 @@ procedure TD2XProcessor.BeginResults;
 var
   lRslts: ID2XResults;
 begin
-  if fHandler.GetInterface(ID2XResults, lRslts) and fActive.Flag then
+  if fHandler.GetInterface(ID2XResults, lRslts) and fActive() then
     lRslts.BeginResults;
 end;
 
@@ -141,7 +141,7 @@ function TD2XProcessor.CheckAfterMethod(pMethod: string): Boolean;
 var
   lChks: ID2XChecks;
 begin
-  Result := not(fHandler.GetInterface(ID2XChecks, lChks) and fActive.Flag) or
+  Result := not(fHandler.GetInterface(ID2XChecks, lChks) and fActive()) or
     lChks.CheckAfterMethod(pMethod);
 end;
 
@@ -149,7 +149,7 @@ function TD2XProcessor.CheckBeforeMethod(pMethod: string): Boolean;
 var
   lChks: ID2XChecks;
 begin
-  Result := not(fHandler.GetInterface(ID2XChecks, lChks) and fActive.Flag) or
+  Result := not(fHandler.GetInterface(ID2XChecks, lChks) and fActive()) or
     lChks.CheckBeforeMethod(pMethod);
 end;
 
@@ -158,13 +158,12 @@ begin
   InvalidConstructor;
 end;
 
-constructor TD2XProcessor.CreateClass(pActive: ID2XFlag;
-  pHandler: TD2XHandlerClass);
+constructor TD2XProcessor.CreateClass(pActive: TD2XFlagRef; pHandler: TD2XHandlerClass);
 begin
   CreateHandler(pActive, pHandler.Create, True);
 end;
 
-constructor TD2XProcessor.CreateHandler(pActive: ID2XFlag; pHandler: TD2XLogger;
+constructor TD2XProcessor.CreateHandler(pActive: TD2XFlagRef; pHandler: TD2XLogger;
   pMine: Boolean);
 begin
   Assert(Assigned(pActive), 'Active Flag must exist');
@@ -192,7 +191,7 @@ var
   lFls: ID2XFiles;
 begin
   lS := nil;
-  if fHandler.GetInterface(ID2XFiles, lFls) and fActive.Flag then
+  if fHandler.GetInterface(ID2XFiles, lFls) and fActive() then
     if Assigned(fFileOutput) then
       try
         lFls.EndFile(pFile,
@@ -215,7 +214,7 @@ procedure TD2XProcessor.EndMethod(pMethod: string);
 var
   lMthds: ID2XMethods;
 begin
-  if fHandler.GetInterface(ID2XMethods, lMthds) and fActive.Flag then
+  if fHandler.GetInterface(ID2XMethods, lMthds) and fActive() then
     lMthds.EndMethod(pMethod);
 end;
 
@@ -225,7 +224,7 @@ var
   lPrcs: ID2XProcessing;
 begin
   lS := nil;
-  if fHandler.GetInterface(ID2XProcessing, lPrcs) and fActive.Flag then
+  if fHandler.GetInterface(ID2XProcessing, lPrcs) and fActive() then
     if Assigned(fProcessingOutput) then
       try
         lPrcs.EndProcessing(
@@ -250,7 +249,7 @@ var
   lRslts: ID2XResults;
 begin
   lS := nil;
-  if fHandler.GetInterface(ID2XResults, lRslts) and fActive.Flag then
+  if fHandler.GetInterface(ID2XResults, lRslts) and fActive() then
     if Assigned(fResultsOutput) then
       try
         lRslts.EndResults(
@@ -278,7 +277,7 @@ procedure TD2XProcessor.RollBackTo(pElement: string);
 var
   lTrees: ID2XTrees;
 begin
-  if fHandler.GetInterface(ID2XTrees, lTrees) and fActive.Flag then
+  if fHandler.GetInterface(ID2XTrees, lTrees) and fActive() then
     lTrees.RollBackTo(pElement);
 end;
 
@@ -320,7 +319,7 @@ procedure TD2XProcessor.TrimChildren(pElement: string);
 var
   lTrees: ID2XTrees;
 begin
-  if fHandler.GetInterface(ID2XTrees, lTrees) and fActive.Flag then
+  if fHandler.GetInterface(ID2XTrees, lTrees) and fActive() then
     lTrees.TrimChildren(pElement);
 end;
 
@@ -328,7 +327,7 @@ function TD2XProcessor.UseProxy: Boolean;
 var
   lProxy: ID2XFullProxy;
 begin
-  Result := fActive.Flag and fHandler.GetInterface(ID2XFullProxy, lProxy);
+  Result := fActive() and fHandler.GetInterface(ID2XFullProxy, lProxy);
 end;
 
 end.

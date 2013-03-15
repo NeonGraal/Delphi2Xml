@@ -23,7 +23,7 @@ type
 
   protected
     fParser: TD2XDefinesParser;
-    fActive: ID2XFlag;
+    fActive: TD2XFlagRef;
 
     procedure SetupParserMessage;
     procedure SetupLexerInclude;
@@ -37,7 +37,7 @@ type
     procedure OnLexerInclude(const pFile: string; pX, pY: Integer); virtual;
 
   public
-    procedure InitParser(pParser: TD2XDefinesParser; pActive: ID2XFlag); virtual;
+    procedure InitParser(pParser: TD2XDefinesParser; pActive: TD2XFlagRef); virtual;
 
   end;
 
@@ -105,7 +105,7 @@ type
 
     function Description: string;
 
-    procedure InitParser(pParser: TD2XDefinesParser; pActive: ID2XFlag); override;
+    procedure InitParser(pParser: TD2XDefinesParser; pActive: TD2XFlagRef); override;
 
     procedure EndProcessing(pOutput: TStreamWriterRef);
 
@@ -118,7 +118,7 @@ type
 
     function Description: string;
 
-    procedure InitParser(pParser: TD2XDefinesParser; pActive: ID2XFlag); override;
+    procedure InitParser(pParser: TD2XDefinesParser; pActive: TD2XFlagRef); override;
 
   protected
     procedure OnParserMessage(const pTyp: TMessageEventType; const pMsg: string;
@@ -132,7 +132,7 @@ type
 
   TD2XLogHandler = class(TD2XParserHandler, ID2XHandler, ID2XMethods)
   public
-    procedure InitParser(pParser: TD2XDefinesParser; pActive: ID2XFlag); override;
+    procedure InitParser(pParser: TD2XDefinesParser; pActive: TD2XFlagRef); override;
 
     function Description: string;
 
@@ -156,7 +156,7 @@ type
   public
     constructor CreateDefines(pDefines: TStringList);
 
-    procedure InitParser(pParser: TD2XDefinesParser; pActive: ID2XFlag); override;
+    procedure InitParser(pParser: TD2XDefinesParser; pActive: TD2XFlagRef); override;
 
     function Description: string;
 
@@ -214,7 +214,7 @@ type
     fTreeNode: TD2XTreeNode;
     fWriter: TD2XTreeWriterClass;
 
-    fFinalToken: ID2XFlag;
+    fFinalToken: TD2XFlagRef;
     fParseMode: TD2XStringRef;
 
     procedure OnParserMessage(const pTyp: TMessageEventType;
@@ -223,13 +223,13 @@ type
 
   public
     constructor Create; override;
-    constructor CreateTree(pWriter: TD2XTreeWriterClass; pFinalToken: ID2XFlag;
+    constructor CreateTree(pWriter: TD2XTreeWriterClass; pFinalToken: TD2XFlagRef;
       pParseMode: TD2XStringRef);
     destructor Destroy; override;
 
     function Description: string;
 
-    procedure InitParser(pParser: TD2XDefinesParser; pActive: ID2XFlag); override;
+    procedure InitParser(pParser: TD2XDefinesParser; pActive: TD2XFlagRef); override;
 
     procedure BeginResults;
     procedure EndResults(pOutput: TStreamWriterRef);
@@ -264,7 +264,7 @@ end;
 
 procedure TD2XParserHandler.DoLexerInclude(pSender: TmwBasePasLex);
 begin
-  if fActive.Flag then
+  if fActive() then
     if Assigned(pSender) then
       OnLexerInclude(pSender.DirectiveParam, pSender.PosXY.X, pSender.PosXY.Y)
     else
@@ -277,14 +277,14 @@ end;
 procedure TD2XParserHandler.DoParserMessage(pSender: TObject; const pTyp: TMessageEventType;
   const pMsg: string; pX, pY: Integer);
 begin
-  if fActive.Flag then
+  if fActive() then
     OnParserMessage(pTyp, pMsg, pX, pY);
 
   if Assigned(fPrevParserMessage) then
     fPrevParserMessage(pSender, pTyp, pMsg, pX, pY);
 end;
 
-procedure TD2XParserHandler.InitParser(pParser: TD2XDefinesParser; pActive: ID2XFlag);
+procedure TD2XParserHandler.InitParser(pParser: TD2XDefinesParser; pActive: TD2XFlagRef);
 begin
   fParser := pParser;
   fActive := pActive;
@@ -556,7 +556,7 @@ begin
   raise EInvalidHandler.Create('Invalid constructor called');
 end;
 
-constructor TD2XTreeHandler.CreateTree(pWriter: TD2XTreeWriterClass; pFinalToken: ID2XFlag;
+constructor TD2XTreeHandler.CreateTree(pWriter: TD2XTreeWriterClass; pFinalToken: TD2XFlagRef;
   pParseMode: TD2XStringRef);
 begin
   Assert(Assigned(pFinalToken), 'Final Token Flag must be specified');
@@ -596,7 +596,7 @@ procedure TD2XTreeHandler.EndMethod(pMethod: string);
 begin
   if Assigned(fTreeNode) then
   begin
-    if Assigned(fFinalToken) and fFinalToken.Flag and Assigned(fParser) and
+    if Assigned(fFinalToken) and fFinalToken() and Assigned(fParser) and
       not fParser.KeepTokens and (Length(fParser.LastTokens) > 1) then
       AddAttr('lastToken', '');
 
@@ -621,7 +621,7 @@ begin
   FreeAndNil(fTreeDoc);
 end;
 
-procedure TD2XTreeHandler.InitParser(pParser: TD2XDefinesParser; pActive: ID2XFlag);
+procedure TD2XTreeHandler.InitParser(pParser: TD2XDefinesParser; pActive: TD2XFlagRef);
 begin
   inherited;
 
@@ -756,7 +756,7 @@ begin
 end;
 
 procedure TD2XCountDefinesUsedHandler.InitParser(pParser: TD2XDefinesParser;
-  pActive: ID2XFlag);
+  pActive: TD2XFlagRef);
 begin
   inherited;
 
@@ -814,7 +814,7 @@ begin
   end;
 end;
 
-procedure TD2XParserDefinesHandler.InitParser(pParser: TD2XDefinesParser; pActive: ID2XFlag);
+procedure TD2XParserDefinesHandler.InitParser(pParser: TD2XDefinesParser; pActive: TD2XFlagRef);
 begin
   inherited;
 
@@ -842,7 +842,7 @@ begin
   Result := 'Error Logging';
 end;
 
-procedure TD2XErrorHandler.InitParser(pParser: TD2XDefinesParser; pActive: ID2XFlag);
+procedure TD2XErrorHandler.InitParser(pParser: TD2XDefinesParser; pActive: TD2XFlagRef);
 begin
   inherited;
 
@@ -962,7 +962,7 @@ begin
   Log('AFTER  %s', [pMethod]);
 end;
 
-procedure TD2XLogHandler.InitParser(pParser: TD2XDefinesParser; pActive: ID2XFlag);
+procedure TD2XLogHandler.InitParser(pParser: TD2XDefinesParser; pActive: TD2XFlagRef);
 begin
   inherited;
 

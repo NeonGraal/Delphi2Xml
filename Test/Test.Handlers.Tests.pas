@@ -430,7 +430,7 @@ begin
   fFinalToken := TD2XBoolFlag.Create;
   ID2XFlag(fFinalToken).Flag := True;
 
-  fHndlr := TTestTreeHandler.CreateTree(TD2XTreeWriter, fFinalToken,
+  fHndlr := TTestTreeHandler.CreateTree(TD2XTreeWriter, FlagToRef(fFinalToken),
     function: string
     begin
       fCalledParseMode := True;
@@ -532,11 +532,11 @@ procedure TestTD2XTreeHandler.TestInitParser;
 begin
   fCalledParseMode := False;
 
-  fHndlr.InitParser(fParser, fActive);
+  fHndlr.InitParser(fParser, FlagToRef(fActive));
 
   Check(fParser = fHndlr.Parser, 'Parser set');
   CheckTrue(Assigned(fHndlr.FinalToken), 'Final Token set');
-  CheckTrue(fHndlr.FinalToken.Flag, 'Final Token correct');
+  CheckTrue(fHndlr.FinalToken(), 'Final Token correct');
   CheckTrue(Assigned(fHndlr.ParseMode), 'Parse Mode set');
   CheckEqualsString('ParseMode', fHndlr.ParseMode(), 'Parse Mode correct');
   CheckTrue(fCalledParseMode, 'Parse Mode called');
@@ -678,7 +678,7 @@ end;
 
 procedure TestTD2XWriteDefinesHandler.TestEndResults;
 begin
-  fHndlr.InitParser(fParser, fActive);
+  fHndlr.InitParser(fParser, FlagToRef(fActive));
 
   fHndlr.EndResults(FileWriterRef(fDS));
   CheckStream('**** ' + ReplaceStr(EXPECTED_DEFINES, ',', ' '), 'End Results');
@@ -686,7 +686,7 @@ end;
 
 procedure TestTD2XWriteDefinesHandler.TestInit;
 begin
-  fHndlr.InitParser(fParser, fActive);
+  fHndlr.InitParser(fParser, FlagToRef(fActive));
 
   CheckTrue(Assigned(TTestParserHandler(fHndlr).Parser), 'Parse Mode set');
   Check(fParser = TTestParserHandler(fHndlr).Parser, 'Parser set');
@@ -753,7 +753,7 @@ end;
 
 procedure TestTD2XCountDefinesUsedHandler.TestInitParser;
 begin
-  fHndlr.InitParser(fParser, fActive);
+  fHndlr.InitParser(fParser, FlagToRef(fActive));
 
   CheckTrue(fHndlr.fInitParserCalled, 'Init Parser called');
 end;
@@ -813,7 +813,7 @@ end;
 
 procedure TestTD2XParserDefinesHandler.TestBeginFile;
 begin
-  fHndlr.InitParser(fParser, fActive);
+  fHndlr.InitParser(fParser, FlagToRef(fActive));
 
   fHndlr.BeginFile('', nil);
   CheckList(ReplaceStr(EXPECTED_DEFINES, ',', ' '), 'Begin File', fParser.StartDefines);
@@ -840,7 +840,7 @@ end;
 
 procedure TestTD2XParserDefinesHandler.TestInit;
 begin
-  fHndlr.InitParser(fParser, fActive);
+  fHndlr.InitParser(fParser, FlagToRef(fActive));
 
   CheckTrue(Assigned(TTestParserHandler(fHndlr).Parser), 'Parse Mode set');
   Check(fParser = TTestParserHandler(fHndlr).Parser, 'Parser set');
@@ -879,7 +879,7 @@ end;
 
 procedure TestTD2XErrorHandler.TestInitParser;
 begin
-  fHndlr.InitParser(fParser, fActive);
+  fHndlr.InitParser(fParser, FlagToRef(fActive));
 
   CheckTrue(fHndlr.fInitParserCalled, 'Init Parser called');
 end;
@@ -931,7 +931,7 @@ var
 begin
   lCalled := False;
 
-  fHndlr.InitParser(fParser, fActive);
+  fHndlr.InitParser(fParser, FlagToRef(fActive));
   fParser.GetLexerDefines(fParser.StartDefines);
 
   fHndlr.BeginFile('',
@@ -956,7 +956,7 @@ var
 begin
   lCalled := False;
 
-  fHndlr.InitParser(fParser, fActive);
+  fHndlr.InitParser(fParser, FlagToRef(fActive));
   fParser.GetLexerDefines(fParser.StartDefines);
 
   fHndlr.EndFile('',
@@ -978,7 +978,7 @@ begin
 
   StartExpectingException(EAssertionFailed);
   try
-    fHndlr.InitParser(fParser, fActive);
+    fHndlr.InitParser(fParser, FlagToRef(fActive));
     fParser.GetLexerDefines(fParser.StartDefines);
 
     fHndlr.EndProcessing(
@@ -999,7 +999,7 @@ end;
 
 procedure TestTD2XCountFinalDefinesHandler.TestProcessing;
 begin
-  fHndlr.InitParser(fParser, fActive);
+  fHndlr.InitParser(fParser, FlagToRef(fActive));
   fParser.GetLexerDefines(fParser.StartDefines);
 
   fParser.Lexer.AddDefine('Test');
@@ -1046,7 +1046,7 @@ end;
 
 procedure TestTD2XHeldDefinesHandler.TestBeginFile;
 begin
-  fHndlr.InitParser(fParser, fActive);
+  fHndlr.InitParser(fParser, FlagToRef(fActive));
 
   fHndlr.BeginFile('', nil);
   CheckList('', 'Begin File', fParser.HeldDefines);
@@ -1073,7 +1073,7 @@ end;
 
 procedure TestTD2XHeldDefinesHandler.TestInit;
 begin
-  fHndlr.InitParser(fParser, fActive);
+  fHndlr.InitParser(fParser, FlagToRef(fActive));
 
   CheckTrue(Assigned(TTestParserHandler(fHndlr).Parser), 'Parse Mode set');
   Check(fParser = TTestParserHandler(fHndlr).Parser, 'Parser set');
@@ -1107,7 +1107,7 @@ begin
 
   CheckLog('BEFORE Test', 'Begin Method');
 
-  fHndlr.InitParser(fParser, fActive);
+  fHndlr.InitParser(fParser, FlagToRef(fActive));
   fHndlr.BeginMethod('Test');
 
   CheckLog('BEFORE Test @', 'Begin Method');
@@ -1127,7 +1127,7 @@ end;
 
 procedure TestTD2XLogHandler.TestInitParser;
 begin
-  fHndlr.InitParser(fParser, fActive);
+  fHndlr.InitParser(fParser, FlagToRef(fActive));
 
   CheckTrue(fHndlr.fInitParserCalled, 'Init Parser called');
 end;
@@ -1167,7 +1167,7 @@ end;
 
 procedure TestTD2XParserHandler.TestDoLexerInclude;
 begin
-  fHndlr.InitParser(fParser, fActive);
+  fHndlr.InitParser(fParser, FlagToRef(fActive));
 
   fHndlr.TestDoLexerInclude('Test', 1, 2);
   CheckTrue(fHndlr.fLexerIncludeCalled, 'Lexer Include called');
@@ -1175,7 +1175,7 @@ end;
 
 procedure TestTD2XParserHandler.TestDoParserMessage;
 begin
-  fHndlr.InitParser(fParser, fActive);
+  fHndlr.InitParser(fParser, FlagToRef(fActive));
 
   fHndlr.TestDoParserMessage(meError, 'Test', 1, 2);
   CheckTrue(fHndlr.fParserMessageCalled, 'Parser Message called');
@@ -1183,7 +1183,7 @@ end;
 
 procedure TestTD2XParserHandler.TestInitParser;
 begin
-  fHndlr.InitParser(fParser, fActive);
+  fHndlr.InitParser(fParser, FlagToRef(fActive));
 
   CheckTrue(fHndlr.fInitParserCalled, 'Init Parser called');
 end;

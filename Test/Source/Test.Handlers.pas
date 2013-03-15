@@ -35,7 +35,7 @@ type
     fParserMessageCalled: Boolean;
     fLexerIncludeCalled: Boolean;
 
-    procedure InitParser(pParser: TD2XDefinesParser; pActive: ID2XFlag); override;
+    procedure InitParser(pParser: TD2XDefinesParser; pActive: TD2XFlagRef); override;
 
     procedure TestOnParserMessage(const pTyp: TMessageEventType; const pMsg: string;
       pX, pY: Integer);
@@ -53,7 +53,7 @@ type
   public
     fInitParserCalled: Boolean;
 
-    procedure InitParser(pParser: TD2XDefinesParser; pActive: ID2XFlag); override;
+    procedure InitParser(pParser: TD2XDefinesParser; pActive: TD2XFlagRef); override;
 
     procedure TestOnIf;
     procedure TestOnIfDef;
@@ -65,7 +65,7 @@ type
   public
     fInitParserCalled: Boolean;
 
-    procedure InitParser(pParser: TD2XDefinesParser; pActive: ID2XFlag); override;
+    procedure InitParser(pParser: TD2XDefinesParser; pActive: TD2XFlagRef); override;
 
     procedure TestParserMessage(const pTyp: TMessageEventType; const pMsg: string;
       pX, pY: Integer);
@@ -75,7 +75,7 @@ type
   public
     fInitParserCalled: Boolean;
 
-    procedure InitParser(pParser: TD2XDefinesParser; pActive: ID2XFlag); override;
+    procedure InitParser(pParser: TD2XDefinesParser; pActive: TD2XFlagRef); override;
 
     procedure TestParserMessage(const pTyp: TMessageEventType; const pMsg: string;
       pX, pY: Integer);
@@ -92,7 +92,7 @@ type
     property TreeNode: TD2XTreeNode read fTreeNode;
 
     property Parser: TD2XDefinesParser read fParser;
-    property FinalToken: ID2XFlag read fFinalToken;
+    property FinalToken: TD2XFlagRef read fFinalToken;
     property ParseMode: TD2XStringRef read fParseMode;
 
   end;
@@ -110,8 +110,8 @@ begin
 
   fParser := TD2XDefinesParser.Create;
   fFlag := TD2XBoolFlag.Create;
+  fFlag.SetFlag(True);
   fActive := fFlag;
-  fActive.Flag := True;
 end;
 
 procedure TParserTestCase.TearDown;
@@ -126,7 +126,7 @@ end;
 { TTestCountDefinesUsedHandler }
 
 procedure TTestCountDefinesUsedHandler.InitParser(pParser: TD2XDefinesParser;
-  pActive: ID2XFlag);
+  pActive: TD2XFlagRef);
 begin
   inherited;
 
@@ -150,7 +150,7 @@ end;
 
 { TTestErrorHandler }
 
-procedure TTestErrorHandler.InitParser(pParser: TD2XDefinesParser; pActive: ID2XFlag);
+procedure TTestErrorHandler.InitParser(pParser: TD2XDefinesParser; pActive: TD2XFlagRef);
 begin
   inherited;
 
@@ -165,7 +165,7 @@ end;
 
 { TTestLogHandler }
 
-procedure TTestLogHandler.InitParser(pParser: TD2XDefinesParser; pActive: ID2XFlag);
+procedure TTestLogHandler.InitParser(pParser: TD2XDefinesParser; pActive: TD2XFlagRef);
 begin
   inherited;
 
@@ -198,7 +198,7 @@ end;
 
 { TTestParserHandler }
 
-procedure TTestParserHandler.InitParser(pParser: TD2XDefinesParser; pActive: ID2XFlag);
+procedure TTestParserHandler.InitParser(pParser: TD2XDefinesParser; pActive: TD2XFlagRef);
 begin
   inherited;
 

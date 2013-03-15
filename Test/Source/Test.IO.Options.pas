@@ -53,7 +53,7 @@ begin
 
   fFileOpts := TD2XFileOptionsTest.Create;
   fFileOpts.SetGlobalValidator(TestValidator);
-  fFileOpts.SetTimestampFlag(fTimeFlag);
+  fFileOpts.SetTimestampFlag(FlagToRef(fTimeFlag));
   fFileOpts.RegisterParams(fParams);
 end;
 

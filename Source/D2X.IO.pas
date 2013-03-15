@@ -44,7 +44,7 @@ type
 
     procedure SetGlobalName(const pName: String);
     procedure SetGlobalValidator(pValidator: TD2XSingleParam<String>.TspValidator);
-    procedure SetTimestampFlag(pFlag: ID2XFlag);
+    procedure SetTimestampFlag(pFlag: TD2XFlagRef);
     procedure RegisterParams(pParams: TD2XParams);
     function GetNow: String;
     function GetDuration(pWatch: TStopwatch): Double;

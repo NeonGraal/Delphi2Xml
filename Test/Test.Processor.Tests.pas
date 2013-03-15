@@ -7,6 +7,7 @@ implementation
 uses
   CastaliaPasLexTypes,
 
+  D2X.Flag,
   D2X.IO,
   D2X.Param,
 
@@ -90,7 +91,7 @@ begin
   inherited;
 
   FHandler := TD2XHandlerTester.Create;
-  FD2XProcessor := TD2XProcessor.CreateHandler(fActive, FHandler, True);
+  FD2XProcessor := TD2XProcessor.CreateHandler(FlagToRef(fActive), FHandler, True);
 end;
 
 procedure TestTD2XProcessor.TearDown;
@@ -175,7 +176,7 @@ end;
 procedure TestTD2XProcessor.TestCreateClass;
 begin
   FreeAndNil(FD2XProcessor);
-  FD2XProcessor := TD2XProcessor.CreateClass(fActive, TD2XHandlerTester);
+  FD2XProcessor := TD2XProcessor.CreateClass(FlagToRef(fActive), TD2XHandlerTester);
   CheckTrue(FD2XProcessor.HandlerIs(TD2XHandlerTester), 'Check Handler class');
 end;
 
@@ -381,7 +382,7 @@ begin
   inherited;
 
   FHandler := TD2XParserHandlerTester.Create;
-  FD2XProcessor := TD2XProcessor.CreateHandler(fActive, FHandler, True);
+  FD2XProcessor := TD2XProcessor.CreateHandler(FlagToRef(fActive), FHandler, True);
 end;
 
 procedure TestTD2XParserHandlerProcessor.TearDown;

@@ -351,10 +351,12 @@ procedure TestID2XIOFactory.TestSetTimestampFlag;
 var
   lFlag: TD2XBoolFlag;
   lFile: ID2XIOFile;
+  lFRef: TD2XFlagRef;
 begin
   lFlag := TD2XBoolFlag.Create;
   try
-    fFact.SetTimestampFlag(lFlag);
+    lFRef := FlagToRef(lFlag);
+    fFact.SetTimestampFlag(lFRef);
 
     ID2XFlag(lFlag).Flag := False;
     lFile := fFact.LogFileOrExtn('File.Extn');
@@ -366,6 +368,7 @@ begin
     CheckEqualsString('File-Timestamp.Extn', lFile.Description, 'Log File Timestamped');
 
     fFact.SetTimestampFlag(nil);
+    lFRef := nil;
   finally
     DisposeOf(lFile);
     FreeAndNil(lFlag);

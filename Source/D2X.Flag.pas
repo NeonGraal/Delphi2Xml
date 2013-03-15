@@ -14,20 +14,33 @@ type
     property Flag: Boolean read GetFlag write SetFlag;
   end;
 
+  TD2XFlagRef = reference to function: Boolean;
+
   TD2XBoolFlag = class(TD2XInterfaced, ID2XFlag)
   private
     fFlag: Boolean;
     function GetFlag: Boolean;
+  public
     procedure SetFlag(pVal: Boolean);
   end;
 
+function FlagToRef(pFlag: ID2XFlag): TD2XFlagRef;
+
 implementation
+
+function FlagToRef(pFlag: ID2XFlag): TD2XFlagRef;
+begin
+  Result := function: Boolean
+    begin
+      result := pFlag.Flag;
+    end;
+end;
 
 { TD2XBoolFlag }
 
 function TD2XBoolFlag.GetFlag: Boolean;
 begin
-  Result := fFlag;
+  result := fFlag;
 end;
 
 procedure TD2XBoolFlag.SetFlag(pVal: Boolean);

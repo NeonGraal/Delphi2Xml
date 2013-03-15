@@ -91,6 +91,7 @@ type
 implementation
 
 uses
+  D2X.Flag,
   D2X.IO.Options,
 
   D2X.Tree.Json,
@@ -179,7 +180,7 @@ end;
 
 function TD2XOptions.GetRecurse: Boolean;
 begin
-  Result := fFlags.ByLabel['Recurse'].Flag;
+  Result := fFlags.RefLabel['Recurse']();
 end;
 
 function TD2XOptions.IsInternalMethod(pMethod: string): Boolean;
@@ -389,12 +390,12 @@ end;
 
 procedure TD2XOptions.InitFirstProcessors;
 begin
-  fProcs.Add(TD2XProcessor.CreateHandler(fFlags.ByLabel['LogErrors'],
+  fProcs.Add(TD2XProcessor.CreateHandler(fFlags.RefLabel['LogErrors'],
       TD2XErrorHandler.CreateError(meError, fErrorLog.LogMessage), True));
-  fProcs.Add(TD2XProcessor.CreateHandler(fFlags.ByLabel['LogNotSupp'],
+  fProcs.Add(TD2XProcessor.CreateHandler(fFlags.RefLabel['LogNotSupp'],
       TD2XErrorHandler.CreateError(meNotSupported, fErrorLog.LogMessage), True));
 
-  fProcs.Add(TD2XProcessor.CreateClass(fFlags.ByLabel['Verbose'], TD2XLogHandler));
+  fProcs.Add(TD2XProcessor.CreateClass(fFlags.RefLabel['Verbose'], TD2XLogHandler));
 
   fParams.Add(TD2XParam.Create('?', 'Options', '', 'Show valid options',
         function(pStr: string): Boolean
@@ -512,20 +513,20 @@ begin
   lParserDefinesHandler := TD2XParserDefinesHandler.CreateDefines(lParserDefines.Defines);
   lHeldDefinesHandler := TD2XHeldDefinesHandler.CreateDefines(lHeldDefines.Defines);
 
-  fProcs.Add(TD2XProcessor.CreateClass(lSkipMethods, TD2XSkipHandler).SetFileInput(
+  fProcs.Add(TD2XProcessor.CreateClass(lSkipMethods.FlagRef, TD2XSkipHandler).SetFileInput(
     function: ID2XIOFile
     begin
       Result := fIOFact.ConfigFileOrExtn(lSkipMethods.Value);
     end).SetProcessingOutput(MakeFileRef(lSkipMethods, '.log')));
-  fProcs.Add(TD2XProcessor.CreateClass(lCountChildren, TD2XCountChildrenHandler)
+  fProcs.Add(TD2XProcessor.CreateClass(lCountChildren.FlagRef, TD2XCountChildrenHandler)
     .SetFileInput(NilFileRef()).SetFileOutput(NilFileRef())
     .SetProcessingOutput(MakeFileRef(lCountChildren)));
-  fProcs.Add(TD2XProcessor.CreateClass(lCountFinalDefines, TD2XCountFinalDefinesHandler)
+  fProcs.Add(TD2XProcessor.CreateClass(lCountFinalDefines.FlagRef, TD2XCountFinalDefinesHandler)
     .SetFileOutput(NilFileRef()).SetProcessingOutput(MakeFileRef(lCountFinalDefines)));
-  fProcs.Add(TD2XProcessor.CreateClass(lCountDefinesUsed, TD2XCountDefinesUsedHandler)
+  fProcs.Add(TD2XProcessor.CreateClass(lCountDefinesUsed.FlagRef, TD2XCountDefinesUsedHandler)
     .SetProcessingOutput(MakeFileRef(lCountDefinesUsed)));
-  fProcs.Add(TD2XProcessor.CreateHandler(lParserDefines, lParserDefinesHandler, True));
-  fProcs.Add(TD2XProcessor.CreateHandler(lHeldDefines, lHeldDefinesHandler, True));
+  fProcs.Add(TD2XProcessor.CreateHandler(lParserDefines.FlagRef, lParserDefinesHandler, True));
+  fProcs.Add(TD2XProcessor.CreateHandler(lHeldDefines.FlagRef, lHeldDefinesHandler, True));
 
   fParams.AddRange([lCountChildren, lCountFinalDefines, lCountDefinesUsed, lSkipMethods,
     lParserDefines, lHeldDefines]);
@@ -609,7 +610,7 @@ begin
         lWriteDefines.Convert(pVal);
       Result := True;
     end);
-  fIOFact.SetTimestampFlag(fFlags.ByLabel['Timestamp']);
+  fIOFact.SetTimestampFlag(fFlags.RefLabel['Timestamp']);
 
   fParseMode := TD2XSingleParam<TD2XParseMode>.CreateParamOnSet('M', 'Parse mode', '<mode>',
     'Parser type (F[ull], U[ses])', pmFull, TD2X.CnvEnum<TD2XParseMode>,
@@ -639,13 +640,13 @@ begin
     'Write Final Defines files into current or given <d/e>', 'Defines,def', False,
     ConvertDirExtn);
 
-  fProcs.Add(TD2XProcessor.CreateHandler(lWriteXml, TD2XTreeHandler.CreateTree(TD2XXmlWriter,
-      fFlags.ByLabel['FinalToken'], lGetParseMode), True)
+  fProcs.Add(TD2XProcessor.CreateHandler(lWriteXml.FlagRef, TD2XTreeHandler.CreateTree(TD2XXmlWriter,
+      fFlags.RefLabel['FinalToken'], lGetParseMode), True)
     .SetResultsOutput(MakeNamedRef(lWriteXml)));
-  fProcs.Add(TD2XProcessor.CreateHandler(lWriteJson, TD2XTreeHandler.CreateTree(TD2XJsonWriter,
-      fFlags.ByLabel['FinalToken'], lGetParseMode), True)
+  fProcs.Add(TD2XProcessor.CreateHandler(lWriteJson.FlagRef, TD2XTreeHandler.CreateTree(TD2XJsonWriter,
+      fFlags.RefLabel['FinalToken'], lGetParseMode), True)
     .SetResultsOutput(MakeNamedRef(lWriteJson)));
-  fProcs.Add(TD2XProcessor.CreateClass(lWriteDefines, TD2XWriteDefinesHandler)
+  fProcs.Add(TD2XProcessor.CreateClass(lWriteDefines.FlagRef, TD2XWriteDefinesHandler)
     .SetResultsOutput(MakeNamedRef(lWriteDefines)));
 
   InitFirstProcessors;

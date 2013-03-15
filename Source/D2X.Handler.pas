@@ -24,7 +24,7 @@ type
 
   ID2XParser = interface
     ['{7F3065AD-B574-4214-BDC9-B4DC211F5752}']
-    procedure InitParser(pParser: TD2XDefinesParser; pActive: ID2XFlag);
+    procedure InitParser(pParser: TD2XDefinesParser; pActive: TD2XFlagRef);
   end;
 
   ID2XProcessing = interface
