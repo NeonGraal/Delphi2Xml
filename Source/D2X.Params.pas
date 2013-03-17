@@ -16,7 +16,6 @@ type
     constructor Create(pCode, pLabel, pSample, pDescr: String;
       pParser: TD2XStringCheckRef); override;
     constructor CreateFlags(pFlags: TD2XFlagDefines);
-    destructor Destroy; override;
 
     procedure Describe(pL: ID2XLogger); override;
     procedure Output(pSL: TStringList); override;
@@ -30,13 +29,14 @@ type
 
   private
     fFlags: TD2XFlagDefines;
-    fValues: array of TD2XBoolFlag;
+    fValues: array of Boolean;
 
     function UseParser: TD2XStringCheckRef;
 
     function IndexCode(pCode: Char): Integer;
     function IndexLabel(pLabel: String): Integer;
 
+    function GetRefIndex(pIndex: Integer): TD2XFlagRef;
     function GetRefCode(pCode: Char): TD2XFlagRef;
     function GetRefLabel(pLabel: String): TD2XFlagRef;
 
@@ -110,7 +110,7 @@ type
     function UseFormatter: TD2XSingleParam<String>.TspFormatter;
   end;
 
-  TD2XFlaggedStringParam = class(TD2XSingleParam<String>, ID2XFlag)
+  TD2XFlaggedStringParam = class(TD2XSingleParam<String>)
   public type
     TfspFormatter = reference to function(pFlag: Boolean; pVal: String): String;
 
@@ -162,7 +162,7 @@ type
     property FlagRef: TD2XFlagRef read GetFlagRef;
   end;
 
-  TD2XDefinesParam = class(TD2XSingleParam<Boolean>, ID2XFlag)
+  TD2XDefinesParam = class(TD2XSingleParam<Boolean>)
   public
     constructor CreateParam(pCode, pLabel, pSample, pDescr: String; pDefault: Boolean;
       pConverter: TD2XSingleParam<Boolean>.TspConverter;
@@ -707,8 +707,7 @@ begin
   for i := 0 to High(pFlags) do
   begin
     fFlags[i] := pFlags[i];
-    fValues[i] := TD2XBoolFlag.Create;
-    ID2XFlag(fValues[i]).Flag := pFlags[i].FlagDefault;
+    fValues[i] := pFlags[i].FlagDefault;
   end;
 end;
 
@@ -723,16 +722,6 @@ begin
           FlagDescr]);
 end;
 
-destructor TD2XFlagsParam.Destroy;
-var
-  i: Integer;
-begin
-  for i := 0 to High(fValues) do
-    FreeAndNil(fValues[i]);
-
-  inherited;
-end;
-
 function TD2XFlagsParam.GetFormatted(pDefault: Boolean): String;
 var
   i: Integer;
@@ -741,7 +730,7 @@ begin
   Result := '';
   lSep := '+';
   for i := 0 to High(fFlags) do
-    if (pDefault and fFlags[i].FlagDefault) or (not pDefault and ID2XFlag(fValues[i]).Flag)
+    if (pDefault and fFlags[i].FlagDefault) or (not pDefault and fValues[i])
     then
     begin
       Result := Result + lSep + fFlags[i].FlagCode;
@@ -749,7 +738,7 @@ begin
     end;
   lSep := '-';
   for i := 0 to High(fFlags) do
-    if (pDefault and not fFlags[i].FlagDefault) or not(pDefault or ID2XFlag(fValues[i]).Flag)
+    if (pDefault and not fFlags[i].FlagDefault) or not(pDefault or fValues[i])
     then
     begin
       Result := Result + lSep + fFlags[i].FlagCode;
@@ -763,9 +752,17 @@ var
 begin
   i := IndexCode(pCode);
   if i >= 0 then
-    Result := FlagToRef(fValues[i])
+    Result := GetRefIndex(i)
   else
     Result := nil;
+end;
+
+function TD2XFlagsParam.GetRefIndex(pIndex: Integer): TD2XFlagRef;
+begin
+  Result := function: Boolean
+    begin
+      result := fValues[pIndex];
+    end;
 end;
 
 function TD2XFlagsParam.GetRefLabel(pLabel: String): TD2XFlagRef;
@@ -774,7 +771,7 @@ var
 begin
   i := IndexLabel(pLabel);
   if i >= 0 then
-    Result := FlagToRef(fValues[i])
+    Result := GetRefIndex(i)
   else
     Result := nil;
 end;
@@ -793,7 +790,7 @@ begin
         i := IndexCode(pStr[1]);
       if i >= 0 then
       begin
-        if ID2XFlag(fValues[i]).Flag then
+        if fValues[i] then
           lSL.Add(fFlags[i].FlagLabel + '+')
         else
           lSL.Add(fFlags[i].FlagLabel + '-');
@@ -801,7 +798,7 @@ begin
     end
     else
       for i := 0 to High(fFlags) do
-        if ID2XFlag(fValues[i]).Flag then
+        if fValues[i] then
           lSL.Add(fFlags[i].FlagLabel + '+')
         else
           lSL.Add(fFlags[i].FlagLabel + '-');
@@ -839,7 +836,7 @@ var
 begin
   Result := True;
   for i := 0 to High(fFlags) do
-    Result := Result and (ID2XFlag(fValues[i]).Flag = fFlags[i].FlagDefault);
+    Result := Result and (fValues[i] = fFlags[i].FlagDefault);
 end;
 
 procedure TD2XFlagsParam.Output(pSL: TStringList);
@@ -853,7 +850,7 @@ begin
     lS := '-F';
     lSep := '+';
     for i := 0 to High(fFlags) do
-      if not fFlags[i].FlagDefault and (ID2XFlag(fValues[i]).Flag <> fFlags[i].FlagDefault)
+      if not fFlags[i].FlagDefault and (fValues[i] <> fFlags[i].FlagDefault)
       then
       begin
         lS := lS + lSep + fFlags[i].FlagCode;
@@ -861,7 +858,7 @@ begin
       end;
     lSep := '-';
     for i := 0 to High(fFlags) do
-      if fFlags[i].FlagDefault and (ID2XFlag(fValues[i]).Flag <> fFlags[i].FlagDefault) then
+      if fFlags[i].FlagDefault and (fValues[i] <> fFlags[i].FlagDefault) then
       begin
         lS := lS + lSep + fFlags[i].FlagCode;
         lSep := '';
@@ -885,7 +882,7 @@ begin
     else
       j := IndexCode(pStr[i]);
       if j >= 0 then
-        ID2XFlag(fValues[j]).Flag := lVal
+        fValues[j] := lVal
       else
         Result := False;
     end;
@@ -920,7 +917,7 @@ begin
       end;
       i := IndexLabel(lLabel);
       if i >= 0 then
-        ID2XFlag(fValues[i]).Flag := lVal
+        fValues[i] := lVal
       else
         Result := False;
     end;
@@ -934,7 +931,7 @@ var
   i: Integer;
 begin
   for i := 0 to High(fFlags) do
-    ID2XFlag(fValues[i]).Flag := fFlags[i].FlagDefault;
+    fValues[i] := fFlags[i].FlagDefault;
 end;
 
 procedure TD2XFlagsParam.SetCode(pCode: Char; pVal: Boolean);
@@ -943,7 +940,7 @@ var
 begin
   i := IndexCode(pCode);
   if i >= 0 then
-    ID2XFlag(fValues[i]).Flag := pVal;
+    fValues[i] := pVal;
 end;
 
 function TD2XFlagsParam.UseParser: TD2XStringCheckRef;
@@ -976,7 +973,7 @@ var
   i: Integer;
 begin
   for i := 0 to High(fFlags) do
-    ID2XFlag(fValues[i]).Flag := False;
+    fValues[i] := False;
 end;
 
 { TD2XListParam }

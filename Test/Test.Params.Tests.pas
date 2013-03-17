@@ -217,7 +217,7 @@ type
     function OldFormatted(pVal: string): string;
   end;
 
-  TestTD2XFlaggedStringParam = class(TFlagParamTestCase)
+  TestTD2XFlaggedStringParam = class(TFlagRefParamTestCase)
   strict private
     fFlagP: TTestFlaggedStringParam;
 
@@ -244,11 +244,11 @@ type
     procedure TestFlag;
     procedure TestValue;
     procedure TestToString;
-    procedure TestGetFlag; override;
-    procedure TestSetFlag; override;
+    procedure TestGetFlag;
+    procedure TestSetFlag;
   end;
 
-  TestTD2XFlaggedStringConvertParam = class(TFlagParamTestCase)
+  TestTD2XFlaggedStringConvertParam = class(TFlagRefParamTestCase)
   strict private
     fFlagP: TTestFlaggedStringParam;
 
@@ -264,11 +264,11 @@ type
     procedure TestZero;
     procedure TestConvert;
     procedure TestIsDefault;
-    procedure TestGetFlag; override;
-    procedure TestSetFlag; override;
+    procedure TestGetFlag;
+    procedure TestSetFlag;
   end;
 
-  TestTD2XFlaggedStringFormatParam = class(TFlagParamTestCase)
+  TestTD2XFlaggedStringFormatParam = class(TFlagRefParamTestCase)
   strict private
     fFlagP: TTestFlaggedStringParam;
 
@@ -282,11 +282,11 @@ type
     procedure TestReport;
     procedure TestOutput;
     procedure TestToString;
-    procedure TestGetFlag; override;
-    procedure TestSetFlag; override;
+    procedure TestGetFlag;
+    procedure TestSetFlag;
   end;
 
-  TestTD2XDefinesParam = class(TFlagParamTestCase)
+  TestTD2XDefinesParam = class(TFlagRefParamTestCase)
   strict private
     fDefP: TD2XDefinesParam;
 
@@ -309,8 +309,8 @@ type
     procedure TestOutput;
     procedure TestValue;
     procedure TestToString;
-    procedure TestGetFlag; override;
-    procedure TestSetFlag; override;
+    procedure TestGetFlag;
+    procedure TestSetFlag;
   end;
 
   { TestTD2XSingleParam }
@@ -1042,7 +1042,7 @@ begin
   lBP.Value := True;
   lSP.Value := 'Value';
   lFP.Value := 'Value';
-  ID2XFlag(lFP).Flag := True;
+  lFP.FlagValue := True;
   fPs.ReportAll(fLog);
   CheckLog(REPORT_HEADING + 'Boolean + String Value Flagged :Value', 'All Params Changed');
 
@@ -1210,12 +1210,12 @@ begin
 
   fFlagP := TTestFlaggedStringParam.CreateFlagStr('T', 'Test', '<Example>',
     'Test String Param', 'Tst', False, nil);
-  AssignFlag(fFlagP);
+  AssignFlag(fFlagP.FlagRef);
 end;
 
 procedure TestTD2XFlaggedStringParam.TearDown;
 begin
-  ClearFlag(fFlagP);
+  FreeAndNil(fFlagP);
 
   inherited;
 end;
@@ -1240,7 +1240,7 @@ procedure TestTD2XFlaggedStringParam.TestFlag;
 begin
   CheckFlag(False, 'Default Flag Set');
 
-  SetFlag(True);
+  fFlagP.FlagValue := True;
   CheckFlag(True, 'Other Flag Set');
 end;
 
@@ -1291,7 +1291,7 @@ begin
   fFlagP.Value := '';
   CheckFalse(fFlagP.IsDefault, 'Check is not Default');
 
-  SetFlag(True);
+  fFlagP.FlagValue := True;
   CheckFalse(fFlagP.IsDefault, 'Check is not Default');
 
   fFlagP.Value := 'Tst';
@@ -1323,7 +1323,7 @@ begin
   fFlagP.Output(fL);
   CheckList('-T-', 'Output Blank value off');
 
-  SetFlag(True);
+  fFlagP.FlagValue := True;
   fFlagP.Output(fL);
   CheckList('-T+', 'Output Blank value on');
 
@@ -1349,7 +1349,7 @@ begin
   CheckEqualsString('Tst', fFlagP.Value, 'Remains default Value');
   CheckFlag(True, 'Flag On');
 
-  SetFlag(False);
+  fFlagP.FlagValue := False;
   CheckFlag(False, 'Flag Unset');
 
   Check(fFlagP.Parse('T:Simple'), 'Parse right code with value');
@@ -1370,7 +1370,7 @@ begin
   CheckEqualsString('Tst', fFlagP.Value, 'Default Value Set');
   CheckFlag(False, 'Default Flag Set');
 
-  SetFlag(False);
+  fFlagP.FlagValue := False;
   fFlagP.Value := 'Simple';
   CheckFlag(False, 'Flag Unset');
   CheckEqualsString('Simple', fFlagP.Value, 'Simple Value');
@@ -1389,7 +1389,7 @@ begin
   fFlagP.Report(fLog);
   CheckLog('Test -', 'Report Blank value off');
 
-  SetFlag(True);
+  fFlagP.FlagValue := True;
   fFlagP.Report(fLog);
   CheckLog('Test +', 'Report Blank value on');
 
@@ -1404,7 +1404,7 @@ begin
   CheckFlag(False, 'Default Flag Set');
 
   fFlagP.Value := 'Simple';
-  SetFlag(True);
+  fFlagP.FlagValue := True;
   CheckEqualsString('Simple', fFlagP.Value, 'Simple Value Set');
   CheckFlag(True, 'Other Flag Set');
 
@@ -1419,10 +1419,10 @@ begin
 
   CheckFalse(fFlagP.FlagValue, 'Check is Default');
 
-  SetFlag(True);
+  fFlagP.FlagValue := True;
   CheckTrue(fFlagP.FlagValue, 'Check is not Default');
 
-  SetFlag(False);
+  fFlagP.FlagValue := False;
   CheckFalse(fFlagP.FlagValue, 'Check is Default');
 end;
 
@@ -1433,7 +1433,7 @@ begin
   fFlagP.Value := '';
   CheckEqualsString('T-', fFlagP.ToString, 'Blank value off');
 
-  SetFlag(True);
+  fFlagP.FlagValue := True;
   CheckEqualsString('T+', fFlagP.ToString, 'Blank value on');
 
   fFlagP.Value := 'Simple';
@@ -1454,7 +1454,7 @@ begin
   CheckFlag(False, 'Default Flag Set');
 
   fFlagP.Value := 'Simple';
-  SetFlag(True);
+  fFlagP.FlagValue := True;
   CheckEqualsString('Simple', fFlagP.Value, 'Simple Value Set');
   CheckFlag(True, 'Other Flag Set');
 
@@ -1474,13 +1474,13 @@ begin
     begin
       Result := TTestFile.Create('Config\' + pFile, True, 'Tango'#13#10'Uniform', nil);
     end);
-  AssignFlag(fDefP);
+  AssignFlag(fDefP.FlagRef);
   fDefP.Defines.CommaText := 'ALPHA,BETA,GAMMA';
 end;
 
 procedure TestTD2XDefinesParam.TearDown;
 begin
-  ClearFlag(fDefP);
+  FreeAndNil(fDefP);
 
   inherited;
 end;
@@ -1647,10 +1647,10 @@ begin
 
   CheckFalse(fDefP.Value, 'Check is Default');
 
-  SetFlag(True);
+  fDefP.Value := True;
   CheckTrue(fDefP.Value, 'Check is not Default');
 
-  SetFlag(False);
+  fDefP.Value := False;
   CheckFalse(fDefP.Value, 'Check is Default');
 end;
 
@@ -1666,7 +1666,7 @@ procedure TestTD2XDefinesParam.TestValue;
 begin
   CheckFlag(False, 'Default Flag Set');
 
-  SetFlag(True);
+  fDefP.Value := True;
   CheckFlag(True, 'Other Flag Set');
 end;
 
@@ -2021,12 +2021,12 @@ begin
 
   fFlagP := TTestFlaggedStringParam.CreateFlagStr('T', 'Test', '<Example>',
     'Test String Param', 'tsT', False, TestConverter);
-  AssignFlag(fFlagP);
+  AssignFlag(fFlagP.FlagRef);
 end;
 
 procedure TestTD2XFlaggedStringConvertParam.TearDown;
 begin
-  ClearFlag(fFlagP);
+  FreeAndNil(fFlagP);
 
   inherited;
 end;
@@ -2072,7 +2072,7 @@ begin
   fFlagP.Value := '';
   CheckFalse(fFlagP.IsDefault, 'Check is not Default');
 
-  SetFlag(True);
+  fFlagP.FlagValue := True;
   CheckFalse(fFlagP.IsDefault, 'Check is not Default');
 
   fFlagP.Value := 'Tst';
@@ -2102,7 +2102,7 @@ begin
   CheckEqualsString('tsT', fFlagP.Value, 'Remains default Value');
   CheckFlag(True, 'Flag On');
 
-  SetFlag(False);
+  fFlagP.FlagValue := False;
   CheckFlag(False, 'Flag Unset');
 
   CheckFalse(fFlagP.Parse('T:S'), 'Parse right code with Short value');
@@ -2127,7 +2127,7 @@ begin
   CheckEqualsString('tsT', fFlagP.Value, 'Default Value Set');
   CheckFlag(False, 'Default Flag Set');
 
-  SetFlag(False);
+  fFlagP.FlagValue := False;
   fFlagP.Value := 'elpmiS';
   CheckFlag(False, 'Flag Unset');
   CheckEqualsString('elpmiS', fFlagP.Value, 'Simple Value');
@@ -2143,7 +2143,7 @@ begin
   CheckFlag(False, 'Default Flag Set');
 
   fFlagP.Value := 'Simple';
-  SetFlag(True);
+  fFlagP.FlagValue := True;
   CheckEqualsString('Simple', fFlagP.Value, 'Simple Value Set');
   CheckFlag(True, 'Other Flag Set');
 
@@ -2158,10 +2158,10 @@ begin
 
   CheckFalse(fFlagP.FlagValue, 'Check is Default');
 
-  SetFlag(True);
+  fFlagP.FlagValue := True;
   CheckTrue(fFlagP.FlagValue, 'Check is not Default');
 
-  SetFlag(False);
+  fFlagP.FlagValue := False;
   CheckFalse(fFlagP.FlagValue, 'Check is Default');
 end;
 
@@ -2171,7 +2171,7 @@ begin
   CheckFlag(False, 'Default Flag Set');
 
   fFlagP.Value := 'Simple';
-  SetFlag(True);
+  fFlagP.FlagValue := True;
   CheckEqualsString('Simple', fFlagP.Value, 'Simple Value Set');
   CheckFlag(True, 'Other Flag Set');
 
@@ -2307,12 +2307,12 @@ begin
 
   fFlagP := TTestFlaggedStringParam.CreateFlagStrFmt('T', 'Test', '<Example>',
     'Test String Param', 'Tst', False, nil, FormatFlagString);
-  AssignFlag(fFlagP);
+  AssignFlag(fFlagP.FlagRef);
 end;
 
 procedure TestTD2XFlaggedStringFormatParam.TearDown;
 begin
-  ClearFlag(fFlagP);
+  FreeAndNil(fFlagP);
 
   inherited;
 end;
@@ -2345,7 +2345,7 @@ begin
   fFlagP.Output(fL);
   CheckList('-T -', 'Output Blank value off');
 
-  SetFlag(True);
+  fFlagP.FlagValue := True;
   fFlagP.Output(fL);
   CheckList('-T +', 'Output Blank value on');
 
@@ -2363,7 +2363,7 @@ begin
   fFlagP.Report(fLog);
   CheckLog('Test -', 'Report Blank value off');
 
-  SetFlag(True);
+  fFlagP.FlagValue := True;
   fFlagP.Report(fLog);
   CheckLog('Test +', 'Report Blank value on');
 
@@ -2378,10 +2378,10 @@ begin
 
   CheckFalse(fFlagP.FlagValue, 'Check is Default');
 
-  SetFlag(True);
+  fFlagP.FlagValue := True;
   CheckTrue(fFlagP.FlagValue, 'Check is not Default');
 
-  SetFlag(False);
+  fFlagP.FlagValue := False;
   CheckFalse(fFlagP.FlagValue, 'Check is Default');
 end;
 
@@ -2392,7 +2392,7 @@ begin
   fFlagP.Value := '';
   CheckEqualsString('T -', fFlagP.ToString, 'Blank value off');
 
-  SetFlag(True);
+  fFlagP.FlagValue := True;
   CheckEqualsString('T +', fFlagP.ToString, 'Blank value on');
 
   fFlagP.Value := 'Simple';

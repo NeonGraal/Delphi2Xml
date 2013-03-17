@@ -44,13 +44,11 @@ type
 
 type
   TFlagTestCase = class(TStringTestCase)
-  strict private
-    fFlag: TD2XBoolFlag;
   public
     procedure SetUp; override;
     procedure TearDown; override;
   protected
-    fActive: ID2XFlag;
+    fFlag: TD2XBoolFlag;
   end;
 
 implementation
@@ -146,12 +144,10 @@ begin
   inherited;
 
   fFlag := TD2XBoolFlag.Create;
-  fActive := fFlag;
 end;
 
 procedure TFlagTestCase.TearDown;
 begin
-  fActive := nil;
   FreeAndNil(fFlag);
 
   inherited;

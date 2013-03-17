@@ -495,7 +495,7 @@ begin
   lDS := fFileOpts.LogFileOrExtn(pExtn);
   CheckIO(lDS, 'Log\Global.Extn', 'Default Timestamp Global Extn');
 
-  fTimeFlag.Flag := True;
+  fTimeBool.SetFlag(True);
   CheckTrue(fFileOpts.TimestampFiles, 'Timestamp Files On');
 
   lDS := fFileOpts.LogFileOrExtn('File.Extn');
@@ -509,7 +509,7 @@ begin
   lDS := fFileOpts.LogFileOrExtn(pExtn);
   CheckIO(lDS, 'Log\Global' + fFileOpts.OutputTimestamp + '.Extn', 'On Timestamp Global Extn');
 
-  fTimeFlag.Flag := False;
+  fTimeBool.SetFlag(False);
   CheckFalse(fFileOpts.TimestampFiles, 'Timestamp Files Off');
 
   lDS := fFileOpts.LogFileOrExtn('File.Extn');
@@ -523,7 +523,7 @@ begin
   lDS := fFileOpts.LogFileOrExtn(pExtn);
   CheckIO(lDS, 'Log\Global.Extn', 'Off Timestamp Global Extn');
 
-  fTimeFlag.Flag := True;
+  fTimeBool.SetFlag(True);
   CheckTrue(fFileOpts.TimestampFiles, 'Timestamp Files');
 
   lDS := fFileOpts.LogFileOrExtn('File.Extn');

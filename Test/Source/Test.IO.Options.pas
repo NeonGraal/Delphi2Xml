@@ -18,13 +18,12 @@ type
 
   TFileFactoryTestCase = class(TParamsTestCase)
   private
-    fTimeBool: TD2XBoolFlag;
 
     function TestValidator(pStr: string): Boolean;
   protected
     fFileOpts: TD2XFileOptionsTest;
     fValidatorCalled: Boolean;
-    fTimeFlag: ID2XFlag;
+    fTimeBool: TD2XBoolFlag;
 
     function ForCode(pCode: string): TD2XParam;
   public
@@ -49,18 +48,16 @@ begin
   inherited;
 
   fTimeBool := TD2XBoolFlag.Create;
-  fTimeFlag := fTimeBool;
 
   fFileOpts := TD2XFileOptionsTest.Create;
   fFileOpts.SetGlobalValidator(TestValidator);
-  fFileOpts.SetTimestampFlag(FlagToRef(fTimeFlag));
+  fFileOpts.SetTimestampFlag(fTimeBool.FlagRef);
   fFileOpts.RegisterParams(fParams);
 end;
 
 procedure TFileFactoryTestCase.TearDown;
 begin
   FreeAndNil(fFileOpts);
-  fTimeFlag := nil;
   FreeAndNil(fTimeBool);
 
   inherited;

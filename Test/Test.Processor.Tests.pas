@@ -91,7 +91,7 @@ begin
   inherited;
 
   FHandler := TD2XHandlerTester.Create;
-  FD2XProcessor := TD2XProcessor.CreateHandler(FlagToRef(fActive), FHandler, True);
+  FD2XProcessor := TD2XProcessor.CreateHandler(fFlag.FlagRef, FHandler, True);
 end;
 
 procedure TestTD2XProcessor.TearDown;
@@ -106,7 +106,7 @@ begin
   FD2XProcessor.AddAttr('Test', 'test');
   CheckFalse(FHandler.CalledAddAttr, 'Ignored Add Attr');
 
-  fActive.Flag := True;
+  fFlag.SetFlag(True);
   FD2XProcessor.AddAttr('Test', 'test');
   CheckTrue(FHandler.CalledAddAttr, 'Called Add Attr');
 end;
@@ -116,7 +116,7 @@ begin
   FD2XProcessor.AddText('Test');
   CheckFalse(FHandler.CalledAddText, 'Ignored Add Text');
 
-  fActive.Flag := True;
+  fFlag.SetFlag(True);
   FD2XProcessor.AddText('Test');
   CheckTrue(FHandler.CalledAddText, 'Called Add Text');
 end;
@@ -128,7 +128,7 @@ begin
   FD2XProcessor.BeginFile('');
   CheckFalse(FHandler.CalledBeginFile, 'Ignored Begin File');
 
-  fActive.Flag := True;
+  fFlag.SetFlag(True);
   FD2XProcessor.BeginFile('');
   CheckTrue(FHandler.CalledBeginFile, 'Called Begin File');
 end;
@@ -138,7 +138,7 @@ begin
   FD2XProcessor.BeginMethod('');
   CheckFalse(FHandler.CalledBeginMethod, 'Ignored Begin Method');
 
-  fActive.Flag := True;
+  fFlag.SetFlag(True);
   FD2XProcessor.BeginMethod('');
   CheckTrue(FHandler.CalledBeginMethod, 'Called Begin Method');
 end;
@@ -148,7 +148,7 @@ begin
   FD2XProcessor.BeginResults;
   CheckFalse(FHandler.CalledBeginResults, 'Ignored Begin Results');
 
-  fActive.Flag := True;
+  fFlag.SetFlag(True);
   FD2XProcessor.BeginResults;
   CheckTrue(FHandler.CalledBeginResults, 'Called Begin Results');
 end;
@@ -158,7 +158,7 @@ begin
   FD2XProcessor.CheckAfterMethod('');
   CheckFalse(FHandler.CalledCheckAfterMethod, 'Ignored Check After Method');
 
-  fActive.Flag := True;
+  fFlag.SetFlag(True);
   FD2XProcessor.CheckAfterMethod('');
   CheckTrue(FHandler.CalledCheckAfterMethod, 'Called Check After Method');
 end;
@@ -168,7 +168,7 @@ begin
   FD2XProcessor.CheckBeforeMethod('');
   CheckFalse(FHandler.CalledCheckBeforeMethod, 'Ignored Check Before Method');
 
-  fActive.Flag := True;
+  fFlag.SetFlag(True);
   FD2XProcessor.CheckBeforeMethod('');
   CheckTrue(FHandler.CalledCheckBeforeMethod, 'Called Check Before Method');
 end;
@@ -176,7 +176,7 @@ end;
 procedure TestTD2XProcessor.TestCreateClass;
 begin
   FreeAndNil(FD2XProcessor);
-  FD2XProcessor := TD2XProcessor.CreateClass(FlagToRef(fActive), TD2XHandlerTester);
+  FD2XProcessor := TD2XProcessor.CreateClass(fFlag.FlagRef, TD2XHandlerTester);
   CheckTrue(FD2XProcessor.HandlerIs(TD2XHandlerTester), 'Check Handler class');
 end;
 
@@ -187,7 +187,7 @@ begin
   FD2XProcessor.EndFile('');
   CheckFalse(FHandler.CalledEndFile, 'Ignored End File');
 
-  fActive.Flag := True;
+  fFlag.SetFlag(True);
   FD2XProcessor.EndFile('');
   CheckTrue(FHandler.CalledEndFile, 'Called End File');
 end;
@@ -197,7 +197,7 @@ begin
   FD2XProcessor.EndMethod('');
   CheckFalse(FHandler.CalledEndMethod, 'Ignored End Method');
 
-  fActive.Flag := True;
+  fFlag.SetFlag(True);
   FD2XProcessor.EndMethod('');
   CheckTrue(FHandler.CalledEndMethod, 'Called End Method');
 end;
@@ -209,7 +209,7 @@ begin
   FD2XProcessor.EndProcessing;
   CheckFalse(FHandler.CalledEndProcessing, 'Ignored End Processing');
 
-  fActive.Flag := True;
+  fFlag.SetFlag(True);
   FD2XProcessor.EndProcessing;
   CheckTrue(FHandler.CalledEndProcessing, 'Called End Processing');
 end;
@@ -221,7 +221,7 @@ begin
   FD2XProcessor.EndResults('');
   CheckFalse(FHandler.CalledEndResults, 'Ignored End Results');
 
-  fActive.Flag := True;
+  fFlag.SetFlag(True);
   FD2XProcessor.EndResults('');
   CheckTrue(FHandler.CalledEndResults, 'Called End Results');
 end;
@@ -260,7 +260,7 @@ begin
   FD2XProcessor.RollBackTo('Test');
   CheckFalse(FHandler.CalledRollBackTo, 'Ignored RollBack To');
 
-  fActive.Flag := True;
+  fFlag.SetFlag(True);
   FD2XProcessor.RollBackTo('Test');
   CheckTrue(FHandler.CalledRollBackTo, 'Called RollBack To');
 end;
@@ -282,7 +282,7 @@ begin
   FD2XProcessor.BeginFile('');
   CheckFalse(lCalled, 'Ignored File Input');
 
-  fActive.Flag := True;
+  fFlag.SetFlag(True);
   FD2XProcessor.BeginFile('');
   CheckTrue(lCalled, 'Called File Input');
 end;
@@ -304,7 +304,7 @@ begin
   FD2XProcessor.EndFile('');
   CheckFalse(lCalled, 'Ignored File Output');
 
-  fActive.Flag := True;
+  fFlag.SetFlag(True);
   FD2XProcessor.EndFile('');
   CheckTrue(lCalled, 'Called File Output');
 end;
@@ -331,7 +331,7 @@ begin
   FD2XProcessor.EndProcessing;
   CheckFalse(lCalled, 'Ignored Processing Output');
 
-  fActive.Flag := True;
+  fFlag.SetFlag(True);
   FD2XProcessor.EndProcessing;
   CheckTrue(lCalled, 'Called Processing Output');
 end;
@@ -352,7 +352,7 @@ begin
   FD2XProcessor.EndResults('');
   CheckFalse(lCalled, 'Ignored Results Output');
 
-  fActive.Flag := True;
+  fFlag.SetFlag(True);
   FD2XProcessor.EndResults('');
   CheckTrue(lCalled, 'Called Results Output');
 end;
@@ -362,7 +362,7 @@ begin
   FD2XProcessor.TrimChildren('Test');
   CheckFalse(FHandler.CalledTrimChildren, 'Ignored Trim Children');
 
-  fActive.Flag := True;
+  fFlag.SetFlag(True);
   FD2XProcessor.TrimChildren('Test');
   CheckTrue(FHandler.CalledTrimChildren, 'Called Trim Children');
 end;
@@ -371,7 +371,7 @@ procedure TestTD2XProcessor.TestUseProxy;
 begin
   CheckFalse(FD2XProcessor.UseProxy, 'Dont Use Proxy');
 
-  fActive.Flag := True;
+  fFlag.SetFlag(True);
   CheckFalse(FD2XProcessor.UseProxy, 'Use Proxy');
 end;
 
@@ -382,7 +382,7 @@ begin
   inherited;
 
   FHandler := TD2XParserHandlerTester.Create;
-  FD2XProcessor := TD2XProcessor.CreateHandler(FlagToRef(fActive), FHandler, True);
+  FD2XProcessor := TD2XProcessor.CreateHandler(fFlag.FlagRef, FHandler, True);
 end;
 
 procedure TestTD2XParserHandlerProcessor.TearDown;

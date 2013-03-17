@@ -355,15 +355,15 @@ var
 begin
   lFlag := TD2XBoolFlag.Create;
   try
-    lFRef := FlagToRef(lFlag);
+    lFRef := lFlag.FlagRef;
     fFact.SetTimestampFlag(lFRef);
 
-    ID2XFlag(lFlag).Flag := False;
+    lFlag.SetFlag(False);
     lFile := fFact.LogFileOrExtn('File.Extn');
     CheckEqualsString('File.Extn', lFile.Description, 'Log File not Timestamped');
     DisposeOf(lFile);
 
-    ID2XFlag(lFlag).Flag := True;
+    lFlag.SetFlag(True);
     lFile := fFact.LogFileOrExtn('File.Extn');
     CheckEqualsString('File-Timestamp.Extn', lFile.Description, 'Log File Timestamped');
 

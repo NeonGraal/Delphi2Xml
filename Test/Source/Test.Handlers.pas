@@ -17,7 +17,6 @@ type
   TParserTestCase = class(TLoggerTestCase)
   protected
     fParser: TD2XDefinesParser;
-    fActive: ID2XFlag;
     fFlag: TD2XBoolFlag;
   public
     procedure SetUp; override;
@@ -111,12 +110,10 @@ begin
   fParser := TD2XDefinesParser.Create;
   fFlag := TD2XBoolFlag.Create;
   fFlag.SetFlag(True);
-  fActive := fFlag;
 end;
 
 procedure TParserTestCase.TearDown;
 begin
-  fActive := nil;
   FreeAndNil(fFlag);
   FreeAndNil(fParser);
 
