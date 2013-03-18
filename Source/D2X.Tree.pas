@@ -311,14 +311,14 @@ end;
 
 procedure TD2XTreeWriter.WriteAttribute(pNode: TD2XTreeNode; pW: TTextWriter);
 begin
-  pW.Write(' @');
+  pW.Write('@');
   pW.Write(pNode.fTag);
   if pNode.fText > '' then
   begin
     pW.Write(':');
     pW.Write(pNode.fText);
   end;
-  pW.WriteLine(';');
+  pW.Write(';');
 end;
 
 procedure TD2XTreeWriter.WriteDoc(pNode: TD2XTreeDoc; pW: TTextWriter);
@@ -334,11 +334,17 @@ begin
     pW.Write(pNode.fTag);
     if pNode.HasChildren or pNode.HasAttributes then
     begin
-      pW.WriteLine('<');
+      pW.Write('<');
+      if HasOption(pNode, toAutoIndent) then
+        pW.WriteLine;
       ForeachAttribute(pNode,
           procedure(pAttr: TD2XTreeNode)
         begin
+          if HasOption(pNode, toAutoIndent) then
+            pW.Write(' ');
           WriteAttribute(pAttr, pW);
+          if HasOption(pNode, toAutoIndent) then
+            pW.WriteLine;
         end);
       ForeachChild(pNode,
         procedure(pChild: TD2XTreeNode)
@@ -352,7 +358,10 @@ begin
             while not lR.EndOfStream do
             begin
               lS := lR.ReadLine;
-              pW.WriteLine(' ' + lS);
+              if HasOption(pNode, toAutoIndent) then
+                pW.WriteLine(' ' + lS)
+              else
+                PW.Write(lS);
             end;
           finally
             FreeAndNil(lR);
@@ -364,13 +373,17 @@ begin
     begin
       pW.Write(':');
       pW.Write(pNode.fText);
-      pW.WriteLine(';');
+      pW.Write(';');
+      if HasOption(pNode, toAutoIndent) then
+        pW.WriteLine;
     end;
   end
   else
   begin
     pW.Write(pNode.fText);
-    pW.WriteLine(';');
+    pW.Write(';');
+    if HasOption(pNode, toAutoIndent) then
+      pW.WriteLine;
   end;
 end;
 

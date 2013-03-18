@@ -55,6 +55,8 @@ type
     procedure TestGetStream;
     procedure TestGetIndentedStream;
     procedure TestAddChild;
+    procedure TestAddOptions;
+    procedure TestRemoveOptions;
   end;
 
   { TestTD2XTreeNode }
@@ -162,7 +164,7 @@ begin
   ReturnValue := FD2XTreeElement.AddChild(pTag);
 
   CheckStream('$Child', 'Child Node', ReturnValue.Stream);
-  CheckStream('$Test< $Child >', 'Simple Node', FD2XTreeElement.Stream);
+  CheckStream('$Test<$Child>', 'Simple Node', FD2XTreeElement.Stream);
 end;
 
 procedure TestTD2XTreeElement.TestAddChildren;
@@ -178,7 +180,7 @@ begin
   ReturnValue := FD2XTreeElement.AddChild(pTag);
   CheckStream('$Child2', 'Child2 Node', ReturnValue.Stream);
 
-  CheckStream('$Test< $Child1 $Child2 >', 'Simple Node', FD2XTreeElement.Stream);
+  CheckStream('$Test<$Child1$Child2>', 'Simple Node', FD2XTreeElement.Stream);
 end;
 
 procedure TestTD2XTreeElement.TestGetStream;
@@ -198,7 +200,7 @@ begin
 
   FD2XTreeElement.AddAttribute(pTag);
 
-  CheckStream('$Test< @Attr; >', 'Simple Node', FD2XTreeElement.Stream);
+  CheckStream('$Test<@Attr;>', 'Simple Node', FD2XTreeElement.Stream);
 end;
 
 procedure TestTD2XTreeElement.TestAddAttributes;
@@ -214,7 +216,7 @@ begin
   ReturnValue := FD2XTreeElement.AddAttribute(pTag);
   ReturnValue.Text := 'Value2';
 
-  CheckStream('$Test< @Attr1:Value1; @Attr2:Value2; >', 'Simple Node', FD2XTreeElement.Stream);
+  CheckStream('$Test<@Attr1:Value1;@Attr2:Value2;>', 'Simple Node', FD2XTreeElement.Stream);
 end;
 
 procedure TestTD2XTreeElement.TestHasAttributes;
@@ -313,6 +315,20 @@ begin
   CheckStream('$Child', 'Simple Doc', FD2XTreeDoc.Stream);
 end;
 
+procedure TestTD2XTreeDoc.TestAddOptions;
+var
+  ReturnValue: TStringStream;
+  lNode: TD2XTreeNode;
+begin
+  lNode := FD2XTreeDoc.AddChild('Test1');
+  lNode.AddChild('Test2');
+  FD2XTreeDoc.AddOptions([toAutoIndent]);
+
+  ReturnValue := FD2XTreeDoc.Stream;
+
+  CheckStream('$Test1< $Test2 >', 'Indented', ReturnValue);
+end;
+
 procedure TestTD2XTreeDoc.TestGetIndentedStream;
 var
   ReturnValue: TStringStream;
@@ -334,6 +350,21 @@ begin
   ReturnValue := FD2XTreeDoc.Stream;
 
   CheckStream(';', 'Simple Doc', ReturnValue);
+end;
+
+procedure TestTD2XTreeDoc.TestRemoveOptions;
+var
+  ReturnValue: TStringStream;
+  lNode: TD2XTreeNode;
+begin
+  lNode := FD2XTreeDoc.AddChild('Test1');
+  lNode.AddChild('Test2');
+  FD2XTreeDoc.AddOptions([toAutoIndent]);
+  FD2XTreeDoc.RemoveOptions([toAutoIndent]);
+
+  ReturnValue := FD2XTreeDoc.Stream;
+
+  CheckStream('$Test1<$Test2>', 'Plain', ReturnValue);
 end;
 
 initialization
