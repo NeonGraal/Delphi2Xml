@@ -5,7 +5,6 @@ interface
 uses
   System.Classes,
   System.Generics.Collections,
-  System.Rtti,
   System.SysUtils;
 
 type
@@ -57,7 +56,6 @@ type
 
   end;
 
-  TD2XCheckRef = reference to function: Boolean;
   TD2XStringRef = reference to function: string;
   TD2XStringListRef = reference to function: TStringList;
   TD2XStringCheckRef = reference to function(pStr: string): Boolean;
@@ -78,6 +76,7 @@ implementation
 
 uses
   System.RegularExpressions,
+  System.Rtti,
   System.StrUtils,
   System.TypInfo;
 

@@ -3,14 +3,11 @@ unit D2X.Processor;
 interface
 
 uses
-  CastaliaPasLexTypes,
   D2X.Flag,
   D2X.Global,
-  D2X.Param,
   D2X.Parser,
   D2X.Handler,
-  D2X.IO,
-  System.Generics.Collections;
+  D2X.IO;
 
 type
   TD2XProcessor = class(TD2XLogger)
@@ -71,7 +68,7 @@ type
 implementation
 
 uses
-
+  D2X.Param,
   System.Classes,
   System.SysUtils;
 

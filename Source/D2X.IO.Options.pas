@@ -9,8 +9,7 @@ uses
   D2X.Param,
   D2X.Params,
   System.Classes,
-  System.Diagnostics,
-  System.SysUtils;
+  System.Diagnostics;
 
 type
   TD2XFileOptions = class(TD2XInterfaced, ID2XIOFactory)
@@ -60,6 +59,7 @@ implementation
 uses
   D2X.IO.Actual,
   System.StrUtils,
+  System.SysUtils,
   Winapi.Windows;
 
 procedure SplitDirExtn(pStr: string; out pDir, pExtn: string);

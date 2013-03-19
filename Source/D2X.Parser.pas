@@ -373,7 +373,6 @@ implementation
 
 uses
   D2X.Global,
-  System.Math,
   System.RegularExpressions,
   System.SysUtils;
 

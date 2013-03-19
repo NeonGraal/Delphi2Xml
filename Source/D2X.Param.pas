@@ -3,11 +3,10 @@ unit D2X.Param;
 interface
 
 uses
+  D2X.Global,
   System.Classes,
   System.Generics.Collections,
-  System.SysUtils,
-  D2X.Flag,
-  D2X.Global;
+  System.SysUtils;
 
 type
   EInvalidParam = class(Exception);

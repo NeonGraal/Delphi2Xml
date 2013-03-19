@@ -3,7 +3,6 @@ unit D2X.Handler;
 interface
 
 uses
-  CastaliaPasLexTypes,
   D2X.Flag,
   D2X.Global,
   D2X.IO,

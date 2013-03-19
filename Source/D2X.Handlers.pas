@@ -7,7 +7,6 @@ uses
   CastaliaPasLexTypes,
   D2X.Flag,
   D2X.Global,
-  D2X.Param,
   D2X.Parser,
   D2X.Handler,
   D2X.IO,
@@ -251,9 +250,7 @@ type
 implementation
 
 uses
-
-  System.SysUtils,
-  Xml.XMLIntf;
+  System.SysUtils;
 
 function PairToStr(pPair: TStrIntPair): string;
 begin

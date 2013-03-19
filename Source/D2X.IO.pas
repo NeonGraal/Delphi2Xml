@@ -4,7 +4,6 @@ interface
 
 uses
   D2X.Flag,
-  D2X.Global,
   D2X.Param,
   System.Classes,
   System.Diagnostics,
@@ -66,6 +65,9 @@ function FileReaderRef(pFile: ID2XIOFile): TStreamReaderRef;
 function FileWriterRef(pFile: ID2XIOFile): TStreamWriterRef;
 
 implementation
+
+uses
+  D2X.Global;
 
 procedure DisposeOf(var pIO: ID2XIO); overload;
 var

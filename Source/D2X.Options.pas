@@ -3,9 +3,7 @@ unit D2X.Options;
 interface
 
 uses
-  CastaliaPasLexTypes,
   D2X.Global,
-  D2X.Handlers,
   D2X.Param,
   D2X.Params,
   D2X.Parser,
@@ -91,9 +89,9 @@ type
 implementation
 
 uses
-  D2X.Flag,
+  CastaliaPasLexTypes,
+  D2X.Handlers,
   D2X.IO.Options,
-
   D2X.Tree.Json,
   D2X.Tree.Xml,
   System.StrUtils;
