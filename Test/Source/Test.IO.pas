@@ -412,7 +412,7 @@ var
   lInput: string;
   lExtn: string;
 begin
-  if Assigned(fTimestampFlag) and fTimestampFlag()then
+  if Assigned(fTimestampFlag) and fTimestampFlag() then
   begin
     lExtn := ExtractFileExt(pFileOrExtn);
     Result := TTestFile.Create(ChangeFileExt(pFileOrExtn, '-Timestamp' + lExtn), True,

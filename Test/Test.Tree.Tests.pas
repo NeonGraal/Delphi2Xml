@@ -21,8 +21,8 @@ type
   published
     procedure TestCreate;
     procedure TestGetStream;
-    procedure TestAddChild;
-    procedure TestAddAttribute;
+    procedure TestChild;
+    procedure TestAttribute;
     procedure TestHasChildren;
     procedure TestHasAttributes;
     procedure TestTrimChildren;
@@ -36,10 +36,13 @@ type
   published
     procedure TestGetStream;
     procedure TestText;
-    procedure TestAddChild;
-    procedure TestAddChildren;
-    procedure TestAddAttribute;
-    procedure TestAddAttributes;
+    procedure TestChild;
+    procedure TestChildren;
+    procedure TestTextChildren;
+    procedure TestAttribute;
+    procedure TestAttributes;
+    procedure TestTextAttributes;
+    procedure TestTextAttributesChildren;
     procedure TestHasChildren;
     procedure TestHasAttributes;
     procedure TestTrimChildren;
@@ -54,7 +57,7 @@ type
   published
     procedure TestGetStream;
     procedure TestGetIndentedStream;
-    procedure TestAddChild;
+    procedure TestChild;
     procedure TestAddOptions;
     procedure TestRemoveOptions;
   end;
@@ -68,7 +71,7 @@ begin
   FD2XTreeNode := TD2XTreeNodeTester.Create;
 end;
 
-procedure TestTD2XTreeNode.TestAddChild;
+procedure TestTD2XTreeNode.TestChild;
 var
   ReturnValue: TD2XTreeNode;
   pTag: String;
@@ -99,7 +102,7 @@ begin
   FreeAndNil(FD2XTreeNode);
 end;
 
-procedure TestTD2XTreeNode.TestAddAttribute;
+procedure TestTD2XTreeNode.TestAttribute;
 var
   ReturnValue: TD2XTreeNode;
   pTag: String;
@@ -154,33 +157,21 @@ begin
   FD2XTreeElement := fDoc.AddChild('Test') as TD2XTreeElement;
 end;
 
-procedure TestTD2XTreeElement.TestAddChild;
+procedure TestTD2XTreeElement.TestChild;
 var
   ReturnValue: TD2XTreeNode;
-  pTag: String;
 begin
-  pTag := 'Child';
-
-  ReturnValue := FD2XTreeElement.AddChild(pTag);
+  ReturnValue := PrepareChild('', FD2XTreeElement);
 
   CheckStream('$Child', 'Child Node', ReturnValue.Stream);
-  CheckStream('$Test<$Child>', 'Simple Node', FD2XTreeElement.Stream);
+  CheckStream('$Test<$Child>', 'Child', FD2XTreeElement.Stream);
 end;
 
-procedure TestTD2XTreeElement.TestAddChildren;
-var
-  ReturnValue: TD2XTreeNode;
-  pTag: String;
+procedure TestTD2XTreeElement.TestChildren;
 begin
-  pTag := 'Child1';
-  ReturnValue := FD2XTreeElement.AddChild(pTag);
-  CheckStream('$Child1', 'Child1 Node', ReturnValue.Stream);
+  PrepareChildren(FD2XTreeElement);
 
-  pTag := 'Child2';
-  ReturnValue := FD2XTreeElement.AddChild(pTag);
-  CheckStream('$Child2', 'Child2 Node', ReturnValue.Stream);
-
-  CheckStream('$Test<$Child1$Child2>', 'Simple Node', FD2XTreeElement.Stream);
+  CheckStream('$Test<$Child1$Child2>', 'Children', FD2XTreeElement.Stream);
 end;
 
 procedure TestTD2XTreeElement.TestGetStream;
@@ -192,31 +183,18 @@ begin
   CheckStream('$Test', 'Simple Node', ReturnValue);
 end;
 
-procedure TestTD2XTreeElement.TestAddAttribute;
-var
-  pTag: String;
+procedure TestTD2XTreeElement.TestAttribute;
 begin
-  pTag := 'Attr';
+  PrepareAttribute('', FD2XTreeElement);
 
-  FD2XTreeElement.AddAttribute(pTag);
-
-  CheckStream('$Test<@Attr;>', 'Simple Node', FD2XTreeElement.Stream);
+  CheckStream('$Test<@Attr:Value;>', 'Attribute', FD2XTreeElement.Stream);
 end;
 
-procedure TestTD2XTreeElement.TestAddAttributes;
-var
-  ReturnValue: TD2XTreeNode;
-  pTag: String;
+procedure TestTD2XTreeElement.TestAttributes;
 begin
-  pTag := 'Attr1';
-  ReturnValue := FD2XTreeElement.AddAttribute(pTag);
-  ReturnValue.Text := 'Value1';
+  PrepareAttributes(FD2XTreeElement);
 
-  pTag := 'Attr2';
-  ReturnValue := FD2XTreeElement.AddAttribute(pTag);
-  ReturnValue.Text := 'Value2';
-
-  CheckStream('$Test<@Attr1:Value1;@Attr2:Value2;>', 'Simple Node', FD2XTreeElement.Stream);
+  CheckStream('$Test<@Attr1:Value1;@Attr2:Value2;>', 'Attributes', FD2XTreeElement.Stream);
 end;
 
 procedure TestTD2XTreeElement.TestHasAttributes;
@@ -252,13 +230,37 @@ begin
 end;
 
 procedure TestTD2XTreeElement.TestText;
-var
-  ReturnValue: TStringStream;
 begin
-  FD2XTreeElement.Text := 'Value';
-  ReturnValue := FD2XTreeElement.Stream;
+  PrepareText(FD2XTreeElement);
 
-  CheckStream('$Test:Value;', 'Simple Node', ReturnValue);
+  CheckStream('$Test:Value;', 'Text', FD2XTreeElement.Stream);
+end;
+
+procedure TestTD2XTreeElement.TestTextAttributes;
+begin
+  PrepareText(FD2XTreeElement);
+  PrepareAttributes(FD2XTreeElement);
+
+  CheckStream('$Test<@Attr1:Value1;@Attr2:Value2;:Value;>', 'Text Attributes',
+    FD2XTreeElement.Stream);
+end;
+
+procedure TestTD2XTreeElement.TestTextAttributesChildren;
+begin
+  PrepareText(FD2XTreeElement);
+  PrepareAttributes(FD2XTreeElement);
+  PrepareChildren(FD2XTreeElement);
+
+  CheckStream('$Test<@Attr1:Value1;@Attr2:Value2;$Child1$Child2:Value;>',
+    'Text Attributes Children', FD2XTreeElement.Stream);
+end;
+
+procedure TestTD2XTreeElement.TestTextChildren;
+begin
+  PrepareText(FD2XTreeElement);
+  PrepareChildren(FD2XTreeElement);
+
+  CheckStream('$Test<$Child1$Child2:Value;>', 'Text Children', FD2XTreeElement.Stream);
 end;
 
 procedure TestTD2XTreeElement.TestTrimChildren;
@@ -302,7 +304,7 @@ begin
   FreeAndNil(FD2XTreeDoc);
 end;
 
-procedure TestTD2XTreeDoc.TestAddChild;
+procedure TestTD2XTreeDoc.TestChild;
 var
   ReturnValue: TD2XTreeNode;
   pTag: String;
@@ -349,7 +351,7 @@ var
 begin
   ReturnValue := FD2XTreeDoc.Stream;
 
-  CheckStream(';', 'Simple Doc', ReturnValue);
+  CheckStream('', 'Simple Doc', ReturnValue);
 end;
 
 procedure TestTD2XTreeDoc.TestRemoveOptions;

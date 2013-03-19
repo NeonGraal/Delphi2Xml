@@ -22,11 +22,15 @@ type
   published
     procedure TestGetJson;
     procedure TestText;
-    procedure TestAddChild;
-    procedure TestAddChildren;
-    procedure TestAddAttribute;
-    procedure TestAddAttributes;
-    procedure TestHasChildNodes;
+    procedure TestChild;
+    procedure TestChildren;
+    procedure TestTextChildren;
+    procedure TestAttribute;
+    procedure TestAttributes;
+    procedure TestTextAttributes;
+    procedure TestTextAttributesChildren;
+    procedure TestHasChildren;
+    procedure TestHasAttributes;
     procedure TestTrimChildren;
   end;
 
@@ -52,33 +56,35 @@ begin
   FD2JsonElement := fDoc.AddChild('Test') as TD2XTreeElement;
 end;
 
-procedure TestTD2JsonElement.TestAddChild;
-var
-  ReturnValue: TD2XTreeNode;
-  pTag: String;
+procedure TestTD2JsonElement.TestAttribute;
 begin
-  pTag := 'Child';
+  PrepareAttribute('', FD2JsonElement);
 
-  ReturnValue := FD2JsonElement.AddChild(pTag);
-
-  CheckStream('Child:""', 'Child Node', ReturnValue.Stream);
-  CheckStream('Test:{Child:""}', 'Simple Node', FD2JsonElement.Stream);
+  CheckStream('Test:{_Attr:"Value"}', 'Simple Node', FD2JsonElement.Stream);
 end;
 
-procedure TestTD2JsonElement.TestAddChildren;
+procedure TestTD2JsonElement.TestAttributes;
+begin
+  PrepareAttributes(FD2JsonElement);
+
+  CheckStream('Test:{_Attr1:"Value1",_Attr2:"Value2"}', 'Simple Node', FD2JsonElement.Stream);
+end;
+
+procedure TestTD2JsonElement.TestChild;
 var
   ReturnValue: TD2XTreeNode;
-  pTag: String;
 begin
-  pTag := 'Child1';
-  ReturnValue := FD2JsonElement.AddChild(pTag);
-  CheckStream('Child1:""', 'Child1 Node', ReturnValue.Stream);
+  ReturnValue := PrepareChild('', FD2JsonElement);
 
-  pTag := 'Child2';
-  ReturnValue := FD2JsonElement.AddChild(pTag);
-  CheckStream('Child2:""', 'Child2 Node', ReturnValue.Stream);
+  CheckStream('Child:{}', 'Child Node', ReturnValue.Stream);
+  CheckStream('Test:{Child:{}}', 'Simple Node', FD2JsonElement.Stream);
+end;
 
-  CheckStream('Test:{Child1:"",Child2:""}', 'Simple Node', FD2JsonElement.Stream);
+procedure TestTD2JsonElement.TestChildren;
+begin
+  PrepareChildren(FD2JsonElement);
+
+  CheckStream('Test:{Child1:{},Child2:{}}', 'Simple Node', FD2JsonElement.Stream);
 end;
 
 procedure TestTD2JsonElement.TestGetJson;
@@ -87,37 +93,26 @@ var
 begin
   ReturnValue := FD2JsonElement.Stream;
 
-  CheckStream('Test:""', 'Simple Node', ReturnValue);
+  CheckStream('Test:{}', 'Simple Node', ReturnValue);
 end;
 
-procedure TestTD2JsonElement.TestAddAttribute;
+procedure TestTD2JsonElement.TestHasAttributes;
 var
-  pTag: String;
+  ReturnValue: Boolean;
 begin
-  pTag := 'Attr';
+  ReturnValue := FD2JsonElement.HasAttributes;
+  CheckFalse(ReturnValue, 'No attribute Nodes');
 
-  FD2JsonElement.AddAttribute(pTag);
+  FD2JsonElement.AddAttribute('Attr1');
+  ReturnValue := FD2JsonElement.HasAttributes;
+  Check(ReturnValue, 'Has attribute Node');
 
-  CheckStream('Test:{_Attr:""}', 'Simple Node', FD2JsonElement.Stream);
+  FD2JsonElement.AddAttribute('Attr2');
+  ReturnValue := FD2JsonElement.HasAttributes;
+  Check(ReturnValue, 'Has attribute Nodes');
 end;
 
-procedure TestTD2JsonElement.TestAddAttributes;
-var
-  ReturnValue: TD2XTreeNode;
-  pTag: String;
-begin
-  pTag := 'Attr1';
-  ReturnValue := FD2JsonElement.AddAttribute(pTag);
-  ReturnValue.Text := 'Value1';
-
-  pTag := 'Attr2';
-  ReturnValue := FD2JsonElement.AddAttribute(pTag);
-  ReturnValue.Text := 'Value2';
-
-  CheckStream('Test:{_Attr1:"Value1",_Attr2:"Value2"}', 'Simple Node', FD2JsonElement.Stream);
-end;
-
-procedure TestTD2JsonElement.TestHasChildNodes;
+procedure TestTD2JsonElement.TestHasChildren;
 var
   ReturnValue: Boolean;
 begin
@@ -134,13 +129,36 @@ begin
 end;
 
 procedure TestTD2JsonElement.TestText;
-var
-  ReturnValue: TStringStream;
 begin
-  FD2JsonElement.Text := 'Value';
-  ReturnValue := FD2JsonElement.Stream;
+  PrepareText(FD2JsonElement);
 
-  CheckStream('Test:"Value"', 'Simple Node', ReturnValue);
+  CheckStream('Test:"Value"', 'Simple Node', FD2JsonElement.Stream);
+end;
+
+procedure TestTD2JsonElement.TestTextAttributes;
+begin
+  PrepareText(FD2JsonElement);
+  PrepareAttributes(FD2JsonElement);
+
+  CheckStream('Test:{_Attr1:"Value1",_Attr2:"Value2",_:"Value"}', 'Simple Node', FD2JsonElement.Stream);
+end;
+
+procedure TestTD2JsonElement.TestTextAttributesChildren;
+begin
+  PrepareText(FD2JsonElement);
+  PrepareAttributes(FD2JsonElement);
+  PrepareChildren(FD2JsonElement);
+
+  CheckStream('Test:{_Attr1:"Value1",_Attr2:"Value2",Child1:{},Child2:{},_:"Value"}',
+    'Text Attributes Children', FD2JsonElement.Stream);
+end;
+
+procedure TestTD2JsonElement.TestTextChildren;
+begin
+  PrepareText(FD2JsonElement);
+  PrepareChildren(FD2JsonElement);
+
+  CheckStream('Test:{Child1:{},Child2:{},_:"Value"}', 'Text Children', FD2JsonElement.Stream);
 end;
 
 procedure TestTD2JsonElement.TestTrimChildren;
@@ -193,8 +211,8 @@ begin
 
   ReturnValue := FD2JsonDoc.AddChild(pTag);
 
-  CheckStream('Child:""', 'Child Node', ReturnValue.Stream);
-  CheckStream('Child:""', 'Simple Doc', FD2JsonDoc.Stream);
+  CheckStream('Child:{}', 'Child Node', ReturnValue.Stream);
+  CheckStream('Child:{}', 'Simple Doc', FD2JsonDoc.Stream);
 end;
 
 procedure TestTD2JsonDoc.TestGetIndentedJson;

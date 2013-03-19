@@ -55,7 +55,7 @@ D2X_SubDir:{
           , Block:{
               CompoundStatement:{
                 _lastToken:"end"
-              , StatementList:""
+              , StatementList:{}
               }
             }
           }

@@ -4,14 +4,32 @@ interface
 
 uses
   D2X.Tree,
+  System.Generics.Collections,
   System.Classes;
 
 type
+  TProcRef = reference to procedure;
+
   TD2XJsonWriter = class(TD2XTreeWriter)
+  private
+    fSeps: TStack<string>;
+
+    procedure WS(pNode: TD2XTreeElement);
+
   protected
-    procedure WriteAttribute(pNode: TD2XTreeNode; pW: TTextWriter); override;
-    procedure WriteElement(pNode: TD2XTreeElement; pW: TTextWriter); override;
-    //    procedure WriteDoc(pNode: TD2XTreeDoc; pW: TTextWriter); override;
+    procedure WriteAttribute(pNode: TD2XTreeElement; pAttr: TD2XTreeNode); override;
+
+    procedure WriteHead(pNode: TD2XTreeElement); override;
+    procedure WriteElHead(pNode: TD2XTreeElement); override;
+    procedure WriteChildLine(pNode: TD2XTreeElement; pLine: string; pFirst: Boolean); override;
+    procedure WriteElText(pNode: TD2XTreeElement); override;
+    procedure WriteElFoot(pNode: TD2XTreeElement); override;
+    procedure WriteText(pNode: TD2XTreeElement); override;
+    procedure WriteRawText(pNode: TD2XTreeElement); override;
+
+  public
+    constructor Create(pStream: TStringStream); override;
+    destructor Destroy; override;
 
   end;
 
@@ -22,111 +40,113 @@ uses
 
 { TD2XJsonWriter }
 
-procedure TD2XJsonWriter.WriteAttribute(pNode: TD2XTreeNode; pW: TTextWriter);
+constructor TD2XJsonWriter.Create(pStream: TStringStream);
 begin
-  pW.Write('_');
-  pW.Write(pNode.LocalName);
-  pW.Write(':"');
-  //  pW.Write(JsonEscape(pNode.Text));
-  pW.Write(pNode.Text);
-  pW.Write('"');
+  inherited;
+
+  fSeps := TStack<string>.Create;
 end;
 
-type
-  TProcRef = reference to procedure;
-
-procedure TD2XJsonWriter.WriteElement(pNode: TD2XTreeElement; pW: TTextWriter);
-var
-  lSep: string;
-  lWS: TProcRef;
-
+destructor TD2XJsonWriter.Destroy;
 begin
-  if pNode.LocalName > '' then
-  begin
-    pW.Write(pNode.LocalName);
-    pW.Write(':');
-    if pNode.HasChildren or pNode.HasAttributes then
-    begin
-      pW.Write('{');
-      lWS := procedure
-        begin
-          if HasOption(pNode, toAutoIndent) then
-            pW.WriteLine;
-          pW.Write(lSep);
-          if HasOption(pNode, toAutoIndent) then
-            lSep := ', '
-          else
-            lSep := ',';
-        end;
-      if HasOption(pNode, toAutoIndent) then
-        lSep := '  '
-      else
-        lSep := '';
-      ForeachAttribute(pNode,
-          procedure(pAttr: TD2XTreeNode)
-        begin
-          lWS;
-          WriteAttribute(pAttr, pW);
-        end);
+  FreeAndNil(fSeps);
 
-      if pNode.Text > '' then
-      begin
-        lWS;
-        pW.Write('_:"');
-        pW.Write(pNode.Text);
-        pW.Write('"');
-      end;
-      if HasOption(pNode, toAutoIndent) then
-      begin
-        //        pW.WriteLine;
-        ForeachChild(pNode,
-          procedure(pChild: TD2XTreeNode)
-          var
-            lR: TStreamReader;
-            lL, lS: string;
-          begin
-            lWS;
-            try
-              lR := TStreamReader.Create(pChild.GetStream);
-              lR.BaseStream.Seek(0, soBeginning);
-              lS := '';
-              while not lR.EndOfStream do
-              begin
-                if HasOption(pNode, toAutoIndent) and (lS > '') then
-                  pW.WriteLine;
-                lL := lR.ReadLine;
-                pW.Write(lS);
-                pW.Write(lL);
-                lS := '  ';
-              end;
-            finally
-              FreeAndNil(lR);
-            end;
-          end);
-      end
-      else
-        ForeachChild(pNode,
-          procedure(pChild: TD2XTreeNode)
-          begin
-            lWS;
-            pW.Write(pChild.GetStream.DataString);
-          end);
-      if HasOption(pNode, toAutoIndent) then
-        pW.WriteLine;
-      pW.Write('}');
-      lWS := nil;
-    end
-    else
-    begin
-      pW.Write('"');
-      pW.Write(pNode.Text);
-      pW.Write('"');
-    end;
-    //    if HasOption(pNode, toAutoIndent) then
-    //      pW.WriteLine;
+  inherited;
+end;
+
+procedure TD2XJsonWriter.WriteAttribute(pNode: TD2XTreeElement; pAttr: TD2XTreeNode);
+begin
+  WS(pNode);
+  fW.Write('_');
+  fW.Write(pAttr.LocalName);
+  fW.Write(':"');
+  //  fW.Write(JsonEscape(pNode.Text));
+  fW.Write(pAttr.Text);
+  fW.Write('"');
+end;
+
+procedure TD2XJsonWriter.WriteChildLine(pNode: TD2XTreeElement; pLine: string;
+  pFirst: Boolean);
+begin
+  if pFirst then
+    WS(pNode)
+  else
+  begin
+    if HasOption(pNode, toAutoIndent) then
+      fW.WriteLine;
+    fW.Write('  ');
+  end;
+  fW.Write(pLine);
+end;
+
+procedure TD2XJsonWriter.WriteElFoot(pNode: TD2XTreeElement);
+begin
+  if HasOption(pNode, toAutoIndent) then
+    fW.WriteLine;
+  fSeps.Pop;
+  fW.Write('}');
+end;
+
+procedure TD2XJsonWriter.WriteElHead(pNode: TD2XTreeElement);
+begin
+  fW.Write(pNode.LocalName);
+  fW.Write(':{');
+  if HasOption(pNode, toAutoIndent) then
+    fSeps.Push('  ')
+  else
+    fSeps.Push('');
+  WriteAttributes(pNode);
+end;
+
+procedure TD2XJsonWriter.WriteElText(pNode: TD2XTreeElement);
+begin
+  WS(pNode);
+  fW.Write('_:"');
+  fW.Write(pNode.Text);
+  fW.Write('"');
+end;
+
+procedure TD2XJsonWriter.WriteHead(pNode: TD2XTreeElement);
+begin
+  fW.Write(pNode.LocalName);
+  fW.Write(':{}');
+end;
+
+procedure TD2XJsonWriter.WriteRawText(pNode: TD2XTreeElement);
+begin
+  fW.Write(pNode.Text);
+end;
+
+procedure TD2XJsonWriter.WriteText(pNode: TD2XTreeElement);
+begin
+  if pNode.HasAttributes then
+  begin
+    WriteElHead(pNode);
+    WriteElText(pNode);
+    WriteElFoot(pNode);
   end
   else
-    pW.Write(pNode.Text);
+  begin
+    fW.Write(pNode.LocalName);
+    fW.Write(':"');
+    fW.Write(pNode.Text);
+    fW.Write('"');
+  end;
+end;
+
+procedure TD2XJsonWriter.WS(pNode: TD2XTreeElement);
+var
+  lSep: string;
+begin
+  lSep := fSeps.Pop;
+  if HasOption(pNode, toAutoIndent) then
+  begin
+    fW.WriteLine;
+    fSeps.Push(', ');
+  end
+  else
+    fSeps.Push(',');
+  fW.Write(lSep);
 end;
 
 end.

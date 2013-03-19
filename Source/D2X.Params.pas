@@ -154,9 +154,6 @@ type
 
     function FormatFlagString(pFlag: Boolean; pVal: String): String;
 
-    function GetFlag: Boolean;
-    procedure SetFlag(pVal: Boolean);
-
   public
     property FlagValue: Boolean read fFlag write fFlag;
     property FlagRef: TD2XFlagRef read GetFlagRef;
@@ -196,8 +193,6 @@ type
     procedure ProcessDefines(pDefs: String; pFunc: TDefineProc);
     procedure LoadDefines(pName: String; pFunc: TDefineProc);
 
-    function GetFlag: Boolean;
-    procedure SetFlag(pVal: Boolean);
     function GetFlagRef: TD2XFlagRef;
 
   public
@@ -380,11 +375,6 @@ begin
       Result := '-';
 end;
 
-function TD2XFlaggedStringParam.GetFlag: Boolean;
-begin
-  Result := fFlag;
-end;
-
 function TD2XFlaggedStringParam.GetFormatted(pDefault: Boolean): String;
 begin
   if pDefault then
@@ -408,11 +398,6 @@ begin
   inherited;
 
   fFlag := fFlagDefault;
-end;
-
-procedure TD2XFlaggedStringParam.SetFlag(pVal: Boolean);
-begin
-  fFlag := pVal;
 end;
 
 function TD2XFlaggedStringParam.UseConverter: TD2XSingleParam<String>.TspConverter;
@@ -486,11 +471,6 @@ begin
   FreeAndNil(fDefines);
 
   inherited;
-end;
-
-function TD2XDefinesParam.GetFlag: Boolean;
-begin
-  Result := fValue;
 end;
 
 function TD2XDefinesParam.GetFlagRef: TD2XFlagRef;
@@ -623,11 +603,6 @@ begin
   inherited;
 
   fDefines.Clear;
-end;
-
-procedure TD2XDefinesParam.SetFlag(pVal: Boolean);
-begin
-  SetValue(pVal);
 end;
 
 function TD2XDefinesParam.UseConverter: TD2XSingleParam<Boolean>.TspConverter;

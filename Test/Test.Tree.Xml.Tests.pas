@@ -21,11 +21,15 @@ type
   published
     procedure TestGetXml;
     procedure TestText;
-    procedure TestAddChild;
-    procedure TestAddChildren;
-    procedure TestAddAttribute;
-    procedure TestAddAttributes;
-    procedure TestHasChildNodes;
+    procedure TestChild;
+    procedure TestChildren;
+    procedure TestTextChildren;
+    procedure TestAttribute;
+    procedure TestAttributes;
+    procedure TestTextAttributes;
+    procedure TestTextAttributesChildren;
+    procedure TestHasChildren;
+    procedure TestHasAttributes;
     procedure TestTrimChildren;
   end;
 
@@ -51,31 +55,33 @@ begin
   FD2XmlElement := fDoc.AddChild('Test') as TD2XTreeElement;
 end;
 
-procedure TestTD2XmlElement.TestAddChild;
+procedure TestTD2XmlElement.TestAttribute;
+begin
+  PrepareAttribute('', FD2XmlElement);
+
+  CheckDoc('<Test Attr="Value" />', 'Simple Node', FD2XmlElement.Stream);
+end;
+
+procedure TestTD2XmlElement.TestAttributes;
+begin
+  PrepareAttributes(FD2XmlElement);
+
+  CheckDoc('<Test Attr1="Value1" Attr2="Value2" />', 'Simple Node', FD2XmlElement.Stream);
+end;
+
+procedure TestTD2XmlElement.TestChild;
 var
   ReturnValue: TD2XTreeNode;
-  pTag: String;
 begin
-  pTag := 'Child';
-
-  ReturnValue := FD2XmlElement.AddChild(pTag);
+  ReturnValue := PrepareChild('', FD2XmlElement);
 
   CheckStream('<Child />', 'Child Node', ReturnValue.Stream);
   CheckDoc('<Test><Child /></Test>', 'Simple Node', FD2XmlElement.Stream);
 end;
 
-procedure TestTD2XmlElement.TestAddChildren;
-var
-  ReturnValue: TD2XTreeNode;
-  pTag: String;
+procedure TestTD2XmlElement.TestChildren;
 begin
-  pTag := 'Child1';
-  ReturnValue := FD2XmlElement.AddChild(pTag);
-  CheckStream('<Child1 />', 'Child1 Node', ReturnValue.Stream);
-
-  pTag := 'Child2';
-  ReturnValue := FD2XmlElement.AddChild(pTag);
-  CheckStream('<Child2 />', 'Child2 Node', ReturnValue.Stream);
+  PrepareChildren(FD2XmlElement);
 
   CheckDoc('<Test><Child1 /><Child2 /></Test>', 'Simple Node', FD2XmlElement.Stream);
 end;
@@ -89,34 +95,23 @@ begin
   CheckDoc('<Test />', 'Simple Node', ReturnValue);
 end;
 
-procedure TestTD2XmlElement.TestAddAttribute;
+procedure TestTD2XmlElement.TestHasAttributes;
 var
-  pTag: String;
+  ReturnValue: Boolean;
 begin
-  pTag := 'Attr';
+  ReturnValue := FD2XmlElement.HasAttributes;
+  CheckFalse(ReturnValue, 'No attribute Nodes');
 
-  FD2XmlElement.AddAttribute(pTag);
+  FD2XmlElement.AddAttribute('Attr1');
+  ReturnValue := FD2XmlElement.HasAttributes;
+  Check(ReturnValue, 'Has attribute Node');
 
-  CheckDoc('<Test Attr="" />', 'Simple Node', FD2XmlElement.Stream);
+  FD2XmlElement.AddAttribute('Attr2');
+  ReturnValue := FD2XmlElement.HasAttributes;
+  Check(ReturnValue, 'Has attribute Nodes');
 end;
 
-procedure TestTD2XmlElement.TestAddAttributes;
-var
-  ReturnValue: TD2XTreeNode;
-  pTag: String;
-begin
-  pTag := 'Attr1';
-  ReturnValue := FD2XmlElement.AddAttribute(pTag);
-  ReturnValue.Text := 'Value1';
-
-  pTag := 'Attr2';
-  ReturnValue := FD2XmlElement.AddAttribute(pTag);
-  ReturnValue.Text := 'Value2';
-
-  CheckDoc('<Test Attr1="Value1" Attr2="Value2" />', 'Simple Node', FD2XmlElement.Stream);
-end;
-
-procedure TestTD2XmlElement.TestHasChildNodes;
+procedure TestTD2XmlElement.TestHasChildren;
 var
   ReturnValue: Boolean;
 begin
@@ -133,13 +128,37 @@ begin
 end;
 
 procedure TestTD2XmlElement.TestText;
-var
-  ReturnValue: TStringStream;
 begin
-  FD2XmlElement.Text := 'Value';
-  ReturnValue := FD2XmlElement.Stream;
+  PrepareText(FD2XmlElement);
 
-  CheckDoc('<Test>Value</Test>', 'Simple Node', ReturnValue);
+  CheckDoc('<Test>Value</Test>', 'Simple Node', FD2XmlElement.Stream);
+end;
+
+procedure TestTD2XmlElement.TestTextAttributes;
+begin
+  PrepareText(FD2XmlElement);
+  PrepareAttributes(FD2XmlElement);
+
+  CheckDoc('<Test Attr1="Value1" Attr2="Value2">Value</Test>', 'Text Attributes',
+    FD2XmlElement.Stream);
+end;
+
+procedure TestTD2XmlElement.TestTextAttributesChildren;
+begin
+  PrepareText(FD2XmlElement);
+  PrepareAttributes(FD2XmlElement);
+  PrepareChildren(FD2XmlElement);
+
+  CheckDoc('<Test Attr1="Value1" Attr2="Value2"><Child1 /><Child2 />Value</Test>',
+    'Text Attributes Children', FD2XmlElement.Stream);
+end;
+
+procedure TestTD2XmlElement.TestTextChildren;
+begin
+  PrepareText(FD2XmlElement);
+  PrepareChildren(FD2XmlElement);
+
+  CheckDoc('<Test><Child1 /><Child2 />Value</Test>', 'Text Children', FD2XmlElement.Stream);
 end;
 
 procedure TestTD2XmlElement.TestTrimChildren;

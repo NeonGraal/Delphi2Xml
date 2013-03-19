@@ -9,9 +9,17 @@ uses
 type
   TD2XXmlWriter = class(TD2XTreeWriter)
   protected
-    procedure WriteAttribute(pNode: TD2XTreeNode; pW: TTextWriter); override;
-    procedure WriteElement(pNode: TD2XTreeElement; pW: TTextWriter); override;
-    procedure WriteDoc(pNode: TD2XTreeDoc; pW: TTextWriter); override;
+    procedure WriteAttribute(pNode: TD2XTreeElement; pAttr: TD2XTreeNode); override;
+    procedure WriteDoc(pNode: TD2XTreeDoc); override;
+
+    procedure WriteHead(pNode: TD2XTreeElement); override;
+    procedure WriteElHead(pNode: TD2XTreeElement); override;
+    procedure WriteChildLine(pNode: TD2XTreeElement; pLine: string; pFirst: Boolean); override;
+    procedure WriteElText(pNode: TD2XTreeElement); override;
+    procedure WriteElFoot(pNode: TD2XTreeElement); override;
+    procedure WriteText(pNode: TD2XTreeElement); override;
+    procedure WriteAttrHead(pNode: TD2XTreeElement); override;
+    procedure WriteRawText(pNode: TD2XTreeElement); override;
 
   end;
 
@@ -23,80 +31,85 @@ uses
 
 { TD2XXmlWriter }
 
-procedure TD2XXmlWriter.WriteAttribute(pNode: TD2XTreeNode; pW: TTextWriter);
+procedure TD2XXmlWriter.WriteAttrHead(pNode: TD2XTreeElement);
 begin
-  pW.Write(' ');
-  pW.Write(pNode.LocalName);
-  pW.Write('="');
-  pW.Write(XmlEscape(pNode.Text));
-  pW.Write('"');
+  fW.Write('<');
+  fW.Write(pNode.LocalName);
+  WriteAttributes(pNode);
+  fW.Write(' />');
+  if HasOption(pNode, toAutoIndent) then
+    fW.WriteLine;
 end;
 
-procedure TD2XXmlWriter.WriteDoc(pNode: TD2XTreeDoc; pW: TTextWriter);
+procedure TD2XXmlWriter.WriteAttribute(pNode: TD2XTreeElement; pAttr: TD2XTreeNode);
 begin
-  pW.WriteLine('<?xml version="1.0"?>');
+  fW.Write(' ');
+  fW.Write(pAttr.LocalName);
+  fW.Write('="');
+  fW.Write(XmlEscape(pAttr.Text));
+  fW.Write('"');
+end;
+
+procedure TD2XXmlWriter.WriteChildLine(pNode: TD2XTreeElement; pLine: string; pFirst: Boolean);
+begin
+  if HasOption(pNode, toAutoIndent) then
+    fW.WriteLine('  ' + pLine)
+  else
+    fW.Write(pLine);
+end;
+
+procedure TD2XXmlWriter.WriteDoc(pNode: TD2XTreeDoc);
+begin
+  fW.WriteLine('<?xml version="1.0"?>');
   inherited;
 end;
 
-procedure TD2XXmlWriter.WriteElement(pNode: TD2XTreeElement; pW: TTextWriter);
+procedure TD2XXmlWriter.WriteElFoot(pNode: TD2XTreeElement);
 begin
-  if pNode.LocalName > '' then
-  begin
-    pW.Write('<');
-    pW.Write(pNode.LocalName);
-    ForeachAttribute(pNode,
-        procedure(pAttr: TD2XTreeNode)
-      begin
-        WriteAttribute(pAttr, pW);
-      end);
+  fW.Write('</');
+  fW.Write(pNode.LocalName);
+  fW.Write('>');
+  if HasOption(pNode, toAutoIndent) then
+    fW.WriteLine;
+end;
 
-    if pNode.HasChildren or (pNode.Text > '') then
-    begin
-      pW.Write('>');
-      if pNode.Text > '' then
-        pW.Write(pNode.Text)
-      else
-      begin
-        if HasOption(pNode, toAutoIndent) then
-        begin
-          pW.WriteLine;
-          ForeachChild(pNode,
-            procedure(pChild: TD2XTreeNode)
-            var
-              lR: TStreamReader;
-              lS: string;
-            begin
-              try
-                lR := TStreamReader.Create(pChild.GetStream);
-                lR.BaseStream.Seek(0, soBeginning);
-                while not lR.EndOfStream do
-                begin
-                  lS := lR.ReadLine;
-                  pW.WriteLine('  ' + lS);
-                end;
-              finally
-                FreeAndNil(lR);
-              end;
-            end);
-        end
-        else
-          ForeachChild(pNode,
-            procedure(pChild: TD2XTreeNode)
-            begin
-              pW.Write(pChild.GetStream.DataString);
-            end);
-      end;
-      pW.Write('</');
-      pW.Write(pNode.LocalName);
-      pW.Write('>');
-    end
-    else
-      pW.Write(' />');
-    if HasOption(pNode, toAutoIndent) then
-      pW.WriteLine;
-  end
-  else
-    pW.Write(pNode.Text);
+procedure TD2XXmlWriter.WriteElHead(pNode: TD2XTreeElement);
+begin
+  fW.Write('<');
+  fW.Write(pNode.LocalName);
+  WriteAttributes(pNode);
+  fW.Write('>');
+  if HasOption(pNode, toAutoIndent) then
+    fW.WriteLine;
+end;
+
+procedure TD2XXmlWriter.WriteElText(pNode: TD2XTreeElement);
+begin
+  fW.Write(pNode.Text)
+end;
+
+procedure TD2XXmlWriter.WriteHead(pNode: TD2XTreeElement);
+begin
+  fW.Write('<');
+  fW.Write(pNode.LocalName);
+  fW.Write(' />');
+  if HasOption(pNode, toAutoIndent) then
+    fW.WriteLine;
+end;
+
+procedure TD2XXmlWriter.WriteRawText(pNode: TD2XTreeElement);
+begin
+  fW.Write(pNode.Text);
+end;
+
+procedure TD2XXmlWriter.WriteText(pNode: TD2XTreeElement);
+begin
+  fW.Write('<');
+  fW.Write(pNode.LocalName);
+  WriteAttributes(pNode);
+  fW.Write('>');
+  fW.Write(pNode.Text);
+  WriteElFoot(pNode);
 end;
 
 end.

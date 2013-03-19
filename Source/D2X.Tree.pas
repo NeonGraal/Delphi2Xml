@@ -13,7 +13,7 @@ type
   TD2XTreeOption = (toNone, toAutoIndent);
   TD2XTreeOptions = set of TD2XTreeOption;
 
-  TD2XTreeWriter = class;
+  TD2XTreeWriterClass = class of TD2XTreeWriter;
 
   TD2XTreeDoc = class;
 
@@ -23,12 +23,14 @@ type
     fStream: TStringStream;
 
   protected
-    fWriter: TD2XTreeWriter;
+    fWriter: TD2XTreeWriterClass;
     fTag: string;
     fText: string;
     fDoc: TD2XTreeDoc;
 
     constructor CreateTag(pTag: string; pParent: TD2XTreeNode); virtual;
+
+    function GetStream: TStringStream;
 
   public
     constructor Create;
@@ -39,9 +41,6 @@ type
     function HasChildren: Boolean; virtual;
     function HasAttributes: Boolean; virtual;
     procedure TrimChildren(pElement: string); virtual;
-
-    //  protected
-    function GetStream: TStringStream;
 
   public
     property ParentNode: TD2XTreeNode read fParent;
@@ -71,15 +70,12 @@ type
     procedure TrimChildren(pElement: string); override;
   end;
 
-  TD2XTreeWriterClass = class of TD2XTreeWriter;
-
   TD2XTreeDoc = class(TD2XTreeElement)
   private
     fOptions: TD2XTreeOptions;
 
   public
     constructor CreateDoc(pWriter: TD2XTreeWriterClass);
-    destructor Destroy; override;
 
     function AddChild(pTag: string): TD2XTreeNode; override;
 
@@ -93,17 +89,31 @@ type
     TEachProc = reference to procedure(pChild: TD2XTreeNode);
 
   protected
-    procedure WriteAttribute(pNode: TD2XTreeNode; pW: TTextWriter); virtual;
-    procedure WriteElement(pNode: TD2XTreeElement; pW: TTextWriter); virtual;
-    procedure WriteDoc(pNode: TD2XTreeDoc; pW: TTextWriter); virtual;
+    fW: TTextWriter;
 
-    procedure ForeachChild(pNode: TD2XTreeElement; pEach: TEachProc);
-    procedure ForeachAttribute(pNode: TD2XTreeElement; pEach: TEachProc);
+    procedure WriteAttribute(pNode: TD2XTreeElement; pAttr: TD2XTreeNode); virtual;
+    procedure WriteElement(pNode: TD2XTreeElement);
+    procedure WriteDoc(pNode: TD2XTreeDoc); virtual;
+
+    procedure WriteHead(pNode: TD2XTreeElement); virtual;
+    procedure WriteElHead(pNode: TD2XTreeElement); virtual;
+    procedure WriteChildLine(pNode: TD2XTreeElement; pLine: string; pFirst: Boolean); virtual;
+    procedure WriteElText(pNode: TD2XTreeElement); virtual;
+    procedure WriteElFoot(pNode: TD2XTreeElement); virtual;
+    procedure WriteAttrHead(pNode: TD2XTreeElement); virtual;
+    procedure WriteText(pNode: TD2XTreeElement); virtual;
+    procedure WriteRawText(pNode: TD2XTreeElement); virtual;
+
+    procedure WriteChildren(pNode: TD2XTreeElement);
+    procedure WriteAttributes(pNode: TD2XTreeElement);
 
     function HasOption(pNode: TD2XTreeElement; pOption: TD2XTreeOption): Boolean;
 
   public
-    procedure WriteNode(pNode: TD2XTreeNode; pW: TTextWriter);
+    constructor Create(pStream: TStringStream); virtual;
+    destructor Destroy; override;
+
+    procedure WriteNode(pNode: TD2XTreeNode);
   end;
 
 function NewTreeDocument: TD2XTreeDoc;
@@ -137,14 +147,7 @@ constructor TD2XTreeDoc.CreateDoc(pWriter: TD2XTreeWriterClass);
 begin
   CreateTag('');
   fDoc := Self;
-  fWriter := pWriter.Create;
-end;
-
-destructor TD2XTreeDoc.Destroy;
-begin
-  FreeAndNil(fWriter);
-
-  inherited;
+  fWriter := pWriter;
 end;
 
 procedure TD2XTreeDoc.RemoveOptions(pOptions: TD2XTreeOptions);
@@ -190,16 +193,19 @@ end;
 
 function TD2XTreeNode.GetStream: TStringStream;
 var
-  lW: TStreamWriter;
+  lW: TD2XTreeWriter;
 begin
   if not Assigned(fStream) then
-    try
-      fStream := TStringStream.Create;
-      lW := TStreamWriter.Create(fStream);
-      fWriter.WriteNode(Self, lW);
-    finally
-      FreeAndNil(lW);
-    end;
+    if Assigned(fWriter) then
+      try
+        fStream := TStringStream.Create;
+        lW := fWriter.Create(fStream);
+        lW.WriteNode(Self);
+      finally
+        FreeAndNil(lW);
+      end
+    else
+      raise ETreeWriter.Create('Writer not set');
 
   fStream.Position := 0;
   Result := fStream;
@@ -285,23 +291,16 @@ end;
 
 { TD2XTreeWriter }
 
-procedure TD2XTreeWriter.ForeachAttribute(pNode: TD2XTreeElement; pEach: TEachProc);
-var
-  lNode: TD2XTreeNode;
+constructor TD2XTreeWriter.Create(pStream: TStringStream);
 begin
-  if pNode.HasAttributes then
-    for lNode in pNode.fAtttributes do
-      pEach(lNode);
-  FreeAndNil(pNode.fAtttributes);
+  fW := TStreamWriter.Create(pStream);
 end;
 
-procedure TD2XTreeWriter.ForeachChild(pNode: TD2XTreeElement; pEach: TEachProc);
-var
-  lNode: TD2XTreeNode;
+destructor TD2XTreeWriter.Destroy;
 begin
-  for lNode in pNode.fChildren do
-    pEach(lNode);
-  FreeAndNil(pNode.fChildren);
+  FreeAndNil(fW);
+
+  inherited;
 end;
 
 function TD2XTreeWriter.HasOption(pNode: TD2XTreeElement; pOption: TD2XTreeOption): Boolean;
@@ -309,93 +308,163 @@ begin
   Result := pOption in pNode.fDoc.fOptions;
 end;
 
-procedure TD2XTreeWriter.WriteAttribute(pNode: TD2XTreeNode; pW: TTextWriter);
+procedure TD2XTreeWriter.WriteAttrHead(pNode: TD2XTreeElement);
 begin
-  pW.Write('@');
-  pW.Write(pNode.fTag);
-  if pNode.fText > '' then
+  WriteElHead(pNode);
+  WriteElFoot(pNode);
+end;
+
+procedure TD2XTreeWriter.WriteAttribute(pNode: TD2XTreeElement; pAttr: TD2XTreeNode);
+begin
+  if HasOption(pNode, toAutoIndent) then
+    fW.Write(' ');
+  fW.Write('@');
+  fW.Write(pAttr.fTag);
+  if pAttr.fText > '' then
   begin
-    pW.Write(':');
-    pW.Write(pNode.fText);
+    fW.Write(':');
+    fW.Write(pAttr.fText);
   end;
-  pW.Write(';');
+  fW.Write(';');
+  if HasOption(pNode, toAutoIndent) then
+    fW.WriteLine;
 end;
 
-procedure TD2XTreeWriter.WriteDoc(pNode: TD2XTreeDoc; pW: TTextWriter);
+procedure TD2XTreeWriter.WriteAttributes(pNode: TD2XTreeElement);
+var
+  lAttr: TD2XTreeNode;
 begin
-  WriteElement(pNode, pW);
+  if pNode.HasAttributes then
+    for lAttr in pNode.fAtttributes do
+      WriteAttribute(pNode, lAttr);
+  FreeAndNil(pNode.fAtttributes);
 end;
 
-procedure TD2XTreeWriter.WriteElement(pNode: TD2XTreeElement; pW: TTextWriter);
+procedure TD2XTreeWriter.WriteChildLine(pNode: TD2XTreeElement; pLine: string;
+  pFirst: Boolean);
+begin
+  if HasOption(pNode, toAutoIndent) then
+    fW.WriteLine(' ' + pLine)
+  else
+    fW.Write(pLine);
+end;
+
+procedure TD2XTreeWriter.WriteChildren(pNode: TD2XTreeElement);
+var
+  lNode: TD2XTreeNode;
+  lR: TStreamReader;
+  lS: string;
+  lFirst: Boolean;
+begin
+  for lNode in pNode.fChildren do
+    try
+      lR := TStreamReader.Create(lNode.GetStream);
+      lR.BaseStream.Seek(0, soBeginning);
+      lFirst := True;
+      while not lR.EndOfStream do
+      begin
+        lS := lR.ReadLine;
+        WriteChildLine(pNode, lS, lFirst);
+        lFirst := False;
+      end;
+    finally
+      FreeAndNil(lR);
+    end;
+  FreeAndNil(pNode.fChildren);
+end;
+
+procedure TD2XTreeWriter.WriteDoc(pNode: TD2XTreeDoc);
+begin
+  WriteElement(pNode);
+end;
+
+procedure TD2XTreeWriter.WriteElement(pNode: TD2XTreeElement);
 begin
   if pNode.fTag > '' then
   begin
-    pW.Write('$');
-    pW.Write(pNode.fTag);
-    if pNode.HasChildren or pNode.HasAttributes then
-    begin
-      pW.Write('<');
-      if HasOption(pNode, toAutoIndent) then
-        pW.WriteLine;
-      ForeachAttribute(pNode,
-          procedure(pAttr: TD2XTreeNode)
-        begin
-          if HasOption(pNode, toAutoIndent) then
-            pW.Write(' ');
-          WriteAttribute(pAttr, pW);
-          if HasOption(pNode, toAutoIndent) then
-            pW.WriteLine;
-        end);
-      ForeachChild(pNode,
-        procedure(pChild: TD2XTreeNode)
-        var
-          lR: TStreamReader;
-          lS: string;
-        begin
-          try
-            lR := TStreamReader.Create(pChild.GetStream);
-            lR.BaseStream.Seek(0, soBeginning);
-            while not lR.EndOfStream do
-            begin
-              lS := lR.ReadLine;
-              if HasOption(pNode, toAutoIndent) then
-                pW.WriteLine(' ' + lS)
-              else
-                PW.Write(lS);
-            end;
-          finally
-            FreeAndNil(lR);
-          end;
-        end);
-      pW.Write('>');
-    end;
-    if pNode.fText > '' then
-    begin
-      pW.Write(':');
-      pW.Write(pNode.fText);
-      pW.Write(';');
-      if HasOption(pNode, toAutoIndent) then
-        pW.WriteLine;
-    end;
+    if pNode.HasChildren then
+      try
+        WriteElHead(pNode);
+        WriteChildren(pNode);
+        if pNode.fText > '' then
+          WriteElText(pNode);
+      finally
+        WriteElFoot(pNode);
+      end
+    else
+      if pNode.fText > '' then
+        WriteText(pNode)
+      else
+        if pNode.HasAttributes then
+          WriteAttrHead(pNode)
+        else
+          WriteHead(pNode);
+  end
+  else
+    WriteRawText(pNode);
+end;
+
+procedure TD2XTreeWriter.WriteElFoot(pNode: TD2XTreeElement);
+begin
+  fW.Write('>');
+end;
+
+procedure TD2XTreeWriter.WriteElHead(pNode: TD2XTreeElement);
+begin
+  fW.Write('$');
+  fW.Write(pNode.fTag);
+  fW.Write('<');
+  if HasOption(pNode, toAutoIndent) then
+    fW.WriteLine;
+  WriteAttributes(pNode);
+end;
+
+procedure TD2XTreeWriter.WriteElText(pNode: TD2XTreeElement);
+begin
+  fW.Write(':');
+  fW.Write(pNode.fText);
+  fW.Write(';');
+  if HasOption(pNode, toAutoIndent) then
+    fW.WriteLine;
+end;
+
+procedure TD2XTreeWriter.WriteHead(pNode: TD2XTreeElement);
+begin
+  fW.Write('$');
+  fW.Write(pNode.fTag);
+end;
+
+procedure TD2XTreeWriter.WriteNode(pNode: TD2XTreeNode);
+begin
+  if pNode is TD2XTreeDoc then
+    WriteDoc(TD2XTreeDoc(pNode))
+  else
+    if pNode is TD2XTreeElement then
+      WriteElement(TD2XTreeElement(pNode))
+    else
+      raise ETreeWriter.Create('Invalid class in WriteNode: ' + pNode.ClassName);
+end;
+
+procedure TD2XTreeWriter.WriteRawText(pNode: TD2XTreeElement);
+begin
+  fW.Write(pNode.fText);
+  if HasOption(pNode, toAutoIndent) then
+    fW.WriteLine;
+end;
+
+procedure TD2XTreeWriter.WriteText(pNode: TD2XTreeElement);
+begin
+  if pNode.HasAttributes then
+  begin
+    WriteElHead(pNode);
+    WriteElText(pNode);
+    WriteElFoot(pNode);
   end
   else
   begin
-    pW.Write(pNode.fText);
-    pW.Write(';');
-    if HasOption(pNode, toAutoIndent) then
-      pW.WriteLine;
+    WriteHead(pNode);
+    WriteElText(pNode);
   end;
-end;
-
-procedure TD2XTreeWriter.WriteNode(pNode: TD2XTreeNode; pW: TTextWriter);
-begin
-  if pNode is TD2XTreeDoc then
-    WriteDoc(TD2XTreeDoc(pNode), pW)
-  else
-    if pNode is TD2XTreeElement then
-      WriteElement(TD2XTreeElement(pNode), pW)
-    else
-      raise ETreeWriter.Create('Invalid class in WriteNode: ' + pNode.ClassName);
 end;
 
 end.

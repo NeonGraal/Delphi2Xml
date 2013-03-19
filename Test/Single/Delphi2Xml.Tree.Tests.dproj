@@ -97,6 +97,10 @@
 			<DCCReference Include="..\..\FastMM4\FastMM4Messages.pas"/>
 			<DCCReference Include="..\Test.Tree.Tests.pas"/>
 			<DCCReference Include="..\..\Source\D2X.Tree.pas"/>
+			<DCCReference Include="..\Test.Tree.Xml.Tests.pas"/>
+			<DCCReference Include="..\..\Source\D2X.Tree.Xml.pas"/>
+			<DCCReference Include="..\Test.Tree.Json.Tests.pas"/>
+			<DCCReference Include="..\..\Source\D2X.Tree.Json.pas"/>
 			<None Include="Profiling\Delphi2Xml.Tree.Tests.aqt"/>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>

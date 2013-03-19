@@ -59,7 +59,7 @@ D2X_Param:{
               , Block:{
                   CompoundStatement:{
                     _lastToken:"end"
-                  , StatementList:""
+                  , StatementList:{}
                   }
                 }
               }

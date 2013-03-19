@@ -53,7 +53,7 @@ D2X_Pattern:{
         , Block:{
             CompoundStatement:{
               _lastToken:"end"
-            , StatementList:""
+            , StatementList:{}
             }
           }
         }

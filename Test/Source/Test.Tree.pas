@@ -12,6 +12,12 @@ type
   protected
     procedure CheckStream(pExpected, pLabel: String; pStream: TStringStream);
 
+    procedure PrepareText(pNode: TD2XTreeElement);
+    function PrepareChild(pTag: String; pNode: TD2XTreeElement): TD2XTreeNode;
+    procedure PrepareChildren(pNode: TD2XTreeElement);
+    procedure PrepareAttribute(pTag: String; pNode: TD2XTreeElement);
+    procedure PrepareAttributes(pNode: TD2XTreeElement);
+
   end;
 
   TD2XTreeDocTestCase = class(TD2XTreeTestCase)
@@ -21,15 +27,6 @@ type
   public
     procedure SetUp; override;
     procedure TearDown; override;
-
-  end;
-
-  TD2XTreeElementTestCase = class(TD2XTreeDocTestCase)
-  protected
-    fElem: TD2XTreeElement;
-
-  public
-    procedure SetUp; override;
 
   end;
 
@@ -51,13 +48,34 @@ begin
   CheckEqualsString(pExpected, ReduceString(pStream.DataString), pLabel + ' Stream');
 end;
 
-{ TD2XTreeElementTestCase }
-
-procedure TD2XTreeElementTestCase.SetUp;
+procedure TD2XTreeTestCase.PrepareAttribute(pTag: String; pNode: TD2XTreeElement);
+var
+  lNode: TD2XTreeNode;
 begin
-  inherited;
+  lNode := pNode.AddAttribute('Attr' + pTag);
+  lNode.Text := 'Value' + pTag;
+end;
 
-  fElem := fDoc.AddChild('Elem') as TD2XTreeElement;
+procedure TD2XTreeTestCase.PrepareAttributes(pNode: TD2XTreeElement);
+begin
+  PrepareAttribute('1', pNode);
+  PrepareAttribute('2', pNode);
+end;
+
+function TD2XTreeTestCase.PrepareChild(pTag: String; pNode: TD2XTreeElement): TD2XTreeNode;
+begin
+  Result := pNode.AddChild('Child' + pTag);
+end;
+
+procedure TD2XTreeTestCase.PrepareChildren(pNode: TD2XTreeElement);
+begin
+  PrepareChild('1', pNode);
+  PrepareChild('2', pNode);
+end;
+
+procedure TD2XTreeTestCase.PrepareText(pNode: TD2XTreeElement);
+begin
+  pNode.Text := 'Value';
 end;
 
 { TD2XTreeNodeTester }

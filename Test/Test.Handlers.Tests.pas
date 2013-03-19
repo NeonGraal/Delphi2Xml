@@ -463,7 +463,7 @@ begin
   fHndlr.BeginMethod('Test');
   fHndlr.AddText('Test');
   fHndlr.EndResults(FileWriterRef(fDS));
-  CheckStream('$Test< @parseMode:ParseMode; >:Test;', 'End Results');
+  CheckStream('$Test< @parseMode:ParseMode; :Test; >', 'End Results');
 end;
 
 procedure TestTD2XTreeHandler.TestBeginFile;
@@ -525,7 +525,7 @@ begin
   fHndlr.BeginResults;
   fHndlr.BeginFile('Test', nil);
   fHndlr.EndResults(FileWriterRef(fDS));
-  CheckStream(';', 'End Results');
+  CheckStream('', 'End Results');
 end;
 
 procedure TestTD2XTreeHandler.TestInitParser;
@@ -578,7 +578,7 @@ begin
   fHndlr.TestParserMessage(meNotSupported, 'Test', 1, 2);
 
   fHndlr.EndResults(FileWriterRef(fDS));
-  CheckStream('$Test< @parseMode:ParseMode; $D2X_notSuppMsg< @msgAt:1,2; >:Test; >',
+  CheckStream('$Test< @parseMode:ParseMode; $D2X_notSuppMsg< @msgAt:1,2; :Test; > >',
     'End Results');
 
   fHndlr.BeginResults;
@@ -586,7 +586,7 @@ begin
   fHndlr.BeginMethod('Test');
   fHndlr.TestParserMessage(meError, 'Test', 1, 2);
   fHndlr.EndResults(FileWriterRef(fDS));
-  CheckStream('$Test< @parseMode:ParseMode; $D2X_errorMsg< @msgAt:1,2; >:Test; >',
+  CheckStream('$Test< @parseMode:ParseMode; $D2X_errorMsg< @msgAt:1,2; :Test; > >',
     'End Results');
 end;
 

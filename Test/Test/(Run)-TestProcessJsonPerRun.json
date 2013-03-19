@@ -61,7 +61,7 @@ D2X_Run:{
                 , Block:{
                     CompoundStatement:{
                       _lastToken:"end"
-                    , StatementList:""
+                    , StatementList:{}
                     }
                   }
                 }
