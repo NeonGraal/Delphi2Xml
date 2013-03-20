@@ -6,16 +6,14 @@ implementation
 
 uses
   CastaliaPasLexTypes,
-
-  D2X.Flag,
+  D2X.Global,
   D2X.IO,
   D2X.Param,
-
   D2X.Processor,
   System.SysUtils,
   Test.Global,
+  Test.Flag,
   Test.Handler,
-
   Test.Processor,
   TestFramework;
 

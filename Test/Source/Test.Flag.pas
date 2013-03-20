@@ -1,4 +1,4 @@
-unit D2X.Flag;
+unit Test.Flag;
 
 interface
 
@@ -6,17 +6,17 @@ uses
   D2X.Global;
 
 type
-  TD2XFlagRef = reference to function: Boolean;
-
   TD2XBoolFlag = class(TD2XInterfaced)
   private
     fFlag: Boolean;
 
     function GetFlagRef: TD2XFlagRef;
+
   public
     procedure SetFlag(pVal: Boolean);
 
     property FlagRef: TD2XFlagRef read GetFlagRef;
+
   end;
 
 implementation

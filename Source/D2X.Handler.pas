@@ -3,7 +3,6 @@ unit D2X.Handler;
 interface
 
 uses
-  D2X.Flag,
   D2X.Global,
   D2X.IO,
   D2X.Parser,
@@ -11,11 +10,6 @@ uses
 
 type
   EInvalidHandler = class(Exception);
-
-  ID2XHandler = interface
-    ['{3E71A83A-82B2-42DC-AA5F-F734D77306BE}']
-    function Description: String;
-  end;
 
   ID2XFullProxy = interface
     ['{90414BA6-D237-4893-B3FF-EE8654938F67}']
@@ -33,6 +27,8 @@ type
 
   ID2XFiles = interface
     ['{7FEC9B9F-1502-42F6-BF00-C969B4C6051F}']
+    function Description: String;
+
     procedure BeginFile(pFile: String; pInput: TStreamReaderRef);
     procedure EndFile(pFile: String; pOutput: TStreamWriterRef);
   end;

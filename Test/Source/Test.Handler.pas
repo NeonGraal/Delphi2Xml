@@ -4,14 +4,13 @@ interface
 
 uses
   CastaliaPasLexTypes,
-  D2X.Flag,
   D2X.Global,
   D2X.Handler,
   D2X.IO,
   D2X.Parser;
 
 type
-  TD2XHandlerTester = class(TD2XLogger, ID2XHandler, ID2XProcessing, ID2XFiles, ID2XResults,
+  TD2XHandlerTester = class(TD2XLogger, ID2XProcessing, ID2XFiles, ID2XResults,
     ID2XMethods, ID2XChecks, ID2XTrees)
   public
     CalledEndProcessing, CalledBeginFile, CalledEndFile, CalledBeginResults, CalledEndResults,
@@ -36,11 +35,10 @@ type
 
   end;
 
-  TD2XParserHandlerTester = class(TD2XLogger, ID2XHandler, ID2XParser)
+  TD2XParserHandlerTester = class(TD2XLogger, ID2XParser)
   public
     CalledInitParser: Boolean;
 
-    function Description: String;
     procedure InitParser(pParser: TD2XDefinesParser; pActive: TD2XFlagRef);
   end;
 
@@ -138,11 +136,6 @@ begin
 end;
 
 { TD2XParserHandlerTester }
-
-function TD2XParserHandlerTester.Description: String;
-begin
-  Result := 'Parser Handler Tester';
-end;
 
 procedure TD2XParserHandlerTester.InitParser(pParser: TD2XDefinesParser; pActive: TD2XFlagRef);
 begin

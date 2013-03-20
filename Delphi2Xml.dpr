@@ -25,8 +25,7 @@ uses
   D2X.Tree.Json in 'Source\D2X.Tree.Json.pas',
   D2X.Tree in 'Source\D2X.Tree.pas',
   D2X.Tree.Xml in 'Source\D2X.Tree.Xml.pas',
-  D2X.IO.ErrorLog in 'Source\D2X.IO.ErrorLog.pas',
-  D2X.Flag in 'Source\D2X.Flag.pas';
+  D2X.IO.ErrorLog in 'Source\D2X.IO.ErrorLog.pas';
 
 var
   opts: TD2XRunParam;

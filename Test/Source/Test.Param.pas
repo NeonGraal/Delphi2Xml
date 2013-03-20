@@ -3,7 +3,7 @@ unit Test.Param;
 interface
 
 uses
-  D2X.Flag,
+  D2X.Global,
   D2X.Param,
   Test.Global,
   TestFramework;

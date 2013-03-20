@@ -3,11 +3,10 @@ unit D2X.Params;
 interface
 
 uses
-  System.Classes,
-  D2X.Flag,
   D2X.Global,
   D2X.IO,
-  D2X.Param;
+  D2X.Param,
+  System.Classes;
 
 type
   TD2XFlagsParam = class(TD2XParam)

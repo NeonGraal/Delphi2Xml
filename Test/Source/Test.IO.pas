@@ -3,7 +3,6 @@ unit Test.IO;
 interface
 
 uses
-  D2X.Flag,
   D2X.Global,
   D2X.IO,
   D2X.Param,
@@ -111,6 +110,9 @@ type
 
   end;
 
+function FileReaderRef(pFile: ID2XIOFile): TStreamReaderRef;
+function FileWriterRef(pFile: ID2XIOFile): TStreamWriterRef;
+
 implementation
 
 uses
@@ -118,6 +120,22 @@ uses
   System.StrUtils,
   Test.Constants,
   TestFramework;
+
+function FileReaderRef(pFile: ID2XIOFile): TStreamReaderRef;
+begin
+  Result := function: TStreamReader
+    begin
+      Result := pFile.ReadFrom;
+    end;
+end;
+
+function FileWriterRef(pFile: ID2XIOFile): TStreamWriterRef;
+begin
+  Result := function: TStreamWriter
+    begin
+      Result := pFile.WriteTo;
+    end;
+end;
 
 { TTestFile }
 

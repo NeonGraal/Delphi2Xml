@@ -56,6 +56,8 @@ type
 
   end;
 
+  TD2XFlagRef = reference to function: Boolean;
+
   TD2XStringRef = reference to function: string;
   TD2XStringListRef = reference to function: TStringList;
   TD2XStringCheckRef = reference to function(pStr: string): Boolean;

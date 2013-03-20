@@ -13,8 +13,8 @@ uses
   System.Diagnostics,
   System.SysUtils,
   Test.Constants,
+  Test.Flag,
   Test.IO.Options,
-
   TestFramework,
   Winapi.Windows;
 

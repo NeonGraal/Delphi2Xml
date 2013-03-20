@@ -3,7 +3,6 @@ unit D2X.Processor;
 interface
 
 uses
-  D2X.Flag,
   D2X.Global,
   D2X.Parser,
   D2X.Handler,
@@ -108,8 +107,7 @@ begin
               if lS.Exists then
                 Result := lS.ReadFrom
               else
-                Log('WARNING: %1 file "%2" not found', [(fHandler as ID2XHandler).Description,
-                    lS.Description]);
+                Log('WARNING: %1 file "%2" not found', [lFls.Description, lS.Description]);
           end);
       finally
         DisposeOf(lS);

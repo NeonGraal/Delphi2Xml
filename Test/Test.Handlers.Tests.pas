@@ -6,7 +6,6 @@ implementation
 
 uses
   CastaliaPasLexTypes,
-  D2X.Flag,
   D2X.Global,
   D2X.Handler,
   D2X.Handlers,
@@ -14,13 +13,14 @@ uses
   D2X.Param,
   D2X.Parser,
   D2X.Tree,
-
   System.Classes,
   System.StrUtils,
   System.SysUtils,
   Test.Constants,
+  Test.Flag,
   Test.Global,
   Test.Handlers,
+  Test.IO,
   TestFramework;
 
 type
@@ -80,7 +80,6 @@ type
     procedure SetUp; override;
     procedure TearDown; override;
   published
-    procedure TestDescription;
     procedure TestInitParser;
     procedure TestUseProxy;
     procedure TestEndProcessing;
@@ -103,7 +102,6 @@ type
   published
     procedure TestInvalidCreate;
     procedure TestInitParser;
-    procedure TestDescription;
     procedure TestUseProxy;
     procedure TestOnParserMessage;
   end;
@@ -116,7 +114,6 @@ type
     procedure TearDown; override;
   published
     procedure TestInitParser;
-    procedure TestDescription;
     procedure TestUseProxy;
     procedure TestBeginMethod;
     procedure TestEndMethod;
@@ -180,7 +177,6 @@ type
     procedure SetUp; override;
     procedure TearDown; override;
   published
-    procedure TestDescription;
     procedure TestUseProxy;
     procedure TestInit;
     procedure TestBeginResults;
@@ -671,11 +667,6 @@ begin
   CheckStream('', 'Begin Results');
 end;
 
-procedure TestTD2XWriteDefinesHandler.TestDescription;
-begin
-  CheckEqualsString('Write Defines', fHndlr.Description, 'Description');
-end;
-
 procedure TestTD2XWriteDefinesHandler.TestEndResults;
 begin
   fHndlr.InitParser(fParser, fFlag.FlagRef);
@@ -721,11 +712,6 @@ begin
 
   fHndlr.EndProcessing(FileWriterRef(fDS));
   CheckStream('Test=3', 'Define Used');
-end;
-
-procedure TestTD2XCountDefinesUsedHandler.TestDescription;
-begin
-  CheckEqualsString('Defines Used', fHndlr.Description, 'Description');
 end;
 
 procedure TestTD2XCountDefinesUsedHandler.TestEndProcessing;
@@ -870,11 +856,6 @@ begin
   FreeAndNil(fHndlr);
 
   inherited;
-end;
-
-procedure TestTD2XErrorHandler.TestDescription;
-begin
-  CheckEqualsString('Error Logging', fHndlr.Description, 'Description');
 end;
 
 procedure TestTD2XErrorHandler.TestInitParser;
@@ -1111,11 +1092,6 @@ begin
   fHndlr.BeginMethod('Test');
 
   CheckLog('BEFORE Test @', 'Begin Method');
-end;
-
-procedure TestTD2XLogHandler.TestDescription;
-begin
-  CheckEqualsString('Log', fHndlr.Description, 'Description');
 end;
 
 procedure TestTD2XLogHandler.TestEndMethod;

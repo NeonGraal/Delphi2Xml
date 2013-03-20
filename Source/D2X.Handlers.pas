@@ -5,7 +5,6 @@ interface
 uses
   CastaliaPasLex,
   CastaliaPasLexTypes,
-  D2X.Flag,
   D2X.Global,
   D2X.Parser,
   D2X.Handler,
@@ -45,7 +44,7 @@ type
     Children: Integer;
   end;
 
-  TD2XCountChildrenHandler = class(TD2XParserHandler, ID2XHandler, ID2XFullProxy,
+  TD2XCountChildrenHandler = class(TD2XParserHandler, ID2XFullProxy,
     ID2XProcessing, ID2XFiles, ID2XMethods)
   private
     fCurrent: TMethodCount;
@@ -71,7 +70,7 @@ type
     procedure EndMethod(pMethod: string);
   end;
 
-  TD2XCountFinalDefinesHandler = class(TD2XParserHandler, ID2XHandler, ID2XFullProxy,
+  TD2XCountFinalDefinesHandler = class(TD2XParserHandler, ID2XFullProxy,
     ID2XProcessing, ID2XFiles)
   private
     fDefines: TStrIntDict;
@@ -88,7 +87,7 @@ type
     procedure EndFile(pFile: string; pOutput: TStreamWriterRef);
   end;
 
-  TD2XCountDefinesUsedHandler = class(TD2XParserHandler, ID2XHandler, ID2XProcessing)
+  TD2XCountDefinesUsedHandler = class(TD2XParserHandler, ID2XProcessing)
   private
     fDefinesDict: TStrIntDict;
 
@@ -102,20 +101,16 @@ type
     constructor Create; override;
     destructor Destroy; override;
 
-    function Description: string;
-
     procedure InitParser(pParser: TD2XDefinesParser; pActive: TD2XFlagRef); override;
 
     procedure EndProcessing(pOutput: TStreamWriterRef);
 
   end;
 
-  TD2XErrorHandler = class(TD2XParserHandler, ID2XHandler)
+  TD2XErrorHandler = class(TD2XParserHandler)
   public
     constructor Create; override;
     constructor CreateError(pTyp: TMessageEventType; pLogMessage: TD2XLogMessage);
-
-    function Description: string;
 
     procedure InitParser(pParser: TD2XDefinesParser; pActive: TD2XFlagRef); override;
 
@@ -129,11 +124,9 @@ type
 
   end;
 
-  TD2XLogHandler = class(TD2XParserHandler, ID2XHandler, ID2XMethods)
+  TD2XLogHandler = class(TD2XParserHandler, ID2XMethods)
   public
     procedure InitParser(pParser: TD2XDefinesParser; pActive: TD2XFlagRef); override;
-
-    function Description: string;
 
     procedure BeginMethod(pMethod: string);
     procedure EndMethod(pMethod: string);
@@ -145,7 +138,7 @@ type
 
   end;
 
-  TD2XParserDefinesHandler = class(TD2XParserHandler, ID2XHandler, ID2XFiles)
+  TD2XParserDefinesHandler = class(TD2XParserHandler, ID2XFiles)
   private
     fDefines: TStringList;
     fInitOnce: Boolean;
@@ -163,7 +156,7 @@ type
     procedure EndFile(pFile: string; pOutput: TStreamWriterRef);
   end;
 
-  TD2XHeldDefinesHandler = class(TD2XParserHandler, ID2XHandler, ID2XFiles)
+  TD2XHeldDefinesHandler = class(TD2XParserHandler, ID2XFiles)
   private
     fDefines: TStringList;
 
@@ -176,7 +169,7 @@ type
     procedure EndFile(pFile: string; pOutput: TStreamWriterRef);
   end;
 
-  TD2XSkipHandler = class(TD2XLogger, ID2XHandler, ID2XProcessing, ID2XFiles, ID2XChecks)
+  TD2XSkipHandler = class(TD2XLogger, ID2XProcessing, ID2XFiles, ID2XChecks)
   private
     fSkippedMethods: TStrIntDict;
 
@@ -195,15 +188,13 @@ type
     procedure EndProcessing(pOutput: TStreamWriterRef);
   end;
 
-  TD2XWriteDefinesHandler = class(TD2XParserHandler, ID2XHandler, ID2XResults)
+  TD2XWriteDefinesHandler = class(TD2XParserHandler, ID2XResults)
   public
-    function Description: string;
-
     procedure BeginResults;
     procedure EndResults(pOutput: TStreamWriterRef);
   end;
 
-  TD2XTreeHandler = class(TD2XParserHandler, ID2XHandler, ID2XFullProxy, ID2XResults,
+  TD2XTreeHandler = class(TD2XParserHandler, ID2XFullProxy, ID2XResults,
     ID2XFiles, ID2XMethods, ID2XTrees)
   private
     fHasFiles: Boolean;
@@ -675,11 +666,6 @@ begin
   // Empty
 end;
 
-function TD2XWriteDefinesHandler.Description: string;
-begin
-  Result := 'Write Defines';
-end;
-
 procedure TD2XWriteDefinesHandler.EndResults(pOutput: TStreamWriterRef);
 var
   lSL: TStringList;
@@ -733,11 +719,6 @@ begin
     fDefinesDict[pDef] := lVal + 1
   else
     fDefinesDict.Add(pDef, 1)
-end;
-
-function TD2XCountDefinesUsedHandler.Description: string;
-begin
-  Result := 'Defines Used'
 end;
 
 destructor TD2XCountDefinesUsedHandler.Destroy;
@@ -832,11 +813,6 @@ begin
 
   fTyp := pTyp;
   fLogMessage := pLogMessage;
-end;
-
-function TD2XErrorHandler.Description: string;
-begin
-  Result := 'Error Logging';
 end;
 
 procedure TD2XErrorHandler.InitParser(pParser: TD2XDefinesParser; pActive: TD2XFlagRef);
@@ -947,11 +923,6 @@ begin
     Log('BEFORE %s @ %s', [pMethod, fParser.Lexer.Token])
   else
     Log('BEFORE %s ', [pMethod]);
-end;
-
-function TD2XLogHandler.Description: string;
-begin
-  Result := 'Log';
 end;
 
 procedure TD2XLogHandler.EndMethod(pMethod: string);

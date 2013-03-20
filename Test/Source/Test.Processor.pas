@@ -4,11 +4,12 @@ interface
 
 uses
   CastaliaPasLexTypes,
-  D2X.Flag,
+  D2X.Global,
   D2X.Handler,
   D2X.Param,
   D2X.Parser,
   D2X.Processor,
+  Test.Flag,
   Test.Global;
 
 type

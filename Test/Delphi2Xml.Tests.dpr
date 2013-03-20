@@ -52,7 +52,7 @@ uses
   Test.Tree in 'Source\Test.Tree.pas',
   Test.Tree.Xml in 'Source\Test.Tree.Xml.pas',
   D2X.IO.ErrorLog in '..\Source\D2X.IO.ErrorLog.pas',
-  D2X.Flag in '..\Source\D2X.Flag.pas';
+  Test.Flag in 'Source\Test.Flag.pas';
 
 {$R *.RES}
 

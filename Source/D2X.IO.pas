@@ -3,7 +3,7 @@ unit D2X.IO;
 interface
 
 uses
-  D2X.Flag,
+  D2X.Global,
   D2X.Param,
   System.Classes,
   System.Diagnostics,
@@ -61,13 +61,7 @@ procedure DisposeOf(var pFile: ID2XIOFile); overload;
 procedure DisposeOf(var pDir: ID2XIODir); overload;
 procedure DisposeOf(var pFact: ID2XIOFactory); overload;
 
-function FileReaderRef(pFile: ID2XIOFile): TStreamReaderRef;
-function FileWriterRef(pFile: ID2XIOFile): TStreamWriterRef;
-
 implementation
-
-uses
-  D2X.Global;
 
 procedure DisposeOf(var pIO: ID2XIO); overload;
 var
@@ -115,22 +109,6 @@ begin
     pFact := nil;
     lDS.Free;
   end;
-end;
-
-function FileReaderRef(pFile: ID2XIOFile): TStreamReaderRef;
-begin
-  Result := function: TStreamReader
-    begin
-      Result := pFile.ReadFrom;
-    end;
-end;
-
-function FileWriterRef(pFile: ID2XIOFile): TStreamWriterRef;
-begin
-  Result := function: TStreamWriter
-    begin
-      Result := pFile.WriteTo;
-    end;
 end;
 
 end.

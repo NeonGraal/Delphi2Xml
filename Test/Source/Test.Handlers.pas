@@ -4,14 +4,12 @@ interface
 
 uses
   CastaliaPasLexTypes,
-
-  Test.Global,
-
-  D2X.Flag,
   D2X.Global,
   D2X.Handlers,
   D2X.Parser,
-  D2X.Tree;
+  D2X.Tree,
+  Test.Flag,
+  Test.Global;
 
 type
   TParserTestCase = class(TLoggerTestCase)
