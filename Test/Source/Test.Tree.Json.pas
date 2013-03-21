@@ -50,7 +50,7 @@ procedure TD2JsonDocTestCase.SetUp;
 begin
   inherited;
 
-  fDoc := TD2XTreeDoc.CreateDoc(TD2XJsonWriter);
+  fDoc := TD2XTreeDoc.CreateDoc(JsonTreeWriter);
 end;
 
 procedure TD2JsonDocTestCase.TearDown;

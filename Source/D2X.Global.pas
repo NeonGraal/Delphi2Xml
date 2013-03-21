@@ -59,18 +59,8 @@ type
   TD2XFlagRef = reference to function: Boolean;
 
   TD2XStringRef = reference to function: string;
-  TD2XStringListRef = reference to function: TStringList;
-  TD2XStringCheckRef = reference to function(pStr: string): Boolean;
-  TD2XLogMessage = reference to procedure(pType, pMsg: string; pX, pY: Integer);
-
-  TStrIntPair = TPair<string, Integer>;
-  TStrIntDict = TDictionary<string, Integer>;
-  TPairLogRef = reference to function(pPair: TStrIntPair): string;
-
-procedure OutputStrIntDict(pDict: TStrIntDict; pStream: TStreamWriter; pFunc: TPairLogRef);
 
 function MakeFileName(pStr, pDflt: string): string;
-function TidyFilename(pFilename: string): string;
 
 function ExtractGroup(pName: string): string;
 
@@ -82,26 +72,6 @@ uses
   System.StrUtils,
   System.TypInfo;
 
-procedure OutputStrIntDict(pDict: TStrIntDict; pStream: TStreamWriter; pFunc: TPairLogRef);
-var
-  lP: TStrIntPair;
-begin
-  Assert(Assigned(pStream), 'Need a Stream');
-  Assert(Assigned(pFunc), 'Need a Function');
-  Assert(Assigned(pDict), 'Need a Dictionary');
-  if pDict.Count > 0 then
-    with TStringList.Create do
-      try
-        for lP in pDict do
-          if lP.Value > 0 then
-            Values[lP.Key] := pFunc(lP);
-        Sort;
-        SaveToStream(pStream.BaseStream);
-      finally
-        Free;
-      end;
-end;
-
 function MakeFileName(pStr, pDflt: string): string;
 begin
   if pStr = '' then
@@ -111,12 +81,6 @@ begin
       Result := pStr
     else
       Result := pStr + pDflt;
-end;
-
-function TidyFilename(pFilename: string): string;
-begin
-  Result := ReplaceStr(ReplaceStr(ReplaceStr(ReplaceStr(pFilename, '*', ''), '.', ''), '?',
-      ''), '\', '-');
 end;
 
 var

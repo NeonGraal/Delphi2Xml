@@ -18,6 +18,8 @@ uses
 type
   ED2XOptionsException = class(Exception);
 
+  TD2XStringListRef = reference to function: TStringList;
+
   TD2XOptions = class(TD2XLogger)
   strict private
     fProcs: TObjectList<TD2XProcessor>;
@@ -34,6 +36,7 @@ type
     fParseMode: TD2XSingleParam<TD2XParseMode>;
     fResultPer: TD2XSingleParam<TD2XResultPer>;
     fElapsedMode: TD2XSingleParam<TD2XElapsedMode>;
+    fGroupLen: TD2XSingleParam<Byte>;
 
     procedure SetMinProxy;
     procedure SetFullProxy;
@@ -86,6 +89,8 @@ type
     property Recurse: Boolean read GetRecurse;
   end;
 
+function TidyFilename(pFilename: string): string;
+
 implementation
 
 uses
@@ -95,6 +100,12 @@ uses
   D2X.Tree.Json,
   D2X.Tree.Xml,
   System.StrUtils;
+
+function TidyFilename(pFilename: string): string;
+begin
+  Result := ReplaceStr(ReplaceStr(ReplaceStr(ReplaceStr(pFilename, '*', ''), '.', ''), '?',
+      ''), '\', '-');
+end;
 
 { TD2XOptions }
 
@@ -638,10 +649,10 @@ begin
     'Write Final Defines files into current or given <d/e>', 'Defines,def', False,
     ConvertDirExtn);
 
-  fProcs.Add(TD2XProcessor.CreateHandler(lWriteXml.FlagRef, TD2XTreeHandler.CreateTree(TD2XXmlWriter,
+  fProcs.Add(TD2XProcessor.CreateHandler(lWriteXml.FlagRef, TD2XTreeHandler.CreateTree(XmlTreeWriter,
       fFlags.RefLabel['FinalToken'], lGetParseMode), True)
     .SetResultsOutput(MakeNamedRef(lWriteXml)));
-  fProcs.Add(TD2XProcessor.CreateHandler(lWriteJson.FlagRef, TD2XTreeHandler.CreateTree(TD2XJsonWriter,
+  fProcs.Add(TD2XProcessor.CreateHandler(lWriteJson.FlagRef, TD2XTreeHandler.CreateTree(JsonTreeWriter,
       fFlags.RefLabel['FinalToken'], lGetParseMode), True)
     .SetResultsOutput(MakeNamedRef(lWriteJson)));
   fProcs.Add(TD2XProcessor.CreateClass(lWriteDefines.FlagRef, TD2XWriteDefinesHandler)

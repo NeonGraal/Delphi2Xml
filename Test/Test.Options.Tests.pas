@@ -7,6 +7,7 @@ implementation
 uses
   D2X.Global,
   D2X.IO,
+  D2X.Options,
   D2X.Param,
   System.Classes,
   System.StrUtils,
@@ -23,6 +24,8 @@ uses
 type
   TestTD2XOptionEnums = class(TLoggerTestCase)
   published
+    procedure TestTidyFilename;
+
     procedure TestElapsedModeInvalidCreate;
     procedure TestParseModeInvalidCreate;
     procedure TestResultPerInvalidCreate;
@@ -560,6 +563,18 @@ begin
   finally
     lPrm.Free;
   end;
+end;
+
+procedure TestTD2XOptionEnums.TestTidyFilename;
+begin
+  CheckEqualsString('', TidyFilename(''), 'Blank');
+  CheckEqualsString('A', TidyFilename('A'), 'Simple');
+  CheckEqualsString('A', TidyFilename('A*'), 'Star');
+  CheckEqualsString('A', TidyFilename('A.'), 'Dot');
+  CheckEqualsString('A', TidyFilename('A?'), 'Query');
+  CheckEqualsString('A-B', TidyFilename('A\B'), 'Path');
+  CheckEqualsString('A', TidyFilename('A...'), 'Many');
+  CheckEqualsString('A-B-CD-EF', TidyFilename('A?\*B.\.?C?*?D*\*.E???*F'), 'Complex');
 end;
 
 { TestTD2XOptionsGeneral }
@@ -1578,7 +1593,7 @@ end;
 procedure TestTD2XOptionsParseEnumerated.TestParseOptionMValue;
 begin
   CheckSimple('MUses', 'Parse mode Uses');
-  CheckEqualsString('Uses', fFact.GlobalName, 'GlobalName');
+  CheckEqualsString('Uses', fFact.GlobalName, 'Global name');
 end;
 
 procedure TestTD2XOptionsParseEnumerated.TestParseOptionPValue;

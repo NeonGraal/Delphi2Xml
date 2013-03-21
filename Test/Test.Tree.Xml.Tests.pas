@@ -194,7 +194,7 @@ end;
 
 procedure TestTD2XmlDoc.SetUp;
 begin
-  FD2XmlDoc := TD2XTreeDoc.CreateDoc(TD2XXmlWriter);
+  FD2XmlDoc := TD2XTreeDoc.CreateDoc(XmlTreeWriter);
 end;
 
 procedure TestTD2XmlDoc.TearDown;

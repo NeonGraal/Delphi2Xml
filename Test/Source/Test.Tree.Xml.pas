@@ -65,7 +65,7 @@ procedure TD2XmlDocTestCase.SetUp;
 begin
   inherited;
 
-  fDoc := TD2XTreeDoc.CreateDoc(TD2XXmlWriter);
+  fDoc := TD2XTreeDoc.CreateDoc(XmlTreeWriter);
 end;
 
 procedure TD2XmlDocTestCase.TearDown;

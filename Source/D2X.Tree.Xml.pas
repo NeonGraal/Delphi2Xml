@@ -3,8 +3,14 @@ unit D2X.Tree.Xml;
 interface
 
 uses
-  D2X.Tree,
-  System.Classes;
+  D2X.Tree;
+
+function XmlTreeWriter: TD2XTreeWriterClass;
+
+implementation
+
+uses
+  Data.Cloud.CloudAPI;
 
 type
   TD2XXmlWriter = class(TD2XTreeWriter)
@@ -23,11 +29,10 @@ type
 
   end;
 
-implementation
-
-uses
-  Data.Cloud.CloudAPI,
-  System.SysUtils;
+function XmlTreeWriter: TD2XTreeWriterClass;
+begin
+  Result := TD2XXmlWriter;
+end;
 
 { TD2XXmlWriter }
 

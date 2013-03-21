@@ -11,6 +11,8 @@ uses
 type
   EInvalidParam = class(Exception);
 
+  TD2XStringCheckRef = reference to function(pStr: string): Boolean;
+
   TD2XParam = class(TD2XInterfaced)
   public
     constructor Create(pCode, pLabel, pSample, pDescr: string;

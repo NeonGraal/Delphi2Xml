@@ -48,7 +48,6 @@
 		<Import Condition="'$(Base)'!='' And Exists('CastaliaParser.optset')" Project="CastaliaParser.optset"/>
 		<PropertyGroup Condition="'$(Base)'!=''">
 			<BRCC_Defines>FASTMM;$(BRCC_Defines)</BRCC_Defines>
-			<DCC_OutputDependencies>true</DCC_OutputDependencies>
 			<DCC_OutputXMLDocumentation>true</DCC_OutputXMLDocumentation>
 			<DCC_Define>FASTMM;$(DCC_Define)</DCC_Define>
 			<Manifest_File>None</Manifest_File>
@@ -77,6 +76,10 @@
 			<DCC_RemoteDebug>true</DCC_RemoteDebug>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+			<BCC_SourceDebuggingOn>true</BCC_SourceDebuggingOn>
+			<DCC_DebugDCUs>true</DCC_DebugDCUs>
+			<BCC_DebugLineNumbers>true</BCC_DebugLineNumbers>
+			<ILINK_FullDebugInfo>true</ILINK_FullDebugInfo>
 			<Debugger_RunParams></Debugger_RunParams>
 			<VerInfo_Locale>1033</VerInfo_Locale>
 			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
@@ -117,6 +120,7 @@
 			<DCCReference Include="Source\D2X.IO.ErrorLog.pas"/>
 			<None Include="TODO.txt"/>
 			<None Include="FastMM4Options.inc"/>
+			<None Include="Config\Test.prm"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>
@@ -179,6 +183,7 @@
 				<UnitTesting>
 					<TestProjectName>C:\Dev\Delphi2Xml\Test\Delphi2XmlTests.dproj</TestProjectName>
 				</UnitTesting>
+				<ModelSupport>False</ModelSupport>
 			</BorlandProject>
 			<ProjectFileVersion>12</ProjectFileVersion>
 		</ProjectExtensions>

@@ -39,6 +39,9 @@ type
 
   end;
 
+  TStrIntPair = TPair<string, Integer>;
+  TStrIntDict = TDictionary<string, Integer>;
+
   TMethodCount = record
     Method: string;
     Children: Integer;
@@ -106,6 +109,8 @@ type
     procedure EndProcessing(pOutput: TStreamWriterRef);
 
   end;
+
+  TD2XLogMessage = reference to procedure(pType, pMsg: string; pX, pY: Integer);
 
   TD2XErrorHandler = class(TD2XParserHandler)
   public
@@ -238,10 +243,35 @@ type
     property HasFiles: Boolean read fHasFiles;
   end;
 
+  TPairLogRef = reference to function(pPair: TStrIntPair): string;
+
+procedure OutputStrIntDict(pDict: TStrIntDict; pStream: TStreamWriter; pFunc: TPairLogRef);
+
 implementation
 
 uses
   System.SysUtils;
+
+procedure OutputStrIntDict(pDict: TStrIntDict; pStream: TStreamWriter; pFunc: TPairLogRef);
+var
+  lP: TStrIntPair;
+begin
+  Assert(Assigned(pStream), 'Need a Stream');
+  Assert(Assigned(pFunc), 'Need a Function');
+  Assert(Assigned(pDict), 'Need a Dictionary');
+  if pDict.Count > 0 then
+    with TStringList.Create do
+      try
+        for lP in pDict do
+          if lP.Value > 0 then
+            Values[lP.Key] := pFunc(lP);
+        Sort;
+        SaveToStream(pStream.BaseStream);
+      finally
+        Free;
+      end;
+end;
+
 
 function PairToStr(pPair: TStrIntPair): string;
 begin

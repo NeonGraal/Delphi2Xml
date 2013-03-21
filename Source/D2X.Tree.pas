@@ -85,9 +85,6 @@ type
   end;
 
   TD2XTreeWriter = class
-  protected type
-    TEachProc = reference to procedure(pChild: TD2XTreeNode);
-
   protected
     fW: TTextWriter;
 

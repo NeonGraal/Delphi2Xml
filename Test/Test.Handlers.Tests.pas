@@ -24,6 +24,16 @@ uses
   TestFramework;
 
 type
+  TestHandlerUtils = class(TStringTestCase)
+  private
+    function PairFormat(pPair: TStrIntPair): string;
+  published
+    procedure TestOutputStrIntDictNoStream;
+    procedure TestOutputStrIntDictNoFunc;
+    procedure TestOutputStrIntDictNoDict;
+    procedure TestOutputStrIntDict;
+  end;
+
   TestTD2XParserHandler = class(TParserTestCase)
   strict private
     fHndlr: TTestParserHandler;
@@ -1176,14 +1186,79 @@ begin
   CheckTrue(fHndlr.fParserMessageCalled, 'Parser Message called');
 end;
 
+{ TestHandlerUtils }
+
+function TestHandlerUtils.PairFormat(pPair: TStrIntPair): string;
+begin
+  Result := pPair.Key + ' = ' + IntToStr(pPair.Value);
+end;
+
+procedure TestHandlerUtils.TestOutputStrIntDict;
+var
+  lDict: TStrIntDict;
+begin
+  lDict := TStrIntDict.Create;
+  try
+    OutputStrIntDict(lDict, fDS.WriteTo, PairFormat);
+    CheckStream('', 'No Entries');
+    lDict.Add('Test', 1);
+    OutputStrIntDict(lDict, fDS.WriteTo, PairFormat);
+    CheckStream('Test=Test = 1', 'An Entry');
+  finally
+    lDict.Free;
+  end;
+end;
+
+procedure TestHandlerUtils.TestOutputStrIntDictNoDict;
+begin
+  StartExpectingException(EAssertionFailed);
+  try
+    OutputStrIntDict(nil, fDS.WriteTo, PairFormat);
+  except
+    on E: EAssertionFailed do
+    begin
+      CheckTrue(StartsText('Need a Dictionary', E.Message), 'Exception message');
+      raise;
+    end;
+  end;
+end;
+
+procedure TestHandlerUtils.TestOutputStrIntDictNoFunc;
+begin
+  StartExpectingException(EAssertionFailed);
+  try
+    OutputStrIntDict(nil, fDS.WriteTo, nil);
+  except
+    on E: EAssertionFailed do
+    begin
+      CheckTrue(StartsText('Need a Function', E.Message), 'Exception message');
+      raise;
+    end;
+  end;
+end;
+
+procedure TestHandlerUtils.TestOutputStrIntDictNoStream;
+begin
+  StartExpectingException(EAssertionFailed);
+  try
+    OutputStrIntDict(nil, nil, nil);
+  except
+    on E: EAssertionFailed do
+    begin
+      CheckTrue(StartsText('Need a Stream', E.Message), 'Exception message');
+      raise;
+    end;
+  end;
+end;
+
 initialization
 
 // Register any test cases with the test runner
-RegisterTests('Handlers', [TestTD2XParserHandler.Suite, TestTD2XCountChildrenHandler.Suite,
-  TestTD2XCountFinalDefinesHandler.Suite, TestTD2XCountDefinesUsedHandler.Suite,
-  TestTD2XParserDefinesHandler.Suite, TestTD2XHeldDefinesHandler.Suite,
-  TestTD2XErrorHandler.Suite, TestTD2XLogHandler.Suite, TestTD2XSkipHandler.Suite,
-  TestTD2XWriteDefinesHandler.Suite, TestTD2XTreeHandler.Suite]);
+RegisterTests('Handlers', [TestHandlerUtils.Suite, TestTD2XParserHandler.Suite,
+  TestTD2XCountChildrenHandler.Suite, TestTD2XCountFinalDefinesHandler.Suite,
+  TestTD2XCountDefinesUsedHandler.Suite, TestTD2XParserDefinesHandler.Suite,
+  TestTD2XHeldDefinesHandler.Suite, TestTD2XErrorHandler.Suite, TestTD2XLogHandler.Suite,
+  TestTD2XSkipHandler.Suite, TestTD2XWriteDefinesHandler.Suite, TestTD2XTreeHandler.Suite]);
 
 //InitStringListLoad;
 

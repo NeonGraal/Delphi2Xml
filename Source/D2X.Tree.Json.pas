@@ -3,9 +3,16 @@ unit D2X.Tree.Json;
 interface
 
 uses
-  D2X.Tree,
+  D2X.Tree;
+
+function JsonTreeWriter: TD2XTreeWriterClass;
+
+implementation
+
+uses
+  System.Classes,
   System.Generics.Collections,
-  System.Classes;
+  System.SysUtils;
 
 type
   TProcRef = reference to procedure;
@@ -33,10 +40,10 @@ type
 
   end;
 
-implementation
-
-uses
-  System.SysUtils;
+function JsonTreeWriter: TD2XTreeWriterClass;
+begin
+  Result := TD2XJsonWriter;
+end;
 
 { TD2XJsonWriter }
 

@@ -194,7 +194,7 @@ end;
 
 procedure TestTD2JsonDoc.SetUp;
 begin
-  FD2JsonDoc := TD2XTreeDoc.CreateDoc(TD2XJsonWriter);
+  FD2JsonDoc := TD2XTreeDoc.CreateDoc(JsonTreeWriter);
 end;
 
 procedure TestTD2JsonDoc.TearDown;

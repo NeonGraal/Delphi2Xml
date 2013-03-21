@@ -25,17 +25,9 @@ type
   end;
 
   TestTD2XUtils = class(TStringTestCase)
-  private
-    function PairFormat(pPair: TStrIntPair): string;
   published
     procedure TestReduceString;
     procedure TestMakeFileName;
-    procedure TestTidyFilename;
-
-    procedure TestOutputStrIntDictNoStream;
-    procedure TestOutputStrIntDictNoFunc;
-    procedure TestOutputStrIntDictNoDict;
-    procedure TestOutputStrIntDict;
 
     procedure TestTestStream;
   end;
@@ -570,11 +562,6 @@ end;
 
 { TestTD2XUtils }
 
-function TestTD2XUtils.PairFormat(pPair: TStrIntPair): string;
-begin
-  Result := pPair.Key + ' = ' + IntToStr(pPair.Value);
-end;
-
 procedure TestTD2XUtils.TestMakeFileName;
 begin
   CheckEqualsString('', MakeFileName('', ''), 'Both Blank');
@@ -583,64 +570,6 @@ begin
   CheckEqualsString('F.E', MakeFileName('F.E', ''), 'Extension');
   CheckEqualsString('F.D', MakeFileName('F', '.D'), 'Filename Default');
   CheckEqualsString('F.E', MakeFileName('F.E', '.D'), 'Extension Default');
-end;
-
-procedure TestTD2XUtils.TestOutputStrIntDict;
-var
-  lDict: TStrIntDict;
-begin
-  lDict := TStrIntDict.Create;
-  try
-    OutputStrIntDict(lDict, fDS.WriteTo, PairFormat);
-    CheckStream('', 'No Entries');
-    lDict.Add('Test', 1);
-    OutputStrIntDict(lDict, fDS.WriteTo, PairFormat);
-    CheckStream('Test=Test = 1', 'An Entry');
-  finally
-    lDict.Free;
-  end;
-end;
-
-procedure TestTD2XUtils.TestOutputStrIntDictNoDict;
-begin
-  StartExpectingException(EAssertionFailed);
-  try
-    OutputStrIntDict(nil, fDS.WriteTo, PairFormat);
-  except
-    on E: EAssertionFailed do
-    begin
-      CheckTrue(StartsText('Need a Dictionary', E.Message), 'Exception message');
-      raise;
-    end;
-  end;
-end;
-
-procedure TestTD2XUtils.TestOutputStrIntDictNoFunc;
-begin
-  StartExpectingException(EAssertionFailed);
-  try
-    OutputStrIntDict(nil, fDS.WriteTo, nil);
-  except
-    on E: EAssertionFailed do
-    begin
-      CheckTrue(StartsText('Need a Function', E.Message), 'Exception message');
-      raise;
-    end;
-  end;
-end;
-
-procedure TestTD2XUtils.TestOutputStrIntDictNoStream;
-begin
-  StartExpectingException(EAssertionFailed);
-  try
-    OutputStrIntDict(nil, nil, nil);
-  except
-    on E: EAssertionFailed do
-    begin
-      CheckTrue(StartsText('Need a Stream', E.Message), 'Exception message');
-      raise;
-    end;
-  end;
 end;
 
 procedure TestTD2XUtils.TestReduceString;
@@ -659,18 +588,6 @@ begin
   CheckEqualsString('Test', fDS.Description, 'Test Stream Description');
   CheckTrue(fDS.Exists, 'Test Stream Exists');
   fDS.ReadFrom;
-end;
-
-procedure TestTD2XUtils.TestTidyFilename;
-begin
-  CheckEqualsString('', TidyFilename(''), 'Blank');
-  CheckEqualsString('A', TidyFilename('A'), 'Simple');
-  CheckEqualsString('A', TidyFilename('A*'), 'Star');
-  CheckEqualsString('A', TidyFilename('A.'), 'Dot');
-  CheckEqualsString('A', TidyFilename('A?'), 'Query');
-  CheckEqualsString('A-B', TidyFilename('A\B'), 'Path');
-  CheckEqualsString('A', TidyFilename('A...'), 'Many');
-  CheckEqualsString('A-B-CD-EF', TidyFilename('A?\*B.\.?C?*?D*\*.E???*F'), 'Complex');
 end;
 
 initialization
