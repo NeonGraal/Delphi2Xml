@@ -154,9 +154,10 @@ type
     procedure TestParseOptionD;
     procedure TestParseOptionE;
     procedure TestParseOptionF;
-    //    procedure TestParseOptionG; // Tested in Test.IO.Options
+    procedure TestParseOptionG;
     procedure TestParseOptionH;
     //    procedure TestParseOptionI; // Tested in Test.IO.Options
+    //    procedure TestParseOptionL; // Tested in Test.IO.Options
     procedure TestParseOptionM;
     //    procedure TestParseOptionO; // Tested in Test.IO.Options
     procedure TestParseOptionP;
@@ -175,7 +176,6 @@ type
     procedure TestParseOptionC;
     procedure TestParseOptionJ;
     procedure TestParseOptionK;
-    procedure TestParseOptionL;
     procedure TestParseOptionN;
     procedure TestParseOptionQ;
     procedure TestParseOptionR;
@@ -336,7 +336,7 @@ const
     'FinalToken+,LogErrors+,LogNotSupp+,Recurse+,Timestamp-,Verbose+ ' +
   //    'Recurse + Timestamp - Global name :Test Config dir :Test\ Log dir :Test\ ' +
   //    'Base dir :Test\ Parse mode Full Results per File Show elapsed Quiet ' +
-    'Parse mode Full Results per File Show elapsed Quiet Write XML :Test,xml ' +
+    'Parse mode Full Results per File Show elapsed Quiet Group length 2 Write XML :Test,xml ' +
     'Write JSON :Test,json Write Defines :Test,def Count Children :.Test ' +
     'Count Final Defines :.Test Count Defines Used :.Test Skipped Methods :Test.skip ' +
     'Defines TANGO, UNIFORM, VICTOR Held Defines TANGO, UNIFORM, VICTOR';
@@ -344,7 +344,7 @@ const
     'FinalToken-,LogErrors-,LogNotSupp-,Recurse-,Timestamp-,Verbose- ' +
   //    'Recurse - Timestamp - Global name Config dir - Log dir - Base dir - ' +
   //    'Parse mode Full Results per File Show elapsed None Write XML - ' +
-    'Parse mode Full Results per File Show elapsed None Write XML -(,xml) ' +
+    'Parse mode Full Results per File Show elapsed None Group length 0 Write XML -(,xml) ' +
     'Write JSON -(,json) Write Defines -(,def) Count Children -(.chld) ' +
     'Count Final Defines -(.final) Count Defines Used -(.used) ' +
     'Skipped Methods -(.skip) Defines Default Held Defines Default';
@@ -585,11 +585,13 @@ var
 begin
   for C := 'A' to 'Z' do
   begin
-    if not fOpts.ProcessOption(C + ':Test') then
-      fOpts.ProcessOption(C + '+');
+    if not fOpts.ProcessOption(C + '1') then
+      if not fOpts.ProcessOption(C + ':Test') then
+        fOpts.ProcessOption(C + '+');
     for C1 := 'A' to 'Z' do
-      if not fOpts.ProcessOption(C + C1 + ':Test') then
-        fOpts.ProcessOption(C + C1 + '+');
+      if not fOpts.ProcessOption(C + C1 + '1') then
+        if not fOpts.ProcessOption(C + C1 + ':Test') then
+          fOpts.ProcessOption(C + C1 + '+');
   end;
   fOpts.ProcessOption('F-T');
   fB.Clear;
@@ -724,6 +726,11 @@ end;
 procedure TestTD2XOptionsParseAll.TestParseOptionF;
 begin
   CheckInvalid('F', 'Invalid Flags option: F');
+end;
+
+procedure TestTD2XOptionsParseAll.TestParseOptionG;
+begin
+  CheckSimple('G', 'Group length 2');
 end;
 
 procedure TestTD2XOptionsParseAll.TestParseOptionH;
@@ -912,7 +919,7 @@ end;
 
 procedure TestTD2XOptions.TestGlobal;
 begin
-  fFact.SetGlobalName('Global');
+  fFact.SetGlobalLabel('Global');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Return Value');
   CheckLog(BOTH_PROCESSING, 'Process Param');
 end;
@@ -1502,11 +1509,6 @@ begin
   CheckUnknown('K');
 end;
 
-procedure TestTD2XOptionsParseUnused.TestParseOptionL;
-begin
-  CheckUnknown('L');
-end;
-
 procedure TestTD2XOptionsParseUnused.TestParseOptionN;
 begin
   CheckUnknown('N');
@@ -1593,7 +1595,7 @@ end;
 procedure TestTD2XOptionsParseEnumerated.TestParseOptionMValue;
 begin
   CheckSimple('MUses', 'Parse mode Uses');
-  CheckEqualsString('Uses', fFact.GlobalName, 'Global name');
+  CheckEqualsString('Uses', fFact.GlobalLabel, 'Global name');
 end;
 
 procedure TestTD2XOptionsParseEnumerated.TestParseOptionPValue;
@@ -1725,6 +1727,7 @@ begin
 
   fOpts.ProcessOption('!!');
   fOpts.ProcessOption('FRF');
+  fOpts.ProcessOption('G!');
   fOpts.ProcessOption('E!');
 end;
 
@@ -1922,6 +1925,7 @@ begin
 
   fOpts.ProcessOption('!!');
   fOpts.ProcessOption('FRF');
+  fOpts.ProcessOption('G!');
   fOpts.ProcessOption('E!');
 end;
 

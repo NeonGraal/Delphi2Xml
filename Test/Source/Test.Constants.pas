@@ -30,7 +30,8 @@ const
     'M<mode> Full Parser type (F[ull], U[ses]) ' +
     'P<per> File Result per (F[ile], S[ubdir], D[ir], W[ildcard], P[aram], R[un]) ' +
     'E<mode> Quiet Elapsed time display (N[one], T[otal], D[ir], F[ile], P[rocessing], [Q]uiet) '
-    + 'WX[+-]:<d/e> :Xml,xml Write XML files into current or given <d/e> ' +
+    + 'G<int> 2 Number of dot delimited names in Group name ' +
+    'WX[+-]:<d/e> :Xml,xml Write XML files into current or given <d/e> ' +
     'WJ[+-]:<d/e> -(Json,json) Write JSON files into current or given <d/e> ' +
     'WD[+-]:<d/e> -(Defines,def) Write Final Defines files into current or given <d/e> ' +
     'CC[+-]:<f/e> :.chld Report Min/Max Children into <f/e> ' +
@@ -43,11 +44,11 @@ const
   REPORT_HEADING = 'Current option settings: ';
 
   FILE_REPORT_OPTIONS =
-    'Global name %s Config dir :Config\ Log dir :Log\ Base dir -(.\) Exclude Files/Dirs';
+    'Global label %s Config dir :Config\ Log dir :Log\ Base dir -(.\) Exclude Files/Dirs';
 
   BASE_REPORT_OPTIONS = REPORT_HEADING +
     'Flags FinalToken+,LogErrors+,LogNotSupp-,Recurse-,Timestamp-,Verbose- ' +
-    'Parse mode Full Results per File Show elapsed Quiet Write XML :Xml,xml ' +
+    'Parse mode Full Results per File Show elapsed Quiet Group length 2 Write XML :Xml,xml ' +
     'Write JSON -(Json,json) Write Defines -(Defines,def) Count Children :.chld ' +
     'Count Final Defines :.final Count Defines Used :.used Skipped Methods -(.skip) ';
   DEFAULT_REPORT_OPTIONS = BASE_REPORT_OPTIONS + 'Defines Default Held Defines Default';
@@ -78,7 +79,7 @@ uses
 const
   DESCRIPTION_PREFIX = 'Usage: %s [ Option | @Params | mFilename | Wildcard ] ... ' +
     'Options: Default Description';
-  GLOBAL_DESCRIPTION = ' G<str> %s Sets global name ';
+  GLOBAL_DESCRIPTION = ' L<str> %s Sets global label ';
 
 function UsageDescription: string;
 begin

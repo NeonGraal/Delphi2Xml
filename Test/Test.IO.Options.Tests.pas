@@ -24,7 +24,7 @@ type
     procedure CheckIO(var pDS: ID2XIO; pExp, pLabel: string);
     procedure CheckValidator(pLabel: string);
   published
-    procedure TestGobalName;
+    procedure TestGlobalLabel;
     procedure TestTimestampFiles;
     procedure TestConfigFileOrExtn;
     procedure TestLogFileOrExtn;
@@ -44,7 +44,7 @@ type
   TestTD2XFileOptions = class(TFileFactoryTestCase)
   published
     procedure TestParseB;
-    procedure TestParseG;
+    procedure TestParseL;
     procedure TestParseI;
     procedure TestParseO;
     procedure TestParseX;
@@ -69,7 +69,7 @@ type
   end;
 
 const
-  FILE_CHANGED_OPTIONS = 'Global name :Test Config dir ::Test Log dir ::Test ' +
+  FILE_CHANGED_OPTIONS = 'Global label :Test Config dir ::Test Log dir ::Test ' +
     'Base dir -(:Test) Exclude Files/Dirs';
   { TestTD2XFileOptions }
 
@@ -146,18 +146,18 @@ var
   lDS: ID2XIO;
   pExtn: string;
 begin
-  lGlobal := ForCode('G');
+  lGlobal := ForCode('L');
   lInput := ForCode('I');
   pExtn := '.Extn';
 
   lDS := fFileOpts.ConfigFileOrExtn('File.Extn');
   CheckIO(lDS, 'Config\File.Extn', 'Config File');
 
-  lGlobal.Parse('G');
+  lGlobal.Parse('L');
   lDS := fFileOpts.ConfigFileOrExtn(pExtn);
-  CheckIO(lDS, 'Config\' + fFileOpts.GlobalName + '.Extn', 'Config Default .Extn');
+  CheckIO(lDS, 'Config\' + fFileOpts.GlobalLabel + '.Extn', 'Config Default .Extn');
 
-  lGlobal.Parse('GGlobal');
+  lGlobal.Parse('LGlobal');
   lDS := fFileOpts.ConfigFileOrExtn(pExtn);
   CheckIO(lDS, 'Config\Global.Extn', 'Config Global .Extn');
 
@@ -166,11 +166,11 @@ begin
   lDS := fFileOpts.ConfigFileOrExtn('File.Extn');
   CheckIO(lDS, 'File.Extn', 'Input Off File');
 
-  lGlobal.Parse('G');
+  lGlobal.Parse('L');
   lDS := fFileOpts.ConfigFileOrExtn(pExtn);
-  CheckIO(lDS, fFileOpts.GlobalName + '.Extn', 'Input Off Default .Extn ');
+  CheckIO(lDS, fFileOpts.GlobalLabel + '.Extn', 'Input Off Default .Extn ');
 
-  ForCode('G').Parse('GGlobal');
+  lGlobal.Parse('LGlobal');
   lDS := fFileOpts.ConfigFileOrExtn(pExtn);
   CheckIO(lDS, 'Global.Extn', 'Input Off Global .Extn');
 
@@ -179,11 +179,11 @@ begin
   lDS := fFileOpts.ConfigFileOrExtn('File.Extn');
   CheckIO(lDS, 'Config\File.Extn', 'Input On File');
 
-  lGlobal.Parse('G');
+  lGlobal.Parse('L');
   lDS := fFileOpts.ConfigFileOrExtn(pExtn);
-  CheckIO(lDS, 'Config\' + fFileOpts.GlobalName + '.Extn', 'Input On Default .Extn ');
+  CheckIO(lDS, 'Config\' + fFileOpts.GlobalLabel + '.Extn', 'Input On Default .Extn ');
 
-  ForCode('G').Parse('GGlobal');
+  lGlobal.Parse('LGlobal');
   lDS := fFileOpts.ConfigFileOrExtn(pExtn);
   CheckIO(lDS, 'Config\Global.Extn', 'Input On Global .Extn');
 
@@ -192,11 +192,11 @@ begin
   lDS := fFileOpts.ConfigFileOrExtn('File.Extn');
   CheckIO(lDS, 'In\File.Extn', 'Input File');
 
-  lGlobal.Parse('G');
+  lGlobal.Parse('L');
   lDS := fFileOpts.ConfigFileOrExtn(pExtn);
-  CheckIO(lDS, 'In\' + fFileOpts.GlobalName + '.Extn', 'Input Default .Extn ');
+  CheckIO(lDS, 'In\' + fFileOpts.GlobalLabel + '.Extn', 'Input Default .Extn ');
 
-  ForCode('G').Parse('GGlobal');
+  lGlobal.Parse('LGlobal');
   lDS := fFileOpts.ConfigFileOrExtn(pExtn);
   CheckIO(lDS, 'In\Global.Extn', 'Input Global .Extn');
 end;
@@ -381,26 +381,26 @@ begin
     'Get Now');
 end;
 
-procedure TestTD2XFileFactory.TestGobalName;
+procedure TestTD2XFileFactory.TestGlobalLabel;
 var
   lGlobal: TD2XParam;
   lDefault: string;
 begin
-  lGlobal := ForCode('G');
+  lGlobal := ForCode('L');
   lDefault := ChangeFileExt(ExtractFileName(ParamStr(0)), '');
 
-  CheckEqualsString(lDefault, fFileOpts.GlobalName, 'Default Global Name');
+  CheckEqualsString(lDefault, fFileOpts.GlobalLabel, 'Default Global Name');
 
-  lGlobal.Parse('GGlobal');
-  CheckEqualsString('Global', fFileOpts.GlobalName, 'Global Name');
+  lGlobal.Parse('LGlobal');
+  CheckEqualsString('Global', fFileOpts.GlobalLabel, 'Global Name');
   CheckValidator('Global Name');
 
-  fFileOpts.SetGlobalName('Test');
-  CheckEqualsString('Test', fFileOpts.GlobalName, 'Test Global Name');
+  fFileOpts.SetGlobalLabel('Test');
+  CheckEqualsString('Test', fFileOpts.GlobalLabel, 'Test Global Name');
   CheckValidator('Test Global Name');
 
-  lGlobal.Parse('G');
-  CheckEqualsString(lDefault, fFileOpts.GlobalName, 'Reset Global Name');
+  lGlobal.Parse('L');
+  CheckEqualsString(lDefault, fFileOpts.GlobalLabel, 'Reset Global Name');
   CheckValidator('Reset Global Name');
 end;
 
@@ -411,17 +411,17 @@ var
   lDS: ID2XIO;
 begin
   pExtn := '.Extn';
-  lGlobal := ForCode('G');
+  lGlobal := ForCode('L');
   lOutput := ForCode('O');
 
   lDS := fFileOpts.LogFileOrExtn('File.Extn');
   CheckIO(lDS, 'Log\File.Extn', 'Log File');
 
-  lGlobal.Parse('G');
+  lGlobal.Parse('L');
   lDS := fFileOpts.LogFileOrExtn(pExtn);
-  CheckIO(lDS, 'Log\' + fFileOpts.GlobalName + '.Extn', 'Log Default Extn');
+  CheckIO(lDS, 'Log\' + fFileOpts.GlobalLabel + '.Extn', 'Log Default Extn');
 
-  lGlobal.Parse('GGlobal');
+  lGlobal.Parse('LGlobal');
   lDS := fFileOpts.LogFileOrExtn(pExtn);
   CheckIO(lDS, 'Log\Global.Extn', 'Log Global Extn');
 
@@ -430,11 +430,11 @@ begin
   lDS := fFileOpts.LogFileOrExtn('File.Extn');
   CheckIO(lDS, 'File.Extn', 'Output Off File');
 
-  lGlobal.Parse('G');
+  lGlobal.Parse('L');
   lDS := fFileOpts.LogFileOrExtn(pExtn);
-  CheckIO(lDS, fFileOpts.GlobalName + '.Extn', 'Output Off Default Extn');
+  CheckIO(lDS, fFileOpts.GlobalLabel + '.Extn', 'Output Off Default Extn');
 
-  lGlobal.Parse('GGlobal');
+  lGlobal.Parse('LGlobal');
   lDS := fFileOpts.LogFileOrExtn(pExtn);
   CheckIO(lDS, 'Global.Extn', 'Output Off Global Extn');
 
@@ -443,11 +443,11 @@ begin
   lDS := fFileOpts.LogFileOrExtn('File.Extn');
   CheckIO(lDS, 'Log\File.Extn', 'Output On File');
 
-  lGlobal.Parse('G');
+  lGlobal.Parse('L');
   lDS := fFileOpts.LogFileOrExtn(pExtn);
-  CheckIO(lDS, 'Log\' + fFileOpts.GlobalName + '.Extn', 'Output On Default Extn');
+  CheckIO(lDS, 'Log\' + fFileOpts.GlobalLabel + '.Extn', 'Output On Default Extn');
 
-  lGlobal.Parse('GGlobal');
+  lGlobal.Parse('LGlobal');
   lDS := fFileOpts.LogFileOrExtn(pExtn);
   CheckIO(lDS, 'Log\Global.Extn', 'Output On Global Extn');
 
@@ -456,11 +456,11 @@ begin
   lDS := fFileOpts.LogFileOrExtn('File.Extn');
   CheckIO(lDS, 'Out\File.Extn', 'Output File');
 
-  lGlobal.Parse('G');
+  lGlobal.Parse('L');
   lDS := fFileOpts.LogFileOrExtn(pExtn);
-  CheckIO(lDS, 'Out\' + fFileOpts.GlobalName + '.Extn', 'Output Default Extn');
+  CheckIO(lDS, 'Out\' + fFileOpts.GlobalLabel + '.Extn', 'Output Default Extn');
 
-  lGlobal.Parse('GGlobal');
+  lGlobal.Parse('LGlobal');
   lDS := fFileOpts.LogFileOrExtn(pExtn);
   CheckIO(lDS, 'Out\Global.Extn', 'Output Global Extn');
 end;
@@ -480,18 +480,18 @@ var
   lDS: ID2XIO;
 begin
   pExtn := '.Extn';
-  lGlobal := ForCode('G');
+  lGlobal := ForCode('L');
 
   CheckFalse(fFileOpts.TimestampFiles, 'Timestamp Files Default');
 
   lDS := fFileOpts.LogFileOrExtn('File.Extn');
   CheckIO(lDS, 'Log\File.Extn', 'Default Timestamp File');
 
-  lGlobal.Parse('G');
+  lGlobal.Parse('L');
   lDS := fFileOpts.LogFileOrExtn(pExtn);
-  CheckIO(lDS, 'Log\' + fFileOpts.GlobalName + '.Extn', 'Default Timestamp Default Extn');
+  CheckIO(lDS, 'Log\' + fFileOpts.GlobalLabel + '.Extn', 'Default Timestamp Default Extn');
 
-  lGlobal.Parse('GGlobal');
+  lGlobal.Parse('LGlobal');
   lDS := fFileOpts.LogFileOrExtn(pExtn);
   CheckIO(lDS, 'Log\Global.Extn', 'Default Timestamp Global Extn');
 
@@ -502,10 +502,10 @@ begin
   CheckIO(lDS, 'Log\File' + fFileOpts.OutputTimestamp + '.Extn', 'On Timestamp File');
 
   lDS := fFileOpts.LogFileOrExtn(pExtn);
-  CheckIO(lDS, 'Log\' + fFileOpts.GlobalName + fFileOpts.OutputTimestamp + '.Extn',
+  CheckIO(lDS, 'Log\' + fFileOpts.GlobalLabel + fFileOpts.OutputTimestamp + '.Extn',
     'On Timestamp Default Extn');
 
-  ForCode('G').Parse('GGlobal');
+  lGlobal.Parse('LGlobal');
   lDS := fFileOpts.LogFileOrExtn(pExtn);
   CheckIO(lDS, 'Log\Global' + fFileOpts.OutputTimestamp + '.Extn', 'On Timestamp Global Extn');
 
@@ -515,11 +515,11 @@ begin
   lDS := fFileOpts.LogFileOrExtn('File.Extn');
   CheckIO(lDS, 'Log\File.Extn', 'Off Timestamp File');
 
-  lGlobal.Parse('G');
+  lGlobal.Parse('L');
   lDS := fFileOpts.LogFileOrExtn(pExtn);
-  CheckIO(lDS, 'Log\' + fFileOpts.GlobalName + '.Extn', 'Off Timestamp Default Extn');
+  CheckIO(lDS, 'Log\' + fFileOpts.GlobalLabel + '.Extn', 'Off Timestamp Default Extn');
 
-  lGlobal.Parse('GGlobal');
+  lGlobal.Parse('LGlobal');
   lDS := fFileOpts.LogFileOrExtn(pExtn);
   CheckIO(lDS, 'Log\Global.Extn', 'Off Timestamp Global Extn');
 
@@ -530,10 +530,10 @@ begin
   CheckIO(lDS, 'Log\File' + fFileOpts.OutputTimestamp + '.Extn', 'Timestamp File');
 
   lDS := fFileOpts.LogFileOrExtn(pExtn);
-  CheckIO(lDS, 'Log\' + fFileOpts.GlobalName + fFileOpts.OutputTimestamp + '.Extn',
+  CheckIO(lDS, 'Log\' + fFileOpts.GlobalLabel + fFileOpts.OutputTimestamp + '.Extn',
     'Timestamp Default Extn');
 
-  ForCode('G').Parse('GGlobal');
+  lGlobal.Parse('LGlobal');
   lDS := fFileOpts.LogFileOrExtn(pExtn);
   CheckIO(lDS, 'Log\Global' + fFileOpts.OutputTimestamp + '.Extn', 'Timestamp Global Extn');
 end;
@@ -552,7 +552,7 @@ begin
   Check(Assigned(ForCode('I')), 'Code found for Input Param');
   Check(Assigned(ForCode('O')), 'Code found for Output Param');
   Check(Assigned(ForCode('B')), 'Code found for Base Param');
-  Check(Assigned(ForCode('G')), 'Code found for Global Param');
+  Check(Assigned(ForCode('L')), 'Code found for Global Param');
   Check(Assigned(ForCode('X')), 'Code found for Exclusions Param');
 end;
 
@@ -567,12 +567,12 @@ begin
     lPrm.Convert(':Test');
 
   fParams.OutputAll(fL);
-  CheckList('-G:Test -I::Test -O::Test -B-(:Test) -X:', 'All Params Changed');
+  CheckList('-L:Test -I::Test -O::Test -B-(:Test) -X:', 'All Params Changed');
 
   fParams.ZeroAll;
 
   fParams.OutputAll(fL);
-  CheckList('-G -I- -O- -B- -X:', 'All Params Zeroed');
+  CheckList('-L -I- -O- -B- -X:', 'All Params Zeroed');
 end;
 
 procedure TestTD2XFileOptions.TestParseB;
@@ -587,16 +587,16 @@ begin
   CheckTrue(lBase.Parse('B:Test'), 'Parse Base Value');
 end;
 
-procedure TestTD2XFileOptions.TestParseG;
+procedure TestTD2XFileOptions.TestParseL;
 var
   lGlobal: TD2XParam;
 begin
-  lGlobal := ForCode('G');
-  CheckTrue(lGlobal.Parse('G'), 'Parse just Global code');
-  CheckTrue(lGlobal.Parse('G-'), 'Parse Global Off');
-  CheckTrue(lGlobal.Parse('G+'), 'Parse Global On');
-  CheckTrue(lGlobal.Parse('G!'), 'Parse Global Reset');
-  CheckTrue(lGlobal.Parse('G:Test'), 'Parse Global Value');
+  lGlobal := ForCode('L');
+  CheckTrue(lGlobal.Parse('L'), 'Parse just Global label');
+  CheckTrue(lGlobal.Parse('L-'), 'Parse Global Off');
+  CheckTrue(lGlobal.Parse('L+'), 'Parse Global On');
+  CheckTrue(lGlobal.Parse('L!'), 'Parse Global Reset');
+  CheckTrue(lGlobal.Parse('L:Test'), 'Parse Global Value');
 end;
 
 procedure TestTD2XFileOptions.TestParseI;
@@ -676,7 +676,7 @@ begin
   fParams.ZeroAll;
 
   fParams.ReportAll(fLog);
-  CheckLog(REPORT_HEADING + 'Global name Config dir - Log dir - Base dir - Exclude Files/Dirs',
+  CheckLog(REPORT_HEADING + 'Global label Config dir - Log dir - Base dir - Exclude Files/Dirs',
     'All Params Zeroed');
 end;
 

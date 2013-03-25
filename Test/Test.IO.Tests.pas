@@ -75,7 +75,7 @@ type
     procedure TestBaseDir;
     procedure TestSimpleFile;
 
-    procedure TestSetGlobalName;
+    procedure TestSetGlobalLabel;
     procedure TestSetGlobalValidator;
     procedure TestSetTimestampFlag;
     procedure TestRegisterParams;
@@ -323,10 +323,10 @@ begin
   end;
 end;
 
-procedure TestID2XIOFactory.TestSetGlobalName;
+procedure TestID2XIOFactory.TestSetGlobalLabel;
 begin
-  fFact.SetGlobalName('Test');
-  CheckEqualsString('Test', fFact.GlobalName, 'Global name');
+  fFact.SetGlobalLabel('Test');
+  CheckEqualsString('Test', fFact.GlobalLabel, 'Global name');
 end;
 
 procedure TestID2XIOFactory.TestSetGlobalValidator;
@@ -342,7 +342,7 @@ begin
     end);
 
   CheckFalse(lGVCalled, 'Validator not called yet');
-  fFact.SetGlobalName('Test');
+  fFact.SetGlobalLabel('Test');
   CheckTrue(lGVCalled, 'Validator called');
 end;
 

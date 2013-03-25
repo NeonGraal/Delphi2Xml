@@ -69,7 +69,7 @@
 			<ILINK_FullDebugInfo>true</ILINK_FullDebugInfo>
 			<BCC_SourceDebuggingOn>true</BCC_SourceDebuggingOn>
 			<BCC_DebugLineNumbers>true</BCC_DebugLineNumbers>
-			<Debugger_RunParams>gui</Debugger_RunParams>
+			<Debugger_RunParams></Debugger_RunParams>
 			<Debugger_CWD>..</Debugger_CWD>
 		</PropertyGroup>
 		<Import Condition="'$(Base)'!='' And Exists('..\Warnings.optset')" Project="..\Warnings.optset"/>

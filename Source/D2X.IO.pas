@@ -41,7 +41,7 @@ type
     function BaseDir(pFileOrDir: String): ID2XIODir;
     function SimpleFile(pFile: String): ID2XIOFile;
 
-    procedure SetGlobalName(const pName: String);
+    procedure SetGlobalLabel(const pLabel: String);
     procedure SetGlobalValidator(pValidator: TD2XSingleParam<String>.TspValidator);
     procedure SetTimestampFlag(pFlag: TD2XFlagRef);
     procedure RegisterParams(pParams: TD2XParams);

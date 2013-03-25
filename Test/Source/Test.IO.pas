@@ -57,7 +57,7 @@ type
     fBaseDirs: TDictionary<string, TATestDir>;
     fOutputFiles: TDictionary<string, string>;
 
-    fGlobalName: string;
+    fGlobalLabel: string;
     fValidator: TD2XSingleParam<string>.TspValidator;
     fTimestampFlag: TD2XFlagRef;
 
@@ -75,7 +75,7 @@ type
     function BaseDir(pFileOrDir: string): ID2XIODir;
     function SimpleFile(pFile: string): ID2XIOFile;
 
-    procedure SetGlobalName(const pName: string);
+    procedure SetGlobalLabel(const pName: string);
     procedure SetGlobalValidator(pValidator: TD2XSingleParam<string>.TspValidator);
     procedure SetTimestampFlag(pFlag: TD2XFlagRef);
     procedure RegisterParams(pParams: TD2XParams);
@@ -86,7 +86,7 @@ type
     function CheckFiles: TArray<string>;
     function CheckOutput(pFile: string): string;
 
-    property GlobalName: string read fGlobalName write SetGlobalName;
+    property GlobalLabel: string read fGlobalLabel write SetGlobalLabel;
   end;
 
   TTestFile = class(TTestIO, ID2XIOFile)
@@ -446,11 +446,11 @@ begin
 end;
 {$HINTS OFF}
 
-procedure TTestFactory.SetGlobalName(const pName: string);
+procedure TTestFactory.SetGlobalLabel(const pName: string);
 var
   lRes: Boolean;
 begin
-  fGlobalName := pName;
+  fGlobalLabel := pName;
   if Assigned(fValidator) then
     lRes := fValidator(pName);
 end;

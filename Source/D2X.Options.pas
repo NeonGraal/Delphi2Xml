@@ -36,7 +36,8 @@ type
     fParseMode: TD2XSingleParam<TD2XParseMode>;
     fResultPer: TD2XSingleParam<TD2XResultPer>;
     fElapsedMode: TD2XSingleParam<TD2XElapsedMode>;
-    fGroupLen: TD2XSingleParam<Byte>;
+
+    fGetGroup: TD2XGetGroupEvent;
 
     procedure SetMinProxy;
     procedure SetFullProxy;
@@ -99,6 +100,7 @@ uses
   D2X.IO.Options,
   D2X.Tree.Json,
   D2X.Tree.Xml,
+  System.RegularExpressions,
   System.StrUtils;
 
 function TidyFilename(pFilename: string): string;
@@ -140,6 +142,8 @@ end;
 
 destructor TD2XOptions.Destroy;
 begin
+  fGetGroup := nil;
+
   FreeAndNil(fParser);
   FreeAndNil(fErrorLog);
 
@@ -260,7 +264,7 @@ begin
           BeginResults('D2X_Pattern', rpWildcard);
           lGroup := INIT_GROUP;
           repeat
-            lS := ExtractGroup(lPath.Current);
+            lS := fGetGroup(ExtractFileName(lPath.Current));
             if lGroup <> lS then
             begin
               if lGroup <> INIT_GROUP then
@@ -530,8 +534,9 @@ begin
   fProcs.Add(TD2XProcessor.CreateClass(lCountChildren.FlagRef, TD2XCountChildrenHandler)
     .SetFileInput(NilFileRef()).SetFileOutput(NilFileRef())
     .SetProcessingOutput(MakeFileRef(lCountChildren)));
-  fProcs.Add(TD2XProcessor.CreateClass(lCountFinalDefines.FlagRef, TD2XCountFinalDefinesHandler)
-    .SetFileOutput(NilFileRef()).SetProcessingOutput(MakeFileRef(lCountFinalDefines)));
+  fProcs.Add(TD2XProcessor.CreateClass(lCountFinalDefines.FlagRef,
+    TD2XCountFinalDefinesHandler).SetFileOutput(NilFileRef())
+    .SetProcessingOutput(MakeFileRef(lCountFinalDefines)));
   fProcs.Add(TD2XProcessor.CreateClass(lCountDefinesUsed.FlagRef, TD2XCountDefinesUsedHandler)
     .SetProcessingOutput(MakeFileRef(lCountDefinesUsed)));
   fProcs.Add(TD2XProcessor.CreateHandler(lParserDefines.FlagRef, lParserDefinesHandler, True));
@@ -581,6 +586,8 @@ begin
           lP.TrimChildren(pElement);
       end;
 
+    fParser.OnGetGroup := fGetGroup;
+
     fParser.Lexer.OnIncludeDirect := LexerOnInclude;
 
     for lP in fProcs do
@@ -598,10 +605,14 @@ begin
     fParser.OnProgress := nil;
 end;
 
+var
+  gGroupRE: TRegEx;
+
 procedure TD2XOptions.InitProcessors(pFileOpts: ID2XIOFactory);
 var
   lWriteXml, lWriteJson, lWriteDefines: TD2XFlaggedStringParam;
   lGetParseMode: TD2XStringRef;
+  lGroupLen: TD2XSingleParam<Byte>;
 begin
   InitFlags;
 
@@ -627,7 +638,7 @@ begin
     procedure(pOld, pNew, pDflt: TD2XParseMode)
     begin
       if pNew = pmUses then
-        fIOFact.SetGlobalName('Uses');
+        fIOFact.SetGlobalLabel('Uses');
     end);
   fResultPer := TD2XSingleParam<TD2XResultPer>.CreateParam('P', 'Results per', '<per>',
     'Result per (F[ile], S[ubdir], D[ir], W[ildcard], P[aram], R[un])', rpFile,
@@ -635,6 +646,39 @@ begin
   fElapsedMode := TD2XSingleParam<TD2XElapsedMode>.CreateParam('E', 'Show elapsed', '<mode>',
     'Elapsed time display (N[one], T[otal], D[ir], F[ile], P[rocessing], [Q]uiet)', emQuiet,
     TD2X.CnvEnum<TD2XElapsedMode>, TD2X.ToLabel<TD2XElapsedMode>);
+  lGroupLen := TD2XSingleParam<Byte>.CreateParam('G', 'Group length', '<int>',
+    'Number of dot delimited names in Group name', 2,
+    function(pStr: string; pDflt: Byte; out pVal: Byte): Boolean
+    var
+      lVal: Integer;
+    begin
+      Result := True;
+      if TryStrToInt(pStr, lVal) then
+        pVal := lVal
+      else
+        pVal := pDflt;
+    end,
+    function(pVal: Byte): string
+    begin
+      Result := IntToStr(pVal);
+    end);
+
+  fGetGroup := function(pName: string): string
+    var
+      lPos: Integer;
+      lCnt: Byte;
+    begin
+      Result := '';
+      lPos := Pos('.', pName);
+      lCnt := 1;
+      while (lCnt < lGroupLen.Value) and (lPos > 0) do
+      begin
+        lPos := PosEx('.', pName, lPos + 1);
+        Inc(lCnt);
+      end;
+      if (lPos > 0) and (lCnt = lGroupLen.Value) then
+        Result := Copy(pName, 1, lPos - 1);
+    end;
 
   lGetParseMode := function: string
     begin
@@ -649,12 +693,12 @@ begin
     'Write Final Defines files into current or given <d/e>', 'Defines,def', False,
     ConvertDirExtn);
 
-  fProcs.Add(TD2XProcessor.CreateHandler(lWriteXml.FlagRef, TD2XTreeHandler.CreateTree(XmlTreeWriter,
-      fFlags.RefLabel['FinalToken'], lGetParseMode), True)
-    .SetResultsOutput(MakeNamedRef(lWriteXml)));
-  fProcs.Add(TD2XProcessor.CreateHandler(lWriteJson.FlagRef, TD2XTreeHandler.CreateTree(JsonTreeWriter,
-      fFlags.RefLabel['FinalToken'], lGetParseMode), True)
-    .SetResultsOutput(MakeNamedRef(lWriteJson)));
+  fProcs.Add(TD2XProcessor.CreateHandler(lWriteXml.FlagRef,
+    TD2XTreeHandler.CreateTree(XmlTreeWriter, fFlags.RefLabel['FinalToken'], lGetParseMode),
+    True).SetResultsOutput(MakeNamedRef(lWriteXml)));
+  fProcs.Add(TD2XProcessor.CreateHandler(lWriteJson.FlagRef,
+    TD2XTreeHandler.CreateTree(JsonTreeWriter, fFlags.RefLabel['FinalToken'], lGetParseMode),
+    True).SetResultsOutput(MakeNamedRef(lWriteJson)));
   fProcs.Add(TD2XProcessor.CreateClass(lWriteDefines.FlagRef, TD2XWriteDefinesHandler)
     .SetResultsOutput(MakeNamedRef(lWriteDefines)));
 
@@ -662,7 +706,7 @@ begin
 
   fParams.AddRange([fFlags]);
   fIOFact.RegisterParams(fParams);
-  fParams.AddRange([fParseMode, fResultPer, fElapsedMode, lWriteXml, lWriteJson,
+  fParams.AddRange([fParseMode, fResultPer, fElapsedMode, lGroupLen, lWriteXml, lWriteJson,
     lWriteDefines]);
 
   InitOtherProcessors;
@@ -808,5 +852,8 @@ begin
   for lP in fProcs do
     Result := Result or lP.UseProxy;
 end;
+
+initialization
+  gGroupRE := TRegEx.Create('^(\w+\.\w+)\.');
 
 end.

@@ -62,12 +62,9 @@ type
 
 function MakeFileName(pStr, pDflt: string): string;
 
-function ExtractGroup(pName: string): string;
-
 implementation
 
 uses
-  System.RegularExpressions,
   System.Rtti,
   System.StrUtils,
   System.TypInfo;
@@ -81,19 +78,6 @@ begin
       Result := pStr
     else
       Result := pStr + pDflt;
-end;
-
-var
-  gGroupRE: TRegEx;
-
-function ExtractGroup(pName: string): string;
-var
-  lM: TMatch;
-begin
-  Result := '';
-  lM := gGroupRE.Match(ExtractFileName(pName));
-  if lM.Success then
-    Result := lM.Groups[1].Value;
 end;
 
 { TD2X }
@@ -242,9 +226,5 @@ function TD2XInterfaced._Release: Integer;
 begin
   Result := -1;
 end;
-
-initialization
-
-gGroupRE := TRegEx.Create('^(\w+\.\w+)\.');
 
 end.

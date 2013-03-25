@@ -18,6 +18,7 @@ type
   TD2XProgressEvent = reference to procedure(pProgress: Integer);
   TD2XTrimChildrenEvent = reference to procedure(pElement: string);
   TD2XMethodEvent = reference to procedure(pMethod: string);
+  TD2XGetGroupEvent = reference to function(pName: string): string;
 
   TD2XDefinesParser = class(TD2XParser)
   private
@@ -36,6 +37,7 @@ type
 
     fOnAfterMethod: TD2XMethodEvent;
     fOnBeforeMethod: TD2XMethodEvent;
+    fOnGetGroup: TD2XGetGroupEvent;
 
     function GetStartDefines: TStringList;
     function GetHeldDefines: TStringList;
@@ -80,6 +82,7 @@ type
     property HeldDefines: TStringList read GetHeldDefines;
 
     property OnProgress: TD2XProgressEvent read fOnProgress write fOnProgress;
+    property OnGetGroup: TD2XGetGroupEvent read fOnGetGroup write fOnGetGroup;
 
     property AddAttribute: TD2XAddAttributeEvent read FAddAttribute write FAddAttribute;
     property AddText: TD2XAddTextEvent read FAddText write FAddText;
@@ -372,8 +375,6 @@ type
 implementation
 
 uses
-  D2X.Global,
-  System.RegularExpressions,
   System.SysUtils;
 
 { TD2XParser }
@@ -1814,10 +1815,17 @@ begin
 end;
 
 procedure TD2XDefinesParser.UnitName;
+var
+  lGroup: string;
 begin
   inherited;
-  if TRegEx.Matches(fLastTokens, '\.').Count > 1 then
-    DoAddAttribute('group', ExtractGroup(fLastTokens));
+
+  if Assigned(fOnGetGroup) then
+  begin
+    lGroup := fOnGetGroup(fLastTokens);
+    if lGroup > '' then
+      DoAddAttribute('group', lGroup);
+  end;
 
   DoAddText;
 end;
@@ -1913,3 +1921,4 @@ begin
 end;
 
 end.
+

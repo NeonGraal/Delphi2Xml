@@ -19,7 +19,7 @@ type
     function BaseDir(pFileOrDir: string): ID2XIODir;
     function SimpleFile(pFile: string): ID2XIOFile;
 
-    procedure SetGlobalName(const pName: string);
+    procedure SetGlobalLabel(const pLabel: string);
     procedure SetGlobalValidator(pValidator: TD2XSingleParam<string>.TspValidator);
     procedure SetTimestampFlag(pFlag: TD2XFlagRef);
     procedure RegisterParams(pParams: TD2XParams);
@@ -31,11 +31,11 @@ type
     fLogBase: TD2XFlaggedStringParam;
     fConfigBase: TD2XFlaggedStringParam;
     fInputBase: TD2XFlaggedStringParam;
-    fGlobalName: TD2XStringParam;
+    fGlobalLabel: TD2XStringParam;
     fTimestampFiles: TD2XFlagRef;
     fExcludeDirs: TD2XListParam;
 
-    function GetGlobalName: string;
+    function GetGlobalLabel: string;
 
   protected
     fOutputTimestamp: string;
@@ -43,7 +43,7 @@ type
     function GetTimestampFiles: Boolean;
 
   public
-    property GlobalName: string read GetGlobalName write SetGlobalName;
+    property GlobalLabel: string read GetGlobalLabel write SetGlobalLabel;
   end;
 
 procedure SplitDirExtn(pStr: string; out pDir, pExtn: string);
@@ -132,9 +132,9 @@ begin
   Result := pWatch.Elapsed.TotalSeconds;
 end;
 
-function TD2XFileOptions.GetGlobalName: string;
+function TD2XFileOptions.GetGlobalLabel: string;
 begin
-  Result := fGlobalName.Value;
+  Result := fGlobalLabel.Value;
 end;
 
 function TD2XFileOptions.GetInputStream: TStreamReader;
@@ -174,7 +174,7 @@ function TD2XFileOptions.ConfigFileOrExtn(pFileOrExtn: string): ID2XIOFile;
   function GlobalFileOrExtn(pFileOrExtn: string): string;
   begin
     if StartsText('.', pFileOrExtn) then
-      Result := fGlobalName.Value + pFileOrExtn
+      Result := fGlobalLabel.Value + pFileOrExtn
     else
       Result := pFileOrExtn;
   end;
@@ -194,9 +194,9 @@ function TD2XFileOptions.LogFileOrExtn(pFileOrExtn: string): ID2XIOFile;
   begin
     if StartsText('.', pFileOrExtn) then
       if fTimestampFiles()then
-        Result := fGlobalName.Value + fOutputTimestamp + pFileOrExtn
+        Result := fGlobalLabel.Value + fOutputTimestamp + pFileOrExtn
       else
-        Result := fGlobalName.Value + pFileOrExtn
+        Result := fGlobalLabel.Value + pFileOrExtn
     else
       if fTimestampFiles()then
       begin
@@ -217,16 +217,16 @@ end;
 
 procedure TD2XFileOptions.RegisterParams(pParams: TD2XParams);
 begin
-  pParams.Add(fGlobalName);
+  pParams.Add(fGlobalLabel);
   pParams.Add(fConfigBase);
   pParams.Add(fLogBase);
   pParams.Add(fInputBase);
   pParams.Add(fExcludeDirs);
 end;
 
-procedure TD2XFileOptions.SetGlobalName(const pName: string);
+procedure TD2XFileOptions.SetGlobalLabel(const pLabel: string);
 begin
-  fGlobalName.Value := pName;
+  fGlobalLabel.Value := pLabel;
 end;
 
 procedure TD2XFileOptions.SetGlobalValidator(pValidator: TD2XSingleParam<string>.TspValidator);
@@ -237,8 +237,8 @@ begin
     'Use <dir> as a base for all Log files', 'Log\', True, ConvertDir);
   fInputBase := TD2XFlaggedStringParam.CreateFlagStr('B', 'Base dir', '<dir>',
     'Use <dir> as a base for all Input files', '.\', False, ConvertDir);
-  fGlobalName := TD2XStringParam.CreateStrValid('G', 'Global name', '<str>',
-    'Sets global name', ChangeFileExt(ExtractFileName(ParamStr(0)), ''),
+  fGlobalLabel := TD2XStringParam.CreateStrValid('L', 'Global label', '<str>',
+    'Sets global label', ChangeFileExt(ExtractFileName(ParamStr(0)), ''),
       function(pStr: string; pDflt: string; out pVal: string): Boolean
     begin
       Result := True;
