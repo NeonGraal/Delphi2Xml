@@ -120,6 +120,23 @@ type
   end;
 
   TD2XFullParser = class(TD2XDefinesParser)
+  protected
+    procedure ConstantName; override;
+    procedure ConstructorName; override;
+    procedure DestructorName; override;
+    procedure FieldName; override;
+    procedure FunctionMethodName; override;
+    procedure FunctionProcedureName; override;
+    procedure MainUnitName; override;
+    procedure ParameterName; override;
+    procedure ProcedureMethodName; override;
+    procedure PropertyName; override;
+    procedure ResolutionInterfaceName; override;
+    procedure TagFieldName; override;
+    procedure TagFieldTypeName; override;
+    procedure TypeName; override;
+    procedure VarName; override; // !! Added VarName and VarNameList back in...
+
   public
     procedure AccessSpecifier; override;
     procedure AdditiveOperator; override;
@@ -156,14 +173,12 @@ type
     procedure ConstantDeclaration; override;
     procedure ConstantEqual; override;
     procedure ConstantExpression; override;
-    procedure ConstantName; override;
     // JR added constant type
     procedure ConstantType; override;
     procedure ConstantValue; override;
     procedure ConstantValueTyped; override;
     procedure ConstParameter; override;
     procedure ConstructorHeading; override;
-    procedure ConstructorName; override;
     procedure ConstSection; override;
     procedure ContainsExpression; override;
     procedure ContainsIdentifier; override;
@@ -174,7 +189,6 @@ type
     procedure DeclarationSection; override;
     procedure Designator; override;
     procedure DestructorHeading; override;
-    procedure DestructorName; override;
     procedure Directive16Bit; override;
     procedure DirectiveBinding; override;
     procedure DirectiveCalling; override;
@@ -207,7 +221,6 @@ type
     procedure FieldDeclaration; override;
     procedure FieldList; override;
     procedure FieldNameList; override;
-    procedure FieldName; override;
     procedure FileType; override;
     procedure FormalParameterList; override;
     procedure FormalParameterSection; override;
@@ -215,9 +228,7 @@ type
     procedure ForwardDeclaration; override; { GLC: corrected spelling }
     procedure FunctionHeading; override;
     procedure FunctionMethodDeclaration; override;
-    procedure FunctionMethodName; override;
     procedure FunctionProcedureBlock; override;
-    procedure FunctionProcedureName; override;
     procedure Identifier; override;
     procedure IdentifierList; override;
     procedure IfStatement; override;
@@ -239,7 +250,6 @@ type
     procedure LabeledStatement; override;
     procedure LabelId; override;
     procedure LibraryFile; override;
-    procedure MainUnitName; override;
     procedure MainUsedUnitStatement; override;
     procedure MultiplicativeOperator; override;
     procedure NewFormalParameterType; override;
@@ -266,7 +276,6 @@ type
     procedure OutParameter; override;
     procedure PackageFile; override;
     procedure ParameterFormal; override;
-    procedure ParameterName; override;
     procedure ParameterNameList; override;
     procedure PointerType; override;
     procedure ProceduralDirective; override;
@@ -274,12 +283,10 @@ type
     procedure ProcedureDeclarationSection; override;
     procedure ProcedureHeading; override;
     procedure ProcedureMethodDeclaration; override;
-    procedure ProcedureMethodName; override;
     procedure ProgramBlock; override;
     procedure ProgramFile; override;
     procedure PropertyDefault; override;
     procedure PropertyInterface; override;
-    procedure PropertyName; override;
     procedure PropertyParameterConst; override;
     procedure PropertyParameterList; override;
     procedure PropertySpecifiers; override;
@@ -296,7 +303,6 @@ type
     procedure RelativeOperator; override;
     procedure RepeatStatement; override;
     procedure RequiresIdentifier; override;
-    procedure ResolutionInterfaceName; override;
     procedure ResourceDeclaration; override;
     procedure ReturnType; override;
     procedure SetConstructor; override;
@@ -325,15 +331,12 @@ type
     procedure StructuredType; override;
     procedure SubrangeType; override;
     procedure TagField; override;
-    procedure TagFieldName; override;
-    procedure TagFieldTypeName; override;
     procedure Term; override;
     procedure TryStatement; override;
     procedure TypedConstant; override;
     procedure TypeDeclaration; override;
     procedure TypeId; override;
     procedure TypeKind; override;
-    procedure TypeName; override;
     // generics
     procedure TypeArgs; override;
     procedure TypeParams; override;
@@ -346,8 +349,8 @@ type
     procedure TypeSection; override;
     procedure UnitFile; override;
     procedure UnitId; override;
-    procedure UsedUnitName; override;
     procedure UsedUnitsList; override;
+    procedure UsedUnitName; override;
     procedure VarAbsolute; override;
     procedure VarEqual; override;
     procedure VarDeclaration; override;
@@ -358,7 +361,6 @@ type
     procedure VariantIdentifier; override;
     procedure VariantSection; override;
     procedure VarParameter; override;
-    procedure VarName; override; // !! Added VarName and VarNameList back in...
     procedure VarNameList; override;
     procedure VarSection; override;
     procedure VisibilityAutomated; override;
@@ -556,7 +558,19 @@ end;
 
 procedure TD2XFullParser.ConstantName;
 begin
-  inherited;
+  if not fKeepTokens then
+    try
+      fLastTokens := '';
+      fKeepTokens := true;
+
+      inherited;
+
+      DoAddAttribute('name');
+    finally
+      fKeepTokens := False;
+    end
+  else
+    inherited;
 end;
 
 procedure TD2XFullParser.ConstantType;
@@ -596,7 +610,19 @@ end;
 
 procedure TD2XFullParser.ConstructorName;
 begin
-  inherited;
+  if not fKeepTokens then
+    try
+      fLastTokens := '';
+      fKeepTokens := true;
+
+      inherited;
+
+      DoAddAttribute('name');
+    finally
+      fKeepTokens := False;
+    end
+  else
+    inherited;
 end;
 
 procedure TD2XFullParser.ConstSection;
@@ -636,7 +662,19 @@ end;
 
 procedure TD2XFullParser.DestructorName;
 begin
-  inherited;
+  if not fKeepTokens then
+    try
+      fLastTokens := '';
+      fKeepTokens := true;
+
+      inherited;
+
+      DoAddAttribute('name');
+    finally
+      fKeepTokens := False;
+    end
+  else
+    inherited;
 end;
 
 procedure TD2XFullParser.Directive16Bit;
@@ -796,7 +834,19 @@ end;
 
 procedure TD2XFullParser.FieldName;
 begin
-  inherited;
+  if not fKeepTokens then
+    try
+      fLastTokens := '';
+      fKeepTokens := true;
+
+      inherited;
+
+      DoAddAttribute('name');
+    finally
+      fKeepTokens := False;
+    end
+  else
+    inherited;
 end;
 
 procedure TD2XFullParser.FieldNameList;
@@ -841,7 +891,19 @@ end;
 
 procedure TD2XFullParser.FunctionMethodName;
 begin
-  inherited;
+  if not fKeepTokens then
+    try
+      fLastTokens := '';
+      fKeepTokens := true;
+
+      inherited;
+
+      DoAddAttribute('name');
+    finally
+      fKeepTokens := False;
+    end
+  else
+    inherited;
 end;
 
 procedure TD2XFullParser.FunctionProcedureBlock;
@@ -851,7 +913,19 @@ end;
 
 procedure TD2XFullParser.FunctionProcedureName;
 begin
-  inherited;
+  if not fKeepTokens then
+    try
+      fLastTokens := '';
+      fKeepTokens := true;
+
+      inherited;
+
+      DoAddAttribute('name');
+    finally
+      fKeepTokens := False;
+    end
+  else
+    inherited;
 end;
 
 procedure TD2XFullParser.Identifier;
@@ -961,7 +1035,19 @@ end;
 
 procedure TD2XFullParser.MainUnitName;
 begin
-  inherited;
+  if not fKeepTokens then
+    try
+      fLastTokens := '';
+      fKeepTokens := true;
+
+      inherited;
+
+      DoAddAttribute('name');
+    finally
+      fKeepTokens := False;
+    end
+  else
+    inherited;
 end;
 
 procedure TD2XFullParser.MainUsedUnitStatement;
@@ -1096,7 +1182,19 @@ end;
 
 procedure TD2XFullParser.ParameterName;
 begin
-  inherited;
+  if not fKeepTokens then
+    try
+      fLastTokens := '';
+      fKeepTokens := true;
+
+      inherited;
+
+      DoAddAttribute('name');
+    finally
+      fKeepTokens := False;
+    end
+  else
+    inherited;
 end;
 
 procedure TD2XFullParser.ParameterNameList;
@@ -1136,7 +1234,19 @@ end;
 
 procedure TD2XFullParser.ProcedureMethodName;
 begin
-  inherited;
+  if not fKeepTokens then
+    try
+      fLastTokens := '';
+      fKeepTokens := true;
+
+      inherited;
+
+      DoAddAttribute('name');
+    finally
+      fKeepTokens := False;
+    end
+  else
+    inherited;
 end;
 
 procedure TD2XFullParser.ProgramBlock;
@@ -1161,7 +1271,19 @@ end;
 
 procedure TD2XFullParser.PropertyName;
 begin
-  inherited;
+  if not fKeepTokens then
+    try
+      fLastTokens := '';
+      fKeepTokens := true;
+
+      inherited;
+
+      DoAddAttribute('name');
+    finally
+      fKeepTokens := False;
+    end
+  else
+    inherited;
 end;
 
 procedure TD2XFullParser.PropertyParameterConst;
@@ -1246,7 +1368,19 @@ end;
 
 procedure TD2XFullParser.ResolutionInterfaceName;
 begin
-  inherited;
+  if not fKeepTokens then
+    try
+      fLastTokens := '';
+      fKeepTokens := true;
+
+      inherited;
+
+      DoAddAttribute('name');
+    finally
+      fKeepTokens := False;
+    end
+  else
+    inherited;
 end;
 
 procedure TD2XFullParser.ResourceDeclaration;
@@ -1391,12 +1525,36 @@ end;
 
 procedure TD2XFullParser.TagFieldName;
 begin
-  inherited;
+  if not fKeepTokens then
+    try
+      fLastTokens := '';
+      fKeepTokens := true;
+
+      inherited;
+
+      DoAddAttribute('name');
+    finally
+      fKeepTokens := False;
+    end
+  else
+    inherited;
 end;
 
 procedure TD2XFullParser.TagFieldTypeName;
 begin
-  inherited;
+  if not fKeepTokens then
+    try
+      fLastTokens := '';
+      fKeepTokens := true;
+
+      inherited;
+
+      DoAddAttribute('name');
+    finally
+      fKeepTokens := False;
+    end
+  else
+    inherited;
 end;
 
 procedure TD2XFullParser.Term;
@@ -1436,7 +1594,19 @@ end;
 
 procedure TD2XFullParser.TypeName;
 begin
-  inherited;
+  if not fKeepTokens then
+    try
+      fLastTokens := '';
+      fKeepTokens := true;
+
+      inherited;
+
+      DoAddAttribute('name');
+    finally
+      fKeepTokens := False;
+    end
+  else
+    inherited;
 end;
 
 procedure TD2XFullParser.TypeParamDecl;
@@ -1531,7 +1701,19 @@ end;
 
 procedure TD2XFullParser.VarName;
 begin
-  inherited;
+  if not fKeepTokens then
+    try
+      fLastTokens := '';
+      fKeepTokens := true;
+
+      inherited;
+
+      DoAddAttribute('name');
+    finally
+      fKeepTokens := False;
+    end
+  else
+    inherited;
 end;
 
 procedure TD2XFullParser.VarNameList;
@@ -1598,15 +1780,18 @@ end;
 
 procedure TD2XDefinesParser.ContainsExpression;
 begin
-  fLastTokens := '';
-  fKeepTokens := true;
-  try
+  if not fKeepTokens then
+    try
+      fLastTokens := '';
+      fKeepTokens := true;
+      inherited;
+      DoAddAttribute('file');
+      DoTrimChildren('ConstantExpression');
+    finally
+      fKeepTokens := False;
+    end
+  else
     inherited;
-    DoAddAttribute('file');
-    DoTrimChildren('ConstantExpression');
-  finally
-    fKeepTokens := False;
-  end;
 end;
 
 procedure TD2XDefinesParser.ContainsIdentifier;
@@ -1747,15 +1932,18 @@ end;
 
 procedure TD2XDefinesParser.MainUsedUnitExpression;
 begin
-  fLastTokens := '';
-  fKeepTokens := true;
-  try
+  if not fKeepTokens then
+    try
+      fLastTokens := '';
+      fKeepTokens := true;
+      inherited;
+      DoAddAttribute('file');
+      DoTrimChildren('ConstantExpression');
+    finally
+      fKeepTokens := False;
+    end
+  else
     inherited;
-    DoAddAttribute('file');
-    DoTrimChildren('ConstantExpression');
-  finally
-    fKeepTokens := False;
-  end;
 end;
 
 procedure TD2XDefinesParser.NextToken;
@@ -1921,4 +2109,3 @@ begin
 end;
 
 end.
-
