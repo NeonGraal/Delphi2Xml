@@ -1860,7 +1860,7 @@ end;
 
 procedure TD2XDefinesParser.DoAddText(pText: string);
 begin
-  if Assigned(FAddText) then
+  if Assigned(FAddText) and (pText > '') then
     FAddText(pText);
 end;
 
@@ -1878,7 +1878,7 @@ end;
 
 procedure TD2XDefinesParser.DoAddAttribute(pName, pValue: string);
 begin
-  if Assigned(FAddAttribute) then
+  if Assigned(FAddAttribute) and (pValue > '') then
     FAddAttribute(pName, pValue);
 end;
 

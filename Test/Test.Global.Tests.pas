@@ -30,6 +30,8 @@ type
     procedure TestMakeFileName;
 
     procedure TestTestStream;
+    procedure TestTestStreamRead;
+    procedure TestTestStreamWrite;
   end;
 
   TestID2XLogger = class(TLoggerTestCase)
@@ -587,7 +589,19 @@ procedure TestTD2XUtils.TestTestStream;
 begin
   CheckEqualsString('Test', fDS.Description, 'Test Stream Description');
   CheckTrue(fDS.Exists, 'Test Stream Exists');
-  fDS.ReadFrom;
+end;
+
+procedure TestTD2XUtils.TestTestStreamRead;
+begin
+  fS.WriteString('Test');
+
+  CheckReader('Test', 'Test Stream Reading', fDS.ReadFrom);
+end;
+
+procedure TestTD2XUtils.TestTestStreamWrite;
+begin
+  fDS.WriteTo.Write('Test');
+  CheckStream('Test', 'Test Stream Writing');
 end;
 
 initialization
