@@ -34,6 +34,12 @@
 			<Cfg_1>true</Cfg_1>
 			<Base>true</Base>
 		</PropertyGroup>
+		<PropertyGroup Condition="'$(Config)'=='AQTime' or '$(Cfg_2)'!=''">
+			<Cfg_2>true</Cfg_2>
+			<CfgParent>Cfg_1</CfgParent>
+			<Cfg_1>true</Cfg_1>
+			<Base>true</Base>
+		</PropertyGroup>
 		<Import Condition="'$(Base)'!='' And Exists('..\..\Warnings.optset')" Project="..\..\Warnings.optset"/>
 		<Import Condition="'$(Base)'!='' And Exists('..\..\CastaliaParser.optset')" Project="..\..\CastaliaParser.optset"/>
 		<PropertyGroup Condition="'$(Base)'!=''">
@@ -69,8 +75,11 @@
 			<ILINK_FullDebugInfo>true</ILINK_FullDebugInfo>
 			<BCC_SourceDebuggingOn>true</BCC_SourceDebuggingOn>
 			<BCC_DebugLineNumbers>true</BCC_DebugLineNumbers>
-			<Debugger_RunParams></Debugger_RunParams>
 			<Debugger_CWD>..</Debugger_CWD>
+		</PropertyGroup>
+		<Import Condition="'$(Cfg_2)'!='' And Exists('AQTime.optset')" Project="AQTime.optset"/>
+		<PropertyGroup Condition="'$(Cfg_2)'!=''">
+			<CfgDependentOn>AQTime.optset</CfgDependentOn>
 		</PropertyGroup>
 		<Import Condition="'$(Base)'!='' And Exists('..\Warnings.optset')" Project="..\Warnings.optset"/>
 		<Import Condition="'$(Base)'!='' And Exists('..\CastaliaParser.optset')" Project="..\CastaliaParser.optset"/>
@@ -85,6 +94,11 @@
 			<DCCReference Include="..\..\Source\D2X.Options.pas"/>
 			<DCCReference Include="..\Source\Test.Options.pas"/>
 			<None Include="Profiling\Delphi2Xml.Options.Tests.aqt"/>
+			<BuildConfiguration Include="AQTime">
+				<Key>Cfg_2</Key>
+				<CfgParent>Cfg_1</CfgParent>
+				<DependentOn>AQTime.optset</DependentOn>
+			</BuildConfiguration>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
 				<DependentOn>..\..\Warnings.optset;..\..\CastaliaParser.optset</DependentOn>

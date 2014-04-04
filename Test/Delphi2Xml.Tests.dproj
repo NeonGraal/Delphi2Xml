@@ -4,7 +4,7 @@
 			<ProjectVersion>13.4</ProjectVersion>
 			<FrameworkType>None</FrameworkType>
 			<Base>True</Base>
-			<Config Condition="'$(Config)'==''">Gui</Config>
+			<Config Condition="'$(Config)'==''">AQTime</Config>
 			<Platform Condition="'$(Platform)'==''">Win32</Platform>
 			<TargetedPlatforms>1</TargetedPlatforms>
 			<AppType>Console</AppType>
@@ -80,6 +80,12 @@
 			<Cfg_1>true</Cfg_1>
 			<Base>true</Base>
 		</PropertyGroup>
+		<PropertyGroup Condition="'$(Config)'=='AQTime' or '$(Cfg_4)'!=''">
+			<Cfg_4>true</Cfg_4>
+			<CfgParent>Cfg_1</CfgParent>
+			<Cfg_1>true</Cfg_1>
+			<Base>true</Base>
+		</PropertyGroup>
 		<Import Condition="'$(Base)'!='' And Exists('..\CastaliaParser.optset')" Project="..\CastaliaParser.optset"/>
 		<Import Condition="'$(Base)'!='' And Exists('..\Warnings.optset')" Project="..\Warnings.optset"/>
 		<PropertyGroup Condition="'$(Base)'!=''">
@@ -136,8 +142,12 @@
 			<VerInfo_Locale>1033</VerInfo_Locale>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_3_Win32)'!=''">
-			<Debugger_RunParams></Debugger_RunParams>
+			<Debugger_RunParams>/gui</Debugger_RunParams>
 			<VerInfo_Locale>1033</VerInfo_Locale>
+		</PropertyGroup>
+		<Import Condition="'$(Cfg_4)'!='' And Exists('Single\AQTime.optset')" Project="Single\AQTime.optset"/>
+		<PropertyGroup Condition="'$(Cfg_4)'!=''">
+			<CfgDependentOn>Single\AQTime.optset</CfgDependentOn>
 		</PropertyGroup>
 		<Import Condition="'$(Base)'!='' And Exists('Warnings.optset')" Project="Warnings.optset"/>
 		<Import Condition="'$(Base)'!='' And Exists('..\..\FastMM\FastMM.optset')" Project="..\..\FastMM\FastMM.optset"/>
@@ -192,12 +202,16 @@
 			<DCCReference Include="..\Source\D2X.IO.ErrorLog.pas"/>
 			<DCCReference Include="Source\Test.Flag.pas"/>
 			<None Include="Profiling\Delphi2Xml.Test.aqt"/>
-			<None Include="Config\Test.def"/>
-			<None Include="Config\Test.prm"/>
 			<None Include="FastMM4Options.inc"/>
+			<None Include="..\Config\Test.prm"/>
 			<BuildConfiguration Include="Console">
 				<Key>Cfg_2</Key>
 				<CfgParent>Cfg_1</CfgParent>
+			</BuildConfiguration>
+			<BuildConfiguration Include="AQTime">
+				<Key>Cfg_4</Key>
+				<CfgParent>Cfg_1</CfgParent>
+				<DependentOn>Single\AQTime.optset</DependentOn>
 			</BuildConfiguration>
 			<BuildConfiguration Include="Gui">
 				<Key>Cfg_3</Key>
@@ -245,21 +259,20 @@
 						<VersionInfoKeys Name="Comments"/>
 					</VersionInfoKeys>
 					<Excluded_Packages>
-						<Excluded_Packages Name="$(BDSBIN)\dcloffice2k160.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
-						<Excluded_Packages Name="$(BDSBIN)\dclofficexp160.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
+						<Excluded_Packages Name="C:\Dev\V6\V6Dealer\Main\Build\Win32\Debug\V6DComponentDesign.bpl">File C:\Dev\V6\V6Dealer\Main\Build\Win32\Debug\V6DComponentDesign.bpl not found</Excluded_Packages>
 					</Excluded_Packages>
 					<Source>
 						<Source Name="MainSource">Delphi2Xml.Tests.dpr</Source>
 					</Source>
 				</Delphi.Personality>
 				<Deployment>
-					<DeployFile LocalName="Delphi2XmlTests" Configuration="Debug" Class="ProjectOutput">
-						<Platform Name="All Platforms"/>
-					</DeployFile>
 					<DeployFile LocalName="Delphi2XmlTests.rsm" Configuration="Debug" Class="DebugSymbols">
 						<Platform Name="Win64">
 							<RemoteName>Delphi2XmlTests.rsm</RemoteName>
 						</Platform>
+					</DeployFile>
+					<DeployFile LocalName="Delphi2XmlTests" Configuration="Debug" Class="ProjectOutput">
+						<Platform Name="All Platforms"/>
 					</DeployFile>
 					<DeployFile LocalName="$(BDS)\Redist\osx32\libcgunwind.1.0.dylib" Class="DependencyModule">
 						<Platform Name="OSX32"/>

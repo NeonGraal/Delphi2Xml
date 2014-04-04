@@ -22,7 +22,7 @@ type
 
     procedure InitOptions(pFileOpts: ID2XIOFactory);
 
-    procedure EndProcessing;
+    procedure EndRunProcessing;
 
     function ProcessParam(pStr: string; pIdx: Integer): Boolean;
 
@@ -58,9 +58,9 @@ begin
   inherited;
 end;
 
-procedure TD2XRunParam.EndProcessing;
+procedure TD2XRunParam.EndRunProcessing;
 begin
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
 end;
 
 procedure TD2XRunParam.InitOptions(pFileOpts: ID2XIOFactory);

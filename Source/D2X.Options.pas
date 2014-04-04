@@ -83,7 +83,7 @@ type
     function RecurseDirectory(pDir, pWildCards: string; pMainDir: Boolean): Boolean;
     function ProcessParam(pParam, pFrom: string): Boolean;
 
-    procedure EndProcessing;
+    procedure EndAllProcessing;
 
     procedure DescribeAll;
 
@@ -154,7 +154,7 @@ begin
   inherited;
 end;
 
-procedure TD2XOptions.EndProcessing;
+procedure TD2XOptions.EndAllProcessing;
 var
   lP: TD2XProcessor;
 begin

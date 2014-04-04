@@ -42,7 +42,7 @@ Set the default options for FastMM here.
  of borlndmm.dll has been called"), FastMM cannot be uninstalled safely when
  used inside a replacement borlndmm.dll for the IDE. Setting this option will
  circumvent this problem by never uninstalling the memory manager.}
-{.$define NeverUninstall}
+{$define NeverUninstall}
 
 {Set this option when you use runtime packages in this application or library.
  This will automatically set the "AssumeMultiThreaded" option. Note that you
@@ -50,7 +50,7 @@ Set the default options for FastMM here.
  freed - failure to do so will result in a large leak report followed by a lot
  of A/Vs. (See the FAQ for more detail.) You may have to combine this option
  with the NeverUninstall option.}
-{.$define UseRuntimePackages}
+{$define UseRuntimePackages}
 
 {-----------------------Concurrency Management Options------------------------}
 

@@ -83,7 +83,6 @@
 			<BCC_SourceDebuggingOn>true</BCC_SourceDebuggingOn>
 			<BCC_DebugLineNumbers>true</BCC_DebugLineNumbers>
 			<VerInfo_Locale>1033</VerInfo_Locale>
-			<Debugger_RunParams></Debugger_RunParams>
 			<DCC_RemoteDebug>false</DCC_RemoteDebug>
 		</PropertyGroup>
 		<Import Condition="'$(Base)'!='' And Exists('..\Warnings.optset')" Project="..\Warnings.optset"/>

@@ -70,7 +70,6 @@
 			<ILINK_FullDebugInfo>true</ILINK_FullDebugInfo>
 			<BCC_SourceDebuggingOn>true</BCC_SourceDebuggingOn>
 			<Debugger_CWD>..</Debugger_CWD>
-			<Debugger_RunParams></Debugger_RunParams>
 		</PropertyGroup>
 		<Import Condition="'$(Base)'!='' And Exists('..\Warnings.optset')" Project="..\Warnings.optset"/>
 		<Import Condition="'$(Base)'!='' And Exists('..\CastaliaParser.optset')" Project="..\CastaliaParser.optset"/>

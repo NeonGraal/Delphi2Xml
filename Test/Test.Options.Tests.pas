@@ -901,7 +901,7 @@ end;
 
 procedure TestTD2XOptions.TestEndProcessing;
 begin
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
   CheckLog('Processing finished!', 'End Processing');
 end;
 
@@ -1017,7 +1017,7 @@ begin
   Check(fOpts.ProcessParam('Testing.Test*', 'Count Children'), 'Process Unit');
   CheckLog('', 'Process Unit');
 
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
 end;
 
 procedure TestTD2XOptionsSpecific.TestCountFinalDefines;
@@ -1028,7 +1028,7 @@ begin
   Check(fOpts.ProcessParam('Testing.Test*', 'Count Defines'), 'Process Unit');
   CheckLog('', 'Process Unit');
 
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
 end;
 
 procedure TestTD2XOptionsSpecific.TestCountDefinesUsed;
@@ -1039,7 +1039,7 @@ begin
   Check(fOpts.ProcessParam('Testing.Test*', 'Defines Used'), 'Process Unit');
   CheckLog('', 'Process Unit');
 
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
 end;
 
 procedure TestTD2XOptionsSpecific.TestElapsedMode;
@@ -1130,25 +1130,25 @@ begin
   Check(fOpts.ProcessOption('EQ'), 'Return Value 1');
   fB.Clear;
   Check(fOpts.ProcessParam('Testing.Test*', 'Count Children'), 'Process Units');
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
   CheckLog(ALL_PROCESSING + END_PROCESSING, 'Elapsed Quiet');
 
   Check(fOpts.ProcessOption('ER'), 'Return Value 1');
   fB.Clear;
   Check(fOpts.ProcessParam('Testing.Test*', 'Count Children'), 'Process Units');
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
   CheckLog(ALL_PROCESSING + END_PROCESSING, 'Elapsed Run');
 
   Check(fOpts.ProcessOption('ED'), 'Return Value 1');
   fB.Clear;
   Check(fOpts.ProcessParam('Testing.Test*', 'Count Children'), 'Process Units');
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
   CheckLog(PT([PF(PB('')), PF(PB('Config')), PF(PB('Config\Test'))]), 'Elapsed Dir');
 
   Check(fOpts.ProcessOption('EF'), 'Return Value 1');
   fB.Clear;
   Check(fOpts.ProcessParam('Testing.Test*', 'Count Children'), 'Process Units');
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
   CheckLog(PT([PD('', ['Testing.Test.AUnit.pas', 'Testing.Test.AProgram.dpr',
           'Testing.Test.APackage.dpk']), PD('Config', ['Testing.Test.Dir.pas']),
       PD('Config\Test', ['Testing.Test.SubDir.pas'])]), 'Elapsed File');
@@ -1156,7 +1156,7 @@ begin
   Check(fOpts.ProcessOption('EP'), 'Return Value 1');
   fB.Clear;
   Check(fOpts.ProcessParam('Testing.Test*', 'Count Children'), 'Process Units');
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
   SetLength(lP, 3);
   SA(lP[0], [1, 3, 4, 6, 9, 10, 12, 14, 15, 30, 31, 33, 34, 36, 46, 53, 64, 75, 98, 99, 100]);
   SA(lP[1], [7, 15, 17, 21, 22, 30, 31, 37, 45, 46, 51, 52, 57, 60, 87, 88, 94, 98, 100]);
@@ -1178,7 +1178,7 @@ begin
   Check(fOpts.ProcessParam('Testing.Test*', 'Load Skipped Methods'), 'Process Unit');
   CheckLog('', 'Process Unit');
 
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
 end;
 
 procedure TestTD2XOptionsSpecific.TestLogErrors;
@@ -1197,7 +1197,7 @@ begin
   Check(fOpts.ProcessStream('(Stream)', fDS.ReadFrom), 'Process Stream');
   CheckLog('', 'Process Stream');
 
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
 end;
 
 procedure TestTD2XOptionsSpecific.TestNotSupported;
@@ -1210,7 +1210,7 @@ begin
   CheckLog('', 'Process Unit');
   CheckErrorLog('Currently not supported {$D+}');
 
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
 end;
 
 procedure TestTD2XOptionsSpecific.TestWriteDefines;
@@ -1221,7 +1221,7 @@ begin
   Check(fOpts.ProcessParam('Testing.Test*', 'Write Defines'), 'Process Unit');
   CheckLog('', 'Process Unit');
 
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
 end;
 
 { TOptionsParseTestCase }
@@ -1737,7 +1737,7 @@ begin
   fOpts.ProcessOption('PD');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Dir');
   CheckLog(ALL_PROCESSING, 'Processing Xml per Dir');
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
   CheckFiles('TestProcessXmlPerDir');
 end;
 
@@ -1747,7 +1747,7 @@ begin
   fOpts.ProcessOption('PF');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per File');
   CheckLog(ALL_PROCESSING, 'Processing Xml per File');
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
   CheckFiles('TestProcessXmlPerFile');
 end;
 
@@ -1757,7 +1757,7 @@ begin
   fOpts.ProcessOption('PG');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Group');
   CheckLog(ALL_PROCESSING, 'Processing Xml per Group');
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
   CheckFiles('TestProcessXmlPerGroup');
 end;
 
@@ -1767,7 +1767,7 @@ begin
   fOpts.ProcessOption('PP');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Param');
   CheckLog(ALL_PROCESSING, 'Processing Xml per Param');
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
   CheckFiles('TestProcessXmlPerParam');
 end;
 
@@ -1777,7 +1777,7 @@ begin
   fOpts.ProcessOption('PR');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Run');
   CheckLog(ALL_PROCESSING, 'Processing Xml per Run');
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
   CheckFiles('TestProcessXmlPerRun');
 end;
 
@@ -1787,7 +1787,7 @@ begin
   fOpts.ProcessOption('PS');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per SubDir');
   CheckLog(ALL_PROCESSING, 'Processing Xml per SubDir');
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
   CheckFiles('TestProcessXmlPerSubDir');
 end;
 
@@ -1797,7 +1797,7 @@ begin
   fOpts.ProcessOption('PW');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Wildcard');
   CheckLog(ALL_PROCESSING, 'Processing Xml per Wildcard');
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
   CheckFiles('TestProcessXmlPerWildcard');
 end;
 
@@ -1808,7 +1808,7 @@ begin
   fOpts.ProcessOption('PD');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Dir');
   CheckLog(ALL_PROCESSING, 'Processing Xml per Dir');
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
   CheckFiles('TestProcessXmlUsesPerDir');
 end;
 
@@ -1819,7 +1819,7 @@ begin
   fOpts.ProcessOption('PF');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per File');
   CheckLog(ALL_PROCESSING, 'Processing Xml per File');
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
   CheckFiles('TestProcessXmlUsesPerFile');
 end;
 
@@ -1830,7 +1830,7 @@ begin
   fOpts.ProcessOption('PG');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Group');
   CheckLog(ALL_PROCESSING, 'Processing Xml per Group');
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
   CheckFiles('TestProcessXmlUsesPerGroup');
 end;
 
@@ -1841,7 +1841,7 @@ begin
   fOpts.ProcessOption('PP');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Param');
   CheckLog(ALL_PROCESSING, 'Processing Xml per Param');
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
   CheckFiles('TestProcessXmlUsesPerParam');
 end;
 
@@ -1852,7 +1852,7 @@ begin
   fOpts.ProcessOption('PR');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Run');
   CheckLog(ALL_PROCESSING, 'Processing Xml per Run');
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
   CheckFiles('TestProcessXmlUsesPerRun');
 end;
 
@@ -1863,7 +1863,7 @@ begin
   fOpts.ProcessOption('PS');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per SubDir');
   CheckLog(ALL_PROCESSING, 'Processing Xml per SubDir');
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
   CheckFiles('TestProcessXmlUsesPerSubDir');
 end;
 
@@ -1874,7 +1874,7 @@ begin
   fOpts.ProcessOption('PW');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Xml'), 'Param per Wildcard');
   CheckLog(ALL_PROCESSING, 'Processing Xml per Wildcard');
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
   CheckFiles('TestProcessXmlUsesPerWildcard');
 end;
 
@@ -1935,7 +1935,7 @@ begin
   fOpts.ProcessOption('PD');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Json'), 'Param per Dir');
   CheckLog(ALL_PROCESSING, 'Processing Json per Dir');
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
   CheckFiles('TestProcessJsonPerDir');
 end;
 
@@ -1945,7 +1945,7 @@ begin
   fOpts.ProcessOption('PF');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Json'), 'Param per File');
   CheckLog(ALL_PROCESSING, 'Processing Json per File');
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
   CheckFiles('TestProcessJsonPerFile');
 end;
 
@@ -1955,7 +1955,7 @@ begin
   fOpts.ProcessOption('PG');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Json'), 'Param per Group');
   CheckLog(ALL_PROCESSING, 'Processing Json per Group');
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
   CheckFiles('TestProcessJsonPerGroup');
 end;
 
@@ -1965,7 +1965,7 @@ begin
   fOpts.ProcessOption('PP');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Json'), 'Param per Param');
   CheckLog(ALL_PROCESSING, 'Processing Json per Param');
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
   CheckFiles('TestProcessJsonPerParam');
 end;
 
@@ -1975,7 +1975,7 @@ begin
   fOpts.ProcessOption('PR');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Json'), 'Param per Run');
   CheckLog(ALL_PROCESSING, 'Processing Json per Run');
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
   CheckFiles('TestProcessJsonPerRun');
 end;
 
@@ -1985,7 +1985,7 @@ begin
   fOpts.ProcessOption('PS');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Json'), 'Param per SubDir');
   CheckLog(ALL_PROCESSING, 'Processing Json per SubDir');
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
   CheckFiles('TestProcessJsonPerSubDir');
 end;
 
@@ -1995,7 +1995,7 @@ begin
   fOpts.ProcessOption('PW');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Json'), 'Param per Wildcard');
   CheckLog(ALL_PROCESSING, 'Processing Json per Wildcard');
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
   CheckFiles('TestProcessJsonPerWildcard');
 end;
 
@@ -2006,7 +2006,7 @@ begin
   fOpts.ProcessOption('PD');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Json'), 'Param per Dir');
   CheckLog(ALL_PROCESSING, 'Processing Json per Dir');
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
   CheckFiles('TestProcessJsonUsesPerDir');
 end;
 
@@ -2017,7 +2017,7 @@ begin
   fOpts.ProcessOption('PF');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Json'), 'Param per File');
   CheckLog(ALL_PROCESSING, 'Processing Json per File');
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
   CheckFiles('TestProcessJsonUsesPerFile');
 end;
 
@@ -2028,7 +2028,7 @@ begin
   fOpts.ProcessOption('PG');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Json'), 'Param per Group');
   CheckLog(ALL_PROCESSING, 'Processing Json per Group');
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
   CheckFiles('TestProcessJsonUsesPerGroup');
 end;
 
@@ -2039,7 +2039,7 @@ begin
   fOpts.ProcessOption('PP');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Json'), 'Param per Param');
   CheckLog(ALL_PROCESSING, 'Processing Json per Param');
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
   CheckFiles('TestProcessJsonUsesPerParam');
 end;
 
@@ -2050,7 +2050,7 @@ begin
   fOpts.ProcessOption('PR');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Json'), 'Param per Run');
   CheckLog(ALL_PROCESSING, 'Processing Json per Run');
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
   CheckFiles('TestProcessJsonUsesPerRun');
 end;
 
@@ -2061,7 +2061,7 @@ begin
   fOpts.ProcessOption('PS');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Json'), 'Param per SubDir');
   CheckLog(ALL_PROCESSING, 'Processing Json per SubDir');
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
   CheckFiles('TestProcessJsonUsesPerSubDir');
 end;
 
@@ -2072,7 +2072,7 @@ begin
   fOpts.ProcessOption('PW');
   Check(fOpts.ProcessParam('Testing.Test*', 'Process Json'), 'Param per Wildcard');
   CheckLog(ALL_PROCESSING, 'Processing Json per Wildcard');
-  fOpts.EndProcessing;
+  fOpts.EndAllProcessing;
   CheckFiles('TestProcessJsonUsesPerWildcard');
 end;
 

@@ -3,3 +3,5 @@
 -f+trf
 -g1
 *.dpr,*.pas
+#Comment
+@Bad.file

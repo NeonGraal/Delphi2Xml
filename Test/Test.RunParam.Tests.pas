@@ -43,6 +43,8 @@ type
     procedure TestProcessParamPasFiles;
     procedure TestProcessParamParamFile;
     procedure TestProcessParamInput;
+    procedure TestProcessParamComment;
+    procedure TestProcessParamException;
   end;
 
   { TTestRunParam }
@@ -88,7 +90,7 @@ end;
 
 procedure TestTD2XRunParam.TestEndProcessing;
 begin
-  fOpts.EndProcessing;
+  fOpts.EndRunProcessing;
   CheckBuilder('Processing finished!', 'End Processing');
 end;
 
@@ -102,6 +104,20 @@ begin
 
   Check(ParseOption('''-?'''), 'Return Value');
   CheckLog(UsageDescription + EXPECTED_SHOW_OPTIONS, 'Double Quoted Process Param');
+end;
+
+procedure TestTD2XRunParam.TestProcessParamComment;
+begin
+  Check(ParseOption('#Test.prm'), 'Return Value');
+  CheckBuilder('', 'Processing Comment param');
+end;
+
+procedure TestTD2XRunParam.TestProcessParamException;
+const
+  BAD_FILE_EXCEPTION = 'EXCEPTION (ETestIOException) processing (Param)@0 "@Bad.file" : Unknown test Config file: Bad.file';
+begin
+  CheckFalse(ParseOption('@Bad.file'), 'Return Value');
+  CheckLog(BAD_FILE_EXCEPTION, 'Processing Bad file (Exception)');
 end;
 
 procedure TestTD2XRunParam.TestProcessParamInput;

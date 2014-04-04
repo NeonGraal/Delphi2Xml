@@ -48,7 +48,7 @@ begin
       bOk := True;
       for i := 1 to ParamCount do
         bOk := opts.ProcessParam(ParamStr(i), i) and bOk;
-      opts.EndProcessing;
+      opts.EndRunProcessing;
       if not bOk then
         with TStreamWriter.Create(sOut) do
           try
