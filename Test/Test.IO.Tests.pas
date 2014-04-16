@@ -78,6 +78,7 @@ type
     procedure TestSetGlobalLabel;
     procedure TestSetGlobalValidator;
     procedure TestSetTimestampFlag;
+    procedure TestNoFileIOFlag;
     procedure TestRegisterParams;
     procedure TestGetNow;
     procedure TestGetDuration;
@@ -307,6 +308,34 @@ begin
     CheckEqualsString('File', lFile.Description, 'Log File Description');
   finally
     DisposeOf(lFile);
+  end;
+end;
+
+procedure TestID2XIOFactory.TestNoFileIOFlag;
+var
+  lFlag: TD2XBoolFlag;
+  lFile: ID2XIOFile;
+  lFRef: TD2XFlagRef;
+begin
+  lFlag := TD2XBoolFlag.Create;
+  try
+    lFRef := lFlag.FlagRef;
+    fFact.SetNoFileIOFlag(lFRef);
+
+    lFlag.SetFlag(False);
+    lFile := fFact.SimpleFile('File.Extn');
+    CheckNotNull(lFile, 'Log File has File IO');
+    DisposeOf(lFile);
+
+    lFlag.SetFlag(True);
+    lFile := fFact.SimpleFile('File.Extn');
+    CheckNull(lFile, 'Log File has No File IO');
+
+    fFact.SetNoFileIOFlag(nil);
+    lFRef := nil;
+  finally
+    DisposeOf(lFile);
+    FreeAndNil(lFlag);
   end;
 end;
 

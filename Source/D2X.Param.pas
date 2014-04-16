@@ -250,7 +250,7 @@ var
 begin
   lBase := ChangeFileExt(ExtractFileName(ParamStr(0)), '');
 
-  pL.Log('Usage: %s [ Option | @Params | mFilename | Wildcard ] ... ', [lBase]);
+  pL.Log('Usage: %s [ Option | @Params | Filename | Wildcard ] ... ', [lBase]);
   pL.Log('Options:           %-15s Description', ['Default']);
   for lP in Self do
     lP.Describe(pL);

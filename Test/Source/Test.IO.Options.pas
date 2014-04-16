@@ -25,6 +25,7 @@ type
     fFileOpts: TD2XFileOptionsTest;
     fValidatorCalled: Boolean;
     fTimeBool: TD2XBoolFlag;
+    fNoIOBool: TD2XBoolFlag;
 
     function ForCode(pCode: string): TD2XParam;
   public
@@ -49,16 +50,19 @@ begin
   inherited;
 
   fTimeBool := TD2XBoolFlag.Create;
+  fNoIOBool := TD2XBoolFlag.Create;
 
   fFileOpts := TD2XFileOptionsTest.Create;
   fFileOpts.SetGlobalValidator(TestValidator);
   fFileOpts.SetTimestampFlag(fTimeBool.FlagRef);
+  fFileOpts.SetNoFileIOFlag(fNoIOBool.FlagRef);
   fFileOpts.RegisterParams(fParams);
 end;
 
 procedure TFileFactoryTestCase.TearDown;
 begin
   FreeAndNil(fFileOpts);
+  FreeAndNil(fNoIOBool);
   FreeAndNil(fTimeBool);
 
   inherited;

@@ -44,6 +44,7 @@ type
     procedure SetGlobalLabel(const pLabel: String);
     procedure SetGlobalValidator(pValidator: TD2XSingleParam<String>.TspValidator);
     procedure SetTimestampFlag(pFlag: TD2XFlagRef);
+    procedure SetNoFileIOFlag(pFlag: TD2XFlagRef);
     procedure RegisterParams(pParams: TD2XParams);
     function GetNow: String;
     function GetDuration(pWatch: TStopwatch): Double;

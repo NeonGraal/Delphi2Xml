@@ -1,6 +1,6 @@
 -d+CPU32,Interface,Implementation,Dummy
 -h+Standalone_PropertyUnits
--f+tr-f
+-f+tr#-f
 -b:..\..\Dev_V6\V6\3.6\Main\V6
 -xCode Templates
 *.dp?,*.inc,*.pas

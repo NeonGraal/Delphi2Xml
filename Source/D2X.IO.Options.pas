@@ -22,6 +22,7 @@ type
     procedure SetGlobalLabel(const pLabel: string);
     procedure SetGlobalValidator(pValidator: TD2XSingleParam<string>.TspValidator);
     procedure SetTimestampFlag(pFlag: TD2XFlagRef);
+    procedure SetNoFileIOFlag(pFlag: TD2XFlagRef);
     procedure RegisterParams(pParams: TD2XParams);
     function GetNow: string;
     function GetDuration(pWatch: TStopwatch): Double;
@@ -33,6 +34,7 @@ type
     fInputBase: TD2XFlaggedStringParam;
     fGlobalLabel: TD2XStringParam;
     fTimestampFiles: TD2XFlagRef;
+    fNoFileIOFiles: TD2XFlagRef;
     fExcludeDirs: TD2XListParam;
 
     function GetGlobalLabel: string;
@@ -164,10 +166,10 @@ end;
 function TD2XFileOptions.BaseFile(pFileOrDir: string): ID2XIOFile;
 begin
   if fInputBase.FlagValue and (fInputBase.Value > '') then
-    Result := TD2XFileStream.Create(IncludeTrailingPathDelimiter(fInputBase.Value) +
+    Result := SimpleFile(IncludeTrailingPathDelimiter(fInputBase.Value) +
         pFileOrDir)
   else
-    Result := TD2XFileStream.Create(pFileOrDir);
+    Result := SimpleFile(pFileOrDir);
 end;
 
 function TD2XFileOptions.ConfigFileOrExtn(pFileOrExtn: string): ID2XIOFile;
@@ -253,6 +255,11 @@ begin
   fOutputTimestamp := FormatDateTime('-HH-mm', Now);
 end;
 
+procedure TD2XFileOptions.SetNoFileIOFlag(pFlag: TD2XFlagRef);
+begin
+  fNoFileIOFiles := pFlag;
+end;
+
 procedure TD2XFileOptions.SetTimestampFlag(pFlag: TD2XFlagRef);
 begin
   fTimestampFiles := pFlag;
@@ -260,7 +267,10 @@ end;
 
 function TD2XFileOptions.SimpleFile(pFile: string): ID2XIOFile;
 begin
-  Result := TD2XFileStream.Create(pFile);
+  if fNoFileIOFiles() then
+    Result := TD2XFileNil.Create(pFile)
+  else
+    Result := TD2XFileStream.Create(pFile);
 end;
 
 end.

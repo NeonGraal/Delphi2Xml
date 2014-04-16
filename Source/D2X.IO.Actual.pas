@@ -10,18 +10,32 @@ uses
   System.RegularExpressions;
 
 type
-  TD2XFileStream = class(TD2XInterfaced, ID2XIOFile)
+  TD2XFileBase = class(TD2XInterfaced)
   private
+    fFilename: string;
+  protected
     fSW: TStreamWriter;
     fSR: TStreamReader;
-
-    fFilename: string;
   public
     constructor Create(pFilename: string);
     destructor Destroy; override;
 
     function Description: string;
     function Exists: Boolean;
+  end;
+
+  TD2XFileNil = class(TD2XFileBase, ID2XIOFile)
+  private
+    fMem: TMemoryStream;
+  public
+    destructor Destroy; override;
+
+    function ReadFrom: TStreamReader;
+    function WriteTo(pAppend: Boolean = False): TStreamWriter;
+  end;
+
+  TD2XFileStream = class(TD2XFileBase, ID2XIOFile)
+  public
     function ReadFrom: TStreamReader;
     function WriteTo(pAppend: Boolean = False): TStreamWriter;
   end;
@@ -55,19 +69,24 @@ type
 
 implementation
 
-{ TD2XFileStream }
+{ TD2XFileBase }
 
-constructor TD2XFileStream.Create(pFilename: string);
+constructor TD2XFileBase.Create(pFilename: string);
 begin
   fFilename := pFilename;
 end;
 
-function TD2XFileStream.Description: string;
+function TD2XFileBase.Description: string;
 begin
   Result := fFilename;
 end;
 
-destructor TD2XFileStream.Destroy;
+function TD2XFileBase.Exists: Boolean;
+begin
+  Result := FileExists(fFilename)
+end;
+
+destructor TD2XFileBase.Destroy;
 begin
   FreeAndNil(fSR);
   FreeAndNil(fSW);
@@ -75,10 +94,7 @@ begin
   inherited;
 end;
 
-function TD2XFileStream.Exists: Boolean;
-begin
-  Result := FileExists(fFilename)
-end;
+{ TD2XFileStream }
 
 function TD2XFileStream.ReadFrom: TStreamReader;
 begin
@@ -212,6 +228,28 @@ begin
       Result := False;
       Exit;
     end;
+end;
+
+{ TD2XFileNil }
+
+destructor TD2XFileNil.Destroy;
+begin
+  FreeAndNil(fMem);
+
+  inherited;
+end;
+
+function TD2XFileNil.ReadFrom: TStreamReader;
+begin
+  fSR := TStreamReader.Create();
+  Result := fSR;
+end;
+
+function TD2XFileNil.WriteTo(pAppend: Boolean): TStreamWriter;
+begin
+  fMem := TMemoryStream.Create;
+  fSW := TStreamWriter.Create(fMem);
+  Result := fSW;
 end;
 
 end.

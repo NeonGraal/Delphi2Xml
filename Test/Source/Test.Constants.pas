@@ -22,11 +22,12 @@ const
     'B[+-]:<dir> -(.\) Use <dir> as a base for all Input files ' +
     'X[!:]<list> Clear(!), Load(:,.xre) or Add items to Exclude files/dirs matching these regular expressions';
 
-  EXPECTED_SHOW_OPTIONS = ' ? Show valid options ! Reset all options to defaults ' +
+  EXPECTED_SHOW_OPTIONS = ' ? Show valid options ![!] Reset all options to defaults/"zero" values ' +
     '@<file> Report/Output Current options F<codes> | :<labels> Flags ' +
     'V Verbose - Log all Parser methods called T Timestamp - Timestamp global output files ' +
     'R Recurse - Recurse into subdirectories N LogNotSupp - Log Not Supported messages ' +
     'F FinalToken + Record Final Token E LogErrors + Log Error messages ' +
+    '# NoFileIO - Don''t perform any actual file I/O ' +
     'M<mode> Full Parser type (F[ull], U[ses]) ' +
     'P<per> File Result per (F[ile], S[ubdir], D[ir], W[ildcard], P[aram], R[un]) ' +
     'E<mode> Quiet Elapsed time display (N[one], T[otal], D[ir], F[ile], P[rocessing], [Q]uiet) '
@@ -47,7 +48,7 @@ const
     'Global label %s Config dir :Config\ Log dir :Log\ Base dir -(.\) Exclude Files/Dirs';
 
   BASE_REPORT_OPTIONS = REPORT_HEADING +
-    'Flags FinalToken+,LogErrors+,LogNotSupp-,Recurse-,Timestamp-,Verbose- ' +
+    'Flags FinalToken+,LogErrors+,LogNotSupp-,NoFileIO-,Recurse-,Timestamp-,Verbose- ' +
     'Parse mode Full Results per File Show elapsed Quiet Group length 2 Write XML :Xml,xml ' +
     'Write JSON -(Json,json) Write Defines -(Defines,def) Count Children :.chld ' +
     'Count Final Defines :.final Count Defines Used :.used Skipped Methods -(.skip) ';
@@ -77,7 +78,7 @@ uses
   System.SysUtils;
 
 const
-  DESCRIPTION_PREFIX = 'Usage: %s [ Option | @Params | mFilename | Wildcard ] ... ' +
+  DESCRIPTION_PREFIX = 'Usage: %s [ Option | @Params | Filename | Wildcard ] ... ' +
     'Options: Default Description';
   GLOBAL_DESCRIPTION = ' L<str> %s Sets global label ';
 

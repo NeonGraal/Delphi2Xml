@@ -60,6 +60,7 @@ type
     fGlobalLabel: string;
     fValidator: TD2XSingleParam<string>.TspValidator;
     fTimestampFlag: TD2XFlagRef;
+    fNoFileIOFlag: TD2XFlagRef;
 
     procedure InitFiles;
 
@@ -78,6 +79,7 @@ type
     procedure SetGlobalLabel(const pName: string);
     procedure SetGlobalValidator(pValidator: TD2XSingleParam<string>.TspValidator);
     procedure SetTimestampFlag(pFlag: TD2XFlagRef);
+    procedure SetNoFileIOFlag(pFlag: TD2XFlagRef);
     procedure RegisterParams(pParams: TD2XParams);
     function GetNow: string;
     function GetDuration(pWatch: TStopwatch): Double;
@@ -461,6 +463,11 @@ begin
   fValidator := pValidator;
 end;
 
+procedure TTestFactory.SetNoFileIOFlag(pFlag: TD2XFlagRef);
+begin
+  fNoFileIOFlag := pFlag;
+end;
+
 procedure TTestFactory.SetTimestampFlag(pFlag: TD2XFlagRef);
 begin
   fTimestampFlag := pFlag;
@@ -470,7 +477,10 @@ function TTestFactory.SimpleFile(pFile: string): ID2XIOFile;
 var
   lInput: string;
 begin
-  Result := TTestFile.Create(pFile, True, lInput, Self);
+  if Assigned(fNoFileIOFlag) and fNoFileIOFlag() then
+    Result := nil
+  else
+    Result := TTestFile.Create(pFile, True, lInput, Self);
 end;
 
 procedure TTestFactory.StoreOutput(pFile, pOutput: string);

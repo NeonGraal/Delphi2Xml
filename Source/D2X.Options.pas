@@ -416,7 +416,7 @@ begin
       Result := True;
       fParams.DescribeAll(Self);
     end));
-  fParams.Add(TD2XParam.Create('!', 'Reset', '', 'Reset all options to defaults',
+  fParams.Add(TD2XParam.Create('!', 'Reset', '[!]', 'Reset all options to defaults/"zero" values',
     function(pStr: string): Boolean
     begin
       Result := True;
@@ -469,13 +469,14 @@ procedure TD2XOptions.InitFlags;
 var
   lFlags: TD2XFlagDefines;
 begin
-  SetLength(lFlags, 6);
+  SetLength(lFlags, 7);
   lFlags[0] := FlagDef('V', 'Verbose', 'Log all Parser methods called');
   lFlags[1] := FlagDef('T', 'Timestamp', 'Timestamp global output files');
   lFlags[2] := FlagDef('R', 'Recurse', 'Recurse into subdirectories');
   lFlags[3] := FlagDef('N', 'LogNotSupp', 'Log Not Supported messages');
   lFlags[4] := FlagDef('F', 'FinalToken', 'Record Final Token', True);
   lFlags[5] := FlagDef('E', 'LogErrors', 'Log Error messages', True);
+  lFlags[6] := FlagDef('#', 'NoFileIO', 'Don''t perform any actual file I/O');
 
   fFlags := TD2XFlagsParam.CreateFlags(lFlags);
 end;
@@ -631,6 +632,7 @@ begin
       Result := True;
     end);
   fIOFact.SetTimestampFlag(fFlags.RefLabel['Timestamp']);
+  fIOFact.SetNoFileIOFlag(fFlags.RefLabel['NoFileIO']);
 
   fParseMode := TD2XSingleParam<TD2XParseMode>.CreateParamOnSet('M', 'Parse mode', '<mode>',
     'Parser type (F[ull], U[ses])', pmFull, TD2X.CnvEnum<TD2XParseMode>,

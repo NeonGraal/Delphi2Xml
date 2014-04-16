@@ -205,6 +205,7 @@ type
     procedure TestParseOptionRecurse;
     procedure TestParseOptionTimestamp;
     procedure TestParseOptionVerbose;
+    procedure TestParseOptionNoFileIO;
   end;
 
   TestTD2XOptionsParseCountChildren = class(TOptionsParseTestCase)
@@ -333,7 +334,7 @@ const
   END_PROCESSING = ' Processing finished!';
   ALL_PROCESSING = BOTH_PROCESSING + ' ' + FULLDIR_PROCESSING;
   ALTERED_REPORT_OPTIONS = REPORT_HEADING + 'Flags ' +
-    'FinalToken+,LogErrors+,LogNotSupp+,Recurse+,Timestamp-,Verbose+ ' +
+    'FinalToken+,LogErrors+,LogNotSupp+,NoFileIO-,Recurse+,Timestamp-,Verbose+ ' +
   //    'Recurse + Timestamp - Global name :Test Config dir :Test\ Log dir :Test\ ' +
   //    'Base dir :Test\ Parse mode Full Results per File Show elapsed Quiet ' +
     'Parse mode Full Results per File Show elapsed Quiet Group length 2 Write XML :Test,xml ' +
@@ -341,7 +342,7 @@ const
     'Count Final Defines :.Test Count Defines Used :.Test Skipped Methods :Test.skip ' +
     'Defines TANGO, UNIFORM, VICTOR Held Defines TANGO, UNIFORM, VICTOR';
   ZERO_REPORT_OPTIONS = REPORT_HEADING + 'Flags ' +
-    'FinalToken-,LogErrors-,LogNotSupp-,Recurse-,Timestamp-,Verbose- ' +
+    'FinalToken-,LogErrors-,LogNotSupp-,NoFileIO-,Recurse-,Timestamp-,Verbose- ' +
   //    'Recurse - Timestamp - Global name Config dir - Log dir - Base dir - ' +
   //    'Parse mode Full Results per File Show elapsed None Write XML - ' +
     'Parse mode Full Results per File Show elapsed None Group length 0 Write XML -(,xml) ' +
@@ -1631,6 +1632,11 @@ end;
 procedure TestTD2XOptionsParseFlags.TestParseOptionLogNotSupported;
 begin
   CheckFlag('N', 'LogNotSupp');
+end;
+
+procedure TestTD2XOptionsParseFlags.TestParseOptionNoFileIO;
+begin
+  CheckFlag('#', 'NoFileIO');
 end;
 
 procedure TestTD2XOptionsParseFlags.TestParseOptionRecurse;

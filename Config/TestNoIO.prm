@@ -1,0 +1,7 @@
+-d+CPU32,interface,implementation
+-h+standalone_propertyunits
+-f+trf#
+-g1
+*.dpr,*.pas
+#Comment
+@Bad.file
