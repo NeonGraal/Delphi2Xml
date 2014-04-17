@@ -9,7 +9,7 @@ D2X_SubDir:{
     , D2X_File:{
         _fileName:"Testing.Test.AUnit.pas"
       , UnitFile:{
-          _lastToken:"end."
+          _lastToken:";end."
         , MainUnitName:{
             _group:"Testing.Test"
           , _:"Testing.Test.AUnit"
@@ -26,8 +26,7 @@ D2X_SubDir:{
             }
           }
         , ImplementationSection:{
-            _lastToken:";{$ELSE}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}"
-          , UsedUnitName:"System.SysUtils"
+            UsedUnitName:"System.SysUtils"
           }
         }
       }

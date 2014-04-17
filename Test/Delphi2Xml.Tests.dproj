@@ -203,7 +203,7 @@
 			<DCCReference Include="Source\Test.Flag.pas"/>
 			<None Include="Profiling\Delphi2Xml.Test.aqt"/>
 			<None Include="FastMM4Options.inc"/>
-			<None Include="..\Config\Test.prm"/>
+			<None Include="..\Config\Debug.prm"/>
 			<BuildConfiguration Include="Console">
 				<Key>Cfg_2</Key>
 				<CfgParent>Cfg_1</CfgParent>
@@ -266,6 +266,9 @@
 					</Source>
 				</Delphi.Personality>
 				<Deployment>
+					<DeployFile LocalName="Delphi2XmlTests" Configuration="Debug" Class="ProjectOutput">
+						<Platform Name="All Platforms"/>
+					</DeployFile>
 					<DeployFile LocalName="Delphi2XmlTests.rsm" Configuration="Debug" Class="DebugSymbols">
 						<Platform Name="Win64">
 							<RemoteName>Delphi2XmlTests.rsm</RemoteName>
@@ -273,9 +276,6 @@
 					</DeployFile>
 					<DeployFile LocalName="$(BDS)\Redist\osx32\libcgunwind.1.0.dylib" Class="DependencyModule">
 						<Platform Name="OSX32"/>
-					</DeployFile>
-					<DeployFile LocalName="Delphi2XmlTests" Configuration="Debug" Class="ProjectOutput">
-						<Platform Name="All Platforms"/>
 					</DeployFile>
 					<DeployFile LocalName="Delphi2XmlTests.exe" Configuration="Debug" Class="ProjectOutput">
 						<Platform Name="Win64"/>

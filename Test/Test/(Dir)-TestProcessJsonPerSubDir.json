@@ -27,8 +27,7 @@ D2X_SubDir:{
             }
           }
         , ImplementationSection:{
-            _lastToken:";{$ELSE}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}"
-          , UsedUnitsList:{
+            UsedUnitsList:{
               UsedUnitName:"System.SysUtils"
             }
           }

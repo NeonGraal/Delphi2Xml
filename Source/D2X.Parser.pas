@@ -1950,7 +1950,11 @@ procedure TD2XDefinesParser.NextToken;
 var
   lProcessed: Byte;
 begin
-  fLastTokens := fLastTokens + Lexer.Token;
+  if not (Lexer.TokenID in [ptAnsiComment, ptBorComment, ptSlashesComment,
+    ptSpace, ptCRLF, ptCRLFCo,
+    ptIfDirect, ptIfEndDirect, ptElseIfDirect, ptIfDefDirect, ptIfNDefDirect,
+    ptElseDirect, ptEndIfDirect, ptIfOptDirect, ptDefineDirect, ptUndefDirect]) then
+    fLastTokens := fLastTokens + Lexer.Token;
 
   if Assigned(fOnProgress) and (fLength > 0) then
   begin

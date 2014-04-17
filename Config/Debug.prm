@@ -1,0 +1,9 @@
+-d+CPU32,interface,implementation
+-h+standalone_propertyunits
+-f+trf
+-g0
+-wX-
+-wJ
+-mUses
+-b:Samples
+*.pas
