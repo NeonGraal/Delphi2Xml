@@ -11,7 +11,7 @@
           <IncludeFile filename="TEST.INC" msgAt="71,0" />
           <D2X_notSuppMsg msgAt="91,0">Currently not supported {$D+}</D2X_notSuppMsg>
         </InterfaceSection>
-        <ImplementationSection lastToken=";{$ELSE}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}">
+        <ImplementationSection>
           <UsedUnitsList>
             <UsedUnitName>System.SysUtils</UsedUnitName>
           </UsedUnitsList>

@@ -25,8 +25,7 @@ D2X_Pattern:{
           }
         }
       , ImplementationSection:{
-          _lastToken:";{$ELSE}{$ENDIF}{$ENDIF}{$ENDIF}{$ENDIF}"
-        , UsedUnitsList:{
+          UsedUnitsList:{
             UsedUnitName:"System.SysUtils"
           }
         }
