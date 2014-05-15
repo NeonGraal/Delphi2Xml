@@ -76,7 +76,7 @@
 			<DCC_RemoteDebug>true</DCC_RemoteDebug>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
-			<Debugger_RunParams>@Debug.prm</Debugger_RunParams>
+			<Debugger_RunParams></Debugger_RunParams>
 			<BCC_SourceDebuggingOn>true</BCC_SourceDebuggingOn>
 			<DCC_DebugDCUs>true</DCC_DebugDCUs>
 			<BCC_DebugLineNumbers>true</BCC_DebugLineNumbers>

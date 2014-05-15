@@ -787,10 +787,10 @@ var
   lExtn, lFile, lExpected, lOutput: string;
 begin
   lExtn := '-' + pMethod + ExtractFileExt(pFile);
-  lFile := 'Test\' + TidyFilename(ChangeFileExt(pFile, '')) + lExtn;
+  lFile := 'Check\' + TidyFilename(ChangeFileExt(pFile, '')) + lExtn;
   Result := ' ' + ExtractFileName(lFile);
 
-  ForceDirectories(ExtractFilePath(ParamStr(0)) + 'Test');
+  ForceDirectories(ExtractFilePath(ParamStr(0)) + 'Check');
   if FileExists(lFile) then
     with TStreamReader.Create(lFile) do
       try
