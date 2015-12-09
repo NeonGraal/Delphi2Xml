@@ -1,1 +1,13 @@
 Profiling
+__history/
+*.local
+*.exe
+*.stat
+*.identcache
+*.res
+*.dcu
+*.rsm
+Test/Actual/
+TestTD2XFileStream-OutTest.txt
+*.err
+Test/dunit.ini
