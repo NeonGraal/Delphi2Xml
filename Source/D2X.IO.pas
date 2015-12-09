@@ -57,14 +57,14 @@ type
   TStreamReaderRef = reference to function: TStreamReader;
   TStreamWriterRef = reference to function: TStreamWriter;
 
-procedure DisposeOf(var pIO: ID2XIO); overload;
-procedure DisposeOf(var pFile: ID2XIOFile); overload;
-procedure DisposeOf(var pDir: ID2XIODir); overload;
-procedure DisposeOf(var pFact: ID2XIOFactory); overload;
+procedure DisposeIO(var pIO: ID2XIO); overload;
+procedure DisposeIO(var pFile: ID2XIOFile); overload;
+procedure DisposeIO(var pDir: ID2XIODir); overload;
+procedure DisposeIO(var pFact: ID2XIOFactory); overload;
 
 implementation
 
-procedure DisposeOf(var pIO: ID2XIO); overload;
+procedure DisposeIO(var pIO: ID2XIO); overload;
 var
   lDS: TD2XInterfaced;
 begin
@@ -76,7 +76,7 @@ begin
   end;
 end;
 
-procedure DisposeOf(var pFile: ID2XIOFile); overload;
+procedure DisposeIO(var pFile: ID2XIOFile); overload;
 var
   lDS: TD2XInterfaced;
 begin
@@ -88,7 +88,7 @@ begin
   end;
 end;
 
-procedure DisposeOf(var pDir: ID2XIODir); overload;
+procedure DisposeIO(var pDir: ID2XIODir); overload;
 var
   lDS: TD2XInterfaced;
 begin
@@ -100,7 +100,7 @@ begin
   end;
 end;
 
-procedure DisposeOf(var pFact: ID2XIOFactory); overload;
+procedure DisposeIO(var pFact: ID2XIOFactory); overload;
 var
   lDS: TD2XInterfaced;
 begin

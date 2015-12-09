@@ -378,7 +378,7 @@ begin
   if pDefault then
     Result := fFlagFormatter(fFlagDefault, fDefault)
   else
-    Result := fFlagFormatter(fFlag, fValue);
+    Result := fFlagFormatter(fFlag, Value);
 end;
 
 function TD2XFlaggedStringParam.GetSample: String;
@@ -388,7 +388,7 @@ end;
 
 function TD2XFlaggedStringParam.IsDefault: Boolean;
 begin
-  Result := (fValue = fDefault) and (fFlag = fFlagDefault);
+  Result := (Value = fDefault) and (fFlag = fFlagDefault);
 end;
 
 procedure TD2XFlaggedStringParam.Reset;
@@ -410,7 +410,7 @@ begin
           Reset
         else
           fFlag := pStr <> '-';
-        pVal := fValue;
+        pVal := Value;
       end
       else
         if pStr[1] = ':' then
@@ -475,7 +475,7 @@ function TD2XDefinesParam.GetFlagRef: TD2XFlagRef;
 begin
   Result := function: Boolean
     begin
-      Result := fValue;
+      Result := Value;
     end;
 end;
 
@@ -548,7 +548,7 @@ begin
         pFunc(lS);
     finally
       FreeAndNil(lSL);
-      DisposeOf(lF);
+      DisposeIO(lF);
     end;
 end;
 
@@ -1055,7 +1055,7 @@ begin
         pFunc(lS);
     finally
       FreeAndNil(lSL);
-      DisposeOf(lF);
+      DisposeIO(lF);
     end;
 end;
 

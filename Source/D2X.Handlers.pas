@@ -817,7 +817,7 @@ begin
   fParser.Lexer.InitDefines;
   if Assigned(fDefines) and fInitOnce then
   begin
-    fParser.Lexer.GetDefines(fDefines);
+//    fParser.Lexer.GetDefines(fDefines);
     fInitOnce := False;
   end;
 end;

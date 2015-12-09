@@ -230,7 +230,7 @@ begin
   try
     CheckEqualsString('Test', lDir.Description, 'Base Dir Description');
   finally
-    DisposeOf(lDir);
+    DisposeIO(lDir);
   end;
 end;
 
@@ -242,7 +242,7 @@ begin
   try
     CheckEqualsString('File', lFile.Description, 'Base File Description');
   finally
-    DisposeOf(lFile);
+    DisposeIO(lFile);
   end;
 end;
 
@@ -254,7 +254,7 @@ begin
   try
     lFile.WriteTo.Write('Test');
   finally
-    DisposeOf(lFile);
+    DisposeIO(lFile);
   end;
   CheckEquals(1, Length(fFact.CheckFiles), 'Files output');
   CheckEqualsString('Test', fFact.CheckOutput('File'), 'Simple File Output');
@@ -268,7 +268,7 @@ begin
   try
     CheckEqualsString('File', lFile.Description, 'Config File Description');
   finally
-    DisposeOf(lFile);
+    DisposeIO(lFile);
   end;
 end;
 
@@ -307,7 +307,7 @@ begin
   try
     CheckEqualsString('File', lFile.Description, 'Log File Description');
   finally
-    DisposeOf(lFile);
+    DisposeIO(lFile);
   end;
 end;
 
@@ -325,7 +325,7 @@ begin
     lFlag.SetFlag(False);
     lFile := fFact.SimpleFile('File.Extn');
     CheckNotNull(lFile, 'Log File has File IO');
-    DisposeOf(lFile);
+    DisposeIO(lFile);
 
     lFlag.SetFlag(True);
     lFile := fFact.SimpleFile('File.Extn');
@@ -334,7 +334,7 @@ begin
     fFact.SetNoFileIOFlag(nil);
     lFRef := nil;
   finally
-    DisposeOf(lFile);
+    DisposeIO(lFile);
     FreeAndNil(lFlag);
   end;
 end;
@@ -389,7 +389,7 @@ begin
     lFlag.SetFlag(False);
     lFile := fFact.LogFileOrExtn('File.Extn');
     CheckEqualsString('File.Extn', lFile.Description, 'Log File not Timestamped');
-    DisposeOf(lFile);
+    DisposeIO(lFile);
 
     lFlag.SetFlag(True);
     lFile := fFact.LogFileOrExtn('File.Extn');
@@ -398,7 +398,7 @@ begin
     fFact.SetTimestampFlag(nil);
     lFRef := nil;
   finally
-    DisposeOf(lFile);
+    DisposeIO(lFile);
     FreeAndNil(lFlag);
   end;
 end;
@@ -411,7 +411,7 @@ begin
   try
     CheckEqualsString('File', lFile.Description, 'Simple File Description');
   finally
-    DisposeOf(lFile);
+    DisposeIO(lFile);
   end;
 end;
 

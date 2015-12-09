@@ -110,7 +110,7 @@ begin
                 Log('WARNING: %1 file "%2" not found', [lFls.Description, lS.Description]);
           end);
       finally
-        DisposeOf(lS);
+        DisposeIO(lS);
       end
     else
       lFls.BeginFile(pFile, nil);
@@ -199,7 +199,7 @@ begin
               Result := nil;
           end);
       finally
-        DisposeOf(lS);
+        DisposeIO(lS);
       end
     else
       lFls.EndFile(pFile, nil);
@@ -232,7 +232,7 @@ begin
               Result := nil;
           end);
       finally
-        DisposeOf(lS);
+        DisposeIO(lS);
       end
     else
       lPrcs.EndProcessing(nil);
@@ -257,7 +257,7 @@ begin
               Result := nil;
           end);
       finally
-        DisposeOf(lS);
+        DisposeIO(lS);
       end
     else
       lRslts.EndResults(nil);

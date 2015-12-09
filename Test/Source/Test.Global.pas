@@ -130,7 +130,7 @@ end;
 
 procedure TStringTestCase.TearDown;
 begin
-  DisposeOf(fDS);
+  DisposeIO(fDS);
   FreeAndNil(fW);
   FreeAndNil(fS);
   FreeAndNil(fL);

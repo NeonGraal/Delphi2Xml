@@ -69,7 +69,7 @@ type
 
     procedure ContainsIdentifier; override;
     procedure ContainsStatement; override;
-    procedure MainUnitName; override;
+    procedure MainUnitName; // override;
 
     procedure GetLexerDefines(pDefs: TStringList);
 
@@ -111,7 +111,7 @@ type
 
     procedure InterfaceSection; override;
     procedure ImplementationSection; override;
-    procedure MainUnitName; override;
+    procedure MainUnitName; // override;
     procedure MainUsedUnitStatement; override;
     procedure UsedUnitName; override;
     procedure ContainsExpression; override;
@@ -127,7 +127,7 @@ type
     procedure FieldName; override;
     procedure FunctionMethodName; override;
     procedure FunctionProcedureName; override;
-    procedure MainUnitName; override;
+    procedure MainUnitName; // override;
     procedure ParameterName; override;
     procedure ProcedureMethodName; override;
     procedure PropertyName; override;
@@ -1895,7 +1895,7 @@ end;
 
 procedure TD2XDefinesParser.GetLexerDefines(pDefs: TStringList);
 begin
-  Lexer.GetDefines(pDefs);
+//  Lexer.GetDefines(pDefs);
   pDefs.Sorted := true;
 end;
 

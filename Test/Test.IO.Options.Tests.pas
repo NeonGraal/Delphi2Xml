@@ -78,7 +78,7 @@ begin
   try
     CheckEqualsString(pExp, pDS.Description, pLabel);
   finally
-    DisposeOf(pDS);
+    DisposeIO(pDS);
   end;
 end;
 
@@ -235,8 +235,8 @@ begin
       lD.Close;
     end;
   finally
-    DisposeOf(lSD);
-    DisposeOf(lD);
+    DisposeIO(lSD);
+    DisposeIO(lD);
   end;
 end;
 
@@ -276,8 +276,8 @@ begin
       lD.Close;
     end;
   finally
-    DisposeOf(lSD);
-    DisposeOf(lD);
+    DisposeIO(lSD);
+    DisposeIO(lD);
   end;
 end;
 
@@ -312,8 +312,8 @@ begin
       lD.Close;
     end;
   finally
-    DisposeOf(lSD);
-    DisposeOf(lD);
+    DisposeIO(lSD);
+    DisposeIO(lD);
   end;
 end;
 
@@ -347,8 +347,8 @@ begin
       lD.Close;
     end;
   finally
-    DisposeOf(lSD);
-    DisposeOf(lD);
+    DisposeIO(lSD);
+    DisposeIO(lD);
   end;
 end;
 

@@ -881,17 +881,17 @@ begin
   ReturnValue := fOpts.ConfigFileOrExtn('File');
   //  CheckEqualsString('Config\File', ReturnValue.Description, 'Default File');
   CheckEqualsString('File', ReturnValue.Description, 'Default File');
-  DisposeOf(ReturnValue);
+  DisposeIO(ReturnValue);
 
   ReturnValue := fOpts.ConfigFileOrExtn('.Extn');
   //  CheckEqualsString('Config\Delphi2XmlTests.Extn', ReturnValue.Description, 'Default Extn');
   CheckEqualsString('.Extn', ReturnValue.Description, 'Default Extn');
-  DisposeOf(ReturnValue);
+  DisposeIO(ReturnValue);
 
   ReturnValue := fOpts.ConfigFileOrExtn('File.Extn');
   //  CheckEqualsString('Config\File.Extn', ReturnValue.Description, 'Default File.Extn');
   CheckEqualsString('File.Extn', ReturnValue.Description, 'Default File.Extn');
-  DisposeOf(ReturnValue);
+  DisposeIO(ReturnValue);
 end;
 
 procedure TestTD2XOptions.TestDescribeAll;

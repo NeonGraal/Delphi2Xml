@@ -121,7 +121,7 @@ begin
     for i := 0 to lSL.Count - 1 do
       Result := ProcessItem(lSL[i], lFile.Description, i + 1) and Result;
   finally
-    DisposeOf(lFile);
+    DisposeIO(lFile);
     FreeAndNil(lSL);
   end;
 end;

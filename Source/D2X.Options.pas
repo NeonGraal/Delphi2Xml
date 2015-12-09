@@ -147,7 +147,7 @@ begin
   FreeAndNil(fParser);
   FreeAndNil(fErrorLog);
 
-  DisposeOf(fIOFact);
+  DisposeIO(fIOFact);
   FreeAndNil(fProcs);
   FreeAndNil(fParams);
 
@@ -300,7 +300,7 @@ begin
       end;
 
     end;
-    DisposeOf(lPath);
+    DisposeIO(lPath);
   end;
 end;
 
@@ -319,7 +319,7 @@ begin
           if pInDir then
             Log('Cannot find "%s"', [lFile.Description]);
       finally
-        DisposeOf(lFile);
+        DisposeIO(lFile);
       end;
     except
       on e: Exception do
@@ -457,7 +457,7 @@ begin
               lSL.SaveToStream(lFile.WriteTo.BaseStream);
           finally
             FreeAndNil(lSL);
-            DisposeOf(lFile);
+            DisposeIO(lFile);
           end;
         end
       else
@@ -805,7 +805,7 @@ begin
         lPath.Close;
       end;
   finally
-    DisposeOf(lPath);
+    DisposeIO(lPath);
   end;
 end;
 
