@@ -1,0 +1,3 @@
+[submodule "Castalia-Delphi-Parser"]
+	path = Castalia-Delphi-Parser
+	url = https://github.com/NeonGraal/Castalia-Delphi-Parser.git
